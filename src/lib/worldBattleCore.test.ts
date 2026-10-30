@@ -7,6 +7,8 @@ import {
   toBattleMathBattler,
   worldBattleDamage,
   worldBattleHit,
+  worldCanActGateLine,
+  worldCheckCanAct,
 } from "./worldBattleCore";
 
 // Flat battle mons, as WorldEngine builds them: atk/def/spd where
@@ -262,5 +264,48 @@ describe("worldBattleHit (S6 step 3: secondary status infliction)", () => {
       { power: 40, type: "Water", moveId: "TACKLE" },
       { rng: ROLL_92, forceCrit: false });
     expect(r.damage).toBe(3);
+  });
+});
+
+describe("worldCheckCanAct (S6 step 4: paralysis can-act gate)", () => {
+  // battle-math's paralysis rule: floor(rng * 4) === 0 stops (25%).
+  it("paralyzed, rng 0 -> fully paralyzed: cannot act, reason set, battler unchanged", () => {
+    const r = worldCheckCanAct({ ...GRASS_FLAT, status: "paralysis" }, () => 0);
+    expect(r.canAct).toBe(false);
+    expect(r.reason).toBe("fully-paralyzed");
+    expect(r.patch).toEqual({});
+    expect(worldCanActGateLine("Sproutle", r.reason)).toBe("Sproutle is paralyzed! It can't move!");
+  });
+  it("paralyzed, rng 0.5 -> floor 2, acts: no patch", () => {
+    const r = worldCheckCanAct({ ...GRASS_FLAT, status: "paralysis" }, () => 0.5);
+    expect(r.canAct).toBe(true);
+    expect(r.reason).toBeNull();
+    expect(r.patch).toEqual({});
+  });
+  it("burn and poison pass the gate: they act, and the tick is separate", () => {
+    expect(worldCheckCanAct({ ...GRASS_FLAT, status: "burn" }, () => 0).canAct).toBe(true);
+    expect(worldCheckCanAct({ ...GRASS_FLAT, status: "poison" }, () => 0).canAct).toBe(true);
+    expect(worldCheckCanAct({ ...GRASS_FLAT, status: null }, () => 0).canAct).toBe(true);
+  });
+  it("asleep with 3 turns left counts down: cannot act, patch sleepTurns 2", () => {
+    const r = worldCheckCanAct({ ...GRASS_FLAT, status: "sleep", sleepTurns: 3 }, () => 0.5);
+    expect(r.canAct).toBe(false);
+    expect(r.reason).toBe("asleep");
+    expect(r.patch).toEqual({ sleepTurns: 2 });
+    expect(worldCanActGateLine("Sproutle", r.reason)).toBe("Sproutle is fast asleep!");
+  });
+  it("asleep with 1 turn left wakes: acts, patch clears status and sleepTurns", () => {
+    const r = worldCheckCanAct({ ...GRASS_FLAT, status: "sleep", sleepTurns: 1 }, () => 0.5);
+    expect(r.canAct).toBe(true);
+    expect(r.patch).toEqual({ status: null, sleepTurns: 0 });
+  });
+  it("frozen thaws on rng 0 (floor 0 of 5): acts, patch clears status; rng 0.5 stays frozen", () => {
+    const thaw = worldCheckCanAct({ ...GRASS_FLAT, status: "freeze" }, () => 0);
+    expect(thaw.canAct).toBe(true);
+    expect(thaw.patch).toEqual({ status: null });
+    const stuck = worldCheckCanAct({ ...GRASS_FLAT, status: "freeze" }, () => 0.5);
+    expect(stuck.canAct).toBe(false);
+    expect(stuck.reason).toBe("frozen");
+    expect(stuck.patch).toEqual({});
   });
 });

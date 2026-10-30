@@ -23,7 +23,7 @@ import { resolveTrainerRow, rowToMapMembers } from "../lib/trainer-teams-resolve
 import { planForOutcome, commitRecipientExp, commitNextLevel, expProgressInLevel, type PayoffPlan } from "../lib/battlePayoff";
 import { useBattlePayoffSequence, PayoffStatWindow } from "../components/game/BattlePayoffSequence";
 import { resolveWorldMove, buildWorldAttackPresentation } from "../lib/worldMoveBridge";
-import { worldBattleHit } from "../lib/worldBattleCore";
+import { worldBattleHit, worldCanActGateLine, worldCheckCanAct } from "../lib/worldBattleCore";
 import BattleSceneBackdrop from "../components/game/BattleSceneBackdrop";
 import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackground";
 import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
@@ -2046,6 +2046,31 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // writes the team back.
     const freshTeam: any[] = (useGameStore.getState().party as any) || playerTeam;
     const enemy = bs.type === "wild" ? bs.wild : bs.trainerTeam[bs.trainerTeamIdx];
+    // Gap-fill S6 step 4: the paralysis can-act gate (battle-math
+    // checkCanAct, via worldCheckCanAct) — before the foe picks a
+    // move. A fully-paralyzed foe (25% per turn) does not act and
+    // the turn hands back to the menu, with a log line; the gate
+    // patch (a wake / thaw clearing, a sleep countdown) rides the
+    // foe copy. Switches, items, and catches are not moves, so
+    // they are never gated — only the move branches gate, both
+    // sides. Burn and poison pass this gate (they act); their
+    // end-turn tick is the next S6 sub-step, not this one.
+    const enemyGate = worldCheckCanAct(enemy);
+    if (!enemyGate.canAct) {
+      const gateLog = [...bs.log, worldCanActGateLine(battleMonName(enemy), enemyGate.reason)];
+      let gatedBs = bs;
+      if (Object.keys(enemyGate.patch).length > 0) {
+        if (bs.type === "wild") {
+          gatedBs = { ...bs, wild: { ...bs.wild, ...enemyGate.patch } };
+        } else {
+          const gatedTeam = [...bs.trainerTeam];
+          gatedTeam[bs.trainerTeamIdx] = { ...enemy, ...enemyGate.patch };
+          gatedBs = { ...bs, trainerTeam: gatedTeam };
+        }
+      }
+      setBattleState({ ...gatedBs, log: gateLog, phase: "menu" });
+      return;
+    }
     // v5.2: an empty moves array is truthy, so the old fallback
     // never fired and chosenMove came out undefined (power-40 move
     // with no display name). Empty now falls back to Tackle too.
@@ -2362,6 +2387,30 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     }
 
     if (action.type === "move") {
+      // Gap-fill S6 step 4: the paralysis can-act gate, player side
+      // — before the move resolves, so a stopped battler never
+      // "uses" its move (no move log line, no damage roll). The
+      // turn hands to the enemy exactly like any other completed
+      // player action (phase enemy_turn + 1200ms handoff, the same
+      // handoff the catch / switch / item branches use). A gate
+      // patch (wake / thaw / countdown) rides the battle copy and
+      // the store copy, so the cleared status survives a switch
+      // and the battle's end, like a step-3 infliction does.
+      const playerGate = worldCheckCanAct(bs.player);
+      if (!playerGate.canAct) {
+        const gateLog = [...bs.log, worldCanActGateLine(battleMonName(bs.player), playerGate.reason)];
+        const gatedPlayer = { ...bs.player, ...playerGate.patch };
+        const next = { ...bs, player: gatedPlayer, log: gateLog, phase: "enemy_turn" };
+        setBattleState(next);
+        if (Object.keys(playerGate.patch).length > 0) {
+          const freshGateTeam: any[] = (useGameStore.getState().party as any) || playerTeam;
+          const gatedTeam = [...freshGateTeam];
+          gatedTeam[bs.playerTeamIdx] = { ...gatedTeam[bs.playerTeamIdx], ...playerGate.patch };
+          setPlayerTeam(gatedTeam);
+        }
+        setTimeout(() => doEnemyTurn(next), 1200);
+        return;
+      }
       // v4 bridge (see resolveBattleMove): without this, a starter
       // party's moveIds never matched GAME_DATA.moves and the move
       // silently did nothing. Display name is the MOVES_DB name.

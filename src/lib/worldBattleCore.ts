@@ -43,13 +43,32 @@
  *   attacker status through battle-math's burn rule — so a burn
  *   landed here matters from the very next hit. Paralysis and
  *   poison are stored, logged, and cleared by a healer (gameStore
- *   healParty already clears status), but their turn effects are
- *   NOT yet live: the paralysis can-act gate (checkCanAct) and the
- *   poison/burn end-turn tick (endTurnStatusDamage) are SEPARATE
- *   S6 sub-steps and are NOT claimed here — a poisoned foe takes
- *   no tick damage yet, and a paralyzed foe is never stopped from
- *   acting yet. PP write-back and the evolution hook on the live
- *   path are likewise still open.
+ *   healParty already clears status).
+ * - DONE in step 4 (this step): the paralysis can-act gate, on the
+ *   same resolver rule the unreachable BattleView path already uses
+ *   (battle-math checkCanAct): at the start of a battler's turn,
+ *   before its move resolves, the host asks worldCheckCanAct; a
+ *   fully-paralyzed battler (25% per turn, battle-math's roll)
+ *   does not act and the turn hands over, with a log line. The
+ *   gate is the whole checkCanAct rule, not a paralysis-only
+ *   duplicate — burn and poison pass through (they act, and tick
+ *   separately), and the sleep / freeze / confusion / flinch
+ *   branches are carried by the same function, with their updated
+ *   counters returned as a patch the host merges onto the battler
+ *   (a wake or thaw clears the status). Those branches have NO
+ *   live inflictor on main yet (step 3 inflicts only burn /
+ *   poison / paralysis), so in live play today the gate fires
+ *   only on paralysis; the other branches are the rule carried
+ *   forward, not a claim that sleep or freeze occurs in play.
+ *   What is NOT yet live: the poison/burn end-turn tick
+ *   (endTurnStatusDamage) — a poisoned or burned battler takes no
+ *   tick damage yet. The tick is the next S6 sub-step, and it
+ *   needs the foe-faint-at-end-of-round transition factored out
+ *   of the player branch first (a tick that faints the foe must
+ *   run the payoff / send-out flow, which today lives only
+ *   inline in that branch) — so it is NOT half-wired here.
+ *   PP write-back and the evolution hook on the live path are
+ *   likewise still open.
  * - TYPE CHART, NOT WIRED HERE: calculateDamage takes its type
  *   multipliers from the caller, and this module passes NEUTRAL (1)
  *   for every defending element. That is a placeholder, not a canon
@@ -80,6 +99,7 @@
 import {
   accuracyThreshold,
   calculateDamage,
+  checkCanAct,
   rollAccuracy,
   rollMultiHitCount,
   rollSecondaryEffect,
@@ -347,4 +367,73 @@ export function worldBattleHit(
     results,
     statusApplied,
   };
+}
+
+export type WorldCanActResult = {
+  /** False when the battler is stopped this turn (paralysis, sleep,
+   * freeze, flinch, or a confusion self-hit). */
+  canAct: boolean;
+  /** checkCanAct's reason when stopped, else null. */
+  reason: string | null;
+  /**
+   * Fields the host merges onto the battler copy (battle copy, and
+   * the store copy for the player side) after the check: a wake or
+   * thaw clears status, a still-asleep turn counts sleepTurns
+   * down, a flinch clears. Empty for paralysis (the battler is
+   * unchanged — only its action is stopped) and for burn / poison
+   * (they act; their tick is a separate sub-step).
+   */
+  patch: Record<string, any>;
+};
+
+/**
+ * Step 4: the start-of-turn can-act gate, on battle-math's
+ * checkCanAct (the resolver's rule). The flat / instance mon is
+ * adapted the same way as for damage; the can-act counters
+ * battle-math defines (sleepTurns, confusionTurns, flinched) pass
+ * through from the mon when present, because toBattleMathBattler
+ * does not carry them (no live mon carries them yet — no live
+ * inflictor writes them). A stopped battler's move never resolves:
+ * the host logs the gate line and hands the turn over.
+ */
+export function worldCheckCanAct(
+  mon: any,
+  rng?: Rng,
+): WorldCanActResult {
+  const input = toBattleMathBattler(mon);
+  if (mon?.sleepTurns != null) input.sleepTurns = mon.sleepTurns;
+  if (mon?.confusionTurns != null) input.confusionTurns = mon.confusionTurns;
+  if (mon?.flinched != null) input.flinched = mon.flinched;
+  const result = checkCanAct(input, rng ?? Math.random);
+  const patch: Record<string, any> = {};
+  if (result.battler.status !== input.status) patch.status = result.battler.status;
+  if (result.battler.sleepTurns !== input.sleepTurns) patch.sleepTurns = result.battler.sleepTurns;
+  if (result.battler.confusionTurns !== input.confusionTurns) patch.confusionTurns = result.battler.confusionTurns;
+  if (result.battler.flinched !== input.flinched) patch.flinched = result.battler.flinched;
+  return {
+    canAct: result.canAct,
+    reason: result.canAct ? null : (result as { reason: string }).reason,
+    patch,
+  };
+}
+
+/** The battle-log line for a stopped battler, by checkCanAct reason.
+ * Confusion self-hit damage is NOT rolled here — checkCanAct's own
+ * contract leaves confusionDamage to the caller, and no live move
+ * inflicts confusion, so that branch is carried, not claimed. */
+export function worldCanActGateLine(name: string, reason: string | null): string {
+  switch (reason) {
+    case "fully-paralyzed":
+      return `${name} is paralyzed! It can't move!`;
+    case "asleep":
+      return `${name} is fast asleep!`;
+    case "frozen":
+      return `${name} is frozen solid!`;
+    case "flinched":
+      return `${name} flinched and couldn't move!`;
+    case "confusion-self-hit":
+      return `${name} hurt itself in its confusion!`;
+    default:
+      return `${name} can't move!`;
+  }
 }
