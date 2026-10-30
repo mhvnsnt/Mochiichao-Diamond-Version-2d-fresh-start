@@ -2974,7 +2974,17 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     const animPres = battleAnim ? buildWorldAttackPresentation(battleAnim.side, battleAnim.profile, battleAnim.power, battleAnim.nonce) : null;
 
     return (
-      <div className="w-screen h-screen bg-slate-950 flex flex-col text-white relative">
+      {/* Battle black-bars fix (2026-10-29): this root used w-screen /
+          h-screen (100vh) while the app shell (.game-screen, index.css)
+          is sized to the DYNAMIC viewport (100dvh) precisely so phone
+          browser chrome cannot clip the bottom edge. 100vh is taller
+          than the visible area while chrome is shown, so the battle's
+          black bottom panel bled past the shell and its lower part sat
+          off-screen — stage-frame bleed, not design. h-full/w-full
+          makes the battle fill exactly the shell every other screen
+          fills. The header bar and the h-48 command panel themselves
+          are by design (Black-pattern command menu) and are untouched. */}
+      <div className="w-full h-full bg-slate-950 flex flex-col text-white relative">
         {animPres && <style>{animPres.cssText}</style>}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(0,0,0,0.8)_100%)] pointer-events-none z-10" />
         
