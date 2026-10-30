@@ -613,7 +613,31 @@ export function legacyEffectToResolverEffect(
     case "DEF_UP2": return { kind: "stat", stat: "def", stages: 2, chance };
     case "SPDEF_UP1": return { kind: "stat", stat: "spd", stages: 1, chance };
     case "SPDEF_UP2": return { kind: "stat", stat: "spd", stages: 2, chance };
+    // Batch 3 (2026-10-29, move-completion lane): the full pool's
+    // decomp-constant bindings completed the stat/recoil token set the
+    // batch-2 comment above began. Same dispatch rule — the existing
+    // "stat" kind (positive stages land on the actor, negative on the
+    // target) and the existing "recoil" kind; spa/spe/eva are live
+    // stat-stage axes in the battler state. Self-drop tokens (own-side
+    // negative stages, e.g. a SPATK_DOWN2 for Draco Meteor) are
+    // deliberately NOT minted: under the sign convention they would
+    // hit the wrong battler.
+    case "ATK_UP2": return { kind: "stat", stat: "atk", stages: 2, chance };
+    case "DEF_UP3": return { kind: "stat", stat: "def", stages: 3, chance };
+    case "DEF_DOWN2": return { kind: "stat", stat: "def", stages: -2, chance };
+    case "SPDEF_DOWN2": return { kind: "stat", stat: "spd", stages: -2, chance };
+    case "SPATK_UP1": return { kind: "stat", stat: "spa", stages: 1, chance };
+    case "SPATK_UP2": return { kind: "stat", stat: "spa", stages: 2, chance };
+    case "SPATK_UP3": return { kind: "stat", stat: "spa", stages: 3, chance };
+    case "SPATK_DOWN1": return { kind: "stat", stat: "spa", stages: -1, chance };
+    case "SPE_UP1": return { kind: "stat", stat: "spe", stages: 1, chance };
+    case "SPE_UP2": return { kind: "stat", stat: "spe", stages: 2, chance };
+    case "EVA_UP1": return { kind: "stat", stat: "eva", stages: 1, chance };
+    case "EVA_UP2": return { kind: "stat", stat: "eva", stages: 2, chance };
+    case "EVA_DOWN1": return { kind: "stat", stat: "eva", stages: -1, chance };
     case "RECOIL_25": return { kind: "recoil", recoilFraction: 0.25, chance: 1 };
+    case "RECOIL_33": return { kind: "recoil", recoilFraction: 1 / 3, chance: 1 };
+    case "RECOIL_50": return { kind: "recoil", recoilFraction: 0.5, chance: 1 };
     case "MULTI_HIT": return { kind: "multiHit", chance: 1 };
     case "HIGH_CRIT": return { kind: "highCrit", chance: 1 };
     case "CHARGE_TURN": return { kind: "chargeTurn", chance: 1 };

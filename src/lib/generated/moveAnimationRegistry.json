@@ -1,0 +1,6628 @@
+{
+ "version": "move-animation-registry-1",
+ "generatedBy": "move-animation-wiring/tools/generate_registry.py",
+ "moveCount": 122,
+ "moves": [
+  {
+   "id": "ACID_SPLASH",
+   "displayName": "Acid Splash",
+   "sourcePokemonMove": "ACID",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "ACID_SPLASH",
+   "type": "POISON",
+   "category": "Physical",
+   "power": 40,
+   "effect": "DEF_DOWN1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Physical vs source Special: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.poison",
+    "targetReaction": "recoil_standard",
+    "palette": "#A040A0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "bafe0c2ca850"
+   }
+  },
+  {
+   "id": "ANCIENT_SURGE",
+   "displayName": "Ancient Surge",
+   "sourcePokemonMove": "ANCIENT_POWER",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "ANCIENT_SURGE",
+   "type": "ROCK",
+   "category": "Physical",
+   "power": 60,
+   "effect": "ALL_UP1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Physical vs source Special: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.rock",
+    "targetReaction": "recoil_standard",
+    "palette": "#B8A038",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "4de06f3d4631"
+   }
+  },
+  {
+   "id": "AQUA_CANNON",
+   "displayName": "Aqua Cannon",
+   "sourcePokemonMove": "SURF",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "AQUA_CANNON",
+   "type": "WATER",
+   "category": "Special",
+   "power": 90,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "burst_fan",
+    "camera": "none",
+    "soundCue": "proj.water",
+    "targetReaction": "recoil_heavy",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "766e04a36163"
+   }
+  },
+  {
+   "id": "AQUA_JET",
+   "displayName": "Hydro Rush",
+   "sourcePokemonMove": "AQUA_JET",
+   "sourceBasis": "stable-id (game id is the source move constant)",
+   "legacyAnimField": "AQUA_SHOT",
+   "type": "WATER",
+   "category": "Physical",
+   "power": 40,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "blitz_afterimage",
+    "timelineMs": {
+     "windup": 80,
+     "travel": 170,
+     "impactHold": 50,
+     "recoil": 220,
+     "recover": 260,
+     "total": 780
+    },
+    "phaseFractions": {
+     "travelComplete": 0.321,
+     "impactAt": 0.385
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "streak_spark",
+     "particleCount": 4,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": {
+     "kind": "water_cloak",
+     "afterimages": 3
+    },
+    "projectileShape": null,
+    "camera": "snap_zoom",
+    "soundCue": "speed.blitz",
+    "targetReaction": "recoil_standard",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "3 afterimages on a flat streak line",
+     "heavy": "2 afterimages, streaks thicker",
+     "small": "4 afterimages, tighter spacing",
+     "hover": "streaks arc downward from hover",
+     "rooted": "streak burst from base, body blurs in place then snaps forward"
+    },
+    "signature": "2a97979aa989"
+   }
+  },
+  {
+   "id": "AQUA_SHOT",
+   "displayName": "Aqua Shot",
+   "sourcePokemonMove": "WATER_GUN",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "AQUA_SHOT",
+   "type": "WATER",
+   "category": "Special",
+   "power": 40,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.water",
+    "targetReaction": "recoil_standard",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "5c1b7361a3bc"
+   }
+  },
+  {
+   "id": "BEAK_JAB",
+   "displayName": "Beak Jab",
+   "sourcePokemonMove": "PECK",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "BEAK_JAB",
+   "type": "FLYING",
+   "category": "Physical",
+   "power": 35,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 9,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#A890F0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "1b20c98f8e84"
+   }
+  },
+  {
+   "id": "BODY_SLAM_MOVE",
+   "displayName": "Body Slam",
+   "sourcePokemonMove": "BODY_SLAM",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "BODY_SLAM_MOVE",
+   "type": "NORMAL",
+   "category": "Physical",
+   "power": 85,
+   "effect": "PARALYSIS",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 13,
+     "burstCount": 11,
+     "statusPuff": "paralysis",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "status_puff",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "7da1fe6476e1"
+   }
+  },
+  {
+   "id": "BONE_TOSS",
+   "displayName": "Bone Toss",
+   "sourcePokemonMove": "BONE_CLUB",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "BONE_TOSS",
+   "type": "GROUND",
+   "category": "Physical",
+   "power": 65,
+   "effect": "FLINCH",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "thrown_prop",
+     "particleCount": 1,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "prop",
+    "camera": "none",
+    "soundCue": "proj.ground",
+    "targetReaction": "recoil_standard",
+    "palette": "#E0C068",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "dd1e7616b064"
+   }
+  },
+  {
+   "id": "BRICK_SMASH",
+   "displayName": "Brick Smash",
+   "sourcePokemonMove": "BRICK_BREAK",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "BRICK_SMASH",
+   "type": "FIGHTING",
+   "category": "Physical",
+   "power": 75,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 6,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 12,
+     "burstCount": 10,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#C03028",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "b07ada4eb99f"
+   }
+  },
+  {
+   "id": "BUBBLE_BURST",
+   "displayName": "Bubble Burst",
+   "sourcePokemonMove": "BUBBLE_BEAM",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "BUBBLE_BURST",
+   "type": "WATER",
+   "category": "Special",
+   "power": 65,
+   "effect": "SPE_DOWN1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "burst_fan",
+    "camera": "none",
+    "soundCue": "proj.water",
+    "targetReaction": "recoil_standard",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "1e7b4af1cb8d"
+   }
+  },
+  {
+   "id": "BULLDOZE",
+   "displayName": "Bulldoze",
+   "sourcePokemonMove": "BULLDOZE",
+   "sourceBasis": "stable-id (game id is the source move constant)",
+   "legacyAnimField": "EARTH_TREMOR",
+   "type": "GROUND",
+   "category": "Physical",
+   "power": 60,
+   "effect": "SPE_DOWN1",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "field_impact",
+    "timelineMs": {
+     "windup": 350,
+     "travel": 60,
+     "impactHold": 140,
+     "recoil": 340,
+     "recover": 600,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.275,
+     "impactAt": 0.369
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "quake",
+     "flash": "type",
+     "particleKind": "ground_ring",
+     "particleCount": 15,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "quake_shake",
+    "soundCue": "field.quake",
+    "targetReaction": "recoil_standard",
+    "palette": "#E0C068",
+    "anatomyVariance": {
+     "standard": "ground shockwave from performer position",
+     "heavy": "double shockwave ring",
+     "small": "single fast ring",
+     "hover": "shockwave only on landing beat",
+     "rooted": "strongest form: rooted performer channels the field"
+    },
+    "signature": "1814b4344d63"
+   }
+  },
+  {
+   "id": "BURROW_STRIKE",
+   "displayName": "Burrow Strike",
+   "sourcePokemonMove": "DIG",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "BURROW_STRIKE",
+   "type": "GROUND",
+   "category": "Physical",
+   "power": 60,
+   "effect": "NONE",
+   "scriptTemplateBefore": "two_turn",
+   "scriptFamilyBefore": "two_turn",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "charge_release",
+    "timelineMs": {
+     "windup": 600,
+     "travel": 300,
+     "impactHold": 120,
+     "recoil": 260,
+     "recover": 410,
+     "total": 1690
+    },
+    "phaseFractions": {
+     "travelComplete": 0.533,
+     "impactAt": 0.604
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "charge_motes",
+     "particleCount": 6,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "charge.release",
+    "targetReaction": "recoil_standard",
+    "palette": "#E0C068",
+    "anatomyVariance": {
+     "standard": "charge hold (turn 1) then category release",
+     "heavy": "longer charge glow",
+     "small": "shorter charge glow",
+     "hover": "rises while charging",
+     "rooted": "sinks/roots while charging"
+    },
+    "signature": "d3e98226c696"
+   }
+  },
+  {
+   "id": "CHARGE_UP",
+   "displayName": "Charge Up",
+   "sourcePokemonMove": "CHARGE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "CHARGE_UP",
+   "type": "ELECTRIC",
+   "category": "Status",
+   "power": 0,
+   "effect": "SPDEF_UP1",
+   "scriptTemplateBefore": "stat_change",
+   "scriptFamilyBefore": "stat_change",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "self_aura",
+    "timelineMs": {
+     "windup": 400,
+     "travel": 0,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 500,
+     "total": 1000
+    },
+    "phaseFractions": {
+     "travelComplete": 0.4,
+     "impactAt": 0.5
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "aura_motes",
+     "particleCount": 8,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "buff.rise",
+    "targetReaction": "recoil_standard",
+    "palette": "#F8D030",
+    "anatomyVariance": {
+     "standard": "aura ring rises around performer",
+     "heavy": "aura pulses twice, slower",
+     "small": "quick single pulse",
+     "hover": "aura ring tilts with hover bob",
+     "rooted": "aura roots into ground lines"
+    },
+    "signature": "e345f5063744"
+   }
+  },
+  {
+   "id": "CHASE_DOWN",
+   "displayName": "Chase Down",
+   "sourcePokemonMove": "PURSUIT",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "CHASE_DOWN",
+   "type": "DARK",
+   "category": "Special",
+   "power": 40,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Special vs source Physical: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 9,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#705848",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "329113bcbbaa"
+   }
+  },
+  {
+   "id": "CHILL_WIND",
+   "displayName": "Chill Wind",
+   "sourcePokemonMove": "ICY_WIND",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "CHILL_WIND",
+   "type": "ICE",
+   "category": "Special",
+   "power": 55,
+   "effect": "SPE_DOWN1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.ice",
+    "targetReaction": "recoil_standard",
+    "palette": "#98D8D8",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "681b8f3ec7c6"
+   }
+  },
+  {
+   "id": "CHOP_STRIKE",
+   "displayName": "Chop Strike",
+   "sourcePokemonMove": "KARATE_CHOP",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "CHOP_STRIKE",
+   "type": "FIGHTING",
+   "category": "Physical",
+   "power": 50,
+   "effect": "HIGH_CRIT",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 4,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 10,
+     "burstCount": 8,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#C03028",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "845b6c0f0e0a"
+   }
+  },
+  {
+   "id": "CHROME_WING",
+   "displayName": "Chrome Wing",
+   "sourcePokemonMove": "STEEL_WING",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "CHROME_WING",
+   "type": "STEEL",
+   "category": "Physical",
+   "power": 70,
+   "effect": "DEF_UP1",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 6,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 12,
+     "burstCount": 10,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#B8B8D0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "02708113d37b"
+   }
+  },
+  {
+   "id": "CINDER_WHEEL",
+   "displayName": "Cinder Wheel",
+   "sourcePokemonMove": "FLAME_WHEEL",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "CINDER_WHEEL",
+   "type": "FIRE",
+   "category": "Special",
+   "power": 60,
+   "effect": "BURN",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": "game category Special vs source Physical: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 11,
+     "burstCount": 9,
+     "statusPuff": "burn",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": {
+     "kind": "ember_wake",
+     "afterimages": 0
+    },
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "status_puff",
+    "palette": "#F08030",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "aa558c243c0d"
+   }
+  },
+  {
+   "id": "CLAW_SWIPE",
+   "displayName": "Claw Swipe",
+   "sourcePokemonMove": "SCRATCH",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "CLAW_SWIPE",
+   "type": "NORMAL",
+   "category": "Physical",
+   "power": 40,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 9,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "8eb103e76c31"
+   }
+  },
+  {
+   "id": "COLD_STARE",
+   "displayName": "Cold Stare",
+   "sourcePokemonMove": "LEER",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "COLD_STARE",
+   "type": "NORMAL",
+   "category": "Status",
+   "power": 0,
+   "effect": "DEF_DOWN1",
+   "scriptTemplateBefore": "stat_change",
+   "scriptFamilyBefore": "stat_change",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_gaze",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "gaze_ray",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.wave",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "wave/ray from eyes toward target",
+     "heavy": "slower, wider wave",
+     "small": "fast narrow wave",
+     "hover": "wave angles down",
+     "rooted": "wave travels along ground"
+    },
+    "signature": "5fac6e5c2ac2"
+   }
+  },
+  {
+   "id": "CRAB_SNAP",
+   "displayName": "Crab Snap",
+   "sourcePokemonMove": "CRABHAMMER",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "CRAB_SNAP",
+   "type": "WATER",
+   "category": "Special",
+   "power": 90,
+   "effect": "HIGH_CRIT",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Special vs source Physical: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 14,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_heavy",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "dbab74ec7298"
+   }
+  },
+  {
+   "id": "CRUNCH",
+   "displayName": "Munch",
+   "sourcePokemonMove": "CRUNCH",
+   "sourceBasis": "stable-id (game id is the source move constant)",
+   "legacyAnimField": "SHADOW_CLAW_MOVE",
+   "type": "DARK",
+   "category": "Physical",
+   "power": 80,
+   "effect": "DEF_DOWN1",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 13,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_heavy",
+    "palette": "#705848",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "5ab2fbe48b2c"
+   }
+  },
+  {
+   "id": "CURSE_GAZE",
+   "displayName": "Curse Gaze",
+   "sourcePokemonMove": "CONFUSE_RAY",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "CURSE_GAZE",
+   "type": "GHOST",
+   "category": "Status",
+   "power": 0,
+   "effect": "CONFUSE",
+   "scriptTemplateBefore": "status_condition",
+   "scriptFamilyBefore": "status_condition",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_gaze",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "gaze_ray",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": "confusion",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.wave",
+    "targetReaction": "status_puff",
+    "palette": "#705898",
+    "anatomyVariance": {
+     "standard": "wave/ray from eyes toward target",
+     "heavy": "slower, wider wave",
+     "small": "fast narrow wave",
+     "hover": "wave angles down",
+     "rooted": "wave travels along ground"
+    },
+    "signature": "5842cd73819a"
+   }
+  },
+  {
+   "id": "DARK_PULSE_MOVE",
+   "displayName": "Dark Pulse",
+   "sourcePokemonMove": "DARK_PULSE",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "DARK_PULSE_MOVE",
+   "type": "DARK",
+   "category": "Special",
+   "power": 80,
+   "effect": "FLINCH",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.dark",
+    "targetReaction": "recoil_heavy",
+    "palette": "#705848",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "4addf1bcd84c"
+   }
+  },
+  {
+   "id": "DRAGON_CLAW",
+   "displayName": "Dragon Claw",
+   "sourcePokemonMove": "DRAGON_CLAW",
+   "sourceBasis": "stable-id (game id is the source move constant)",
+   "legacyAnimField": "SHADOW_CLAW_MOVE",
+   "type": "DRAGON",
+   "category": "Physical",
+   "power": 80,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 13,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_heavy",
+    "palette": "#7038F8",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "01fd89229ac7"
+   }
+  },
+  {
+   "id": "DRAGON_SURGE",
+   "displayName": "Dragon Surge",
+   "sourcePokemonMove": "DRAGON_PULSE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "DRAGON_SURGE",
+   "type": "DRAGON",
+   "category": "Special",
+   "power": 90,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.dragon",
+    "targetReaction": "recoil_heavy",
+    "palette": "#7038F8",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "3d9017a5e3c7"
+   }
+  },
+  {
+   "id": "DRAIN_BITE",
+   "displayName": "Drain Bite",
+   "sourcePokemonMove": "ABSORB",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "DRAIN_BITE",
+   "type": "GRASS",
+   "category": "Special",
+   "power": 20,
+   "effect": "DRAIN",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "drain_link",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 2,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "drain_stream",
+     "particleCount": 5,
+     "burstCount": 6,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "drain.stream",
+    "targetReaction": "recoil_standard",
+    "palette": "#78C850",
+    "anatomyVariance": {
+     "standard": "link stream target->performer on impact",
+     "heavy": "thicker stream",
+     "small": "thin fast stream",
+     "hover": "stream arcs",
+     "rooted": "stream runs along ground"
+    },
+    "signature": "85496eb42248"
+   }
+  },
+  {
+   "id": "DRAKE_BREATH",
+   "displayName": "Drake Breath",
+   "sourcePokemonMove": "DRAGON_BREATH",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "DRAKE_BREATH",
+   "type": "DRAGON",
+   "category": "Special",
+   "power": 60,
+   "effect": "PARALYSIS",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 9,
+     "statusPuff": "paralysis",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.dragon",
+    "targetReaction": "status_puff",
+    "palette": "#7038F8",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "50eb8d004111"
+   }
+  },
+  {
+   "id": "DREAM_BITE",
+   "displayName": "Dream Bite",
+   "sourcePokemonMove": "DREAM_EATER",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "DREAM_BITE",
+   "type": "PSYCHIC",
+   "category": "Special",
+   "power": 100,
+   "effect": "DRAIN",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "drain_link",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "drain_stream",
+     "particleCount": 5,
+     "burstCount": 12,
+     "statusPuff": "sleep",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "drain.stream",
+    "targetReaction": "status_puff",
+    "palette": "#F85888",
+    "anatomyVariance": {
+     "standard": "link stream target->performer on impact",
+     "heavy": "thicker stream",
+     "small": "thin fast stream",
+     "hover": "stream arcs",
+     "rooted": "stream runs along ground"
+    },
+    "signature": "2f587f3933b9"
+   }
+  },
+  {
+   "id": "DRILL_BEAK",
+   "displayName": "Drill Beak",
+   "sourcePokemonMove": "DRILL_PECK",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "DRILL_BEAK",
+   "type": "FLYING",
+   "category": "Physical",
+   "power": 80,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 13,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_heavy",
+    "palette": "#A890F0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "639952b43226"
+   }
+  },
+  {
+   "id": "DUST_SLAP",
+   "displayName": "Dust Slap",
+   "sourcePokemonMove": "MUD_SLAP",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "DUST_SLAP",
+   "type": "GROUND",
+   "category": "Physical",
+   "power": 20,
+   "effect": "ACC_DOWN1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Physical vs source Special: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 2,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 6,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.ground",
+    "targetReaction": "recoil_standard",
+    "palette": "#E0C068",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "ef9f7c997217"
+   }
+  },
+  {
+   "id": "EARTH_POWER",
+   "displayName": "Earth Power",
+   "sourcePokemonMove": "EARTH_POWER",
+   "sourceBasis": "stable-id (game id is the source move constant)",
+   "legacyAnimField": "EARTH_TREMOR",
+   "type": "GROUND",
+   "category": "Special",
+   "power": 90,
+   "effect": "SPDEF_DOWN1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "burst_fan",
+    "camera": "none",
+    "soundCue": "proj.ground",
+    "targetReaction": "recoil_heavy",
+    "palette": "#E0C068",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "c4d914c018a0"
+   }
+  },
+  {
+   "id": "EARTH_TREMOR",
+   "displayName": "Tremor",
+   "sourcePokemonMove": "EARTHQUAKE",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "EARTH_TREMOR",
+   "type": "GROUND",
+   "category": "Physical",
+   "power": 100,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "field_impact",
+    "timelineMs": {
+     "windup": 350,
+     "travel": 60,
+     "impactHold": 140,
+     "recoil": 340,
+     "recover": 600,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.275,
+     "impactAt": 0.369
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "quake",
+     "flash": "type",
+     "particleKind": "ground_ring",
+     "particleCount": 18,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "quake_shake",
+    "soundCue": "field.quake",
+    "targetReaction": "recoil_heavy",
+    "palette": "#E0C068",
+    "anatomyVariance": {
+     "standard": "ground shockwave from performer position",
+     "heavy": "double shockwave ring",
+     "small": "single fast ring",
+     "hover": "shockwave only on landing beat",
+     "rooted": "strongest form: rooted performer channels the field"
+    },
+    "signature": "0275a40a4c8a"
+   }
+  },
+  {
+   "id": "EMBER_CYCLONE",
+   "displayName": "Ember Cyclone",
+   "sourcePokemonMove": "FIRE_SPIN",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "EMBER_CYCLONE",
+   "type": "FIRE",
+   "category": "Special",
+   "power": 15,
+   "effect": "TRAP",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "vortex_ring",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.fire",
+    "targetReaction": "trap_linger",
+    "palette": "#F08030",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "b4587afcda2c"
+   }
+  },
+  {
+   "id": "EMBER_FLICK",
+   "displayName": "Ember Flick",
+   "sourcePokemonMove": "EMBER",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "EMBER_FLICK",
+   "type": "FIRE",
+   "category": "Special",
+   "power": 40,
+   "effect": "BURN",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": "burn",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.fire",
+    "targetReaction": "status_puff",
+    "palette": "#F08030",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "ee8ca2fba36d"
+   }
+  },
+  {
+   "id": "EMBER_TOSS",
+   "displayName": "Ember Toss",
+   "sourcePokemonMove": "EMBER",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "EMBER_TOSS",
+   "type": "FIRE",
+   "category": "Special",
+   "power": 40,
+   "effect": "BURN",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": "burn",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.fire",
+    "targetReaction": "status_puff",
+    "palette": "#F08030",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "ee8ca2fba36d"
+   }
+  },
+  {
+   "id": "FAIRY_LIGHT",
+   "displayName": "Fairy Light",
+   "sourcePokemonMove": "CHARM",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "FAIRY_LIGHT",
+   "type": "FAIRY",
+   "category": "Status",
+   "power": 0,
+   "effect": "ATK_DOWN2",
+   "scriptTemplateBefore": "stat_change",
+   "scriptFamilyBefore": "stat_change",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_gaze",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "wave_ring",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.wave",
+    "targetReaction": "recoil_standard",
+    "palette": "#EE99AC",
+    "anatomyVariance": {
+     "standard": "wave/ray from eyes toward target",
+     "heavy": "slower, wider wave",
+     "small": "fast narrow wave",
+     "hover": "wave angles down",
+     "rooted": "wave travels along ground"
+    },
+    "signature": "ff696bb09851"
+   }
+  },
+  {
+   "id": "FIRE_PUNCH_MOVE",
+   "displayName": "Fire Punch",
+   "sourcePokemonMove": "FIRE_PUNCH",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "FIRE_PUNCH_MOVE",
+   "type": "FIRE",
+   "category": "Physical",
+   "power": 75,
+   "effect": "BURN",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 6,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 12,
+     "burstCount": 10,
+     "statusPuff": "burn",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": {
+     "kind": "ember_wake",
+     "afterimages": 0
+    },
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "status_puff",
+    "palette": "#F08030",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "ce7333197923"
+   }
+  },
+  {
+   "id": "FIRE_STREAM",
+   "displayName": "Fire Stream",
+   "sourcePokemonMove": "FLAMETHROWER",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "FIRE_STREAM",
+   "type": "FIRE",
+   "category": "Special",
+   "power": 90,
+   "effect": "BURN",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 12,
+     "statusPuff": "burn",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.fire",
+    "targetReaction": "status_puff",
+    "palette": "#F08030",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "f9b5c8891204"
+   }
+  },
+  {
+   "id": "FLASH_CANNON_MOVE",
+   "displayName": "Flash Cannon",
+   "sourcePokemonMove": "FLASH_CANNON",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "FLASH_CANNON_MOVE",
+   "type": "STEEL",
+   "category": "Special",
+   "power": 80,
+   "effect": "SPDEF_DOWN1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.steel",
+    "targetReaction": "recoil_heavy",
+    "palette": "#B8B8D0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "fa5ecca5629b"
+   }
+  },
+  {
+   "id": "FROST_JAB",
+   "displayName": "Frost Jab",
+   "sourcePokemonMove": "ICE_PUNCH",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "FROST_JAB",
+   "type": "ICE",
+   "category": "Special",
+   "power": 75,
+   "effect": "FREEZE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": "game category Special vs source Physical: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 6,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 12,
+     "burstCount": 10,
+     "statusPuff": "freeze",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "status_puff",
+    "palette": "#98D8D8",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "9de0c63f3142"
+   }
+  },
+  {
+   "id": "FURY_BARRAGE",
+   "displayName": "Fury Barrage",
+   "sourcePokemonMove": "FURY_SWIPES",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "FURY_BARRAGE",
+   "type": "NORMAL",
+   "category": "Physical",
+   "power": 18,
+   "effect": "MULTI_HIT",
+   "scriptTemplateBefore": "multi_hit",
+   "scriptFamilyBefore": "multi_hit",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "multi_hit",
+    "timelineMs": {
+     "windup": 200,
+     "travel": 300,
+     "impactHold": 90,
+     "recoil": 420,
+     "recover": 480,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.336,
+     "impactAt": 0.396
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 3,
+     "hitCount": {
+      "min": 2,
+      "max": 5
+     }
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.multi",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "beats land at even cadence",
+     "heavy": "beats slower, each heavier",
+     "small": "beats faster, lighter",
+     "hover": "beats alternate height",
+     "rooted": "beats from planted stance, reach only"
+    },
+    "signature": "3df07ca978c2"
+   }
+  },
+  {
+   "id": "FUTURE_STRIKE",
+   "displayName": "Future Strike",
+   "sourcePokemonMove": "FUTURE_SIGHT",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "FUTURE_STRIKE",
+   "type": "PSYCHIC",
+   "category": "Special",
+   "power": 80,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 14,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.psychic",
+    "targetReaction": "recoil_heavy",
+    "palette": "#F85888",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "572a1d87cf64"
+   }
+  },
+  {
+   "id": "GHOST_FLAME",
+   "displayName": "Ghost Flame",
+   "sourcePokemonMove": "WILL_O_WISP",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "GHOST_FLAME",
+   "type": "FIRE",
+   "category": "Status",
+   "power": 0,
+   "effect": "BURN",
+   "scriptTemplateBefore": "status_condition",
+   "scriptFamilyBefore": "status_condition",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_gaze",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "wave_ring",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": "burn",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.wave",
+    "targetReaction": "status_puff",
+    "palette": "#F08030",
+    "anatomyVariance": {
+     "standard": "wave/ray from eyes toward target",
+     "heavy": "slower, wider wave",
+     "small": "fast narrow wave",
+     "hover": "wave angles down",
+     "rooted": "wave travels along ground"
+    },
+    "signature": "113f0a5c08ff"
+   }
+  },
+  {
+   "id": "GHOST_TOUCH",
+   "displayName": "Ghost Touch",
+   "sourcePokemonMove": "LICK",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "GHOST_TOUCH",
+   "type": "GHOST",
+   "category": "Physical",
+   "power": 20,
+   "effect": "PARALYSIS",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 2,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 8,
+     "burstCount": 6,
+     "statusPuff": "paralysis",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "status_puff",
+    "palette": "#705898",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "948139036adb"
+   }
+  },
+  {
+   "id": "GLACIER_STORM",
+   "displayName": "Glacier Storm",
+   "sourcePokemonMove": "BLIZZARD",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "GLACIER_STORM",
+   "type": "ICE",
+   "category": "Special",
+   "power": 120,
+   "effect": "FREEZE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 10,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 16,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.ice",
+    "targetReaction": "recoil_heavy",
+    "palette": "#98D8D8",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "2faab4325bca"
+   }
+  },
+  {
+   "id": "GLIMMER_BURST",
+   "displayName": "Glimmer Burst",
+   "sourcePokemonMove": "PSYCHIC",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "GLIMMER_BURST",
+   "type": "FAIRY",
+   "category": "Special",
+   "power": 90,
+   "effect": "SPDEF_DOWN1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "beam",
+    "timelineMs": {
+     "windup": 300,
+     "travel": 380,
+     "impactHold": 120,
+     "recoil": 260,
+     "recover": 430,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.456,
+     "impactAt": 0.537
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "beam_core",
+     "particleCount": 1,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "push_in",
+    "soundCue": "beam.fairy",
+    "targetReaction": "recoil_heavy",
+    "palette": "#EE99AC",
+    "anatomyVariance": {
+     "standard": "sustained beam from mouth/hand anchor",
+     "heavy": "thicker beam, longer hold",
+     "small": "thinner beam, shorter hold",
+     "hover": "beam angles down from hover",
+     "rooted": "beam sweeps up from base"
+    },
+    "signature": "49a29db3466c"
+   }
+  },
+  {
+   "id": "GUARD_WALL",
+   "displayName": "Guard Wall",
+   "sourcePokemonMove": "PROTECT",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "GUARD_WALL",
+   "type": "NORMAL",
+   "category": "Status",
+   "power": 0,
+   "effect": "PROTECT",
+   "scriptTemplateBefore": "generic_fallback",
+   "scriptFamilyBefore": "fallback_utility",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "protect_wall",
+    "timelineMs": {
+     "windup": 400,
+     "travel": 0,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 500,
+     "total": 1000
+    },
+    "phaseFractions": {
+     "travelComplete": 0.4,
+     "impactAt": 0.5
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "wall_flash",
+     "particleCount": 2,
+     "burstCount": 7,
+     "statusPuff": "generic",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "guard.wall",
+    "targetReaction": "status_puff",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "wall flashes up in front of performer",
+     "heavy": "wider wall",
+     "small": "narrow wall, faster flash",
+     "hover": "wall tilts to face attacker",
+     "rooted": "wall anchored to ground"
+    },
+    "signature": "2ecb52f4d7e5"
+   }
+  },
+  {
+   "id": "GUST_WAVE",
+   "displayName": "Wind Blast",
+   "sourcePokemonMove": "GUST",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "GUST_WAVE",
+   "type": "FLYING",
+   "category": "Special",
+   "power": 40,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "wind_swirl",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "wind_swirl",
+    "camera": "none",
+    "soundCue": "proj.flying",
+    "targetReaction": "recoil_standard",
+    "palette": "#A890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "cfc7c4ff76f3"
+   }
+  },
+  {
+   "id": "HEAD_RAM",
+   "displayName": "Head Ram",
+   "sourcePokemonMove": "HEADBUTT",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "HEAD_RAM",
+   "type": "NORMAL",
+   "category": "Physical",
+   "power": 70,
+   "effect": "FLINCH",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 6,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 12,
+     "burstCount": 10,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "23db37d415e2"
+   }
+  },
+  {
+   "id": "HEAT_SURGE",
+   "displayName": "Heat Surge",
+   "sourcePokemonMove": "HEAT_WAVE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "HEAT_SURGE",
+   "type": "FIRE",
+   "category": "Special",
+   "power": 100,
+   "effect": "BURN",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 14,
+     "statusPuff": "burn",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.fire",
+    "targetReaction": "status_puff",
+    "palette": "#F08030",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "48b29c5a5d10"
+   }
+  },
+  {
+   "id": "HYDRO_SURGE",
+   "displayName": "Hydro Surge",
+   "sourcePokemonMove": "HYDRO_PUMP",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "HYDRO_SURGE",
+   "type": "WATER",
+   "category": "Special",
+   "power": 120,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 10,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 16,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.water",
+    "targetReaction": "recoil_heavy",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "137580f9494c"
+   }
+  },
+  {
+   "id": "INFERNO_WAVE",
+   "displayName": "Inferno Wave",
+   "sourcePokemonMove": "FIRE_BLAST",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "INFERNO_WAVE",
+   "type": "FIRE",
+   "category": "Special",
+   "power": 110,
+   "effect": "BURN",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "spread",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 10,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "shard_fan",
+     "particleCount": 5,
+     "burstCount": 16,
+     "statusPuff": "burn",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "spread.fire",
+    "targetReaction": "status_puff",
+    "palette": "#F08030",
+    "anatomyVariance": {
+     "standard": "fan of projectiles across target zone",
+     "heavy": "denser fan, ground-level",
+     "small": "wider, sparser fan",
+     "hover": "fan rains downward",
+     "rooted": "fan erupts from ground line"
+    },
+    "signature": "23a034295a88"
+   }
+  },
+  {
+   "id": "INNER_FOCUS",
+   "displayName": "Inner Focus",
+   "sourcePokemonMove": "MEDITATE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "INNER_FOCUS",
+   "type": "PSYCHIC",
+   "category": "Status",
+   "power": 0,
+   "effect": "ATK_UP1",
+   "scriptTemplateBefore": "stat_change",
+   "scriptFamilyBefore": "stat_change",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "self_aura",
+    "timelineMs": {
+     "windup": 400,
+     "travel": 0,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 500,
+     "total": 1000
+    },
+    "phaseFractions": {
+     "travelComplete": 0.4,
+     "impactAt": 0.5
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "aura_motes",
+     "particleCount": 8,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "buff.rise",
+    "targetReaction": "recoil_standard",
+    "palette": "#F85888",
+    "anatomyVariance": {
+     "standard": "aura ring rises around performer",
+     "heavy": "aura pulses twice, slower",
+     "small": "quick single pulse",
+     "hover": "aura ring tilts with hover bob",
+     "rooted": "aura roots into ground lines"
+    },
+    "signature": "5617e36c99a6"
+   }
+  },
+  {
+   "id": "IRON_BARRAGE",
+   "displayName": "Iron Barrage",
+   "sourcePokemonMove": "GEAR_GRIND",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "IRON_BARRAGE",
+   "type": "STEEL",
+   "category": "Physical",
+   "power": 35,
+   "effect": "MULTI_HIT",
+   "scriptTemplateBefore": "multi_hit",
+   "scriptFamilyBefore": "multi_hit",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "multi_hit",
+    "timelineMs": {
+     "windup": 200,
+     "travel": 300,
+     "impactHold": 90,
+     "recoil": 420,
+     "recover": 480,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.336,
+     "impactAt": 0.396
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 3,
+     "hitCount": {
+      "min": 2,
+      "max": 5
+     }
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.multi",
+    "targetReaction": "recoil_standard",
+    "palette": "#B8B8D0",
+    "anatomyVariance": {
+     "standard": "beats land at even cadence",
+     "heavy": "beats slower, each heavier",
+     "small": "beats faster, lighter",
+     "hover": "beats alternate height",
+     "rooted": "beats from planted stance, reach only"
+    },
+    "signature": "9fdf80716c5c"
+   }
+  },
+  {
+   "id": "IRON_CLAW",
+   "displayName": "Iron Claw",
+   "sourcePokemonMove": "METAL_CLAW",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "IRON_CLAW",
+   "type": "STEEL",
+   "category": "Physical",
+   "power": 50,
+   "effect": "ATK_UP1",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 4,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 10,
+     "burstCount": 8,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#B8B8D0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "5655da207ad1"
+   }
+  },
+  {
+   "id": "IRON_FORTRESS",
+   "displayName": "Iron Fortress",
+   "sourcePokemonMove": "IRON_DEFENSE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "IRON_FORTRESS",
+   "type": "STEEL",
+   "category": "Status",
+   "power": 0,
+   "effect": "DEF_UP2",
+   "scriptTemplateBefore": "stat_change",
+   "scriptFamilyBefore": "stat_change",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "self_aura",
+    "timelineMs": {
+     "windup": 400,
+     "travel": 0,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 500,
+     "total": 1000
+    },
+    "phaseFractions": {
+     "travelComplete": 0.4,
+     "impactAt": 0.5
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "aura_motes",
+     "particleCount": 12,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "buff.rise",
+    "targetReaction": "recoil_standard",
+    "palette": "#B8B8D0",
+    "anatomyVariance": {
+     "standard": "aura ring rises around performer",
+     "heavy": "aura pulses twice, slower",
+     "small": "quick single pulse",
+     "hover": "aura ring tilts with hover bob",
+     "rooted": "aura roots into ground lines"
+    },
+    "signature": "debc77028bea"
+   }
+  },
+  {
+   "id": "LEAF_EDGE",
+   "displayName": "Leaf Edge",
+   "sourcePokemonMove": "LEAF_BLADE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "LEAF_EDGE",
+   "type": "GRASS",
+   "category": "Special",
+   "power": 70,
+   "effect": "HIGH_CRIT",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Special vs source Physical: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 14,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_heavy",
+    "palette": "#78C850",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "e2a0e940e63a"
+   }
+  },
+  {
+   "id": "LEAF_WHIP",
+   "displayName": "Leaf Whip",
+   "sourcePokemonMove": "VINE_WHIP",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "LEAF_WHIP",
+   "type": "GRASS",
+   "category": "Special",
+   "power": 35,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Special vs source Physical: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 9,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#78C850",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "d38429470463"
+   }
+  },
+  {
+   "id": "LEECH_BITE",
+   "displayName": "Leech Bite",
+   "sourcePokemonMove": "LEECH_LIFE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "LEECH_BITE",
+   "type": "BUG",
+   "category": "Physical",
+   "power": 20,
+   "effect": "DRAIN",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "drain_link",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 2,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "drain_stream",
+     "particleCount": 5,
+     "burstCount": 6,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "drain.stream",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8B820",
+    "anatomyVariance": {
+     "standard": "link stream target->performer on impact",
+     "heavy": "thicker stream",
+     "small": "thin fast stream",
+     "hover": "stream arcs",
+     "rooted": "stream runs along ground"
+    },
+    "signature": "0bf0c10f3f78"
+   }
+  },
+  {
+   "id": "METAL_STRIKE",
+   "displayName": "Metal Strike",
+   "sourcePokemonMove": "METAL_CLAW",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "METAL_STRIKE",
+   "type": "STEEL",
+   "category": "Physical",
+   "power": 50,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 4,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 10,
+     "burstCount": 8,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#B8B8D0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "5655da207ad1"
+   }
+  },
+  {
+   "id": "MIND_BEAM",
+   "displayName": "Mind Beam",
+   "sourcePokemonMove": "PSYBEAM",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "MIND_BEAM",
+   "type": "PSYCHIC",
+   "category": "Special",
+   "power": 65,
+   "effect": "CONFUSE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "beam",
+    "timelineMs": {
+     "windup": 300,
+     "travel": 380,
+     "impactHold": 120,
+     "recoil": 260,
+     "recover": 430,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.456,
+     "impactAt": 0.537
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "beam_core",
+     "particleCount": 1,
+     "burstCount": 9,
+     "statusPuff": "confusion",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "push_in",
+    "soundCue": "beam.psychic",
+    "targetReaction": "status_puff",
+    "palette": "#F85888",
+    "anatomyVariance": {
+     "standard": "sustained beam from mouth/hand anchor",
+     "heavy": "thicker beam, longer hold",
+     "small": "thinner beam, shorter hold",
+     "hover": "beam angles down from hover",
+     "rooted": "beam sweeps up from base"
+    },
+    "signature": "b60fedae3612"
+   }
+  },
+  {
+   "id": "MIND_BLAST",
+   "displayName": "Mind Blast",
+   "sourcePokemonMove": "PSYCHIC",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "MIND_BLAST",
+   "type": "PSYCHIC",
+   "category": "Special",
+   "power": 90,
+   "effect": "SPDEF_DOWN1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "beam",
+    "timelineMs": {
+     "windup": 300,
+     "travel": 380,
+     "impactHold": 120,
+     "recoil": 260,
+     "recover": 430,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.456,
+     "impactAt": 0.537
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "beam_core",
+     "particleCount": 1,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "push_in",
+    "soundCue": "beam.psychic",
+    "targetReaction": "recoil_heavy",
+    "palette": "#F85888",
+    "anatomyVariance": {
+     "standard": "sustained beam from mouth/hand anchor",
+     "heavy": "thicker beam, longer hold",
+     "small": "thinner beam, shorter hold",
+     "hover": "beam angles down from hover",
+     "rooted": "beam sweeps up from base"
+    },
+    "signature": "8f059678265a"
+   }
+  },
+  {
+   "id": "MIND_JAB",
+   "displayName": "Mind Jab",
+   "sourcePokemonMove": "CONFUSION",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "MIND_JAB",
+   "type": "PSYCHIC",
+   "category": "Special",
+   "power": 50,
+   "effect": "CONFUSE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "beam",
+    "timelineMs": {
+     "windup": 300,
+     "travel": 380,
+     "impactHold": 120,
+     "recoil": 260,
+     "recover": 430,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.456,
+     "impactAt": 0.537
+    },
+    "impact": {
+     "amplitudePx": 4,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "beam_core",
+     "particleCount": 1,
+     "burstCount": 8,
+     "statusPuff": "confusion",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "push_in",
+    "soundCue": "beam.psychic",
+    "targetReaction": "status_puff",
+    "palette": "#F85888",
+    "anatomyVariance": {
+     "standard": "sustained beam from mouth/hand anchor",
+     "heavy": "thicker beam, longer hold",
+     "small": "thinner beam, shorter hold",
+     "hover": "beam angles down from hover",
+     "rooted": "beam sweeps up from base"
+    },
+    "signature": "71d6e017d398"
+   }
+  },
+  {
+   "id": "MIND_SHIELD",
+   "displayName": "Mind Shield",
+   "sourcePokemonMove": "AMNESIA",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "MIND_SHIELD",
+   "type": "PSYCHIC",
+   "category": "Status",
+   "power": 0,
+   "effect": "SPDEF_UP2",
+   "scriptTemplateBefore": "stat_change",
+   "scriptFamilyBefore": "stat_change",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "self_aura",
+    "timelineMs": {
+     "windup": 400,
+     "travel": 0,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 500,
+     "total": 1000
+    },
+    "phaseFractions": {
+     "travelComplete": 0.4,
+     "impactAt": 0.5
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "aura_motes",
+     "particleCount": 12,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "buff.rise",
+    "targetReaction": "recoil_standard",
+    "palette": "#F85888",
+    "anatomyVariance": {
+     "standard": "aura ring rises around performer",
+     "heavy": "aura pulses twice, slower",
+     "small": "quick single pulse",
+     "hover": "aura ring tilts with hover bob",
+     "rooted": "aura roots into ground lines"
+    },
+    "signature": "b4c2804c272a"
+   }
+  },
+  {
+   "id": "MUD_BLAST",
+   "displayName": "Mud Blast",
+   "sourcePokemonMove": "BULLDOZE",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "MUD_BLAST",
+   "type": "GROUND",
+   "category": "Physical",
+   "power": 55,
+   "effect": "ACC_DOWN1",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "mud_glob",
+     "particleCount": 1,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "glob",
+    "camera": "none",
+    "soundCue": "proj.ground",
+    "targetReaction": "recoil_standard",
+    "palette": "#E0C068",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "dbadc9446ace"
+   }
+  },
+  {
+   "id": "MUD_PELLET",
+   "displayName": "Mud Pellet",
+   "sourcePokemonMove": "MUD_SHOT",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "MUD_PELLET",
+   "type": "GROUND",
+   "category": "Physical",
+   "power": 55,
+   "effect": "SPE_DOWN1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Physical vs source Special: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "mud_glob",
+     "particleCount": 1,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "pellet",
+    "camera": "none",
+    "soundCue": "proj.ground",
+    "targetReaction": "recoil_standard",
+    "palette": "#E0C068",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "5be510dcb589"
+   }
+  },
+  {
+   "id": "NIGHT_SLASH_MOVE",
+   "displayName": "Night Slash",
+   "sourcePokemonMove": "NIGHT_SLASH",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "NIGHT_SLASH_MOVE",
+   "type": "DARK",
+   "category": "Physical",
+   "power": 70,
+   "effect": "HIGH_CRIT",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 6,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 12,
+     "burstCount": 10,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#705848",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "47d8e88d654a"
+   }
+  },
+  {
+   "id": "ORIGIN_VERDICT",
+   "displayName": "Origin Verdict",
+   "sourcePokemonMove": null,
+   "sourceBasis": "native-original (no Pokemon source; owner-canon move)",
+   "legacyAnimField": "ORIGIN_VERDICT",
+   "type": "MYTHIC",
+   "category": "Special",
+   "power": 100,
+   "effect": "FORM_TYPE",
+   "scriptTemplateBefore": null,
+   "scriptFamilyBefore": null,
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.mythic",
+    "targetReaction": "recoil_heavy",
+    "palette": "#FFD54F",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "11398774f62e"
+   }
+  },
+  {
+   "id": "PETAL_BARRAGE",
+   "displayName": "Petal Barrage",
+   "sourcePokemonMove": "ENERGY_BALL",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "PETAL_BARRAGE",
+   "type": "GRASS",
+   "category": "Special",
+   "power": 80,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.grass",
+    "targetReaction": "recoil_heavy",
+    "palette": "#78C850",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "636352b0d686"
+   }
+  },
+  {
+   "id": "PHANTOM_FIST",
+   "displayName": "Phantom Fist",
+   "sourcePokemonMove": "SHADOW_PUNCH",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "PHANTOM_FIST",
+   "type": "GHOST",
+   "category": "Physical",
+   "power": 60,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 11,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#705898",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "63a995fb0873"
+   }
+  },
+  {
+   "id": "PIXIE_KISS",
+   "displayName": "Pixie Kiss",
+   "sourcePokemonMove": "SWEET_KISS",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "PIXIE_KISS",
+   "type": "FAIRY",
+   "category": "Status",
+   "power": 0,
+   "effect": "CONFUSE",
+   "scriptTemplateBefore": "status_condition",
+   "scriptFamilyBefore": "status_condition",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_gaze",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "wave_ring",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": "confusion",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.wave",
+    "targetReaction": "status_puff",
+    "palette": "#EE99AC",
+    "anatomyVariance": {
+     "standard": "wave/ray from eyes toward target",
+     "heavy": "slower, wider wave",
+     "small": "fast narrow wave",
+     "hover": "wave angles down",
+     "rooted": "wave travels along ground"
+    },
+    "signature": "b3144b597c83"
+   }
+  },
+  {
+   "id": "POISON_JAB",
+   "displayName": "Poison Jab",
+   "sourcePokemonMove": "POISON_JAB",
+   "sourceBasis": "stable-id (game id is the source move constant)",
+   "legacyAnimField": "VENOM_STRIKE",
+   "type": "POISON",
+   "category": "Physical",
+   "power": 80,
+   "effect": "POISON",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 13,
+     "burstCount": 11,
+     "statusPuff": "poison",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "status_puff",
+    "palette": "#A040A0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "f33fc338d78f"
+   }
+  },
+  {
+   "id": "POWER_STRIKE",
+   "displayName": "Power Strike",
+   "sourcePokemonMove": "SKY_UPPERCUT",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "POWER_STRIKE",
+   "type": "FIGHTING",
+   "category": "Physical",
+   "power": 85,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 13,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_heavy",
+    "palette": "#C03028",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "0d6f47d76d49"
+   }
+  },
+  {
+   "id": "QUICK_ATTACK",
+   "displayName": "Swift Movement",
+   "sourcePokemonMove": "QUICK_ATTACK",
+   "sourceBasis": "stable-id (game id is the source move constant)",
+   "legacyAnimField": "MACH_STRIKE",
+   "type": "NORMAL",
+   "category": "Physical",
+   "power": 40,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "blitz_afterimage",
+    "timelineMs": {
+     "windup": 80,
+     "travel": 170,
+     "impactHold": 50,
+     "recoil": 220,
+     "recover": 260,
+     "total": 780
+    },
+    "phaseFractions": {
+     "travelComplete": 0.321,
+     "impactAt": 0.385
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "streak_spark",
+     "particleCount": 4,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": {
+     "kind": "speed_streaks",
+     "afterimages": 3
+    },
+    "projectileShape": null,
+    "camera": "snap_zoom",
+    "soundCue": "speed.blitz",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "3 afterimages on a flat streak line",
+     "heavy": "2 afterimages, streaks thicker",
+     "small": "4 afterimages, tighter spacing",
+     "hover": "streaks arc downward from hover",
+     "rooted": "streak burst from base, body blurs in place then snaps forward"
+    },
+    "signature": "9725a0492bee"
+   }
+  },
+  {
+   "id": "QUICK_SAND",
+   "displayName": "Quick Sand",
+   "sourcePokemonMove": "SAND_TOMB",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "QUICK_SAND",
+   "type": "GROUND",
+   "category": "Physical",
+   "power": 15,
+   "effect": "TRAP",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "field_impact",
+    "timelineMs": {
+     "windup": 350,
+     "travel": 60,
+     "impactHold": 140,
+     "recoil": 340,
+     "recover": 600,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.275,
+     "impactAt": 0.369
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "quake",
+     "flash": "type",
+     "particleKind": "vortex_ring",
+     "particleCount": 13,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "quake_shake",
+    "soundCue": "field.quake",
+    "targetReaction": "trap_linger",
+    "palette": "#E0C068",
+    "anatomyVariance": {
+     "standard": "ground shockwave from performer position",
+     "heavy": "double shockwave ring",
+     "small": "single fast ring",
+     "hover": "shockwave only on landing beat",
+     "rooted": "strongest form: rooted performer channels the field"
+    },
+    "signature": "a87a1694139a"
+   }
+  },
+  {
+   "id": "RAGE_STORM",
+   "displayName": "Rage Storm",
+   "sourcePokemonMove": "OUTRAGE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "RAGE_STORM",
+   "type": "DRAGON",
+   "category": "Special",
+   "power": 90,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": "game category Special vs source Physical: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 10,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 16,
+     "burstCount": 14,
+     "statusPuff": "confusion",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "status_puff",
+    "palette": "#7038F8",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "7b990f1354b0"
+   }
+  },
+  {
+   "id": "RAZOR_LEAF",
+   "displayName": "Leaf Blast",
+   "sourcePokemonMove": "RAZOR_LEAF",
+   "sourceBasis": "stable-id (game id is the source move constant)",
+   "legacyAnimField": "PETAL_BARRAGE",
+   "type": "GRASS",
+   "category": "Physical",
+   "power": 55,
+   "effect": "HIGH_CRIT",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 11,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#78C850",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "08f1b04bfa92"
+   }
+  },
+  {
+   "id": "SEED_BURST",
+   "displayName": "Seed Burst",
+   "sourcePokemonMove": "BULLET_SEED",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SEED_BURST",
+   "type": "GRASS",
+   "category": "Special",
+   "power": 10,
+   "effect": "MULTI_HIT",
+   "scriptTemplateBefore": "multi_hit",
+   "scriptFamilyBefore": "multi_hit",
+   "categoryAdaptation": "game category Special vs source Physical: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "multi_hit",
+    "timelineMs": {
+     "windup": 200,
+     "travel": 300,
+     "impactHold": 90,
+     "recoil": 420,
+     "recover": 480,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.336,
+     "impactAt": 0.396
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 3,
+     "hitCount": {
+      "min": 2,
+      "max": 5
+     }
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.multi",
+    "targetReaction": "recoil_standard",
+    "palette": "#78C850",
+    "anatomyVariance": {
+     "standard": "beats land at even cadence",
+     "heavy": "beats slower, each heavier",
+     "small": "beats faster, lighter",
+     "hover": "beats alternate height",
+     "rooted": "beats from planted stance, reach only"
+    },
+    "signature": "d2fe6362da3a"
+   }
+  },
+  {
+   "id": "SHADOW_AMBUSH",
+   "displayName": "Shadow Ambush",
+   "sourcePokemonMove": "FAINT_ATTACK",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SHADOW_AMBUSH",
+   "type": "DARK",
+   "category": "Special",
+   "power": 60,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Special vs source Physical: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 11,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#705848",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "8c05a993f9a9"
+   }
+  },
+  {
+   "id": "SHADOW_PULSE",
+   "displayName": "Dark Wave",
+   "sourcePokemonMove": "SHADOW_BALL",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "SHADOW_PULSE",
+   "type": "GHOST",
+   "category": "Special",
+   "power": 80,
+   "effect": "FLINCH",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.ghost",
+    "targetReaction": "recoil_heavy",
+    "palette": "#705898",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "790df5f64d63"
+   }
+  },
+  {
+   "id": "SIGNAL_FLASH",
+   "displayName": "Signal Flash",
+   "sourcePokemonMove": "SIGNAL_BEAM",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SIGNAL_FLASH",
+   "type": "BUG",
+   "category": "Physical",
+   "power": 75,
+   "effect": "CONFUSE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": "game category Physical vs source Special: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "beam",
+    "timelineMs": {
+     "windup": 300,
+     "travel": 380,
+     "impactHold": 120,
+     "recoil": 260,
+     "recover": 430,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.456,
+     "impactAt": 0.537
+    },
+    "impact": {
+     "amplitudePx": 6,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "beam_core",
+     "particleCount": 1,
+     "burstCount": 10,
+     "statusPuff": "confusion",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "push_in",
+    "soundCue": "beam.bug",
+    "targetReaction": "status_puff",
+    "palette": "#A8B820",
+    "anatomyVariance": {
+     "standard": "sustained beam from mouth/hand anchor",
+     "heavy": "thicker beam, longer hold",
+     "small": "thinner beam, shorter hold",
+     "hover": "beam angles down from hover",
+     "rooted": "beam sweeps up from base"
+    },
+    "signature": "ea9d49a80e08"
+   }
+  },
+  {
+   "id": "SKY_DIVE",
+   "displayName": "Sky Dive",
+   "sourcePokemonMove": "BOUNCE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SKY_DIVE",
+   "type": "FLYING",
+   "category": "Physical",
+   "power": 85,
+   "effect": "NONE",
+   "scriptTemplateBefore": "two_turn",
+   "scriptFamilyBefore": "two_turn",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "charge_release",
+    "timelineMs": {
+     "windup": 600,
+     "travel": 300,
+     "impactHold": 120,
+     "recoil": 260,
+     "recover": 410,
+     "total": 1690
+    },
+    "phaseFractions": {
+     "travelComplete": 0.533,
+     "impactAt": 0.604
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "charge_motes",
+     "particleCount": 6,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "charge.release",
+    "targetReaction": "recoil_standard",
+    "palette": "#A890F0",
+    "anatomyVariance": {
+     "standard": "charge hold (turn 1) then category release",
+     "heavy": "longer charge glow",
+     "small": "shorter charge glow",
+     "hover": "rises while charging",
+     "rooted": "sinks/roots while charging"
+    },
+    "signature": "2d468dd69852"
+   }
+  },
+  {
+   "id": "SKY_KICK",
+   "displayName": "Sky Kick",
+   "sourcePokemonMove": "SKY_UPPERCUT",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SKY_KICK",
+   "type": "FIGHTING",
+   "category": "Physical",
+   "power": 85,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 13,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_heavy",
+    "palette": "#C03028",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "0d6f47d76d49"
+   }
+  },
+  {
+   "id": "SLUDGE_TOSS",
+   "displayName": "Sludge Toss",
+   "sourcePokemonMove": "SLUDGE_BOMB",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SLUDGE_TOSS",
+   "type": "POISON",
+   "category": "Physical",
+   "power": 90,
+   "effect": "POISON",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": "game category Physical vs source Special: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "thrown_prop",
+     "particleCount": 1,
+     "burstCount": 12,
+     "statusPuff": "poison",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "prop",
+    "camera": "none",
+    "soundCue": "proj.poison",
+    "targetReaction": "status_puff",
+    "palette": "#A040A0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "a12a57d47799"
+   }
+  },
+  {
+   "id": "SMOG_CLOUD",
+   "displayName": "Smog Cloud",
+   "sourcePokemonMove": "SMOG",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SMOG_CLOUD",
+   "type": "POISON",
+   "category": "Physical",
+   "power": 20,
+   "effect": "POISON",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": "game category Physical vs source Special: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 2,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 6,
+     "statusPuff": "poison",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.poison",
+    "targetReaction": "status_puff",
+    "palette": "#A040A0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "12c73483678f"
+   }
+  },
+  {
+   "id": "SNOW_DUST",
+   "displayName": "Snow Dust",
+   "sourcePokemonMove": "POWDER_SNOW",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SNOW_DUST",
+   "type": "ICE",
+   "category": "Special",
+   "power": 40,
+   "effect": "FREEZE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": "freeze",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.ice",
+    "targetReaction": "status_puff",
+    "palette": "#98D8D8",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "94f3ea8163ad"
+   }
+  },
+  {
+   "id": "SOLAR_BLAST",
+   "displayName": "Solar Blast",
+   "sourcePokemonMove": "SOLAR_BEAM",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "SOLAR_BLAST",
+   "type": "GRASS",
+   "category": "Special",
+   "power": 120,
+   "effect": "CHARGE_TURN",
+   "scriptTemplateBefore": "two_turn",
+   "scriptFamilyBefore": "two_turn",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "charge_release",
+    "timelineMs": {
+     "windup": 600,
+     "travel": 300,
+     "impactHold": 120,
+     "recoil": 260,
+     "recover": 410,
+     "total": 1690
+    },
+    "phaseFractions": {
+     "travelComplete": 0.533,
+     "impactAt": 0.604
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "charge_motes",
+     "particleCount": 6,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "charge.release",
+    "targetReaction": "recoil_heavy",
+    "palette": "#78C850",
+    "anatomyVariance": {
+     "standard": "charge hold (turn 1) then category release",
+     "heavy": "longer charge glow",
+     "small": "shorter charge glow",
+     "hover": "rises while charging",
+     "rooted": "sinks/roots while charging"
+    },
+    "signature": "68a03222e44f"
+   }
+  },
+  {
+   "id": "SPARK_SHOT",
+   "displayName": "Spark Shot",
+   "sourcePokemonMove": "THUNDER_SHOCK",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "SPARK_SHOT",
+   "type": "ELECTRIC",
+   "category": "Special",
+   "power": 40,
+   "effect": "PARALYSIS",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": "paralysis",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.electric",
+    "targetReaction": "status_puff",
+    "palette": "#F8D030",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "8aed08786f0f"
+   }
+  },
+  {
+   "id": "SPORE_CLOUD",
+   "displayName": "Spore Cloud",
+   "sourcePokemonMove": "SLEEP_POWDER",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SPORE_CLOUD",
+   "type": "GRASS",
+   "category": "Status",
+   "power": 0,
+   "effect": "SLEEP",
+   "scriptTemplateBefore": "status_condition",
+   "scriptFamilyBefore": "status_condition",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_cloud",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "spore_puff",
+     "particleCount": 7,
+     "burstCount": 7,
+     "statusPuff": "sleep",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.cloud",
+    "targetReaction": "status_puff",
+    "palette": "#78C850",
+    "anatomyVariance": {
+     "standard": "cloud drifts to target and settles",
+     "heavy": "bigger cloud, longer settle",
+     "small": "small fast puffs",
+     "hover": "cloud sheds downward",
+     "rooted": "cloud boils up from base"
+    },
+    "signature": "9dd92a6946f8"
+   }
+  },
+  {
+   "id": "STATIC_JOLT",
+   "displayName": "Static Jolt",
+   "sourcePokemonMove": "THUNDER_SHOCK",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "STATIC_JOLT",
+   "type": "ELECTRIC",
+   "category": "Special",
+   "power": 40,
+   "effect": "PARALYSIS",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": "paralysis",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.electric",
+    "targetReaction": "status_puff",
+    "palette": "#F8D030",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "8aed08786f0f"
+   }
+  },
+  {
+   "id": "STATIC_WAVE",
+   "displayName": "Static Wave",
+   "sourcePokemonMove": "THUNDER_WAVE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "STATIC_WAVE",
+   "type": "ELECTRIC",
+   "category": "Status",
+   "power": 0,
+   "effect": "PARALYSIS",
+   "scriptTemplateBefore": "status_condition",
+   "scriptFamilyBefore": "status_condition",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_gaze",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "wave_ring",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": "paralysis",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.wave",
+    "targetReaction": "status_puff",
+    "palette": "#F8D030",
+    "anatomyVariance": {
+     "standard": "wave/ray from eyes toward target",
+     "heavy": "slower, wider wave",
+     "small": "fast narrow wave",
+     "hover": "wave angles down",
+     "rooted": "wave travels along ground"
+    },
+    "signature": "6b3b2ce09503"
+   }
+  },
+  {
+   "id": "STEEL_TAIL",
+   "displayName": "Steel Tail",
+   "sourcePokemonMove": "IRON_TAIL",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "STEEL_TAIL",
+   "type": "STEEL",
+   "category": "Physical",
+   "power": 100,
+   "effect": "DEF_DOWN1",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 14,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_heavy",
+    "palette": "#B8B8D0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "ee3d5667dd72"
+   }
+  },
+  {
+   "id": "STONE_BURST",
+   "displayName": "Stone Burst",
+   "sourcePokemonMove": "ROCK_BLAST",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "STONE_BURST",
+   "type": "ROCK",
+   "category": "Physical",
+   "power": 25,
+   "effect": "MULTI_HIT",
+   "scriptTemplateBefore": "multi_hit",
+   "scriptFamilyBefore": "multi_hit",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "multi_hit",
+    "timelineMs": {
+     "windup": 200,
+     "travel": 300,
+     "impactHold": 90,
+     "recoil": 420,
+     "recover": 480,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.336,
+     "impactAt": 0.396
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 3,
+     "hitCount": {
+      "min": 2,
+      "max": 5
+     }
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.multi",
+    "targetReaction": "recoil_standard",
+    "palette": "#B8A038",
+    "anatomyVariance": {
+     "standard": "beats land at even cadence",
+     "heavy": "beats slower, each heavier",
+     "small": "beats faster, lighter",
+     "hover": "beats alternate height",
+     "rooted": "beats from planted stance, reach only"
+    },
+    "signature": "15d04abb1aac"
+   }
+  },
+  {
+   "id": "STONE_SLIDE",
+   "displayName": "Stone Slide",
+   "sourcePokemonMove": "ROCK_SLIDE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "STONE_SLIDE",
+   "type": "ROCK",
+   "category": "Physical",
+   "power": 75,
+   "effect": "FLINCH",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "field_impact",
+    "timelineMs": {
+     "windup": 350,
+     "travel": 60,
+     "impactHold": 140,
+     "recoil": 340,
+     "recover": 600,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.275,
+     "impactAt": 0.369
+    },
+    "impact": {
+     "amplitudePx": 6,
+     "shake": "quake",
+     "flash": "type",
+     "particleKind": "ground_ring",
+     "particleCount": 16,
+     "burstCount": 10,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "quake_shake",
+    "soundCue": "field.quake",
+    "targetReaction": "recoil_standard",
+    "palette": "#B8A038",
+    "anatomyVariance": {
+     "standard": "ground shockwave from performer position",
+     "heavy": "double shockwave ring",
+     "small": "single fast ring",
+     "hover": "shockwave only on landing beat",
+     "rooted": "strongest form: rooted performer channels the field"
+    },
+    "signature": "c10e91b32bd5"
+   }
+  },
+  {
+   "id": "STONE_TOSS",
+   "displayName": "Stone Toss",
+   "sourcePokemonMove": "ROCK_THROW",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "STONE_TOSS",
+   "type": "ROCK",
+   "category": "Physical",
+   "power": 50,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 4,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "thrown_prop",
+     "particleCount": 1,
+     "burstCount": 8,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "prop",
+    "camera": "none",
+    "soundCue": "proj.rock",
+    "targetReaction": "recoil_standard",
+    "palette": "#B8A038",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "e1dc28e66ade"
+   }
+  },
+  {
+   "id": "STORM_CALL",
+   "displayName": "Storm Call",
+   "sourcePokemonMove": "THUNDER",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "STORM_CALL",
+   "type": "ELECTRIC",
+   "category": "Special",
+   "power": 120,
+   "effect": "PARALYSIS",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 10,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 16,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.electric",
+    "targetReaction": "recoil_heavy",
+    "palette": "#F8D030",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "bea64d532d73"
+   }
+  },
+  {
+   "id": "STUN_POLLEN",
+   "displayName": "Stun Pollen",
+   "sourcePokemonMove": "STUN_SPORE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "STUN_POLLEN",
+   "type": "GRASS",
+   "category": "Status",
+   "power": 0,
+   "effect": "PARALYSIS",
+   "scriptTemplateBefore": "status_condition",
+   "scriptFamilyBefore": "status_condition",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_cloud",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "spore_puff",
+     "particleCount": 7,
+     "burstCount": 7,
+     "statusPuff": "paralysis",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.cloud",
+    "targetReaction": "status_puff",
+    "palette": "#78C850",
+    "anatomyVariance": {
+     "standard": "cloud drifts to target and settles",
+     "heavy": "bigger cloud, longer settle",
+     "small": "small fast puffs",
+     "hover": "cloud sheds downward",
+     "rooted": "cloud boils up from base"
+    },
+    "signature": "21fd1c7b3de0"
+   }
+  },
+  {
+   "id": "SURGE_RIDE",
+   "displayName": "Surge Ride",
+   "sourcePokemonMove": "SURF",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SURGE_RIDE",
+   "type": "WATER",
+   "category": "Special",
+   "power": 95,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.water",
+    "targetReaction": "recoil_heavy",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "dfdf46475873"
+   }
+  },
+  {
+   "id": "SWARM_STRIKE",
+   "displayName": "Swarm Strike",
+   "sourcePokemonMove": "TWINEEDLE",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "SWARM_STRIKE",
+   "type": "BUG",
+   "category": "Physical",
+   "power": 25,
+   "effect": "MULTI_HIT",
+   "scriptTemplateBefore": "multi_hit",
+   "scriptFamilyBefore": "multi_hit",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "multi_hit",
+    "timelineMs": {
+     "windup": 200,
+     "travel": 300,
+     "impactHold": 90,
+     "recoil": 420,
+     "recover": 480,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.336,
+     "impactAt": 0.396
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 3,
+     "hitCount": {
+      "min": 2,
+      "max": 5
+     }
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.multi",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8B820",
+    "anatomyVariance": {
+     "standard": "beats land at even cadence",
+     "heavy": "beats slower, each heavier",
+     "small": "beats faster, lighter",
+     "hover": "beats alternate height",
+     "rooted": "beats from planted stance, reach only"
+    },
+    "signature": "b1a51acd413b"
+   }
+  },
+  {
+   "id": "SWIFT_STRIKE",
+   "displayName": "Swift Strike",
+   "sourcePokemonMove": "SWIFT",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "SWIFT_STRIKE",
+   "type": "NORMAL",
+   "category": "Physical",
+   "power": 60,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Physical vs source Special: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "spread",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "star_shards",
+     "particleCount": 5,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "star_shards",
+    "camera": "none",
+    "soundCue": "spread.normal",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "fan of projectiles across target zone",
+     "heavy": "denser fan, ground-level",
+     "small": "wider, sparser fan",
+     "hover": "fan rains downward",
+     "rooted": "fan erupts from ground line"
+    },
+    "signature": "f15403f3ed8d"
+   }
+  },
+  {
+   "id": "TACKLE",
+   "displayName": "Tackle",
+   "sourcePokemonMove": "TACKLE",
+   "sourceBasis": "stable-id (game id is the source move constant)",
+   "legacyAnimField": "BODY_SLAM_MOVE",
+   "type": "NORMAL",
+   "category": "Physical",
+   "power": 40,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 4,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 10,
+     "burstCount": 8,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "6d9a57931d98"
+   }
+  },
+  {
+   "id": "THUNDER_BOLT",
+   "displayName": "Thunderbolt",
+   "sourcePokemonMove": "THUNDERBOLT",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "THUNDER_BOLT",
+   "type": "ELECTRIC",
+   "category": "Special",
+   "power": 90,
+   "effect": "PARALYSIS",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 12,
+     "statusPuff": "paralysis",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.electric",
+    "targetReaction": "status_puff",
+    "palette": "#F8D030",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "322300675268"
+   }
+  },
+  {
+   "id": "TIDE_SHOT",
+   "displayName": "Tide Shot",
+   "sourcePokemonMove": "WATER_GUN",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "TIDE_SHOT",
+   "type": "WATER",
+   "category": "Special",
+   "power": 40,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.water",
+    "targetReaction": "recoil_standard",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "5c1b7361a3bc"
+   }
+  },
+  {
+   "id": "TIDE_SPOUT",
+   "displayName": "Tide Spout",
+   "sourcePokemonMove": "WATER_SPOUT",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "TIDE_SPOUT",
+   "type": "WATER",
+   "category": "Special",
+   "power": 150,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 12,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 18,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.water",
+    "targetReaction": "recoil_heavy",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "afd8678e8884"
+   }
+  },
+  {
+   "id": "TOXIN_CLOUD",
+   "displayName": "Toxin Cloud",
+   "sourcePokemonMove": "POISON_GAS",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "TOXIN_CLOUD",
+   "type": "POISON",
+   "category": "Status",
+   "power": 0,
+   "effect": "POISON",
+   "scriptTemplateBefore": "status_condition",
+   "scriptFamilyBefore": "status_condition",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_cloud",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "spore_puff",
+     "particleCount": 7,
+     "burstCount": 7,
+     "statusPuff": "poison",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.cloud",
+    "targetReaction": "status_puff",
+    "palette": "#A040A0",
+    "anatomyVariance": {
+     "standard": "cloud drifts to target and settles",
+     "heavy": "bigger cloud, longer settle",
+     "small": "small fast puffs",
+     "hover": "cloud sheds downward",
+     "rooted": "cloud boils up from base"
+    },
+    "signature": "83e98a9d0cac"
+   }
+  },
+  {
+   "id": "TRUE_WING",
+   "displayName": "True Wing",
+   "sourcePokemonMove": "AERIAL_ACE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "TRUE_WING",
+   "type": "FLYING",
+   "category": "Physical",
+   "power": 60,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 11,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#A890F0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "35f08255dbbc"
+   }
+  },
+  {
+   "id": "TWIN_KICK",
+   "displayName": "Twin Kick",
+   "sourcePokemonMove": "DOUBLE_KICK",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "TWIN_KICK",
+   "type": "FIGHTING",
+   "category": "Physical",
+   "power": 30,
+   "effect": "MULTI_HIT",
+   "scriptTemplateBefore": "multi_hit",
+   "scriptFamilyBefore": "multi_hit",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "multi_hit",
+    "timelineMs": {
+     "windup": 200,
+     "travel": 300,
+     "impactHold": 90,
+     "recoil": 420,
+     "recover": 480,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.336,
+     "impactAt": 0.396
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 3,
+     "hitCount": {
+      "min": 2,
+      "max": 2
+     }
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.multi",
+    "targetReaction": "recoil_standard",
+    "palette": "#C03028",
+    "anatomyVariance": {
+     "standard": "beats land at even cadence",
+     "heavy": "beats slower, each heavier",
+     "small": "beats faster, lighter",
+     "hover": "beats alternate height",
+     "rooted": "beats from planted stance, reach only"
+    },
+    "signature": "3ec47d5eb495"
+   }
+  },
+  {
+   "id": "TWIN_STING",
+   "displayName": "Twin Sting",
+   "sourcePokemonMove": "TWINEEDLE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "TWIN_STING",
+   "type": "BUG",
+   "category": "Physical",
+   "power": 25,
+   "effect": "POISON",
+   "scriptTemplateBefore": "multi_hit",
+   "scriptFamilyBefore": "multi_hit",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "multi_hit",
+    "timelineMs": {
+     "windup": 200,
+     "travel": 300,
+     "impactHold": 90,
+     "recoil": 420,
+     "recover": 480,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.336,
+     "impactAt": 0.396
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 3,
+     "hitCount": {
+      "min": 2,
+      "max": 2
+     }
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.multi",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8B820",
+    "anatomyVariance": {
+     "standard": "beats land at even cadence",
+     "heavy": "beats slower, each heavier",
+     "small": "beats faster, lighter",
+     "hover": "beats alternate height",
+     "rooted": "beats from planted stance, reach only"
+    },
+    "signature": "fa700b6cec90"
+   }
+  },
+  {
+   "id": "UMBRAL_ORB",
+   "displayName": "Umbral Orb",
+   "sourcePokemonMove": "SHADOW_BALL",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "UMBRAL_ORB",
+   "type": "GHOST",
+   "category": "Physical",
+   "power": 80,
+   "effect": "SPDEF_DOWN1",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Physical vs source Special: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.ghost",
+    "targetReaction": "recoil_heavy",
+    "palette": "#705898",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "790df5f64d63"
+   }
+  },
+  {
+   "id": "UMBRAL_PULSE",
+   "displayName": "Umbral Pulse",
+   "sourcePokemonMove": "DARK_PULSE",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "UMBRAL_PULSE",
+   "type": "DARK",
+   "category": "Special",
+   "power": 80,
+   "effect": "FLINCH",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "orb",
+     "particleCount": 1,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.dark",
+    "targetReaction": "recoil_heavy",
+    "palette": "#705848",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "4addf1bcd84c"
+   }
+  },
+  {
+   "id": "VENOM_STING",
+   "displayName": "Venom Sting",
+   "sourcePokemonMove": "POISON_STING",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "VENOM_STING",
+   "type": "POISON",
+   "category": "Physical",
+   "power": 15,
+   "effect": "POISON",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 1,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 7,
+     "burstCount": 5,
+     "statusPuff": "poison",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "status_puff",
+    "palette": "#A040A0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "1b5549d324e3"
+   }
+  },
+  {
+   "id": "VICE_HOLD",
+   "displayName": "Vice Hold",
+   "sourcePokemonMove": "VICE_GRIP",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "VICE_HOLD",
+   "type": "NORMAL",
+   "category": "Physical",
+   "power": 55,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 11,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "06a13eae0bdd"
+   }
+  },
+  {
+   "id": "VINE_LASH",
+   "displayName": "Vine Lash",
+   "sourcePokemonMove": "VINE_WHIP",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "VINE_LASH",
+   "type": "GRASS",
+   "category": "Physical",
+   "power": 45,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 9,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_standard",
+    "palette": "#78C850",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "d38429470463"
+   }
+  },
+  {
+   "id": "VOLT_PUNCH",
+   "displayName": "Volt Punch",
+   "sourcePokemonMove": "THUNDER_PUNCH",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "VOLT_PUNCH",
+   "type": "ELECTRIC",
+   "category": "Special",
+   "power": 75,
+   "effect": "PARALYSIS",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage_with_status",
+   "categoryAdaptation": "game category Special vs source Physical: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 6,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 12,
+     "burstCount": 10,
+     "statusPuff": "paralysis",
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "status_puff",
+    "palette": "#F8D030",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "cfc2c220eff8"
+   }
+  },
+  {
+   "id": "WAR_CRY",
+   "displayName": "War Cry",
+   "sourcePokemonMove": "GROWL",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "WAR_CRY",
+   "type": "NORMAL",
+   "category": "Status",
+   "power": 0,
+   "effect": "ATK_DOWN1",
+   "scriptTemplateBefore": "stat_change",
+   "scriptFamilyBefore": "stat_change",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_gaze",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "sound_wave",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.wave",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8A878",
+    "anatomyVariance": {
+     "standard": "wave/ray from eyes toward target",
+     "heavy": "slower, wider wave",
+     "small": "fast narrow wave",
+     "hover": "wave angles down",
+     "rooted": "wave travels along ground"
+    },
+    "signature": "087ecb12d7e0"
+   }
+  },
+  {
+   "id": "WATER_ORB",
+   "displayName": "Water Orb",
+   "sourcePokemonMove": null,
+   "sourceBasis": "native-original (no Pokemon source; owner-canon move)",
+   "legacyAnimField": "WATER_ORB",
+   "type": "WATER",
+   "category": "Special",
+   "power": 80,
+   "effect": "SPDEF_DOWN1",
+   "scriptTemplateBefore": null,
+   "scriptFamilyBefore": null,
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 400,
+     "travel": 300,
+     "impactHold": 100,
+     "recoil": 300,
+     "recover": 390,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.537
+    },
+    "impact": {
+     "amplitudePx": 5,
+     "shake": "light",
+     "flash": "type",
+     "particleKind": "thrown_prop",
+     "particleCount": 1,
+     "burstCount": 9,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "prop",
+    "camera": "none",
+    "soundCue": "proj.water",
+    "targetReaction": "recoil_standard",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "a0ba217d9e34"
+   }
+  },
+  {
+   "id": "WEB_SHOT",
+   "displayName": "Web Shot",
+   "sourcePokemonMove": "STRING_SHOT",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "WEB_SHOT",
+   "type": "BUG",
+   "category": "Status",
+   "power": 0,
+   "effect": "SPE_DOWN1",
+   "scriptTemplateBefore": "stat_change",
+   "scriptFamilyBefore": "stat_change",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "status_gaze",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 100,
+     "recoil": 0,
+     "recover": 400,
+     "total": 1200
+    },
+    "phaseFractions": {
+     "travelComplete": 0.583,
+     "impactAt": 0.667
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "wave_ring",
+     "particleCount": 3,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "status.wave",
+    "targetReaction": "recoil_standard",
+    "palette": "#A8B820",
+    "anatomyVariance": {
+     "standard": "wave/ray from eyes toward target",
+     "heavy": "slower, wider wave",
+     "small": "fast narrow wave",
+     "hover": "wave angles down",
+     "rooted": "wave travels along ground"
+    },
+    "signature": "3056e1258a4e"
+   }
+  },
+  {
+   "id": "WHIRL_TRAP",
+   "displayName": "Whirl Trap",
+   "sourcePokemonMove": "WHIRLPOOL",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "WHIRL_TRAP",
+   "type": "WATER",
+   "category": "Special",
+   "power": 15,
+   "effect": "TRAP",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "vortex_ring",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "orb",
+    "camera": "none",
+    "soundCue": "proj.water",
+    "targetReaction": "trap_linger",
+    "palette": "#6890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "3218736b48bf"
+   }
+  },
+  {
+   "id": "WILD_CHARGE",
+   "displayName": "Wild Charge",
+   "sourcePokemonMove": "WILD_CHARGE",
+   "sourceBasis": "stable-id (game id is the source move constant)",
+   "legacyAnimField": "THUNDER_BOLT",
+   "type": "ELECTRIC",
+   "category": "Physical",
+   "power": 90,
+   "effect": "RECOIL_25",
+   "scriptTemplateBefore": "physical",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 8,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 14,
+     "burstCount": 12,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_heavy",
+    "palette": "#F8D030",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "b9d7a3286397"
+   }
+  },
+  {
+   "id": "WIND_GUST",
+   "displayName": "Wind Gust",
+   "sourcePokemonMove": "GUST",
+   "sourceBasis": "data-provenance (mochiichao_moves_provenance.json sourceConstant)",
+   "legacyAnimField": "WIND_GUST",
+   "type": "FLYING",
+   "category": "Physical",
+   "power": 40,
+   "effect": "NONE",
+   "scriptTemplateBefore": "special_projectile",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": "game category Physical vs source Special: source animation carried per owner order 2026-10-29 (script-map lane had left this unrouted)",
+   "profile": {
+    "delivery": "projectile",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 3,
+     "shake": "soft",
+     "flash": "type",
+     "particleKind": "wind_swirl",
+     "particleCount": 1,
+     "burstCount": 7,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": "wind_swirl",
+    "camera": "none",
+    "soundCue": "proj.flying",
+    "targetReaction": "recoil_standard",
+    "palette": "#A890F0",
+    "anatomyVariance": {
+     "standard": "single origin at mouth/hand anchor",
+     "heavy": "larger projectile, slower",
+     "small": "smaller, faster projectile",
+     "hover": "projectile drops on a slight arc",
+     "rooted": "projectile rises from base anchor"
+    },
+    "signature": "cfc7c4ff76f3"
+   }
+  },
+  {
+   "id": "WING_ASSAULT",
+   "displayName": "Wing Assault",
+   "sourcePokemonMove": "DRILL_PECK",
+   "sourceBasis": "animation-route (gameMoveScriptMap entry)",
+   "legacyAnimField": "WING_ASSAULT",
+   "type": "FLYING",
+   "category": "Physical",
+   "power": 85,
+   "effect": "NONE",
+   "scriptTemplateBefore": "physical_contact",
+   "scriptFamilyBefore": "damage",
+   "categoryAdaptation": null,
+   "profile": {
+    "delivery": "contact_lunge",
+    "timelineMs": {
+     "windup": 250,
+     "travel": 450,
+     "impactHold": 90,
+     "recoil": 300,
+     "recover": 400,
+     "total": 1490
+    },
+    "phaseFractions": {
+     "travelComplete": 0.47,
+     "impactAt": 0.53
+    },
+    "impact": {
+     "amplitudePx": 7,
+     "shake": "heavy",
+     "flash": "type",
+     "particleKind": "impact_star",
+     "particleCount": 13,
+     "burstCount": 11,
+     "statusPuff": null,
+     "beats": 0,
+     "hitCount": null
+    },
+    "trail": null,
+    "projectileShape": null,
+    "camera": "none",
+    "soundCue": "hit.body",
+    "targetReaction": "recoil_heavy",
+    "palette": "#A890F0",
+    "anatomyVariance": {
+     "standard": "full-body lunge, contact at target edge",
+     "heavy": "shorter lunge, deeper impact hold +1 amplitude band",
+     "small": "two quick hops into contact",
+     "hover": "diving lunge from hover height",
+     "rooted": "lean-and-strike from planted base, no travel"
+    },
+    "signature": "639952b43226"
+   }
+  }
+ ]
+}
