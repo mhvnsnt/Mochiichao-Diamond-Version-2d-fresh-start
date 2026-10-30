@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
+import { applyMusic } from '../../lib/musicPlacement';
 import CreaturePortrait from '../game/CreaturePortrait';
 import { MenuHelpLine } from '../game/MenuList';
 import { SPECIES_DB } from '../../lib/species';
@@ -31,6 +32,12 @@ import { GARDEN_CRITTERS } from '../../lib/garden-data';
 const ZERO: GardenStats = { dive: 0, glide: 0, sprint: 0, might: 0, endurance: 0 };
 
 export default function GardenView({ onBack }: { onBack: () => void }) {
+  // Sound-full-coverage: the Garden is a place, and places carry
+  // music. It rides the calm town class until a garden theme of
+  // its own is composed (the Chao-garden music class is recorded
+  // as a future slot in the coverage audit — SA2's garden has its
+  // own theme; ours does not exist yet, and no track is faked).
+  useEffect(() => { applyMusic({ screen: 'garden', mapId: '', battleKind: null }); }, []);
   const party = useGameStore(s => s.party);
   const [selected, setSelected] = useState(0);
   // Pass 3: Garden records are shared store state, not local state —

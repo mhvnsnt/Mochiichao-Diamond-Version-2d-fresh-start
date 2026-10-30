@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { playCue } from '../../lib/soundCues';
 import { useGameStore } from '../../store/gameStore';
 import CreaturePortrait from '../game/CreaturePortrait';
 import { SPECIES_DB } from '../../lib/species';
@@ -107,8 +108,12 @@ export default function PcView({ onBack }: { onBack: () => void }) {
   const boxCreatures = pc.slice(safeBox * BOX_SIZE, safeBox * BOX_SIZE + BOX_SIZE);
   const selectedCreature = boxCreatures[Math.min(selected, Math.max(0, boxCreatures.length - 1))];
 
-  const selectBox = (b: number) => { setBox(b); setSelected(boxCursor[b] || 0); };
-  const selectSlot = (i: number) => { boxCursor[safeBox] = i; setSelected(i); };
+  // Sound (2026-10-29): opening the PC is the measured power-on
+  // voice (SE_PC_ON); box/slot movement is the cursor class.
+  useEffect(() => { playCue('pc.on'); const t = setTimeout(() => playCue('pc.login'), 300); return () => clearTimeout(t); }, []);
+
+  const selectBox = (b: number) => { if (b !== safeBox) playCue('ui.cursor'); setBox(b); setSelected(boxCursor[b] || 0); };
+  const selectSlot = (i: number) => { if (i !== selected) playCue('ui.cursor'); boxCursor[safeBox] = i; setSelected(i); };
 
   const moveToParty = (id: string) => {
     if (party.length >= STORAGE_RULES.partyMax) return;
@@ -127,6 +132,7 @@ export default function PcView({ onBack }: { onBack: () => void }) {
 
   const doConfirm = () => {
     if (!confirm) return;
+    playCue('ui.confirm');
     if (confirm.kind === 'withdraw') { moveToParty(confirm.id); setMessage(`${confirm.name} withdrawn to your team.`); }
     else if (confirm.kind === 'release') { useGameStore.setState(s => ({ pc: s.pc.filter(x => x.id !== confirm.id) })); setMessage(`${confirm.name} was released.`); }
     else { moveToPc(confirm.id); setMessage(`${confirm.name} deposited to PC storage.`); }
@@ -137,7 +143,7 @@ export default function PcView({ onBack }: { onBack: () => void }) {
     <div className="game-screen flex flex-col p-4 sm:p-6 overflow-hidden bg-[#0b1526]" data-menu-skin={skin?.id} data-menu-layout={pcMenuLayout.entryId} style={menuSkinVars(skin)}>
       <div className="flex justify-between items-center mb-4 shrink-0">
         <h2 className="game-title text-2xl">PC Storage</h2>
-        <button onClick={onBack} className="game-button px-4 py-2 min-h-[48px]">Close</button>
+        <button onClick={() => { playCue('pc.off'); onBack(); }} className="game-button px-4 py-2 min-h-[48px]">Close</button>
       </div>
       {message && <div className="game-panel px-4 py-2 mb-4 text-white shrink-0" role="status">{message}</div>}
       <div className="text-sm text-slate-300 mb-3 shrink-0">Data Cards in bag: {inventory[DATA_CARD_ID] || 0} — buy them in the Shop, then store a PC creature&apos;s data on one. It stays swappable at the PC. Release is offered for a selected box creature (confirm dialog; egg block not yet enforceable — no egg flag).</div>
@@ -207,13 +213,13 @@ export default function PcView({ onBack }: { onBack: () => void }) {
               <div className="flex flex-wrap gap-2 mt-3">
                 <button
                   disabled={party.length >= STORAGE_RULES.partyMax}
-                  onClick={() => setConfirm({ kind: 'withdraw', id: selectedCreature.id, name: selectedCreature.nickname })}
+                  onClick={() => { playCue('ui.confirm'); setConfirm({ kind: 'withdraw', id: selectedCreature.id, name: selectedCreature.nickname }); }}
                   className="game-button px-3 py-2 text-xs min-h-[48px]"
                 >
                   Withdraw to Team
                 </button>
                 <button
-                  onClick={() => setConfirm({ kind: 'release', id: selectedCreature.id, name: selectedCreature.nickname })}
+                  onClick={() => { playCue('ui.confirm'); setConfirm({ kind: 'release', id: selectedCreature.id, name: selectedCreature.nickname }); }}
                   className="game-button px-3 py-2 text-xs min-h-[48px]"
                 >
                   Release
@@ -239,7 +245,7 @@ export default function PcView({ onBack }: { onBack: () => void }) {
                 <div className="font-bold text-white truncate">{m.nickname}</div>
                 <div className="text-xs text-slate-400">Lv. {m.level} · {SPECIES_DB[m.speciesId]?.name}</div>
               </div>
-              <button disabled={STORAGE_RULES.depositBlockedWhenItWouldEmptyParty && party.length <= 1} onClick={() => setConfirm({ kind: 'deposit', id: m.id, name: m.nickname })} className="game-button px-2 py-2 text-xs min-h-[48px]">Deposit</button>
+              <button disabled={STORAGE_RULES.depositBlockedWhenItWouldEmptyParty && party.length <= 1} onClick={() => { playCue('ui.confirm'); setConfirm({ kind: 'deposit', id: m.id, name: m.nickname }); }} className="game-button px-2 py-2 text-xs min-h-[48px]">Deposit</button>
             </div>
           ))}
           {party.length === 0 && <div className="text-slate-400 text-sm">Party is empty.</div>}
@@ -259,7 +265,7 @@ export default function PcView({ onBack }: { onBack: () => void }) {
             <p className="text-sm text-slate-400 mb-4">Nothing moves until you confirm.</p>
             <div className="flex gap-2">
               <button onClick={doConfirm} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">Yes</button>
-              <button onClick={() => setConfirm(null)} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">No</button>
+              <button onClick={() => { playCue('ui.cancel'); setConfirm(null); }} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">No</button>
             </div>
           </div>
         </div>
