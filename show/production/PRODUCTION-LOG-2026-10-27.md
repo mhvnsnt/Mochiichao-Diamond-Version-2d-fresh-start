@@ -2037,3 +2037,10 @@ follow-up — this entry does not claim them.
   non-CN" row + research INDEX pointer), not from a file in hand
   at writing time; TOOLING-INDEX repeated it as held. The
   material was real — the paperwork predated the pull.
+
+
+---
+
+## 2026-10-30 — Cast gaps build landed for review (PR #35)
+
+Built from the game's existing production art (owner correction: the humans were never sheetless): show model sheets (spec §1b) for **Mochiko, Hex, Aeon** under `show/production/model-sheets/humans/` (v2 likeness of record + world-views turnarounds + atlas portraits/battle cells + the built Blair-10 talking sets on record; ¾ views and expression sets carried as explicit OWED placeholders, gate H-2 open) · §2 CMYK palette files for the pilot six + the three humans under `model-sheets/palettes/`, sampled from the canon cutouts (Wispkin from the reference of record, sha256 b9de2318…) · principal + secondary height charts under `model-sheets/` (creature units repo-stated, human units derived and labelled) · shared generic-hands library v1 (15 poses) under `rigs/SHARED/hands/` · `rigs/BUILD-NOTES-cast-gaps-2026-10-30.md` with sources per piece, the canon-lock check, and five contradictions found in the game material (Mochiko/Hex world-pass divergences from the v2 locks, missing battle fullsize sources named by the atlas manifests, Kittember 'black coat' text vs sampled dark grey). Additions only; not merged — pending review.

@@ -1,0 +1,353 @@
+{
+ "character": "mochiko",
+ "slots": {
+  "dominant": {
+   "hex": "#19979c",
+   "rgb": [
+    25,
+    151,
+    156
+   ],
+   "cmyk_pct": [
+    84,
+    3,
+    0,
+    39
+   ],
+   "sampled_coverage_pct": 25.56,
+   "tints": {
+    "50%": {
+     "hex": "#8ccbce",
+     "rgb": [
+      140,
+      203,
+      206
+     ],
+     "cmyk_pct": [
+      32,
+      1,
+      0,
+      19
+     ]
+    },
+    "75%": {
+     "hex": "#c6e5e6",
+     "rgb": [
+      198,
+      229,
+      230
+     ],
+     "cmyk_pct": [
+      14,
+      1,
+      0,
+      10
+     ]
+    }
+   }
+  },
+  "support": {
+   "hex": "#2d3e5f",
+   "rgb": [
+    45,
+    62,
+    95
+   ],
+   "cmyk_pct": [
+    53,
+    35,
+    0,
+    63
+   ],
+   "sampled_coverage_pct": 14.41,
+   "tints": {
+    "50%": {
+     "hex": "#969eaf",
+     "rgb": [
+      150,
+      158,
+      175
+     ],
+     "cmyk_pct": [
+      14,
+      9,
+      0,
+      31
+     ]
+    },
+    "75%": {
+     "hex": "#cacfd7",
+     "rgb": [
+      202,
+      207,
+      215
+     ],
+     "cmyk_pct": [
+      6,
+      4,
+      0,
+      16
+     ]
+    }
+   }
+  },
+  "accent": {
+   "hex": "#13636d",
+   "rgb": [
+    19,
+    99,
+    109
+   ],
+   "cmyk_pct": [
+    82,
+    10,
+    0,
+    57
+   ],
+   "sampled_coverage_pct": 5.92
+  },
+  "ink": {
+   "hex": "#150810",
+   "rgb": [
+    21,
+    8,
+    16
+   ],
+   "cmyk_pct": [
+    0,
+    62,
+    24,
+    92
+   ],
+   "sampled_coverage_pct": 11.71
+  }
+ },
+ "all_clusters": [
+  {
+   "hex": "#19979c",
+   "rgb": [
+    25,
+    151,
+    156
+   ],
+   "cmyk_pct": [
+    84,
+    3,
+    0,
+    39
+   ],
+   "coverage_pct": 25.56,
+   "saturation": 0.84
+  },
+  {
+   "hex": "#2d3e5f",
+   "rgb": [
+    45,
+    62,
+    95
+   ],
+   "cmyk_pct": [
+    53,
+    35,
+    0,
+    63
+   ],
+   "coverage_pct": 14.41,
+   "saturation": 0.526
+  },
+  {
+   "hex": "#150810",
+   "rgb": [
+    21,
+    8,
+    16
+   ],
+   "cmyk_pct": [
+    0,
+    62,
+    24,
+    92
+   ],
+   "coverage_pct": 11.71,
+   "saturation": 0.618
+  },
+  {
+   "hex": "#513a32",
+   "rgb": [
+    81,
+    58,
+    50
+   ],
+   "cmyk_pct": [
+    0,
+    29,
+    39,
+    68
+   ],
+   "coverage_pct": 8.91,
+   "saturation": 0.387
+  },
+  {
+   "hex": "#1d273e",
+   "rgb": [
+    29,
+    39,
+    62
+   ],
+   "cmyk_pct": [
+    53,
+    37,
+    0,
+    76
+   ],
+   "coverage_pct": 6.3,
+   "saturation": 0.528
+  },
+  {
+   "hex": "#13636d",
+   "rgb": [
+    19,
+    99,
+    109
+   ],
+   "cmyk_pct": [
+    82,
+    10,
+    0,
+    57
+   ],
+   "coverage_pct": 5.92,
+   "saturation": 0.822
+  },
+  {
+   "hex": "#d9996e",
+   "rgb": [
+    217,
+    153,
+    110
+   ],
+   "cmyk_pct": [
+    0,
+    29,
+    49,
+    15
+   ],
+   "coverage_pct": 5.7,
+   "saturation": 0.494
+  },
+  {
+   "hex": "#e6e7e7",
+   "rgb": [
+    230,
+    231,
+    231
+   ],
+   "cmyk_pct": [
+    0,
+    0,
+    0,
+    9
+   ],
+   "coverage_pct": 5.1,
+   "saturation": 0.004
+  },
+  {
+   "hex": "#331f1c",
+   "rgb": [
+    51,
+    31,
+    28
+   ],
+   "cmyk_pct": [
+    0,
+    39,
+    44,
+    80
+   ],
+   "coverage_pct": 4.61,
+   "saturation": 0.445
+  },
+  {
+   "hex": "#8a99b3",
+   "rgb": [
+    138,
+    153,
+    179
+   ],
+   "cmyk_pct": [
+    23,
+    14,
+    0,
+    30
+   ],
+   "coverage_pct": 3.31,
+   "saturation": 0.229
+  },
+  {
+   "hex": "#383f55",
+   "rgb": [
+    56,
+    63,
+    85
+   ],
+   "cmyk_pct": [
+    35,
+    26,
+    0,
+    67
+   ],
+   "coverage_pct": 2.73,
+   "saturation": 0.349
+  },
+  {
+   "hex": "#1ca7ab",
+   "rgb": [
+    28,
+    167,
+    171
+   ],
+   "cmyk_pct": [
+    84,
+    2,
+    0,
+    33
+   ],
+   "coverage_pct": 2.35,
+   "saturation": 0.835
+  },
+  {
+   "hex": "#9d6454",
+   "rgb": [
+    157,
+    100,
+    84
+   ],
+   "cmyk_pct": [
+    0,
+    36,
+    47,
+    39
+   ],
+   "coverage_pct": 1.92,
+   "saturation": 0.466
+  },
+  {
+   "hex": "#398a93",
+   "rgb": [
+    57,
+    138,
+    147
+   ],
+   "cmyk_pct": [
+    61,
+    7,
+    0,
+    42
+   ],
+   "coverage_pct": 1.48,
+   "saturation": 0.615
+  }
+ ],
+ "sampled_from": "src/assets/human-characters/named-canon/ v2 sheet (keyed front figure, sampled 2026-10-30)",
+ "slot_assignment_note": "Accent curated to the deep-teal device/capsule shade; the raw saturation pick collided with Ink (both near-black hair/shadow clusters). Skin tones #d9996e / #9d6454 are in the cluster table."
+}
