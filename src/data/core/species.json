@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/species.schema.json",
   "version": "1.0.0",
-  "source": "Canonical 47 roster from src/lib/global_roster.json on main (id/name/elements/baseStats/evolutions). Roster wins over species.ts on every shared field; species.ts (12 entries) supplies only catchRate/expYield/growthRate/dexText/learnset, matched by name. Abilities/eggGroups are owed for 47/47 (empty here, not invented). DexText/catchRate/expYield/growthRate present for 12/47; null elsewhere, not invented. Addendum 2026-10-28: Dorowani (147) and Gabu (148) added as the first two of Gen 2 per owner lock, landed from the species-data-system gap-fill drafts (not roster-derived); their base stats and dexText are owed (owner-set canon) and null here, and their types are signature-derived, flagged on their records. Species count 47 to 49. Addendum 2026-10-28 (later): Gabu moved from dex 148 to dex 150 by the owner's canonical ruling (up two spots to 150); 148/149 are vacant and Dorowani stays 147. Count stays 49. Addendum 2026-10-28 (later): Goddgachuu (400) added per owner canon — a mystical Mochiichao at number 400, named by the owner with its type given by the owner (Mythic, owner-confirmed); base stats and dexText are owed (owner-set canon) and null here, not invented. Species count 49 to 50.",
+  "source": "Canonical 47 roster from src/lib/global_roster.json on main (id/name/elements/baseStats/evolutions). Roster wins over species.ts on every shared field; species.ts (12 entries) supplies only catchRate/expYield/growthRate/dexText/learnset, matched by name. Abilities/eggGroups are owed for 47/47 (empty here, not invented). DexText/catchRate/expYield/growthRate present for 12/47; null elsewhere, not invented. Addendum 2026-10-28: Dorowani (147) and Gabu (148) added as the first two of Gen 2 per owner lock, landed from the species-data-system gap-fill drafts (not roster-derived); their base stats and dexText are owed (owner-set canon) and null here, and their types are signature-derived, flagged on their records. Species count 47 to 49. Addendum 2026-10-28 (later): Gabu moved from dex 148 to dex 150 by the owner's canonical ruling (up two spots to 150); 148/149 are vacant and Dorowani stays 147. Count stays 49. Addendum 2026-10-28 (later): Goddgachuu (400) added per owner canon \u2014 a mystical Mochiichao at number 400, named by the owner with its type given by the owner (Mythic, owner-confirmed); base stats and dexText are owed (owner-set canon) and null here, not invented. Species count 49 to 50.",
   "count": 50,
   "species": [
     {
@@ -29,7 +29,7 @@
       "provenance": "roster+species.ts",
       "notes": [],
       "cry": {
-        "identity_note": "Bouncing squeak-cry — a squeaky metronome: three bright hops, pitch bouncing up-down-up, joyful and round.",
+        "identity_note": "Bouncing squeak-cry \u2014 a squeaky metronome: three bright hops, pitch bouncing up-down-up, joyful and round.",
         "status": "draft",
         "synth": {
           "amp_env": [
@@ -114,7 +114,7 @@
           "wave_a": "pulse25",
           "wave_b": "triangle"
         },
-        "rendered_wav": null
+        "rendered_wav": "public/audio/cries/mochii-cry.wav"
       }
     },
     {
@@ -143,7 +143,77 @@
       "provenance": "roster+species.ts",
       "notes": [
         "Roster typo repaired: '\"atk: 63' read as atk 63."
-      ]
+      ],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aqua-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 480.6,
+          "length_s": 0.96,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              4
+            ],
+            [
+              0.6,
+              1
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.1,
+          "noise_tone": 0.7,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 281
+        },
+        "rendered_wav": "public/audio/cries/tiidebiite-cry.wav"
+      }
     },
     {
       "id": "003",
@@ -171,7 +241,77 @@
       "provenance": "roster+species.ts",
       "notes": [
         "Name matched via alias: species.ts spells this 'Aquari-OS'; roster spelling wins."
-      ]
+      ],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aqua-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 422.9,
+          "length_s": 1.0,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              4
+            ],
+            [
+              0.6,
+              1
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.1,
+          "noise_tone": 0.7,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 418
+        },
+        "rendered_wav": "public/audio/cries/aquariios-cry.wav"
+      }
     },
     {
       "id": "004",
@@ -196,7 +336,77 @@
       "growthRate": "Medium Slow",
       "dexText": "A small crocodile with metallic scales.",
       "provenance": "roster+species.ts",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 chrome-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "pulse_pwm",
+          "morph": 0.4,
+          "base_hz": 550.3,
+          "length_s": 0.56,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              0.55,
+              3
+            ],
+            [
+              1,
+              -1
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 555
+        },
+        "rendered_wav": "public/audio/cries/razorgater-cry.wav"
+      }
     },
     {
       "id": "005",
@@ -224,7 +434,77 @@
       "provenance": "roster+species.ts",
       "notes": [
         "Name matched via alias: species.ts spells this 'Chromedile'; roster spelling wins."
-      ]
+      ],
+      "cry": {
+        "identity_note": "Derived cry \u2014 chrome-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "pulse_pwm",
+          "morph": 0.4,
+          "base_hz": 484.3,
+          "length_s": 0.78,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              0.55,
+              3
+            ],
+            [
+              1,
+              -1
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 692
+        },
+        "rendered_wav": "public/audio/cries/chromejaww-cry.wav"
+      }
     },
     {
       "id": "006",
@@ -250,7 +530,77 @@
       "growthRate": "Medium Slow",
       "dexText": "A walking tank engineered for destruction.",
       "provenance": "roster+species.ts",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 chrome-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "pulse_pwm",
+          "morph": 0.4,
+          "base_hz": 426.2,
+          "length_s": 1.0,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              0.55,
+              3
+            ],
+            [
+              1,
+              -1
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 829
+        },
+        "rendered_wav": "public/audio/cries/reaperdile-cry.wav"
+      }
     },
     {
       "id": "007",
@@ -275,7 +625,73 @@
       "growthRate": "Medium Slow",
       "dexText": "A tiny dinosaur made of packed earth.",
       "provenance": "roster+species.ts",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 core-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 601.8,
+          "length_s": 0.54,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.5,
+              5
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.6,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 966
+        },
+        "rendered_wav": "public/audio/cries/tyrage-cry.wav"
+      }
     },
     {
       "id": "008",
@@ -301,7 +717,73 @@
       "growthRate": "Medium Slow",
       "dexText": "It wears a bone mask and hunts in the desert.",
       "provenance": "roster+species.ts",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 core-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 529.5,
+          "length_s": 0.76,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.5,
+              5
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.6,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 1103
+        },
+        "rendered_wav": "public/audio/cries/duneclaw-cry.wav"
+      }
     },
     {
       "id": "009",
@@ -327,7 +809,73 @@
       "growthRate": "Medium Slow",
       "dexText": "The apex predator fossilized into code.",
       "provenance": "roster+species.ts",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 core-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 466.0,
+          "length_s": 1.16,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.5,
+              5
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.6,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 1240
+        },
+        "rendered_wav": "public/audio/cries/oblivirex-cry.wav"
+      }
     },
     {
       "id": "010",
@@ -355,7 +903,7 @@
       "provenance": "roster+species.ts",
       "notes": [],
       "cry": {
-        "identity_note": "Thin mewl with a warm crackle underneath — a small cat voice, rising then falling away, with faint fire-pops from the tail flame woven through it.",
+        "identity_note": "Thin mewl with a warm crackle underneath \u2014 a small cat voice, rising then falling away, with faint fire-pops from the tail flame woven through it.",
         "status": "draft",
         "synth": {
           "amp_env": [
@@ -413,7 +961,7 @@
           "wave_a": "triangle",
           "wave_b": "sine"
         },
-        "rendered_wav": null
+        "rendered_wav": "public/audio/cries/kittember-cry.wav"
       }
     },
     {
@@ -440,7 +988,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 beast-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "triangle",
+          "wave_b": "pulse25",
+          "morph": 0.4,
+          "base_hz": 506.4,
+          "length_s": 0.77,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.12,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 1514
+        },
+        "rendered_wav": "public/audio/cries/pyropaw-cry.wav"
+      }
     },
     {
       "id": "012",
@@ -466,7 +1080,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 beast-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "triangle",
+          "wave_b": "pulse25",
+          "morph": 0.4,
+          "base_hz": 445.7,
+          "length_s": 0.99,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.12,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 1651
+        },
+        "rendered_wav": "public/audio/cries/manticlaw-cry.wav"
+      }
     },
     {
       "id": "013",
@@ -492,7 +1172,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 beast-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "triangle",
+          "wave_b": "pulse25",
+          "morph": 0.4,
+          "base_hz": 591.2,
+          "length_s": 0.54,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.12,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 1788
+        },
+        "rendered_wav": "public/audio/cries/pupbble-cry.wav"
+      }
     },
     {
       "id": "014",
@@ -518,7 +1264,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 beast-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "triangle",
+          "wave_b": "pulse25",
+          "morph": 0.4,
+          "base_hz": 520.3,
+          "length_s": 0.94,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.12,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 1925
+        },
+        "rendered_wav": "public/audio/cries/terradog-cry.wav"
+      }
     },
     {
       "id": "015",
@@ -544,7 +1356,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 beast-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "triangle",
+          "wave_b": "pulse25",
+          "morph": 0.4,
+          "base_hz": 457.9,
+          "length_s": 1.16,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.12,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 2062
+        },
+        "rendered_wav": "public/audio/cries/quakehound-cry.wav"
+      }
     },
     {
       "id": "016",
@@ -570,7 +1448,97 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 bug-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse12",
+          "wave_b": "pulse12",
+          "morph": 0.4,
+          "base_hz": 685.8,
+          "length_s": 0.5,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.2,
+              4
+            ],
+            [
+              0.4,
+              0
+            ],
+            [
+              0.6,
+              4
+            ],
+            [
+              0.8,
+              0
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.04,
+              1.0
+            ],
+            [
+              0.18,
+              0.15
+            ],
+            [
+              0.3,
+              1.0
+            ],
+            [
+              0.44,
+              0.15
+            ],
+            [
+              0.56,
+              1.0
+            ],
+            [
+              0.75,
+              0.4
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.18,
+          "noise_tone": 0.9,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 2199
+        },
+        "rendered_wav": "public/audio/cries/squirmite-cry.wav"
+      }
     },
     {
       "id": "017",
@@ -596,7 +1564,97 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 bug-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse12",
+          "wave_b": "pulse12",
+          "morph": 0.4,
+          "base_hz": 603.5,
+          "length_s": 0.72,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.2,
+              4
+            ],
+            [
+              0.4,
+              0
+            ],
+            [
+              0.6,
+              4
+            ],
+            [
+              0.8,
+              0
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.04,
+              1.0
+            ],
+            [
+              0.18,
+              0.15
+            ],
+            [
+              0.3,
+              1.0
+            ],
+            [
+              0.44,
+              0.15
+            ],
+            [
+              0.56,
+              1.0
+            ],
+            [
+              0.75,
+              0.4
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.18,
+          "noise_tone": 0.9,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 2336
+        },
+        "rendered_wav": "public/audio/cries/cocoonode-cry.wav"
+      }
     },
     {
       "id": "018",
@@ -622,7 +1680,97 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 bug-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse12",
+          "wave_b": "pulse12",
+          "morph": 0.4,
+          "base_hz": 531.0,
+          "length_s": 0.94,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.2,
+              4
+            ],
+            [
+              0.4,
+              0
+            ],
+            [
+              0.6,
+              4
+            ],
+            [
+              0.8,
+              0
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.04,
+              1.0
+            ],
+            [
+              0.18,
+              0.15
+            ],
+            [
+              0.3,
+              1.0
+            ],
+            [
+              0.44,
+              0.15
+            ],
+            [
+              0.56,
+              1.0
+            ],
+            [
+              0.75,
+              0.4
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.18,
+          "noise_tone": 0.9,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 2473
+        },
+        "rendered_wav": "public/audio/cries/mothrix-cry.wav"
+      }
     },
     {
       "id": "019",
@@ -648,7 +1796,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aero-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse12",
+          "wave_b": "sine",
+          "morph": 0.4,
+          "base_hz": 612.2,
+          "length_s": 0.53,
+          "pitch_env": [
+            [
+              0,
+              3
+            ],
+            [
+              0.4,
+              9
+            ],
+            [
+              0.7,
+              4
+            ],
+            [
+              1,
+              7
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.14,
+          "noise_tone": 0.9,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 2610
+        },
+        "rendered_wav": "public/audio/cries/zephling-cry.wav"
+      }
     },
     {
       "id": "020",
@@ -674,7 +1892,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aero-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse12",
+          "wave_b": "sine",
+          "morph": 0.4,
+          "base_hz": 538.8,
+          "length_s": 0.75,
+          "pitch_env": [
+            [
+              0,
+              3
+            ],
+            [
+              0.4,
+              9
+            ],
+            [
+              0.7,
+              4
+            ],
+            [
+              1,
+              7
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.14,
+          "noise_tone": 0.9,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 2747
+        },
+        "rendered_wav": "public/audio/cries/aerobeak-cry.wav"
+      }
     },
     {
       "id": "021",
@@ -700,7 +1988,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aero-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse12",
+          "wave_b": "sine",
+          "morph": 0.4,
+          "base_hz": 474.1,
+          "length_s": 0.97,
+          "pitch_env": [
+            [
+              0,
+              3
+            ],
+            [
+              0.4,
+              9
+            ],
+            [
+              0.7,
+              4
+            ],
+            [
+              1,
+              7
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.14,
+          "noise_tone": 0.9,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 2884
+        },
+        "rendered_wav": "public/audio/cries/stormtalon-cry.wav"
+      }
     },
     {
       "id": "022",
@@ -726,7 +2084,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aqua-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 549.2,
+          "length_s": 0.74,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              4
+            ],
+            [
+              0.6,
+              1
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.1,
+          "noise_tone": 0.7,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 3021
+        },
+        "rendered_wav": "public/audio/cries/finblade-cry.wav"
+      }
     },
     {
       "id": "023",
@@ -752,7 +2180,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aqua-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 483.3,
+          "length_s": 1.14,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              4
+            ],
+            [
+              0.6,
+              1
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.1,
+          "noise_tone": 0.7,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 3158
+        },
+        "rendered_wav": "public/audio/cries/megalochrome-cry.wav"
+      }
     },
     {
       "id": "024",
@@ -778,7 +2276,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aqua-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 538.8,
+          "length_s": 0.56,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              4
+            ],
+            [
+              0.6,
+              1
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.1,
+          "noise_tone": 0.7,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 3295
+        },
+        "rendered_wav": "public/audio/cries/floatcalf-cry.wav"
+      }
     },
     {
       "id": "025",
@@ -804,7 +2372,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aqua-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 474.1,
+          "length_s": 0.78,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              4
+            ],
+            [
+              0.6,
+              1
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.1,
+          "noise_tone": 0.7,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 3432
+        },
+        "rendered_wav": "public/audio/cries/astroleviathan-cry.wav"
+      }
     },
     {
       "id": "026",
@@ -830,7 +2468,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aqua-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 575.5,
+          "length_s": 0.55,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              4
+            ],
+            [
+              0.6,
+              1
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.1,
+          "noise_tone": 0.7,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 3569
+        },
+        "rendered_wav": "public/audio/cries/inklet-cry.wav"
+      }
     },
     {
       "id": "027",
@@ -856,7 +2564,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aqua-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 506.4,
+          "length_s": 0.77,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              4
+            ],
+            [
+              0.6,
+              1
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.1,
+          "noise_tone": 0.7,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 3706
+        },
+        "rendered_wav": "public/audio/cries/toxitacle-cry.wav"
+      }
     },
     {
       "id": "028",
@@ -882,7 +2660,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 aqua-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 445.7,
+          "length_s": 1.17,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              4
+            ],
+            [
+              0.6,
+              1
+            ],
+            [
+              1,
+              -2
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.1,
+          "noise_tone": 0.7,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 3843
+        },
+        "rendered_wav": "public/audio/cries/krakenox-cry.wav"
+      }
     },
     {
       "id": "029",
@@ -908,7 +2756,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 core-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 565.0,
+          "length_s": 0.55,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.5,
+              5
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.6,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 3980
+        },
+        "rendered_wav": "public/audio/cries/punchkid-cry.wav"
+      }
     },
     {
       "id": "030",
@@ -934,7 +2848,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 core-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 497.2,
+          "length_s": 0.77,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.5,
+              5
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.6,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 4117
+        },
+        "rendered_wav": "public/audio/cries/strikechamp-cry.wav"
+      }
     },
     {
       "id": "031",
@@ -960,7 +2940,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 core-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 437.5,
+          "length_s": 0.99,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.5,
+              5
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.6,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 4254
+        },
+        "rendered_wav": "public/audio/cries/kickmaster-cry.wav"
+      }
     },
     {
       "id": "032",
@@ -986,7 +3032,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 chrome-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "pulse_pwm",
+          "morph": 0.4,
+          "base_hz": 580.8,
+          "length_s": 0.54,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              0.55,
+              3
+            ],
+            [
+              1,
+              -1
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 4391
+        },
+        "rendered_wav": "public/audio/cries/gearkid-cry.wav"
+      }
     },
     {
       "id": "033",
@@ -1012,7 +3128,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 chrome-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "pulse_pwm",
+          "morph": 0.4,
+          "base_hz": 511.1,
+          "length_s": 0.94,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              0.55,
+              3
+            ],
+            [
+              1,
+              -1
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 4528
+        },
+        "rendered_wav": "public/audio/cries/mechapion-cry.wav"
+      }
     },
     {
       "id": "034",
@@ -1038,7 +3224,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 chrome-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "pulse_pwm",
+          "morph": 0.4,
+          "base_hz": 449.7,
+          "length_s": 1.16,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.3,
+              3
+            ],
+            [
+              0.55,
+              3
+            ],
+            [
+              1,
+              -1
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.5,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 4665
+        },
+        "rendered_wav": "public/audio/cries/gorokappa-cry.wav"
+      }
     },
     {
       "id": "035",
@@ -1064,7 +3320,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 core-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 607.0,
+          "length_s": 0.71,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.5,
+              5
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.6,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 4802
+        },
+        "rendered_wav": "public/audio/cries/pebblefist-cry.wav"
+      }
     },
     {
       "id": "036",
@@ -1090,7 +3412,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 core-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 534.2,
+          "length_s": 0.93,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.5,
+              5
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.6,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 4939
+        },
+        "rendered_wav": "public/audio/cries/cragarm-cry.wav"
+      }
     },
     {
       "id": "037",
@@ -1116,7 +3504,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 core-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "pulse25",
+          "wave_b": "triangle",
+          "morph": 0.4,
+          "base_hz": 470.1,
+          "length_s": 0.97,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.5,
+              5
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.6,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 5076
+        },
+        "rendered_wav": "public/audio/cries/terrapod-cry.wav"
+      }
     },
     {
       "id": "038",
@@ -1144,7 +3598,7 @@
       "provenance": "roster+species.ts",
       "notes": [],
       "cry": {
-        "identity_note": "Soft chirps — three gentle, rounded chirps with quiet gaps between them; a noticer's small voice, never startling.",
+        "identity_note": "Soft chirps \u2014 three gentle, rounded chirps with quiet gaps between them; a noticer's small voice, never startling.",
         "status": "draft",
         "synth": {
           "amp_env": [
@@ -1233,7 +3687,7 @@
           "wave_a": "sine",
           "wave_b": "triangle"
         },
-        "rendered_wav": null
+        "rendered_wav": "public/audio/cries/sproutle-cry.wav"
       }
     },
     {
@@ -1260,7 +3714,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 flora-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "sine",
+          "morph": 0.4,
+          "base_hz": 480.6,
+          "length_s": 0.78,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.35,
+              5
+            ],
+            [
+              0.7,
+              3
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.06,
+          "noise_tone": 0.8,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 5350
+        },
+        "rendered_wav": "public/audio/cries/shellguard-cry.wav"
+      }
     },
     {
       "id": "040",
@@ -1288,7 +3812,77 @@
       "provenance": "roster+species.ts",
       "notes": [
         "species.ts labels this creature '039'; roster id '040' wins, matched by name."
-      ]
+      ],
+      "cry": {
+        "identity_note": "Derived cry \u2014 flora-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "sine",
+          "morph": 0.4,
+          "base_hz": 422.9,
+          "length_s": 1.0,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.35,
+              5
+            ],
+            [
+              0.7,
+              3
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.06,
+          "noise_tone": 0.8,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 5487
+        },
+        "rendered_wav": "public/audio/cries/dreadtoise-cry.wav"
+      }
     },
     {
       "id": "041",
@@ -1313,7 +3907,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 flora-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "sine",
+          "morph": 0.4,
+          "base_hz": 575.5,
+          "length_s": 0.55,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.35,
+              5
+            ],
+            [
+              0.7,
+              3
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.06,
+          "noise_tone": 0.8,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 5624
+        },
+        "rendered_wav": "public/audio/cries/pixilite-cry.wav"
+      }
     },
     {
       "id": "042",
@@ -1340,7 +4004,7 @@
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
       "notes": [],
       "cry": {
-        "identity_note": "Whisper-wail — soft and breathy, a slow minor fall carried on noise-breath; the night keeper heard more than seen.",
+        "identity_note": "Whisper-wail \u2014 soft and breathy, a slow minor fall carried on noise-breath; the night keeper heard more than seen.",
         "status": "draft",
         "synth": {
           "amp_env": [
@@ -1402,7 +4066,7 @@
           "wave_a": "sine",
           "wave_b": "triangle"
         },
-        "rendered_wav": null
+        "rendered_wav": "public/audio/cries/wispkin-cry.wav"
       }
     },
     {
@@ -1428,7 +4092,73 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 umbral-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "saw_soft",
+          "wave_b": "sine",
+          "morph": 0.4,
+          "base_hz": 506.4,
+          "length_s": 0.77,
+          "pitch_env": [
+            [
+              0,
+              2
+            ],
+            [
+              0.5,
+              -3
+            ],
+            [
+              1,
+              -7
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.26,
+          "noise_tone": 0.4,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 5898
+        },
+        "rendered_wav": "public/audio/cries/duskfiend-cry.wav"
+      }
     },
     {
       "id": "044",
@@ -1454,7 +4184,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 flame-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "saw_soft",
+          "wave_b": "pulse25",
+          "morph": 0.4,
+          "base_hz": 554.5,
+          "length_s": 0.55,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.25,
+              6
+            ],
+            [
+              0.5,
+              2
+            ],
+            [
+              1,
+              -4
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.22,
+          "noise_tone": 0.6,
+          "crackle": 0.5,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 6035
+        },
+        "rendered_wav": "public/audio/cries/ashemit-cry.wav"
+      }
     },
     {
       "id": "045",
@@ -1480,7 +4280,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 flame-family voice, stage 1 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "saw_soft",
+          "wave_b": "pulse25",
+          "morph": 0.4,
+          "base_hz": 488.0,
+          "length_s": 0.77,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.25,
+              6
+            ],
+            [
+              0.5,
+              2
+            ],
+            [
+              1,
+              -4
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.22,
+          "noise_tone": 0.6,
+          "crackle": 0.5,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 6172
+        },
+        "rendered_wav": "public/audio/cries/pyromonk-cry.wav"
+      }
     },
     {
       "id": "046",
@@ -1506,7 +4376,77 @@
       "growthRate": null,
       "dexText": null,
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
-      "notes": []
+      "notes": [],
+      "cry": {
+        "identity_note": "Derived cry \u2014 flame-family voice, stage 2 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "saw_soft",
+          "wave_b": "pulse25",
+          "morph": 0.4,
+          "base_hz": 429.4,
+          "length_s": 0.99,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.25,
+              6
+            ],
+            [
+              0.5,
+              2
+            ],
+            [
+              1,
+              -4
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.22,
+          "noise_tone": 0.6,
+          "crackle": 0.5,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 6309
+        },
+        "rendered_wav": "public/audio/cries/yogiferno-cry.wav"
+      }
     },
     {
       "id": "047",
@@ -1533,7 +4473,77 @@
       "provenance": "roster-only (catchRate/expYield/growthRate/dexText owed)",
       "notes": [
         "Roster id typo repaired: roster reads '331', corrected to '047' by sequence 001-047."
-      ]
+      ],
+      "cry": {
+        "identity_note": "Derived cry \u2014 mythic-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "pulse12",
+          "morph": 0.4,
+          "base_hz": 250.0,
+          "length_s": 0.67,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.4,
+              6
+            ],
+            [
+              0.75,
+              2
+            ],
+            [
+              1,
+              5
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.8,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 6446
+        },
+        "rendered_wav": "public/audio/cries/mythar-cry.wav"
+      }
     },
     {
       "id": "147",
@@ -1549,7 +4559,7 @@
         "spd": null,
         "spe": null
       },
-      "hpStatus": "pending-decision: no canon base stats for this species exist in any repo source (absent from species.json and global_roster.json); null here, never guessed — same convention as Pebblefist HP in the data core",
+      "hpStatus": "pending-decision: no canon base stats for this species exist in any repo source (absent from species.json and global_roster.json); null here, never guessed \u2014 same convention as Pebblefist HP in the data core",
       "abilities": [],
       "hiddenAbility": null,
       "eggGroups": [],
@@ -1557,12 +4567,89 @@
       "expYield": null,
       "growthRate": null,
       "dexText": null,
-      "provenance": "gap-fill 2026-10-27: assembled from dex registry (id 147) + show canon; types DERIVED from owner canon signature Water Orb (PR #345) and bipedal-amphibian body plan (show/shared/cast.json) — signature-derived, flag retained from the draft. Landed 2026-10-28 per owner lock: first two of Gen 2, dex 147/148. Base stats + dexText owed (owner-set canon); null here, never invented.",
+      "provenance": "gap-fill 2026-10-27: assembled from dex registry (id 147) + show canon; types DERIVED from owner canon signature Water Orb (PR #345) and bipedal-amphibian body plan (show/shared/cast.json) \u2014 signature-derived, flag retained from the draft. Landed 2026-10-28 per owner lock: first two of Gen 2, dex 147/148. Base stats + dexText owed (owner-set canon); null here, never invented.",
       "notes": [
-        "Exists in: dex registry 147, footprints (PR #237), silhouettes (PR #175), cries (PR #193), idle/garden/title assets, pilot cast, show bundles. Was absent from species.json + global_roster.json — this record is the gap fill for that absence.",
+        "Exists in: dex registry 147, footprints (PR #237), silhouettes (PR #175), cries (PR #193), idle/garden/title assets, pilot cast, show bundles. Was absent from species.json + global_roster.json \u2014 this record is the gap fill for that absence.",
         "Signature move: Water Orb (owner canon, Dorowani's alone). Cry law: pure cries only.",
-        "Numbering: dex 147 per owner lock 2026-10-28 — Gen 2 #1; record 48 of 49 in this file. Core ids ran 001–047 sequentially while the dex registry carries 147/148 for this pair and 331 for Mythar (core 047): the three-scheme conflict (GAP-AUDIT Conflict 2; TBD register D1) is named here, not resolved by this record."
-      ]
+        "Numbering: dex 147 per owner lock 2026-10-28 \u2014 Gen 2 #1; record 48 of 49 in this file. Core ids ran 001\u2013047 sequentially while the dex registry carries 147/148 for this pair and 331 for Mythar (core 047): the three-scheme conflict (GAP-AUDIT Conflict 2; TBD register D1) is named here, not resolved by this record."
+      ],
+      "cry": {
+        "identity_note": "Low steady croak \u2014 unhurried, patient, told-you-so. Two slow throat pulses from a pulse-width-modulated low voice.",
+        "status": "draft",
+        "synth": {
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.1,
+              0.9
+            ],
+            [
+              0.38,
+              0.75
+            ],
+            [
+              0.5,
+              0.95
+            ],
+            [
+              0.82,
+              0.8
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "base_hz": 118.0,
+          "length_s": 0.85,
+          "morph": 0.25,
+          "noise_mix": 0.06,
+          "noise_tone": 0.2,
+          "pitch_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.3,
+              -0.6
+            ],
+            [
+              0.55,
+              0.2
+            ],
+            [
+              0.8,
+              -1.0
+            ],
+            [
+              1.0,
+              -1.6
+            ]
+          ],
+          "pwm": {
+            "duty_hi": 0.45,
+            "duty_lo": 0.18,
+            "rate_hz": 6.0
+          },
+          "seed": 1202,
+          "tremolo": {
+            "depth": 0.55,
+            "rate_hz": 17.0
+          },
+          "vibrato": {
+            "delay_s": 0.2,
+            "depth_st": 0.15,
+            "rate_hz": 4.5
+          },
+          "wave_a": "pulse_pwm",
+          "wave_b": "triangle"
+        },
+        "rendered_wav": "public/audio/cries/dorowani-cry.wav"
+      }
     },
     {
       "id": "150",
@@ -1578,7 +4665,7 @@
         "spd": null,
         "spe": null
       },
-      "hpStatus": "pending-decision: no canon base stats for this species exist in any repo source (absent from species.json and global_roster.json); null here, never guessed — same convention as Pebblefist HP in the data core",
+      "hpStatus": "pending-decision: no canon base stats for this species exist in any repo source (absent from species.json and global_roster.json); null here, never guessed \u2014 same convention as Pebblefist HP in the data core",
       "abilities": [],
       "hiddenAbility": null,
       "eggGroups": [],
@@ -1586,12 +4673,68 @@
       "expYield": null,
       "growthRate": null,
       "dexText": null,
-      "provenance": "gap-fill 2026-10-27: assembled from dex registry (id 148) + show canon; types DERIVED from owner canon signature Tremor, the game's earthquake-equivalent move (EARTH_TREMOR) — signature-derived, flag retained from the draft. Landed 2026-10-28 per owner lock: first two of Gen 2, dex 147/148. Moved the same day to dex 150 by the owner's canonical ruling (\"move Gabu up two spots to 150\"); 148/149 now vacant. Base stats + dexText owed (owner-set canon); null here, never invented.",
+      "provenance": "gap-fill 2026-10-27: assembled from dex registry (id 148) + show canon; types DERIVED from owner canon signature Tremor, the game's earthquake-equivalent move (EARTH_TREMOR) \u2014 signature-derived, flag retained from the draft. Landed 2026-10-28 per owner lock: first two of Gen 2, dex 147/148. Moved the same day to dex 150 by the owner's canonical ruling (\"move Gabu up two spots to 150\"); 148/149 now vacant. Base stats + dexText owed (owner-set canon); null here, never invented.",
       "notes": [
-        "Exists in: dex registry 148, footprints (PR #237), silhouettes (PR #175), cries (PR #193), idle/garden/title assets, pilot cast. Was absent from species.json + global_roster.json — this record is the gap fill for that absence.",
+        "Exists in: dex registry 148, footprints (PR #237), silhouettes (PR #175), cries (PR #193), idle/garden/title assets, pilot cast. Was absent from species.json + global_roster.json \u2014 this record is the gap fill for that absence.",
         "Signature move: Tremor (owner-locked name). Cry law: pure cries only.",
-        "Numbering: dex 150 per owner canonical ruling 2026-10-28 — Gen 2 #2, with 148/149 vacant between Dorowani (147) and Gabu (150); record 49 of 49 in this file. Sequence: drafted at dex 148 from the dex registry (gap audit 2026-10-27), landed as 148 earlier on 2026-10-28 under the first-two-of-Gen-2 owner lock, then moved up two spots to 150 by the owner's ruling the same day. Core ids ran 001–047 sequentially while the dex registry carried 147/148 for this pair and 331 for Mythar (core 047): the three-scheme conflict (GAP-AUDIT Conflict 2; TBD register D1) is named here, not resolved by this record."
-      ]
+        "Numbering: dex 150 per owner canonical ruling 2026-10-28 \u2014 Gen 2 #2, with 148/149 vacant between Dorowani (147) and Gabu (150); record 49 of 49 in this file. Sequence: drafted at dex 148 from the dex registry (gap audit 2026-10-27), landed as 148 earlier on 2026-10-28 under the first-two-of-Gen-2 owner lock, then moved up two spots to 150 by the owner's ruling the same day. Core ids ran 001\u2013047 sequentially while the dex registry carried 147/148 for this pair and 331 for Mythar (core 047): the three-scheme conflict (GAP-AUDIT Conflict 2; TBD register D1) is named here, not resolved by this record."
+      ],
+      "cry": {
+        "identity_note": "Foghorn bellow \u2014 total confidence, no plan. A big low horn that swells in, holds, and drifts down; slight breath at the edges.",
+        "status": "draft",
+        "synth": {
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.22,
+              1.0
+            ],
+            [
+              0.7,
+              0.95
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "base_hz": 82.0,
+          "length_s": 1.6,
+          "morph": 0.3,
+          "noise_mix": 0.07,
+          "noise_tone": 0.3,
+          "pitch_env": [
+            [
+              0.0,
+              1.5
+            ],
+            [
+              0.2,
+              0.4
+            ],
+            [
+              0.6,
+              0.0
+            ],
+            [
+              1.0,
+              -2.2
+            ]
+          ],
+          "seed": 1303,
+          "vibrato": {
+            "delay_s": 0.5,
+            "depth_st": 0.2,
+            "rate_hz": 5.0
+          },
+          "wave_a": "saw_soft",
+          "wave_b": "triangle"
+        },
+        "rendered_wav": "public/audio/cries/gabu-cry.wav"
+      }
     },
     {
       "id": "400",
@@ -1608,7 +4751,7 @@
         "spd": null,
         "spe": null
       },
-      "hpStatus": "pending-decision: no canon base stats for this species exist in any repo source (absent from species.json and global_roster.json); null here, never guessed — same convention as Pebblefist HP in the data core",
+      "hpStatus": "pending-decision: no canon base stats for this species exist in any repo source (absent from species.json and global_roster.json); null here, never guessed \u2014 same convention as Pebblefist HP in the data core",
       "abilities": [],
       "hiddenAbility": null,
       "eggGroups": [],
@@ -1616,12 +4759,82 @@
       "expYield": null,
       "growthRate": null,
       "dexText": null,
-      "provenance": "owner canon 2026-10-28: named by the owner in chat (~17:03 CT) — “Mochiichao 400 mystical mochiichao: Goddgachuu”, spelling confirmed by the owner (Goddgachuu, double-d). Type Mythic is OWNER-GIVEN by the owner's ruling the same day (~17:18 CT: “Mythic — land Goddgachuu at 400”) — owner-confirmed on this record, NOT derived (contrast Dorowani 147 / Gabu 150, whose types are signature-derived and still flagged as awaiting owner confirmation). Base stats + dexText owed (owner-set canon); null here, never invented. TYPE UPDATE — owner ruling 2026-10-28 (~18:06 CT: “Okay, he can be mythic and neon”): Neon added as second type; types are now Mythic + Neon, both owner-ruled (Mythic owner-given ~17:18 CT as recorded above; Neon ruled ~18:06 CT — the owner settling directly the ‘mythic dragon, whatever our universal equivalent of that is’ question: no new element invented, Neon is one of our existing fifteen). RARITY — owner ruling 2026-10-28 (~18:04 CT): Goddgachuu is the rarest Mochiichao, wired on the Pokémon Mythical pattern (see the rarity note in this record’s notes).",
+      "provenance": "owner canon 2026-10-28: named by the owner in chat (~17:03 CT) \u2014 \u201cMochiichao 400 mystical mochiichao: Goddgachuu\u201d, spelling confirmed by the owner (Goddgachuu, double-d). Type Mythic is OWNER-GIVEN by the owner's ruling the same day (~17:18 CT: \u201cMythic \u2014 land Goddgachuu at 400\u201d) \u2014 owner-confirmed on this record, NOT derived (contrast Dorowani 147 / Gabu 150, whose types are signature-derived and still flagged as awaiting owner confirmation). Base stats + dexText owed (owner-set canon); null here, never invented. TYPE UPDATE \u2014 owner ruling 2026-10-28 (~18:06 CT: \u201cOkay, he can be mythic and neon\u201d): Neon added as second type; types are now Mythic + Neon, both owner-ruled (Mythic owner-given ~17:18 CT as recorded above; Neon ruled ~18:06 CT \u2014 the owner settling directly the \u2018mythic dragon, whatever our universal equivalent of that is\u2019 question: no new element invented, Neon is one of our existing fifteen). RARITY \u2014 owner ruling 2026-10-28 (~18:04 CT): Goddgachuu is the rarest Mochiichao, wired on the Pok\u00e9mon Mythical pattern (see the rarity note in this record\u2019s notes).",
       "notes": [
-        "Descriptor: a mystical Mochiichao (the owner's word, 2026-10-28). No art, cry, signature move, or dex text exists for this species in any repo source yet — this record lands the owner's canon note as data; nothing added, nothing inferred.",
-        "Numbering: 400 per owner ruling 2026-10-28; record 50 of 50 in this file. The number sits outside every existing range and was verified free in every scheme before landing: core ids ran 001–047 plus Dorowani 147 / Gabu 150, the global roster and the dex registry top out at 331 (Mythar, core 047), and the roster-lock register stands in the 050s. The three-scheme conflict (GAP-AUDIT Conflict 2; TBD register D1) is named here, not resolved by this record.",
-        "Rarity (owner ruling 2026-10-28, ~18:04 CT): Goddgachuu is the RAREST Mochiichao — wired on the Pokémon Mythical pattern at the owner’s direction (‘wire them up just like that’). Concretely: NO row in any spawn or encounter table — verified at this landing across src/data/core/encounters.json, encounters/dark-forest.spawn-tables.json (its depths table stays EMPTY by #163’s law), encounters/garden-complex.spawn-tables.json, encounters/region1-dojo-circuit.json, and ecology/region1.ecology.json (no residency) — and that absence IS the wiring: per #163 mythical habitat sealing, a sealed species has no row, not a rare row. Habitat SEALED — sealed record instanced at show/production/world-systems/sealing-records.json (mochiichao/habitat-sealing/v1; no area id, no coordinates, no table reference — nothing to leak). Obtainable only through an owner-authored set-piece if canon ever authors one (the #163/#52 authored set-piece route); none exists, so the sealed record’s accessFacts is empty by fact, and no table in the data can produce him. catchRate stays null — it belongs to the owner-set numbers family on this record, like base stats; the Pokémon pattern value for a battleable mythical (catch rate 3) is recorded in the research note, not landed. Roaming (#114) does not apply: roaming and mythical are separate axes and no roaming individual of this species is authored. Research: show/production/species-data-system/RESEARCH-NOTE-goddgachuu-rarity.md; design seat: DESIGN-BRIEF-goddgachuu.md."
-      ]
+        "Descriptor: a mystical Mochiichao (the owner's word, 2026-10-28). No art, cry, signature move, or dex text exists for this species in any repo source yet \u2014 this record lands the owner's canon note as data; nothing added, nothing inferred.",
+        "Numbering: 400 per owner ruling 2026-10-28; record 50 of 50 in this file. The number sits outside every existing range and was verified free in every scheme before landing: core ids ran 001\u2013047 plus Dorowani 147 / Gabu 150, the global roster and the dex registry top out at 331 (Mythar, core 047), and the roster-lock register stands in the 050s. The three-scheme conflict (GAP-AUDIT Conflict 2; TBD register D1) is named here, not resolved by this record.",
+        "Rarity (owner ruling 2026-10-28, ~18:04 CT): Goddgachuu is the RAREST Mochiichao \u2014 wired on the Pok\u00e9mon Mythical pattern at the owner\u2019s direction (\u2018wire them up just like that\u2019). Concretely: NO row in any spawn or encounter table \u2014 verified at this landing across src/data/core/encounters.json, encounters/dark-forest.spawn-tables.json (its depths table stays EMPTY by #163\u2019s law), encounters/garden-complex.spawn-tables.json, encounters/region1-dojo-circuit.json, and ecology/region1.ecology.json (no residency) \u2014 and that absence IS the wiring: per #163 mythical habitat sealing, a sealed species has no row, not a rare row. Habitat SEALED \u2014 sealed record instanced at show/production/world-systems/sealing-records.json (mochiichao/habitat-sealing/v1; no area id, no coordinates, no table reference \u2014 nothing to leak). Obtainable only through an owner-authored set-piece if canon ever authors one (the #163/#52 authored set-piece route); none exists, so the sealed record\u2019s accessFacts is empty by fact, and no table in the data can produce him. catchRate stays null \u2014 it belongs to the owner-set numbers family on this record, like base stats; the Pok\u00e9mon pattern value for a battleable mythical (catch rate 3) is recorded in the research note, not landed. Roaming (#114) does not apply: roaming and mythical are separate axes and no roaming individual of this species is authored. Research: show/production/species-data-system/RESEARCH-NOTE-goddgachuu-rarity.md; design seat: DESIGN-BRIEF-goddgachuu.md."
+      ],
+      "cry": {
+        "identity_note": "Derived cry \u2014 mythic-family voice, stage 0 of its line (lane-derived, draft).",
+        "status": "draft",
+        "synth": {
+          "wave_a": "sine",
+          "wave_b": "pulse12",
+          "morph": 0.4,
+          "base_hz": 544.0,
+          "length_s": 0.56,
+          "pitch_env": [
+            [
+              0,
+              0
+            ],
+            [
+              0.4,
+              6
+            ],
+            [
+              0.75,
+              2
+            ],
+            [
+              1,
+              5
+            ]
+          ],
+          "amp_env": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.05,
+              1.0
+            ],
+            [
+              0.55,
+              0.75
+            ],
+            [
+              0.8,
+              0.5
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ],
+          "vibrato": {
+            "delay_s": 0.15,
+            "depth_st": 0.4,
+            "rate_hz": 6.0
+          },
+          "tremolo": {
+            "depth": 0.15,
+            "rate_hz": 9.0
+          },
+          "noise_mix": 0.08,
+          "noise_tone": 0.8,
+          "crackle": 0.0,
+          "echo": {
+            "delay_s": 0.0,
+            "decay": 0.0,
+            "repeats": 0
+          },
+          "seed": 54807
+        },
+        "rendered_wav": "public/audio/cries/goddgachuu-cry.wav"
+      }
     }
   ]
 }

@@ -282,7 +282,12 @@ const CRY_URLS: Record<string, string> = {
   '045': '/audio/cries/pyromonk-cry.wav',
   '046': '/audio/cries/yogiferno-cry.wav',
   '147': '/audio/cries/dorowani-cry.wav',
-  '148': '/audio/cries/gabu-cry.wav',
+  // Soundtrack lane (2026-10-29): Gabu's canonical id is 150 (owner
+  // ruling 2026-10-28; 148/149 are vacant) — this table still said 148,
+  // so Gabu's dex cry pointed at the wrong row. Goddgachuu (400) added;
+  // its cry is rendered from the same synth parameter system.
+  '150': '/audio/cries/gabu-cry.wav',
+  '400': '/audio/cries/goddgachuu-cry.wav',
   '331': '/audio/cries/mythar-cry.wav',
 };
 

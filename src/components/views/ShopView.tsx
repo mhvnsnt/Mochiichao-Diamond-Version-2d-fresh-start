@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { playCue } from '../../lib/soundCues';
 import { useGameStore } from '../../store/gameStore';
 import { DATA_CARD_COST, DATA_CARD_ID } from '../../lib/monster-tamer-systems';
 import { ITEM_ICONS } from '../../lib/uiArt';
 import { MenuHelpLine } from '../game/MenuList';
 import { useMenuLayout, cssAlignment } from '../../lib/menuLayoutLive';
 import { sellPrice } from '../../lib/playableWiring';
+import { shopBuyPrice } from '../../lib/shopPricing';
+import { applyMusic } from '../../lib/musicPlacement';
 
 /**
  * Shop, v2 structure (shop.c, structure/rules only, no Pokemon code,
@@ -52,6 +55,16 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
   const buyItem = useGameStore(s => s.buyItem);
   const useItem = useGameStore(s => s.useItem);
   const gainWallet = useGameStore(s => s.gainWallet);
+  // INFINITE MONEY cheat (Settings > Cheat Codes): while the toggle
+  // is on, affordability never blocks a purchase — buyItem already
+  // grants without deducting; this read keeps the button honest.
+  const infiniteMoney = useGameStore(s => s.infiniteMoney);
+  // Honor P1 (List 28): buy prices derive from the deed ledger at
+  // render through lib/shopPricing — the player simply sees the
+  // adjusted price; no standing is ever displayed (RDR2 grammar).
+  // An empty ledger leaves every price at its catalogue value.
+  const deedLedger = useGameStore(s => s.deedLedger);
+  const bandPrice = (cost: number) => shopBuyPrice(cost, deedLedger);
   const [mode, setMode] = useState<'menu' | 'buy' | 'sell'>('menu');
   // Selection changes on click / keyboard focus ONLY. Hover selection
   // was removed after the 2026-10-27 live playtest: moving the mouse
@@ -79,6 +92,12 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
   const buySelected = SHOP_ITEMS[Math.min(selected, SHOP_ITEMS.length - 1)];
   const sellSelected = sellable[Math.min(selected, Math.max(0, sellable.length - 1))];
 
+  // Sound-full-coverage: the shop is a place with its own music
+  // (MUS_POKE_MART's slot). This view unmounts the world engine, so
+  // it applies the shop placement on mount; leaving remounts
+  // WorldEngine, whose placement effect restores the field track.
+  useEffect(() => { applyMusic({ screen: 'shop', mapId: '', battleKind: null }); }, []);
+
   // Audit-plan Y/N scope: YES/NO key handling must cover ALL
   // yes/no prompts, not only DialogueBox choices and Bag Toss.
   // Shop buy/sell confirm: Y confirms, N cancels. Wording and
@@ -87,7 +106,7 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
     if (!confirm) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'y' || e.key === 'Y') doConfirm();
-      else if (e.key === 'n' || e.key === 'N') setConfirm(null);
+      else if (e.key === 'n' || e.key === 'N') { playCue('ui.cancel'); setConfirm(null); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -96,12 +115,15 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
 
   const doConfirm = () => {
     if (!confirm) return;
+    // Sound (2026-10-29): a completed transaction rings the
+    // register (measured SE_SHOP); a refused one speaks the error
+    // class. Both keys (Y) and the Yes button arrive here.
     if (confirm.kind === 'buy') {
-      if (buyItem(confirm.id, confirm.price)) setMessage(`Bought ${confirm.name}!`);
-      else setMessage('Not enough Credits for that one.');
+      if (buyItem(confirm.id, confirm.price)) { playCue('shop.register'); setMessage(`Bought ${confirm.name}!`); }
+      else { playCue('ui.error'); setMessage('Not enough Credits for that one.'); }
     } else {
-      if (useItem(confirm.id)) { gainWallet(confirm.price); setMessage(`Sold ${confirm.name} for ${confirm.price} CR.`); }
-      else setMessage(`No ${confirm.name} to sell.`);
+      if (useItem(confirm.id)) { playCue('shop.register'); gainWallet(confirm.price); setMessage(`Sold ${confirm.name} for ${confirm.price} CR.`); }
+      else { playCue('ui.error'); setMessage(`No ${confirm.name} to sell.`); }
     }
     setConfirm(null);
     // Back to the item list, NOT back to the world.
@@ -132,9 +154,9 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
 
       {mode === 'menu' && (
         <div className="flex flex-col gap-3 max-w-md">
-          <button onClick={() => { setMode('buy'); setSelected(0); }} className="game-button px-4 py-3 text-left font-bold min-h-[48px]">► Buy</button>
-          <button onClick={() => { setMode('sell'); setSelected(0); }} className="game-button px-4 py-3 text-left font-bold min-h-[48px]">► Sell</button>
-          <button onClick={onBack} className="game-button px-4 py-3 text-left font-bold min-h-[48px]">► Quit</button>
+          <button onClick={() => { playCue('ui.confirm'); setMode('buy'); setSelected(0); }} className="game-button px-4 py-3 text-left font-bold min-h-[48px]">► Buy</button>
+          <button onClick={() => { playCue('ui.confirm'); setMode('sell'); setSelected(0); }} className="game-button px-4 py-3 text-left font-bold min-h-[48px]">► Sell</button>
+          <button onClick={() => { playCue('ui.cancel'); onBack(); }} className="game-button px-4 py-3 text-left font-bold min-h-[48px]">► Quit</button>
           <MenuHelpLine text="Buy items, sell items from your bag, or leave the shop." />
         </div>
       )}
@@ -142,7 +164,7 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
       {mode === 'buy' && (
         <div className="flex flex-col flex-1 min-h-0">
           <div className="flex gap-2 mb-3 shrink-0">
-            <button onClick={() => setMode('menu')} className="game-button px-3 py-2 text-sm min-h-[48px]">◄ Back to Buy / Sell / Quit</button>
+            <button onClick={() => { playCue('ui.cancel'); setMode('menu'); }} className="game-button px-3 py-2 text-sm min-h-[48px]">◄ Back to Buy / Sell / Quit</button>
           </div>
           <p className="text-xs text-slate-400 mb-3 shrink-0">Shop prices are placeholders until Mars sets the CR economy — not canon. Tiers only: capture low, 50-HP heal mid, 50% revive high.</p>
           {canUp && <div className="text-center text-slate-300 text-sm shrink-0" aria-hidden="true">▲</div>}
@@ -150,13 +172,13 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
             {SHOP_ITEMS.map((item, i) => (
               <button
                 key={item.id}
-                onClick={() => setSelected(i)}
+                onClick={() => { if (i !== selected) playCue('ui.cursor'); setSelected(i); }}
                 onFocus={() => setSelected(i)}
                 className={`game-panel p-3 flex items-center gap-3 text-left min-h-[48px] ${i === selected ? 'ring-2 ring-yellow-300' : 'opacity-80'}`}
               >
                 <ItemIcon id={item.id} />
                 <span className="flex-1 font-bold text-white">{i === selected ? '► ' : ''}{item.name}</span>
-                <span className="text-sm font-bold text-yellow-300 shrink-0">{item.cost} CR</span>
+                <span className="text-sm font-bold text-yellow-300 shrink-0">{bandPrice(item.cost)} CR</span>
               </button>
             ))}
           </div>
@@ -164,14 +186,14 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
           <div className="game-panel p-4 mt-3 shrink-0 flex items-center gap-3">
             <ItemIcon id={buySelected.id} />
             <div className="flex-1 min-w-0">
-              <div className="font-bold text-white">{buySelected.name} — {buySelected.cost} CR</div>
+              <div className="font-bold text-white">{buySelected.name} — {bandPrice(buySelected.cost)} CR</div>
               <div className="text-sm text-slate-400">{buySelected.desc}</div>
               {/* Uncapped stacks (Mars 2026-10-27): no 99 / 999 cap. buyItem already increments without a cap check; this line states it. */}
               <div className="text-sm text-slate-400">In bag: {inventory[buySelected.id] || 0} — stacks are unlimited.</div>
             </div>
             <button
-              onClick={() => setConfirm({ kind: 'buy', id: buySelected.id, name: buySelected.name, price: buySelected.cost })}
-              disabled={wallet < buySelected.cost}
+              onClick={() => { playCue('ui.confirm'); setConfirm({ kind: 'buy', id: buySelected.id, name: buySelected.name, price: bandPrice(buySelected.cost) }); }}
+              disabled={!infiniteMoney && wallet < bandPrice(buySelected.cost)}
               className="game-button px-3 py-2 text-sm disabled:opacity-40 min-h-[48px] shrink-0"
             >
               Buy
@@ -183,7 +205,7 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
       {mode === 'sell' && (
         <div className="flex flex-col flex-1 min-h-0">
           <div className="flex gap-2 mb-3 shrink-0">
-            <button onClick={() => setMode('menu')} className="game-button px-3 py-2 text-sm min-h-[48px]">◄ Back to Buy / Sell / Quit</button>
+            <button onClick={() => { playCue('ui.cancel'); setMode('menu'); }} className="game-button px-3 py-2 text-sm min-h-[48px]">◄ Back to Buy / Sell / Quit</button>
           </div>
           {sellable.length === 0 ? (
             <div className="game-panel p-6 text-center text-slate-300">Nothing to sell — your bag is empty.</div>
@@ -193,7 +215,7 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
                 {sellable.map((item, i) => (
                   <button
                     key={item.id}
-                    onClick={() => setSelected(i)}
+                    onClick={() => { if (i !== selected) playCue('ui.cursor'); setSelected(i); }}
                     onFocus={() => setSelected(i)}
                     className={`game-panel p-3 flex items-center gap-3 text-left min-h-[48px] ${i === selected ? 'ring-2 ring-yellow-300' : 'opacity-80'}`}
                   >
@@ -211,7 +233,7 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
                     <div className="text-sm text-slate-400">{sellSelected.desc}</div>
                   </div>
                   <button
-                    onClick={() => setConfirm({ kind: 'sell', id: sellSelected.id, name: sellSelected.name, price: sellSelected.sellPrice })}
+                    onClick={() => { playCue('ui.confirm'); setConfirm({ kind: 'sell', id: sellSelected.id, name: sellSelected.name, price: sellSelected.sellPrice }); }}
                     className="game-button px-3 py-2 text-sm min-h-[48px] shrink-0"
                   >
                     Sell
@@ -232,7 +254,7 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
             <p className="text-sm text-slate-400 mb-4">No money or items change until you confirm.</p>
             <div className="flex gap-2">
               <button onClick={doConfirm} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">Yes</button>
-              <button onClick={() => setConfirm(null)} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">No</button>
+              <button onClick={() => { playCue('ui.cancel'); setConfirm(null); }} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">No</button>
             </div>
           </div>
         </div>

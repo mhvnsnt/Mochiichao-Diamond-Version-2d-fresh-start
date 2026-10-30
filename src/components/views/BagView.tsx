@@ -4,6 +4,7 @@ import { DATA_CARD_ID } from '../../lib/monster-tamer-systems';
 import { ITEM_ICONS } from '../../lib/uiArt';
 import { MenuHelpLine } from '../game/MenuList';
 import { useMenuLayout } from '../../lib/menuLayoutLive';
+import { playCue } from '../../lib/soundCues';
 
 /**
  * Bag, v5.2 heal wiring: Mend Patch now actually heals (see Use
@@ -41,6 +42,25 @@ export default function BagView({ onBack }: { onBack: () => void }) {
   const useItem = useGameStore(s => s.useItem);
   const party = useGameStore(s => s.party);
   const updatePartyMember = useGameStore(s => s.updatePartyMember);
+  // Ranger companion health (ranger-defense package): the Ranger is
+  // a healable member of the household — a Mend Patch used from the
+  // bag works on him exactly as on a creature (same item, same 50
+  // HP, same consume-only-on-use), including from DOWN (the patch is
+  // the aid a downed companion needs — Fallout's shape). Revive Core
+  // stays creature-only: its own text says "a fainted Mochiichao".
+  const playerName = useGameStore(s => s.playerName);
+  const rangerHp = useGameStore(s => s.rangerHp);
+  const rangerMaxHp = useGameStore(s => s.rangerMaxHp);
+  const healRangerBy = useGameStore(s => s.healRangerBy);
+  const healRangerWithPatch = () => {
+    if (rangerMaxHp <= 0 || rangerHp >= rangerMaxHp) return;
+    if (!useItem('mend_patch')) { setMessage('No Mend Patches left.'); return; }
+    healRangerBy(50);
+    const healed = Math.min(rangerMaxHp, rangerHp + 50);
+    setMessage(healed > 0 && rangerHp === 0
+      ? `Used Mend Patch. ${playerName} is back on his feet at ${healed}/${rangerMaxHp} HP.`
+      : `Used Mend Patch. ${playerName} restored to ${healed}/${rangerMaxHp} HP.`);
+  };
   const [selected, setSelected] = useState(0);
   // Menu-layout live wiring: gen1.bag is a flat list (no pockets in
   // that gen), later gens group by pocket. Pocket-tab position and
@@ -54,7 +74,7 @@ export default function BagView({ onBack }: { onBack: () => void }) {
   const bagPerPocketCursor = bagMenuLayout.overrides.perPocketCursor ?? (bagMenuLayout.gen >= 3);
   const [pocketCursors, setPocketCursors] = useState<Record<string, number>>({});
   const [sidePocket, setSidePocket] = useState<string | null>(null);
-  const selectEntry = (i: number, pocket: string) => { setSelected(i); if (bagPerPocketCursor) setPocketCursors((c) => ({ ...c, [pocket]: i })); };
+  const selectEntry = (i: number, pocket: string) => { if (i !== selected) playCue('ui.cursor'); setSelected(i); if (bagPerPocketCursor) setPocketCursors((c) => ({ ...c, [pocket]: i })); };
   const restorePocketCursor = (pocket: string) => { const i = pocketCursors[pocket]; if (i !== undefined) setSelected(i); };
   const [confirmToss, setConfirmToss] = useState(false);
   const [mendSelect, setMendSelect] = useState(false);
@@ -75,6 +95,7 @@ export default function BagView({ onBack }: { onBack: () => void }) {
   // behaviour are otherwise unchanged.
   const doTossYes = () => {
     if (!current) return;
+    playCue('ui.confirm');
     useItem(current.id);
     setMessage(`Tossed one ${current.name}.`);
     setConfirmToss(false);
@@ -83,7 +104,7 @@ export default function BagView({ onBack }: { onBack: () => void }) {
     if (!confirmToss) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'y' || e.key === 'Y') doTossYes();
-      else if (e.key === 'n' || e.key === 'N') setConfirmToss(false);
+      else if (e.key === 'n' || e.key === 'N') { playCue('ui.cancel'); setConfirmToss(false); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -99,7 +120,8 @@ export default function BagView({ onBack }: { onBack: () => void }) {
   const mendCur = (m: any) => m.hp ?? m.currentHp ?? 0;
   const mendDamaged = () => party.map((m, i) => ({ m, i })).filter(({ m }) => mendCur(m) > 0 && mendCur(m) < m.maxHp);
   const healMember = (idx: number) => {
-    if (!useItem('mend_patch')) return;
+    if (!useItem('mend_patch')) { playCue('ui.error'); return; }
+    playCue('item.use');
     const m = party[idx];
     const healed = Math.min(m.maxHp, mendCur(m) + 50);
     updatePartyMember(idx, { ...m, hp: healed, currentHp: healed } as any);
@@ -120,9 +142,17 @@ export default function BagView({ onBack }: { onBack: () => void }) {
       <span aria-hidden="true" className="pointer-events-none select-none absolute bottom-2 right-3 text-lime-300 text-base">✦</span>
       <div className="flex justify-between items-center mb-4 shrink-0">
         <h2 className="game-title text-2xl">Bag</h2>
-        <button onClick={onBack} className="game-button px-4 py-2 min-h-[48px]">Close</button>
+        <button onClick={() => { playCue('ui.cancel'); onBack(); }} className="game-button px-4 py-2 min-h-[48px]">Close</button>
       </div>
       {message && <div className="game-panel px-4 py-2 mb-4 text-white shrink-0" role="status">{message}</div>}
+      {rangerMaxHp > 0 && rangerHp < rangerMaxHp && (
+        <div className="game-panel px-4 py-2 mb-4 text-white shrink-0 flex items-center justify-between gap-3">
+          <span>{playerName} (Ranger): {rangerHp}/{rangerMaxHp} HP{rangerHp <= 0 ? ' — DOWN' : ''}</span>
+          <button onClick={healRangerWithPatch} className="game-button px-3 py-1.5 min-h-[40px]" disabled={(inventory['mend_patch'] || 0) <= 0}>
+            Use Mend Patch ({inventory['mend_patch'] || 0})
+          </button>
+        </div>
+      )}
       {entries.length === 0 ? (
         <div className="game-panel p-6 text-center text-slate-300">Bag is empty.</div>
       ) : (
@@ -131,7 +161,7 @@ export default function BagView({ onBack }: { onBack: () => void }) {
             {bagSideTabs && !bagFlatList && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {pockets.map((pocket) => (
-                  <button key={pocket} onClick={() => { setSidePocket(pocket); restorePocketCursor(pocket); }} className={`game-button px-3 py-2 text-sm min-h-[48px] ${(sidePocket ?? pockets[0]) === pocket ? 'ring-2 ring-yellow-300' : 'opacity-80'}`}>{pocket}</button>
+                  <button key={pocket} onClick={() => { if ((sidePocket ?? pockets[0]) !== pocket) playCue('ui.cursor'); setSidePocket(pocket); restorePocketCursor(pocket); }} className={`game-button px-3 py-2 text-sm min-h-[48px] ${(sidePocket ?? pockets[0]) === pocket ? 'ring-2 ring-yellow-300' : 'opacity-80'}`}>{pocket}</button>
                 ))}
               </div>
             )}
@@ -194,6 +224,7 @@ export default function BagView({ onBack }: { onBack: () => void }) {
                       // WorldEngine blackout rule.)
                       const damaged = mendDamaged();
                       if (damaged.length === 0) {
+                        playCue('ui.error');
                         setMessage(party.length === 0 ? 'You have no Mochiichao yet.' : party.every(m => mendCur(m) <= 0) ? 'Mend Patch cannot revive a fainted Mochiichao.' : 'No Mochiichao needs healing right now.');
                         return;
                       }
@@ -201,15 +232,16 @@ export default function BagView({ onBack }: { onBack: () => void }) {
                       setMendSelect(true);
                       return;
                     }
-                    if (useItem(current.id)) setMessage(`Used ${current.name}.`);
+                    if (useItem(current.id)) { playCue('item.use'); setMessage(`Used ${current.name}.`); }
+                    else playCue('ui.error');
                   }}
                   className="game-button px-3 py-2 text-sm min-h-[48px]"
                 >
                   Use
                 </button>
                 <button className="game-button px-3 py-2 text-sm min-h-[48px] opacity-60" disabled>Give</button>
-                <button onClick={() => setConfirmToss(true)} className="game-button px-3 py-2 text-sm min-h-[48px]">Toss</button>
-                <button onClick={onBack} className="game-button px-3 py-2 text-sm min-h-[48px]">Quit</button>
+                <button onClick={() => { playCue('ui.confirm'); setConfirmToss(true); }} className="game-button px-3 py-2 text-sm min-h-[48px]">Toss</button>
+                <button onClick={() => { playCue('ui.cancel'); onBack(); }} className="game-button px-3 py-2 text-sm min-h-[48px]">Quit</button>
               </div>
               <p className="text-xs text-slate-400 mt-2">Mend Patch restores 50 HP to a party member you choose.</p>
             </div>
@@ -232,7 +264,7 @@ export default function BagView({ onBack }: { onBack: () => void }) {
                   </button>
                 );
               })}
-              <button onClick={() => setMendSelect(false)} className="game-button px-4 py-2 font-bold min-h-[48px]">Cancel</button>
+              <button onClick={() => { playCue('ui.cancel'); setMendSelect(false); }} className="game-button px-4 py-2 font-bold min-h-[48px]">Cancel</button>
             </div>
           </div>
         </div>
@@ -244,7 +276,7 @@ export default function BagView({ onBack }: { onBack: () => void }) {
             <p className="text-sm text-slate-400 mb-4">It will be removed from your bag.</p>
             <div className="flex gap-2">
               <button onClick={doTossYes} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">Yes</button>
-              <button onClick={() => setConfirmToss(false)} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">No</button>
+              <button onClick={() => { playCue('ui.cancel'); setConfirmToss(false); }} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">No</button>
             </div>
           </div>
         </div>
