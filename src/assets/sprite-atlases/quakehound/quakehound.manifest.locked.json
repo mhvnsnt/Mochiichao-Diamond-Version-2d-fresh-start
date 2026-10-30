@@ -243,5 +243,6 @@
   243,
   241,
   239
- ]
+ ],
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): the frame labelled battle_back (128,0) holds a front crouch view (face mask visible). The genuine back view already exists in this atlas at (64,0) (overworld_back). src/lib/spriteSheets.ts now uses (64,0) as the battle back cell. This frame's role is left as-is pending a Sprite Art lane re-lock; do not regenerate defs without applying this correction."
 }

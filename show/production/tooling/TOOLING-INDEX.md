@@ -86,6 +86,27 @@ The largest working toolset he owns. The show-relevant core:
 - `tools/avatar-pipeline/` — the Mochiichao avatar/show bundle
   pipeline (PR #309, merged).
 
+### BlairWitch — `mhvnsnt/BlairWitch` (rig / sheet / puppet creator)
+The working rig, sheet and puppet creator (Python package +
+`blairwitch` CLI): character spec in → model sheet (JSON + SVG),
+`.rig.json` scaffold (6 body plans, Blair symbol libraries, ROM
+battery), versioned puppet packages. As of v0.3.0 (PR #1)
+it **implements the donor-measured rig-and-sheet standard**
+(`show/production/rigs/RIG-AND-SHEET-SPEC.md`, this repo's
+PR #145) in code: the §2 CMYK palette engine with sanctioned
+50%/75% tints, the §1 sheet format with principal/secondary
+height charts, the §3 puppet construction (root stack,
+four-piece masked eyes, mouth frame-chart, view-code part
+naming, part library files, SHARED hands), the CC-BY open-movie
+constraints module, and validators for palette format, part
+naming and the hands-library reference. As of v0.4.0 (PR #2)
+it also implements the Harmony + settei addendum (this repo's
+PR #34): the Harmony construction profile (node scaffold,
+substitution charts, linked .plt palettes), the settei
+five-section model-pack standard, and the design & cleanup
+rule checks. Canonical home is its
+own repo (no-fork law); show production calls it from there.
+
 ## Class B — Convention / spec documents (carried in as native specs)
 | Convention/spec | Source (his docs) | Carried in as |
 |---|---|---|
@@ -97,6 +118,8 @@ The largest working toolset he owns. The show-relevant core:
 | Scooby 6-beat episode formula | mystery-coast research | beat-sheet template (TEMPLATES.md) |
 | Model-pack completeness (8-sheet) + mouth QC | rig-mapping/shows/knd-model-pack.md | model-sheet template (TEMPLATES.md) |
 | Palette enforcement as a system | cape-jones `palette-enforce.py` + docs | PIPELINE.md finish stage |
+| Rig-and-sheet standard (model-sheet format §1, CMYK palette format §2, puppet construction §3, compositing glue §4) | donor-measured extraction 2026-10-29 (per-source record: `show/production/rigs/DONOR-PROVENANCE-2026-10-29.md`) | `show/production/rigs/RIG-AND-SHEET-SPEC.md` — **CURRENT standard** (PR #145); implemented in code by BlairWitch v0.3.0 (PR #1); cast build-out landed as CURRENT artifacts (PR #35) — registered in `show/production/rigs/README.md` and the cast-artifacts section below |
+| Harmony + settei addendum (Harmony node-graph construction, angle-coded substitution charts, .plt palette discipline; settei five-section pack standard; design & cleanup rules) | donor hunt 2026-10-30 — Harmony measurements from the production templates in the owner's own releases; settei standard from a published design-works book; cleanup rules from the recovered rulebook (record: `show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md`) | same file — **CURRENT extension of the rig-and-sheet standard** (PR #34); implemented in code by BlairWitch v0.4.0 (PR #2) |
 | Persona 5 UI principles (CEDEC 2017) | research report | `show/production/research/persona-5-ui-principles.md` |
 | Manifest/catalog formats | TRIPPEDD sources manifests; cape-jones example_manifest.json | `show/shared/` manifests (SHOW-HOME plan) |
 
@@ -116,6 +139,15 @@ unchanged boundary:
    production files for their film. **Decision: pointer for the
    files; the reusable system (folder discipline, rig layout) is
    already extracted into native specs** (research INDEX + rigs).
+   **Update (2026-10-30):** the five `pyconstraints` scripts
+   themselves were carried **verbatim under their CC-BY 3.0
+   licence** (attribution in place) into
+   `show/production/rigs/open-movie-kit/pyconstraints/` by
+   PR #145, and are now **wired into BlairWitch** as its
+   `blairwitch.constraints` module (registry + verbatim script
+   access + modern ports of the separable maths; rigs assign them
+   by name) — BlairWitch PR #1. The rest of the tree stays
+   pointer-only.
 2. **Rhubarb Lip Sync vendored in cape-jones** — third-party open-
    source *software* (not studio content): fine to use as a tool via
    its home path/license; not re-copied here.
@@ -140,3 +172,27 @@ unchanged boundary:
 - **USD lighting keys** — `show/production/tooling/lighting-cluster/usd/` — the Garden Gate key set from `show/bible/LIGHTING-SYSTEM.md` §3 as real OpenUSD data (`gate_keys.usda` + `gate_keys_overrides.usda` opinion layer + `validate_gate_keys.py`; 64/64 checks at landing, TEST-RECORD.md in the package).
 - **House OCIO config** — `show/production/tooling/lighting-cluster/ocio/config.ocio` (+ `check_config.py`, 16/16 at landing) — fills the "linear/ACES via OpenColorIO in Natron" slot named in `show/production/UNIFIED-PIPELINE.md`; protected identity colours travel as a data colorspace (LS-1/LS-2), environment colour exists only as named Looks.
 - **MaterialX lustre look** — `show/production/tooling/lighting-cluster/materialx/lustre_sheen.mtlx` (+ `check_lustre.py`, 13/13 at landing) — the LV-1..LV-6 lustre rules from LIGHTING-SYSTEM.md §6 as a standard material definition.
+
+## Cast artifacts — rig-and-sheet build-out (landed 2026-10-30, PR #35)
+The cast artifacts the rig-and-sheet standard (Class B, above)
+specifies — built from the repo's own game production art and
+registered CURRENT. Production work points at these files:
+- **Human model sheets (§1b)** — `show/production/model-sheets/humans/`
+  (Mochiko, Hex, Aeon: sheet PNG + MD + per-character `assets/` sets).
+  CURRENT. **Owed:** ¾ (TQ) turnarounds ×3; expression sets beyond the
+  face of record — gate H-2 NOT PASS on all three; full-res battle
+  views ×3. Mouth sets: gate H-1 material PASS, owner's eye-check
+  pending.
+- **Palette files (§2)** — `show/production/model-sheets/palettes/`
+  (9 JSON + 6 MD: the pilot six + Mochiko, Hex, Aeon; CMYK-% with
+  sanctioned 50%/75% tints). CURRENT. **Owed:** Lustre palette deltas
+  for Mochii, Gabu, Kittember, Sproutle.
+- **Height charts (§1c)** — `show/production/model-sheets/height-chart-principal.png`
+  + `height-chart-secondary.png` + `height-chart-data.md`. CURRENT.
+- **Shared hands library (§3f)** — `show/production/rigs/SHARED/hands/`
+  (v1, 15 poses + `hands-library-sheet.png` + README; the locked
+  library rigs link hand poses from). CURRENT (v1). **Owed (v2
+  poses):** point, generic grip, TQ set, wave, palm-up offer.
+- Build record: `show/production/rigs/BUILD-NOTES-cast-gaps-2026-10-30.md`
+  (sources per piece, canon-lock check, contradictions found in the
+  game material, the full owed list).

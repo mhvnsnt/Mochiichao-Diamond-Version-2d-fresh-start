@@ -23,7 +23,7 @@
  "frames": [
   {
    "cell": 0,
-   "role": "battle_front",
+   "role": "battle_back",
    "file": "duskfiend_cell_00.png",
    "game_ready": true,
    "source_cell": 0,
@@ -34,7 +34,7 @@
   },
   {
    "cell": 1,
-   "role": "battle_back",
+   "role": "battle_front",
    "file": "duskfiend_cell_01.png",
    "game_ready": true,
    "source_cell": 1,
@@ -279,5 +279,6 @@
    }
   ],
   "notes": "Unmapped cells NOT relabelled (open scope question, see LOCK-UPDATE note)."
- }
+ },
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): the frame labelled battle_front (0,0) holds the BACK art (hooded cloak rear) and the frame labelled battle_back (64,0) holds the FRONT art (mask face). Role labels swapped in this manifest and in src/lib/spriteSheets.ts so the player side renders the cloak back and the opponent side the face."
 }

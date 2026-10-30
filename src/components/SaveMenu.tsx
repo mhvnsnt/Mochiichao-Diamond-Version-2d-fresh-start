@@ -3,6 +3,7 @@ import { useGameStore } from "../store/gameStore";
 import { getSaves, saveGame, SaveEntry, loadGame } from "../lib/saveSystem";
 import { useMenuSkin, menuSkinVars } from "../lib/menuSkins";
 import { useMenuLayout, cssAlignment } from "../lib/menuLayoutLive";
+import { playCue } from "../lib/soundCues";
 
 // Save rows show a place name, never tile coordinates (Pokemon save screens
 // show location + time). Sector ids map to their place names here.
@@ -42,7 +43,7 @@ export default function SaveMenu({ onClose }: SaveMenuProps) {
     if (viewing !== "CONFIRM_LOAD") return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'y' || e.key === 'Y') handleLoad();
-      else if (e.key === 'n' || e.key === 'N') setViewing("LIST");
+      else if (e.key === 'n' || e.key === 'N') { playCue('ui.cancel'); setViewing("LIST"); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -56,11 +57,13 @@ export default function SaveMenu({ onClose }: SaveMenuProps) {
     const mapName = gameState.currentMap;
     const label = `${mapName.toUpperCase()} - Lvl ${gameState.party.length ? gameState.party[0].level : 5}`;
     saveGame(slotId, "manual", label, gameState);
+    playCue('ui.save');
     setSaves(getSaves(slotId));
   };
 
   const handleLoad = () => {
     if (selectedSave) {
+      playCue('ui.confirm');
       loadGame(selectedSave, gameState.loadState);
       onClose();
     }
@@ -71,7 +74,7 @@ export default function SaveMenu({ onClose }: SaveMenuProps) {
       <div className="std-window p-6 w-full max-w-2xl" data-menu-skin={skin?.id} style={menuSkinVars(skin)}>
          <div className="flex justify-between items-center mb-6 border-b-2 border-teal-900 pb-2">
             <h2 className="text-teal-300 text-2xl font-bold tracking-widest textShadow">SYSTEM / SAVE</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-white font-bold tracking-widest">▼ CLOSE</button>
+            <button onClick={() => { playCue('ui.cancel'); onClose(); }} className="text-gray-400 hover:text-white font-bold tracking-widest">▼ CLOSE</button>
          </div>
 
          {saveMenuLayout.entryId === 'gen3.save' && (
@@ -100,8 +103,8 @@ export default function SaveMenu({ onClose }: SaveMenuProps) {
                         {new Date(save.timestamp).toLocaleString()} • {MAP_DISPLAY_NAMES[save.data.currentMap] || save.data.currentMap || save.label}
                       </div>
                     </div>
-                    <button 
-                       onClick={() => { setSelectedSave(save); setViewing("CONFIRM_LOAD"); }}
+                    <button
+                       onClick={() => { playCue('ui.cursor'); setSelectedSave(save); setViewing("CONFIRM_LOAD"); }}
                        className="bg-slate-800 hover:bg-yellow-400 hover:text-black text-xs font-bold text-teal-100 px-4 py-2 border border-slate-600 rounded opacity-50 group-hover:opacity-100 transition-all"
                     >
                       LOAD
@@ -117,7 +120,7 @@ export default function SaveMenu({ onClose }: SaveMenuProps) {
               <div className="text-red-400 font-bold text-xl mb-4 animate-pulse">WARNING</div>
               <div className="text-white mb-8">Loading this save will overwrite current unsaved progress. Are you sure?</div>
               <div className="flex gap-4 justify-center">
-                 <button onClick={() => setViewing("LIST")} className={`bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded font-bold tracking-widest border border-slate-600${saveMenuLayout.entryId === 'gen4.save' ? ' px-10 py-4 text-lg' : ''}`}>CANCEL</button>
+                 <button onClick={() => { playCue('ui.cancel'); setViewing("LIST"); }} className={`bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded font-bold tracking-widest border border-slate-600${saveMenuLayout.entryId === 'gen4.save' ? ' px-10 py-4 text-lg' : ''}`}>CANCEL</button>
                  <button onClick={handleLoad} className={`bg-red-900/50 hover:bg-red-800/80 text-red-100 border border-red-500 px-8 py-3 rounded font-bold tracking-widest${saveMenuLayout.entryId === 'gen4.save' ? ' px-10 py-4 text-lg' : ''}`}>LOAD GAME</button>
               </div>
            </div>

@@ -264,5 +264,6 @@
   247,
   248,
   243
- ]
+ ],
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): the frame labelled battle_back (0,192) holds a three-quarter pose (key raised), not a true back, and this atlas has no other back cell. The true back view was cut from the species' main 2D sheet as src/assets/sprites/gearkid/gearkid-back-cut.png, registered as the player battle override in src/lib/spriteSheets.ts; the atlas cell remains the fallback where the cut is not used."
 }

@@ -34,11 +34,11 @@
   },
   {
    "cell": 1,
-   "role": "overworld_front_2",
+   "role": "battle_back",
    "file": "gabu_cell_01.png",
    "game_ready": true,
    "source_cell": 1,
-   "lock_note": "",
+   "lock_note": "BACK-CHOICE CORRECTION 2026-10-29 (owner ruling): eye re-check \u2014 this cell is the full standing shell back (no face, arms down), mislabelled overworld_front_2 at lock. It is Gabu's battle back (spriteSheets.ts 148/150 back cell).",
    "eye_status": "extractor_assigned_spot_checked",
    "atlas_x": 64,
    "atlas_y": 0
@@ -56,11 +56,11 @@
   },
   {
    "cell": 3,
-   "role": "battle_back",
+   "role": "3d_sprite_back",
    "file": "gabu_cell_03.png",
    "game_ready": true,
    "source_cell": 3,
-   "lock_note": "",
+   "lock_note": "RELABELLED 2026-10-29 (back-choice correction, owner ruling): this cell is Gabu's T-pose 3D sprite back (arms straight out, tail curled \u2014 the 3D-bake pose). Kept and labelled; NOT the battle back. Battle back = atlas (64,0).",
    "eye_status": "eye_confirmed",
    "atlas_x": 192,
    "atlas_y": 0
@@ -278,5 +278,6 @@
   255,
   246,
   231
- ]
+ ],
+ "back_choice_correction_2026_10_29": "Owner ruling 2026-10-29: the previously wired battle back (atlas (192,0)) is the T-pose 3D sprite back \u2014 relabelled, kept, not wired. Battle back = atlas (64,0), the standing shell back."
 }

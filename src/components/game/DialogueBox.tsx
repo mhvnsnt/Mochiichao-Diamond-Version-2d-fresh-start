@@ -6,12 +6,13 @@ import { TEXT_SPEED_MS } from '../../lib/gameSettings';
 import { messageWindowStyle } from '../../lib/hudCustom';
 import type { MessageWindowStyle } from '../../lib/hudCustom';
 import { isConfirmKey } from '../../lib/buttonMode';
-import { getDayNightMenuVariant } from '../../lib/dayNightMenuVariants';
+import { getDayNightMenuVariant, getWorldMenuVariant } from '../../lib/dayNightMenuVariants';
 import { useMenuSkin, menuSkinVars, menuSkinPanelShadow } from '../../lib/menuSkins';
 import type { DialoguePresentationMode } from '../../lib/personaDialogue';
 import { PERSONA_LETTERBOX_PX } from '../../lib/personaDialogue';
 import type { HumanSlot } from '../../lib/humanSheets';
 import { cellPos } from '../../lib/humanSheets';
+import { playCue } from '../../lib/soundCues';
 
 /**
  * DialogueBox — game-flow v4 dialogue system (field_message_box.c
@@ -124,7 +125,13 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
   // here — only the frame accent is wired, via StdWindow's accent
   // prop (border colour only). No label, margin, font, or cursor
   // change; the box sits over game art, which is never repainted.
-  const dnVariant = getDayNightMenuVariant();
+  // S1 TAIL: dialogue reads the world clock when the save is
+  // anchored; unanchored saves fall back to the device-clock
+  // variant, exactly as before (the engine anchors on its first tick).
+  const worldClockAnchor = useGameStore(s => s.worldClock);
+  const dnVariant = worldClockAnchor
+    ? (getWorldMenuVariant(worldClockAnchor) ?? getDayNightMenuVariant())
+    : getDayNightMenuVariant();
   const page = pages[Math.min(pageIdx, pages.length - 1)];
   const typingDone = shown >= page.length;
   const isLast = pageIdx >= pages.length - 1;
@@ -133,10 +140,21 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
 
   // Typewriter: reveal ~1 char per typeInterval, where typeInterval
   // is the Settings TEXT SPEED row (SLOW 45 / MID 18 / FAST 6 ms).
+  // Sound (2026-10-29): the dialogue-talk blip fires on every second
+  // revealed character — the typewriter's voice (Gen 4 names the
+  // class: SEQ_SE_DP_TALK2; pitch/duty measured from Gen 2's text
+  // sound). Advance presses themselves stay silent, as in the
+  // source: the blip stopping IS the feedback that the page is done.
+  const blipCountRef = useRef(0);
   useEffect(() => {
     setShown(0);
+    blipCountRef.current = 0;
     if (page.length === 0) return;
     const iv = setInterval(() => {
+      blipCountRef.current += 1;
+      if (blipCountRef.current <= page.length && blipCountRef.current % 2 === 0) {
+        playCue('dialog.blip');
+      }
       setShown(s => {
         if (s >= page.length) { clearInterval(iv); return s; }
         return s + 1;
@@ -144,6 +162,13 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
     }, typeInterval);
     return () => clearInterval(iv);
   }, [page, pageIdx, typeInterval]);
+
+  // YES/NO answers speak the decision classes: YES = confirm,
+  // NO = cancel, from keys and buttons alike (one choke point).
+  const choose = React.useCallback((yes: boolean) => {
+    playCue(yes ? 'ui.confirm' : 'ui.cancel');
+    onChoice?.(yes);
+  }, [onChoice]);
 
   const advance = React.useCallback(() => {
     const st = stateRef.current;
@@ -171,8 +196,8 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
       // Y/N now answer directly; Enter/Space are left alone for
       // choice dialogues so a focused YES/NO button can activate.
       if (choice && onChoice) {
-        if (e.key === 'y' || e.key === 'Y') { onChoice(true); return; }
-        if (e.key === 'n' || e.key === 'N') { onChoice(false); return; }
+        if (e.key === 'y' || e.key === 'Y') { choose(true); return; }
+        if (e.key === 'n' || e.key === 'N') { choose(false); return; }
         // Sequence build (2026-10-28): before this, the early return
         // below swallowed Enter/Space on EVERY page of a choice
         // dialogue, so a keyboard player could never read past page
@@ -280,8 +305,8 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
           )}
           {isLast && typingDone && choice && onChoice && (
             <div className="flex gap-3 mt-3 justify-end">
-              <button onClick={(e) => { e.stopPropagation(); onChoice(true); }} className="game-button px-6 py-2 font-bold min-h-[48px]">YES</button>
-              <button onClick={(e) => { e.stopPropagation(); onChoice(false); }} className="game-button px-6 py-2 font-bold min-h-[48px]">NO</button>
+              <button onClick={(e) => { e.stopPropagation(); choose(true); }} className="game-button px-6 py-2 font-bold min-h-[48px]">YES</button>
+              <button onClick={(e) => { e.stopPropagation(); choose(false); }} className="game-button px-6 py-2 font-bold min-h-[48px]">NO</button>
             </div>
           )}
         </div>
