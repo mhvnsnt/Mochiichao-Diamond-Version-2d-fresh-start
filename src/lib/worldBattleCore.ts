@@ -93,7 +93,9 @@
  *   full (gameStore healParty, via worldFullPp in this module), so
  *   write-back does not introduce depletion with no restore — the
  *   exact reason battleWiring.ts left the resolver's PP unwritten.
- *   The evolution hook on the live path is still open.
+ *   Step 8 closes the mid-battle half of the evolution hook (below):
+ *   a level crossed on a non-final trainer faint is queued, not lost,
+ *   and fires at the victory payoff before the victory tail.
  * - TYPE CHART, NOT WIRED HERE: calculateDamage takes its type
  *   multipliers from the caller, and this module passes NEUTRAL (1)
  *   for every defending element. That is a placeholder, not a canon
@@ -625,7 +627,10 @@ export type WorldEvolutionAfterPayoffResult = {
  * The host owns the endsBattle gate (this function cannot see it:
  * the plan carries no endsBattle flag) and the prompt itself, so a
  * mid-battle faint that reaches this function by mistake still
- * returns ready — the host must not call it there. No species
+ * returns ready — step 7's host therefore never called it there.
+ * Step 8 changes that use, deliberately: the host calls it on a
+ * mid-battle faint ONLY through worldQueueEvolution below, which
+ * queues a ready result instead of prompting. No species
  * outside the safe chains, no rule-less species, and no payoff
  * with no level-up ever returns ready.
  */
@@ -643,4 +648,61 @@ export function worldEvolutionAfterPayoff(
   const rule = getSafeEvolutionRule(speciesId);
   if (!rule || !safeEvolutionReady(speciesId, rec.endLevel)) return notReady;
   return { ready: true, rule, targetId: rule.targetId, endLevel: rec.endLevel };
+}
+
+/**
+ * Step 8: a pending evolution — a level crossed on a non-final
+ * trainer faint, waiting for the battle's end. Pokémon defers
+ * evolution to the end of the battle, it does not prompt mid-battle
+ * and it does not drop the level: the queue is that deferral.
+ * One entry per party index, earliest wins: a repeated ready check
+ * for the same member (still unevolved, same species) returns the
+ * same rule, so re-queueing it would duplicate the prompt, not
+ * advance the chain. The chain advances only after the prompt is
+ * confirmed, via worldNextChainEvolution below.
+ */
+export type PendingEvolution = {
+  partyIndex: number;
+  speciesId: string;
+  endLevel: number;
+  rule: EvolutionRule;
+  targetId: string;
+};
+
+/** Queue a ready payoff evolution, or return the queue unchanged. */
+export function worldQueueEvolution(
+  pending: PendingEvolution[],
+  plan: WorldEvolutionPayoff | null | undefined,
+  partyIndex: number,
+  speciesId: string | null | undefined,
+): PendingEvolution[] {
+  const evo = worldEvolutionAfterPayoff(plan, partyIndex, speciesId);
+  if (!evo.ready || !evo.rule || !speciesId || evo.endLevel === null) return pending;
+  if (pending.some((p) => p.partyIndex === partyIndex)) return pending;
+  return [
+    ...pending,
+    {
+      partyIndex,
+      speciesId,
+      endLevel: evo.endLevel,
+      rule: evo.rule,
+      targetId: evo.targetId ?? evo.rule.targetId,
+    },
+  ];
+}
+
+/**
+ * Step 8: the chain step after a confirmed evolution. When a member
+ * evolves to a species whose own safe-chain rule is already met by
+ * its current level (a multi-level award crossed two links), the
+ * next link fires at the same victory, not at a later battle.
+ * Returns null when the new species has no rule or is not ready.
+ */
+export function worldNextChainEvolution(
+  speciesId: string,
+  level: number,
+): { rule: EvolutionRule; targetId: string } | null {
+  const rule = getSafeEvolutionRule(speciesId);
+  if (!rule || !safeEvolutionReady(speciesId, level)) return null;
+  return { rule, targetId: rule.targetId };
 }
