@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../../store/gameStore';
+import { playCue } from '../../lib/soundCues';
 import { MochiiInstance } from '../../lib/types';
-import { createMochii, evolveInstance, gainExp } from '../../lib/engine';
+import { createMochii, evolveInstance } from '../../lib/engine';
+import {
+  planExpAward,
+  commitRecipientExp,
+  commitNextLevel,
+  expProgressInLevel,
+  type PayoffPlan,
+} from '../../lib/battlePayoff';
+import { useBattlePayoffSequence, PayoffStatWindow } from '../game/BattlePayoffSequence';
 import { SPECIES_DB } from '../../lib/species';
 import {
   buildMidFightPrompt,
@@ -10,6 +19,7 @@ import {
   type MidFightEvolutionPrompt,
 } from '../../lib/evolution-hook';
 import { MOVES_DB } from '../../lib/moves';
+import { getMoveAnimationProfile } from '../../lib/moveAnimation';
 import { TYPES } from '../../lib/constants';
 import {
   resolveTurn,
@@ -26,12 +36,16 @@ import {
   type CarriedBattlerState,
 } from '../../lib/battleWiring';
 import { creatureDisplayName } from '../../lib/spriteSheets';
+import { playCry } from '../../lib/cries';
+import { playVictoryJingle, applyMusic } from '../../lib/musicPlacement';
 import { fuseStats, fusionName } from '../../lib/monster-tamer-systems';
 import CreaturePortrait from '../game/CreaturePortrait';
 import HumanPortrait from '../game/HumanPortrait';
 import { UiPanel } from '../game/UiArt';
 import { UI_ART } from '../../lib/uiArt';
 import { playerSlot, cellPos } from '../../lib/humanSheets';
+import { resolveBattleScene } from '../../lib/battleBackground';
+import { FULL_WORLD } from '../../world/FullWorldMaps';
 import PixiBattleCanvas, { BattleAttack } from '../game/PixiBattleCanvas';
 import {
   healthbarStyle, battleHudPositions, moveButtonContainerClass, ppTypeLine,
@@ -43,7 +57,7 @@ import { isConfirmKey, shoulderKey } from '../../lib/buttonMode';
 import { useMenuSkin, menuSkinVars, menuSkinPanelShadow } from '../../lib/menuSkins';
 import { useMenuLayout } from '../../lib/menuLayoutLive';
 
-type BattleState = 'START' | 'PLAYER_TURN' | 'ANIMATING' | 'ENEMY_TURN' | 'CAUGHT' | 'VICTORY' | 'DEFEAT' | 'FLED' | 'SWITCH_CHOICE' | 'EVOLUTION';
+type BattleState = 'START' | 'PLAYER_TURN' | 'ANIMATING' | 'ENEMY_TURN' | 'CAUGHT' | 'VICTORY' | 'DEFEAT' | 'FLED' | 'SWITCH_CHOICE' | 'EVOLUTION' | 'PAYOFF';
 
 /**
  * Battle, mod layer: the turn-based logic from the previous BattleView is
@@ -56,6 +70,23 @@ type BattleState = 'START' | 'PLAYER_TURN' | 'ANIMATING' | 'ENEMY_TURN' | 'CAUGH
  * the original silhouette fallback.
  */
 export default function BattleView({ enemyId, onLeave }: { enemyId: string | null, onLeave: () => void }) {
+  // Battle background context: the map the battle started on + the
+  // tile under the player, resolved through lib/battleBackground
+  // (HGSS: map header battleBg refined by standing tile). BattleView
+  // has no clock reader, so phase stays the resolver's honest 'day'
+  // default until worldClock.ts lands; the WorldEngine battle surface
+  // passes its live phase through the same resolver.
+  const currentMap = useGameStore(s => s.currentMap);
+  const playerPos = useGameStore(s => s.playerPos);
+  const battleBgScene = React.useMemo(() => {
+    const mapRec = (FULL_WORLD as Record<string, any>)[currentMap];
+    const tile = mapRec?.tiles?.[playerPos.y]?.[playerPos.x];
+    return resolveBattleScene({
+      mapId: currentMap,
+      standingTile: typeof tile === 'number' ? tile : null,
+      interior: mapRec?.interior ?? null,
+    });
+  }, [currentMap, playerPos]);
   const party = useGameStore(s => s.party);
   const addMochii = useGameStore(s => s.addMochii);
   const gainWallet = useGameStore(s => s.gainWallet);
@@ -120,11 +151,22 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
     const t = setTimeout(() => setLastDamage(null), 1400);
     return () => clearTimeout(t);
   }, [lastDamage]);
+  // Sound (2026-10-29): this view mounts once per battle session —
+  // the encounter sting (the "!" voice) fires on mount. Win /
+  // level-up jingles are NOT here: they belong to the battle-
+  // payoff lane's post-battle sequence.
+  useEffect(() => { playCue('encounter.sting'); }, []);
+  // Sound-full-coverage: this view unmounts the world engine, so it
+  // carries its own music placement — a wild battle interrupts the
+  // field track here (previously nothing switched the music and the
+  // field track, or silence, ran under the whole battle). Leaving
+  // remounts WorldEngine, whose placement effect restores the field.
+  useEffect(() => { applyMusic({ screen: 'battle', mapId: '', battleKind: 'wild' }); }, []);
   // BUTTON MODE (buttonMode.ts): battle had no keyboard handler
   // before this batch — this is its first, PLAYER_TURN only.
   const buttonMode = useGameStore(s => s.settings.buttonMode);
   const [switchOptions, setSwitchOptions] = useState<Array<{ idx: number; m: MochiiInstance }> | null>(null);
-  const pendingRef = useRef<{ damage: number; text: string; attacker: 'player' | 'enemy'; moveId: string; damageFraction: number; isCrit: boolean } | null>(null);
+  const pendingRef = useRef<{ damage: number; text: string; attacker: 'player' | 'enemy'; moveId: string; damageFraction: number; isCrit: boolean; typeMultiplier: number } | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
   // Resolver wiring (PR #107 -> live BattleView): one resolveTurn call per
   // turn, played back event by event through the existing Pixi pipeline.
@@ -177,6 +219,9 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
       battleHpRef.current = { player: party[firstAlive].hp, foe: newEnemy.hp };
       updateDex(enemyId, 'seen');
       pushLog(`A wild ${newEnemy.nickname} appeared!`);
+      // Soundtrack lane: battle entry cries, both sides.
+      void playCry(enemyId);
+      void playCry(party[firstAlive].speciesId);
       // BATTLE SCENE OFF skips the intro delay; ON keeps 1000ms.
       setTimeout(() => setBState('PLAYER_TURN'), battleScene === 'OFF' ? 0 : 1000);
     } else {
@@ -186,6 +231,7 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
   }, []);
 
   const handleRun = () => {
+    playCue('battle.flee');
     pushLog('You fled the battle!');
     setBState('ANIMATING');
     setTimeout(onLeave, 1500);
@@ -195,23 +241,38 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
     if (!enemy) return;
     if (inventory['luigi_cube'] > 0) {
       useItemState('luigi_cube');
+      // Sound (2026-10-29): throw, then the shake inside the
+      // resolution window, then the lock click + success jingle —
+      // or the break-free buzz. The window is the game's own
+      // 1500 ms ANIMATING beat; with the scene OFF it collapses
+      // and the cues simply land together.
+      playCue('capture.throw');
       pushLog('You threw a Luigi Cube!');
       setBState('ANIMATING');
+      const sceneOff = battleScene === 'OFF';
+      if (!sceneOff) setTimeout(() => playCue('capture.shake'), 500);
       setTimeout(() => {
         const catchRate = SPECIES_DB[enemy.speciesId].catchRate;
         const hpFactor = (3 * enemy.maxHp - 2 * enemy.hp) / (3 * enemy.maxHp);
         const chance = (catchRate * hpFactor) / 255;
-        if (Math.random() < chance + 0.3) {
+        // PERFECT CATCH cheat (same flag the WorldEngine catch site
+        // reads; recorded in cheatLog when toggled): every throw
+        // catches while on.
+        if (useGameStore.getState().guaranteedCatch || Math.random() < chance + 0.3) {
+          playCue('capture.click');
+          setTimeout(() => playCue('capture.success'), 150);
           pushLog(`Gotcha! ${enemy.nickname} was caught!`);
           addMochii(enemy);
           setBState('CAUGHT');
           setTimeout(onLeave, 2000);
         } else {
+          playCue('capture.fail');
           pushLog('Oh no! The Mochiichao broke free!');
           setBState('ENEMY_TURN');
         }
-      }, battleScene === 'OFF' ? 0 : 1500);
+      }, sceneOff ? 0 : 1500);
     } else {
+      playCue('ui.error');
       pushLog('You have no Luigi Cubes!');
     }
   };
@@ -230,14 +291,111 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
   };
 
   // Victory tail (shared by the plain win and the evolution prompt):
-  // the 50-credit reward, the VICTORY state, and the 3s auto-leave.
-  // The evolution prompt resolves through this, so a level-up win never
-  // leaves before the player answers the prompt.
+  // the VICTORY state and the 3s auto-leave. The 50-credit reward is
+  // no longer granted here — it is the payoff sequence's money beat
+  // (below), so the player SEES it land. The evolution prompt resolves
+  // through this, so a level-up win never leaves before the player
+  // answers the prompt.
   const finishVictory = () => {
-    gainWallet(50);
-    pushLog('You found 50 Credits.');
+    // Sound composition (2026-10-29): the win jingle
+    // (MUS_VICTORY_WILD's slot — BattleView hosts wild battles
+    // only; trainer wins resolve in WorldEngine). The 50-credit
+    // reward is NOT re-granted here: the payoff sequence's
+    // money beat owns it in this lineage.
+    playVictoryJingle('wild');
     setBState('VICTORY');
     setTimeout(onLeave, 3000);
+  };
+
+  // Post-battle payoff (lib/battlePayoff.ts + BattlePayoffSequence):
+  // when the foe faints, the battle pauses on the payoff ritual —
+  // EXP text, gauge sweep, per-level fanfare + stat window, money
+  // line — player-paced, exactly the beats the source games play
+  // (pokeheartgold Task_GetExp). Commits land at the source's own
+  // moments via these handlers; the sequence component owns pacing.
+  const [payoff, setPayoff] = useState<PayoffPlan | null>(null);
+  const payoffAfterRef = useRef<(() => void) | null>(null);
+  const payoffCommitExp = (idx: number, amount: number) => {
+    const cur = useGameStore.getState().party[idx];
+    if (!cur) return;
+    const next = { ...cur, stats: { ...cur.stats } };
+    commitRecipientExp(next, amount);
+    updatePartyMember(idx, next);
+    const rec = payoff?.recipients.find(r => r.partyIndex === idx);
+    if (rec) pushLog(`${next.nickname} gained ${rec.expAwarded} Exp. Points!`);
+  };
+  const payoffCommitLevel = (idx: number) => {
+    const cur = useGameStore.getState().party[idx];
+    if (!cur) return;
+    const next = { ...cur, stats: { ...cur.stats } };
+    const step = commitNextLevel(next);
+    if (step) {
+      updatePartyMember(idx, next);
+      pushLog(`${next.nickname} grew to Lv. ${step.toLevel}!`);
+    }
+  };
+  const handlePayoffDone = () => {
+    setPayoff(null);
+    const fn = payoffAfterRef.current;
+    payoffAfterRef.current = null;
+    if (fn) fn();
+    else finishVictory();
+  };
+
+  // Payoff presentation (PRESENTATION-SPEC.md — a port, not a
+  // design): the beat machine runs as a hook and this host renders
+  // its display state inside its own battle scene — the text in the
+  // standing message window below, the gauge sweep in the player
+  // databox's own EXP gauge, and the summary window over the arena.
+  // No covering layer, no second databox, no payoff screen.
+  const payoffDisplay = useBattlePayoffSequence(payoff, {
+    moneyText: 'You found 50 Credits.',
+    instant: battleScene === 'OFF',
+    onCommitExp: payoffCommitExp,
+    onCommitLevel: payoffCommitLevel,
+    onCommitMoney: () => { gainWallet(50); pushLog('You found 50 Credits.'); },
+    onDone: handlePayoffDone,
+  });
+
+  // After the payoff: the mid-fight evolution check (evolution-hook.ts,
+  // SAFE chains only) runs on the levels the payoff actually granted,
+  // then the victory tail. A level-up that meets a safe-chain rule
+  // pauses behind the cancellable prompt, as before; confirm evolves
+  // the active member in place, cancel keeps the old species.
+  const afterPayoff = (plan: PayoffPlan) => {
+    const active = useGameStore.getState().party[activeIdx];
+    const rec = plan.recipients.find(r => r.partyIndex === activeIdx);
+    if (active && rec && rec.levelUps.length > 0) {
+      const newLevel = rec.endLevel;
+      const rule = getSafeEvolutionRule(active.speciesId);
+      if (rule && safeEvolutionReady(active.speciesId, newLevel)) {
+        const target = SPECIES_DB[rule.targetId];
+        const fromName = active.nickname;
+        const prompt = buildMidFightPrompt(
+          { kind: 'levelUpInBattle', speciesId: active.speciesId, newLevel, rule },
+          fromName,
+          target ? target.name : rule.targetId,
+          () => {
+            if (evolveInstance(active, rule.targetId)) {
+              updatePartyMember(activeIdx, active);
+              playCue('ritual.evolve');
+              pushLog(`${fromName} evolved into ${active.nickname}!`);
+            }
+            setEvolutionPrompt(null);
+            finishVictory();
+          },
+          () => {
+            pushLog(`${active.nickname} stopped evolving.`);
+            setEvolutionPrompt(null);
+            finishVictory();
+          },
+        );
+        setEvolutionPrompt(prompt);
+        setBState('EVOLUTION');
+        return;
+      }
+    }
+    finishVictory();
   };
 
   // End of a resolver turn: sync HP + carried state, then exactly one of
@@ -263,54 +421,28 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
     const cur = partyBefore[activeIdx];
     if (cur) updatePartyMember(activeIdx, { ...cur, hp: q.finalPlayerHp });
     if (q.finalFoeHp <= 0) {
-      const active = useGameStore.getState().party[activeIdx];
-      if (active && q.finalPlayerHp > 0) {
-        const expGained = Math.floor((SPECIES_DB[q.foeSpeciesId].baseExpYield * q.foeLevel) / 5);
-        pushLog(`${active.nickname} gained ${expGained} EXP!`);
-        const { leveledUp, newLevel } = gainExp(active, expGained);
-        if (leveledUp) pushLog(`${active.nickname} grew to Level ${newLevel}!`);
-        updatePartyMember(activeIdx, active);
-        // Mid-fight evolution (evolution-hook.ts, SAFE chains only):
-        // a level-up that meets a safe-chain rule pauses the victory
-        // tail behind a cancellable prompt. Confirm evolves the active
-        // member in place (nickname, stats, moves recomputed at the
-        // current level, HP proportion kept); cancel keeps the old
-        // species and level. Either way the victory tail runs after.
-        // A multi-level jump past two rules evolves once, to the
-        // immediate target; the next rule fires on the next level-up.
-        if (leveledUp) {
-          const rule = getSafeEvolutionRule(active.speciesId);
-          if (rule && safeEvolutionReady(active.speciesId, newLevel)) {
-            const target = SPECIES_DB[rule.targetId];
-            const fromName = active.nickname;
-            const prompt = buildMidFightPrompt(
-              { kind: 'levelUpInBattle', speciesId: active.speciesId, newLevel, rule },
-              fromName,
-              target ? target.name : rule.targetId,
-              () => {
-                if (evolveInstance(active, rule.targetId)) {
-                  updatePartyMember(activeIdx, active);
-                  pushLog(`${fromName} evolved into ${active.nickname}!`);
-                }
-                setEvolutionPrompt(null);
-                finishVictory();
-              },
-              () => {
-                pushLog(`${active.nickname} stopped evolving.`);
-                setEvolutionPrompt(null);
-                finishVictory();
-              },
-            );
-            setEvolutionPrompt(prompt);
-            setBState('EVOLUTION');
-            return;
-          }
-        }
-      }
-      finishVictory();
+      // Payoff (lib/battlePayoff.ts): the foe's EXP pool is planned
+      // against the live party — the active member is the participant
+      // of record (this host runs single-active battles; no held
+      // items exist, so no share split). The planner itself skips a
+      // fainted recipient (the recoil edge: foe faints, active also
+      // fainted — EXP is skipped, the victory reward is kept and is
+      // now SEEN as the sequence's money beat). The sequence plays
+      // player-paced; the evolution check + victory tail run after
+      // it via afterPayoff. BATTLE SCENE OFF plays it instantly.
+      const partyNow = useGameStore.getState().party;
+      const plan = planExpAward(
+        partyNow,
+        { speciesId: q.foeSpeciesId, level: q.foeLevel },
+        { participants: [activeIdx], activeIndex: activeIdx, trainerBattle: false, endsBattle: true, expMultiplier: useGameStore.getState().expMultiplier },
+      );
+      payoffAfterRef.current = () => afterPayoff(plan);
+      setPayoff(plan);
+      setBState('PAYOFF');
       return;
     }
     if (q.finalPlayerHp <= 0) {
+      playCue('battle.faint');
       // BATTLE STYLE: SHIFT offers a switch choice; SET sends the
       // next alive creature automatically (pre-existing behaviour).
       const partyAfter = useGameStore.getState().party;
@@ -356,9 +488,9 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
       const attacker = ev.actor === 'player' ? 'player' : 'enemy';
       const targetMax = ev.actor === 'player' ? (enemy?.maxHp ?? 1) : (playerActive?.maxHp ?? 1);
       const dmg = ev.damage ?? 0;
-      pendingRef.current = { damage: dmg, text: ev.text, attacker, moveId: ev.moveId, damageFraction: dmg / targetMax, isCrit: !!ev.isCrit };
+      pendingRef.current = { damage: dmg, text: ev.text, attacker, moveId: ev.moveId, damageFraction: dmg / targetMax, isCrit: !!ev.isCrit, typeMultiplier: ev.typeMultiplier ?? 1 };
       setBState('ANIMATING');
-      setAttack({ nonce: Date.now(), attacker, category: mv?.cat || 'Physical', color: mv ? TYPES[mv.type]?.color || '#ffffff' : '#ffffff', damageFraction: dmg / targetMax, isCrit: !!ev.isCrit, moveId: ev.moveId });
+      setAttack({ nonce: Date.now(), attacker, category: mv?.cat || 'Physical', color: mv ? TYPES[mv.type]?.color || '#ffffff' : '#ffffff', damageFraction: dmg / targetMax, isCrit: !!ev.isCrit, moveId: ev.moveId, animProfile: getMoveAnimationProfile(ev.moveId) });
       return;
     }
     queueTimerRef.current = window.setTimeout(advanceTurnQueue, 650);
@@ -371,6 +503,16 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
     const p = pendingRef.current;
     if (!p) return;
     pendingRef.current = null;
+    // Sound-full-coverage: the hit sound lands AT the impact frame,
+    // in the effectiveness voice the source uses (pokeemerald
+    // battle_script_commands.c: SE_EFFECTIVE / SE_SUPER_EFFECTIVE /
+    // SE_NOT_EFFECTIVE on every damaging hit). A 0-damage no-effect
+    // hit stays silent, the way the source plays no hit voice for it.
+    if (p.damage > 0) {
+      if (p.typeMultiplier > 1) playCue('battle.hitSuper');
+      else if (p.typeMultiplier < 1) playCue('battle.hitWeak');
+      else playCue('battle.hit');
+    }
     if (p.attacker === 'player') {
       const newEnemyHp = Math.max(0, battleHpRef.current.foe - p.damage);
       battleHpRef.current.foe = newEnemyHp;
@@ -475,12 +617,12 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
       const moveCount = playerActive?.moves?.length ?? 0;
       if (moveCount === 0) return;
       const shoulder = shoulderKey(e, buttonMode);
-      if (shoulder === 'L') { e.preventDefault(); setSelectedMove(s => (s - 1 + moveCount) % moveCount); return; }
-      if (shoulder === 'R') { e.preventDefault(); setSelectedMove(s => (s + 1) % moveCount); return; }
+      if (shoulder === 'L') { e.preventDefault(); playCue('ui.cursor'); setSelectedMove(s => (s - 1 + moveCount) % moveCount); return; }
+      if (shoulder === 'R') { e.preventDefault(); playCue('ui.cursor'); setSelectedMove(s => (s + 1) % moveCount); return; }
       if (isConfirmKey(e, buttonMode)) {
         e.preventDefault();
         const moveId = playerActive?.moves?.[selectedMove];
-        if (moveId) handlePlayerMove(moveId);
+        if (moveId) { playCue('ui.confirm'); handlePlayerMove(moveId); }
       }
     };
     window.addEventListener('keydown', handler);
@@ -501,6 +643,22 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
 
   const playerPct = Math.max(0, (playerActive.hp / playerActive.maxHp) * 100);
   const enemyPct = Math.max(0, (enemy.hp / enemy.maxHp) * 100);
+  // The player databox carries an EXP gauge under the HP bar, as the
+  // Gen 5 databox does — progress inside the current level, from the
+  // engine's own curve (lib/battlePayoff.expProgressInLevel). During
+  // the payoff, the gauge is driven by the sequence's animated
+  // fraction instead (source: the databox animates between the
+  // pre-award and post-award progress values — the EXP total itself
+  // commits when the message prints, so the stored value has already
+  // arrived at the end state).
+  const playerExpFrac =
+    bState === 'PAYOFF' && payoffDisplay.recipient?.partyIndex === activeIdx
+      ? payoffDisplay.expFrac
+      : expProgressInLevel(
+          playerActive.experience,
+          playerActive.level,
+          SPECIES_DB[playerActive.speciesId]?.growthRate ?? 'Medium Fast',
+        ).frac;
   const hpColor = (pct: number) => pct > 50 ? '#4caf50' : pct > 20 ? '#ff9800' : '#f44336';
 
   return (
@@ -510,6 +668,7 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
         <PixiBattleCanvas
           playerSpeciesId={playerActive.speciesId}
           enemySpeciesId={enemy.speciesId}
+          scene={battleBgScene}
           attack={attack}
           onImpact={onAttackImpact}
           onDone={onAttackDone}
@@ -546,6 +705,12 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
             <div className="text-[11px] text-slate-300 text-right">{Math.ceil(playerActive.hp)} / {playerActive.maxHp} HP</div>
             <div className="bg-black/70 overflow-hidden mt-1 border border-white/20" style={{ height: hbStyle.height, borderRadius: hbStyle.radius }}>
               <div className="h-full transition-all duration-300" style={{ width: `${playerPct}%`, backgroundColor: hpColor(playerPct), backgroundImage: hbStyle.segmented ? 'repeating-linear-gradient(90deg, transparent 0 8px, rgba(0,0,0,0.35) 8px 10px)' : undefined }} />
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[9px] font-bold text-sky-300 tracking-widest">EXP</span>
+              <div className="flex-1 bg-black/70 overflow-hidden border border-white/20" style={{ height: 4, borderRadius: 2 }}>
+                <div className="h-full transition-all duration-300" style={{ width: `${playerExpFrac * 100}%`, backgroundColor: '#38b6ff' }} />
+              </div>
+            </div>
             </div>
           </div>
         </div>
@@ -565,6 +730,23 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
         </div>
         <div className="absolute bottom-2 right-2 opacity-90 pointer-events-none hidden sm:block">
           <CreaturePortrait speciesId={enemy.speciesId} view="front" size={56} />
+        {/* Post-battle payoff, summary window only (payoff state
+            only): the level-up stat window at the source's geometry,
+            over the arena — the scene, both creatures and both
+            databoxes stay visible around it (PRESENTATION-SPEC.md
+            §3). The payoff's text and gauge live in the standing
+            message window and the player databox, not here. The
+            money commit is this host's standing canon reward ("You
+            found 50 Credits.") — the sequence makes it a seen beat
+            instead of a silent wallet change. */}
+        {bState === 'PAYOFF' && payoffDisplay.statWindow && (
+          <PayoffStatWindow
+            lu={payoffDisplay.statWindow.lu}
+            mode={payoffDisplay.statWindow.mode}
+            recipient={payoffDisplay.statWindow.recipient}
+            onAdvance={payoffDisplay.advance}
+          />
+        )}
         </div>
       </div>
 
@@ -577,11 +759,14 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
           healthboxes and headings above use the MAIN FONT stack. */}
       <div className="game-panel-bottom flex flex-col shrink-0 z-20" style={{ paddingBottom: 'env(safe-area-inset-bottom)', fontFamily: 'var(--battle-font, "Trebuchet MS", "Segoe UI", system-ui, sans-serif)' }}>
         <UiPanel
+          onClick={bState === 'PAYOFF' ? payoffDisplay.advance : undefined}
           slot={UI_ART.battle_panel}
           style={{ margin: '8px 12px 0', padding: '12px 16px', minHeight: '56px', borderColor: skin ? skin.panel.border : battleAccent, ...messageWindowStyle(settings.hudMessageStyle as MessageWindowStyle, settings.panelOpacity || 100), boxShadow: skin ? menuSkinPanelShadow(skin) : (settings.panelShadow ? '0 10px 30px rgba(0,0,0,0.65)' : undefined) }}
         >
           <div className="text-white font-bold text-base leading-relaxed">
-            {log.length > 0 ? log[log.length - 1] : `A wild ${creatureDisplayName(enemy.speciesId)} appeared!`}
+            {bState === 'PAYOFF' && payoffDisplay.active
+              ? payoffDisplay.message
+              : log.length > 0 ? log[log.length - 1] : `A wild ${creatureDisplayName(enemy.speciesId)} appeared!`}
           </div>
         </UiPanel>
         {switchOptions && (
@@ -589,14 +774,18 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
             <div className="text-white font-bold text-sm mb-2">Choose your next Mochiichao! (BATTLE STYLE: SHIFT)</div>
             <div className="flex flex-wrap gap-2">
               {switchOptions.map(o => (
-                <button key={o.idx} onClick={() => { pushLog(`Go! ${o.m.nickname}!`); resetPlayerCarried(o.idx); setActiveIdx(o.idx); setSwitchOptions(null); setBState('PLAYER_TURN'); }} className="game-button px-3 py-2 text-sm font-bold min-h-[48px]">
+                <button key={o.idx} onClick={() => { pushLog(`Go! ${o.m.nickname}!`); playCue('battle.switch'); void playCry(o.m.speciesId); resetPlayerCarried(o.idx); setActiveIdx(o.idx); setSwitchOptions(null); setBState('PLAYER_TURN'); }} className="game-button px-3 py-2 text-sm font-bold min-h-[48px]">
                   {o.m.nickname} (Lv.{o.m.level}, {Math.ceil(o.m.hp)}/{o.m.maxHp} HP)
                 </button>
               ))}
             </div>
           </div>
         )}
-        <div className="flex">
+        {/* During the payoff the source shows only the message
+            window (the command selection is gone while Task_GetExp
+            runs) — the log tray and move grid come back with the
+            next state. */}
+        <div className={bState === 'PAYOFF' ? 'hidden' : 'flex'}>
           <div ref={logRef} className="flex-1 p-3 overflow-y-auto flex flex-col gap-1 text-sm text-slate-200 min-h-[56px] max-h-[88px]">
             {log.map((l, i) => (
               <div key={i} className={i === log.length - 1 ? 'text-white font-bold' : 'opacity-70'}>{l}</div>
@@ -636,9 +825,9 @@ export default function BattleView({ enemyId, onLeave }: { enemyId: string | nul
                   <button
                     key={i}
                     disabled={bState !== 'PLAYER_TURN'}
-                    onClick={() => handlePlayerMove(mId)}
-                    onMouseEnter={() => setSelectedMove(i)}
-                    onFocus={() => setSelectedMove(i)}
+                    onClick={() => { playCue('ui.confirm'); handlePlayerMove(mId); }}
+                    onMouseEnter={() => { if (i !== selectedMove) playCue('ui.cursor'); setSelectedMove(i); }}
+                    onFocus={() => { if (i !== selectedMove) playCue('ui.cursor'); setSelectedMove(i); }}
                     className={`game-button text-left px-3 py-2 disabled:opacity-50${battleMenuLayout.arrangement === 'bottom-screen-touch-2x2' ? ' min-h-[56px]' : ''} ${i === selectedMove ? (skin ? 'skin-selected' : 'ring-2 ring-yellow-300') : ''}`}
                     style={{ borderColor: color }}
                   >
