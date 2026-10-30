@@ -54,8 +54,41 @@ rules:
   full reach overhead, deep crouch, sit, plus its character-specific
   extremes) with **before/after proof frames reviewed by eye**.
   Fixes come from the pipeline, not hand edits.
+- **Sheet / palette / construction formats (CURRENT standard):**
+  `RIG-AND-SHEET-SPEC.md` in this folder — the donor-measured
+  standard landed via PR #145 (2026-10-30) and wired the same day.
+  It rules: model-sheet sections (§1, incl. the two height charts —
+  principal and secondary are separate charts, §1c), palette
+  sheets (§2: base swatches as **CMYK percentages** in the
+  Dominant/Support/Accent/Ink discipline, **sanctioned 50%/75%
+  tints**, variants as delta blocks), puppet construction (§3:
+  root stack, the four-piece masked eye system, the mouth as a
+  frame-chart symbol, pose-frame limbs + `torso_move`, view-code
+  part naming `<view>-<part><L/R>-<###>` with view codes
+  FR/TQ/SD/BK, part-per-file linked libraries, the locked
+  **SHARED/hands** library, overlap skirts), and the compositing
+  glue gate (§4). Where this README's v1 summary and the spec
+  differ in detail, the spec governs.
+- **Implemented in code:** BlairWitch (`mhvnsnt/BlairWitch`, the
+  owner's rig/sheet/puppet creator — canonical home there, per
+  the no-fork law) emits and validates this standard: palette
+  engine, sheet generator, rig scaffold, puppet packages and the
+  extended validator (PR #1). New sheets, palettes and
+  puppets are produced with that tool, not hand-formatted.
 
 ## Files
+- `RIG-AND-SHEET-SPEC.md` — **the CURRENT rig-and-sheet standard**
+  (model-sheet format, palette format, puppet construction,
+  compositing glue), measured from real production files; see the
+  standard bullet above.
+- `DONOR-PROVENANCE-2026-10-29.md` — per-source provenance for the
+  spec: repo/release/file, verified sizes and sha256, licence
+  buckets, located-not-fetched items, named gaps.
+- `open-movie-kit/` — the one direct carry-over: the Big Buck
+  Bunny rig-constraint scripts (CC-BY 3.0, Blender Foundation),
+  carried verbatim with attribution; wired into BlairWitch as its
+  constraints module (registry + modern ports of the separable
+  maths) — BlairWitch PR #1.
 - `CAST-RIG-SPECS.md` — written rig specs for the principal cast
   (pilot six), in his Stage-3 template shape.
 - `scaffolds/*.rig.json` — original, machine-readable rig scaffolds
