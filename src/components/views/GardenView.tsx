@@ -13,6 +13,7 @@ import { MEMORY_QUESTS } from '../../lib/monster-tamer-systems';
 import {
   newGardenRecord, enterCocoon, tickCocoon, plantPlot, harvestPlot,
   runRace, runSpar, createBreedingEgg, dataRebirth, GardenSaveRecord, upgradeGardenRecord,
+  gardenNowMinutes,
 } from '../../lib/garden-wiring';
 import { GARDEN_CRITTERS } from '../../lib/garden-data';
 
@@ -47,6 +48,19 @@ export default function GardenView({ onBack }: { onBack: () => void }) {
   const setGardenRecord = useGameStore(s => s.setGardenRecord);
   const gardenMinutes = useGameStore(s => s.gardenMinutes) || 0;
   const setGardenMinutes = useGameStore(s => s.setGardenMinutes);
+  // S1 TAIL part 2: the Garden reads the world clock when the save is
+  // anchored; gardenMinutes stays only as the unanchored fallback.
+  // Handlers call nowFor() fresh at click time (the world clock runs
+  // 4 game-minutes per real second, so a render-time value would go
+  // stale fast); the 1 s tick below keeps the displayed time live.
+  const worldClock = useGameStore(s => s.worldClock);
+  const [, setNowTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(t => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const nowFor = () => gardenNowMinutes(worldClock, gardenMinutes, Date.now());
+  const gardenNow = nowFor();
   const [note, setNote] = useState<string | null>(null);
   const [place, setPlace] = useState<string | null>(null);
   // Bonding / Memory Quests (monster-tamer spec step 4): quest givers
@@ -177,20 +191,24 @@ export default function GardenView({ onBack }: { onBack: () => void }) {
               </div>
               {note && <div className="mt-3 text-sm text-slate-200 bg-black/40 rounded-lg p-3">{note}</div>}
             </div>
-            <h3 className="text-white font-bold mt-4 mb-2">Farm Plots (3 plots, ready after 7 Garden minutes)</h3>
+            <h3 className="text-white font-bold mt-4 mb-2">Farm Plots (3 plots, ready after 7 minutes)</h3>
             <div className="flex flex-wrap gap-2">
               {rec.farm.map(p => (
                 <button key={p.id} onClick={() => {
-                  if (!p.seed) { setGardenRecord(current.id, plantPlot(rec, p.id, 'Aqua Fruit', gardenMinutes)); setNote(`${p.id} planted with Aqua Fruit.`); }
-                  else { const r = harvestPlot(rec, p.id, gardenMinutes); if (r.fruit) { setGardenRecord(current.id, r.rec); setNote(`Harvested ${r.fruit} from ${p.id}.`); } else setNote(`${p.id} not ready yet (ready at ${p.readyAt}, now ${gardenMinutes}).`); }
+                  if (!p.seed) { setGardenRecord(current.id, plantPlot(rec, p.id, 'Aqua Fruit', nowFor())); setNote(`${p.id} planted with Aqua Fruit.`); }
+                  else { const now = nowFor(); const r = harvestPlot(rec, p.id, now); if (r.fruit) { setGardenRecord(current.id, r.rec); setNote(`Harvested ${r.fruit} from ${p.id}.`); } else setNote(`${p.id} not ready yet (ready at ${p.readyAt}, now ${now}).`); }
                 }} className="game-button px-3 py-1.5 text-sm">{p.id}: {p.seed || 'empty'}</button>
               ))}
-              <button onClick={() => { setGardenMinutes(gardenMinutes + 7); setNote('Garden time +7 minutes.'); }} className="game-button px-3 py-1.5 text-sm">Advance Garden Time +7</button>
+              {worldClock ? (
+                <span className="text-xs text-slate-400 self-center">Garden time follows the world clock{gardenNow ? ` (now ${gardenNow})` : ''}.</span>
+              ) : (
+                <button onClick={() => { setGardenMinutes(gardenMinutes + 7); setNote('Garden time +7 minutes.'); }} className="game-button px-3 py-1.5 text-sm">Advance Garden Time +7</button>
+              )}
             </div>
             <h3 className="text-white font-bold mt-4 mb-2">Data Cocoon / Data Rebirth</h3>
             <div className="flex flex-wrap gap-2">
-              <button onClick={() => { const n = enterCocoon(rec, gardenMinutes); setGardenRecord(current.id, n); setNote(n.cocoon ? `Entered Data Cocoon, emerges at ${n.cocoon.endsAt}.` : 'No cocoon: needs Garden Form I (150 total) or II (300).'); }} className="game-button px-3 py-1.5 text-sm">Enter Cocoon</button>
-              <button onClick={() => { const n = tickCocoon(rec, gardenMinutes); setGardenRecord(current.id, n); setNote(n.cocoon ? 'Cocoon still active.' : 'Cocoon complete (or none active).'); }} className="game-button px-3 py-1.5 text-sm">Check Cocoon</button>
+              <button onClick={() => { const n = enterCocoon(rec, nowFor()); setGardenRecord(current.id, n); setNote(n.cocoon ? `Entered Data Cocoon, emerges at ${n.cocoon.endsAt}.` : 'No cocoon: needs Garden Form I (150 total) or II (300).'); }} className="game-button px-3 py-1.5 text-sm">Enter Cocoon</button>
+              <button onClick={() => { const n = tickCocoon(rec, nowFor()); setGardenRecord(current.id, n); setNote(n.cocoon ? 'Cocoon still active.' : 'Cocoon complete (or none active).'); }} className="game-button px-3 py-1.5 text-sm">Check Cocoon</button>
               <button onClick={() => { if (rec.bond > 50) { const n = dataRebirth(rec); setGardenRecord(current.id, n); setNote('Data Rebirth: stats halved, parts kept, Rebirth Egg created.'); } else setNote('Data Rebirth needs Bond >50 — Last-Chance window instead.'); }} className="game-button px-3 py-1.5 text-sm">Data Rebirth (Bond &gt;50)</button>
             </div>
             <div className="text-xs text-slate-400 mt-1">Cocoon: {rec.cocoon ? `active, ends ${rec.cocoon.endsAt}` : 'none'} · Rebirths: {rec.rebirths} · Mythic: {rec.mythic ? 'yes' : 'no'} · Egg: {rec.egg ? rec.egg.speciesId : 'none'}</div>

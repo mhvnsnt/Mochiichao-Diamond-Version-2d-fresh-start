@@ -1055,6 +1055,15 @@ export default function PixiWorldCanvas({
     drawables.forEach(d => d.build(world));
 
     // Day/night tint overlay (screen space, one persistent Graphics).
+    // OWNER RULE 2026-10-29 ~19:39 CDT (CLOCK §7): the global tint
+    // applies OUTDOORS ONLY. Inside buildings there is no
+    // whole-interior tint — daylight enters through windows via
+    // the light-ray lane, which reads sun facts from the world
+    // clock, not this overlay. The map's own `interior` flag is
+    // the regime data; windowless interiors therefore also skip
+    // the tint rather than getting a wash. The overlay Graphics
+    // is still created (so a map change back outdoors reuses it),
+    // but it is cleared and left empty for interior maps.
     const tint = DAY_TINT[phase] || DAY_TINT.day;
     let overlay = overlayRef.current;
     if (!overlay) {

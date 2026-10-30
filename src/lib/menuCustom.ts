@@ -8,7 +8,11 @@
  * - Day/night: HeartGold pokeheartgold/include/gf_rtc.h +
  *   src/gf_rtc.c GF_RTC_GetTimeOfDayByHour. The hour table below is
  *   that table, transcribed as data: hours 0-3 LATE, 4-9 MORN,
- *   10-17 DAY, 18-20 EVE, 21-23 NITE. Visual states are the four
+ *   10-16 DAY, 17-19 EVE, 20-23 NITE. (CORRECTED gap-fill S1: the
+ *   table previously read 10-17 DAY / 18-20 EVE / 21-23 NITE, one
+ *   hour late against the decomp table — see CLOCK-FROM-POKEMON
+ *   §1.4.1 and src/lib/worldClock.ts PHASE_BY_HOUR, which is now
+ *   the single source of these boundaries.) Visual states are the four
  *   the task names (MORN/DAY/EVE/NITE); LATE renders with the NITE
  *   visual, exactly as HeartGold's wild-param mapping folds
  *   NITE/LATE together (GF_RTC_GetTimeOfDayWildParamByHour:
@@ -84,13 +88,16 @@ export type RtcTimeOfDay = 'LATE' | 'MORN' | 'DAY' | 'EVE' | 'NITE';
 /** Visual states the task names. LATE maps to NITE visually. */
 export type DayNightVisual = 'MORN' | 'DAY' | 'EVE' | 'NITE';
 
-/** sTimeOfDayByHour from pokeheartgold/src/gf_rtc.c, as data. */
+/** sTimeOfDayByHour from pokeheartgold/src/gf_rtc.c, as data.
+ *  Corrected gap-fill S1 to the decomp table (was 10-17 DAY /
+ *  18-20 EVE / 21-23 NITE); worldClock.ts PHASE_BY_HOUR is the
+ *  same table in the producer's vocabulary. */
 export const TIME_OF_DAY_BY_HOUR: RtcTimeOfDay[] = [
   'LATE', 'LATE', 'LATE', 'LATE', // 0-3
   'MORN', 'MORN', 'MORN', 'MORN', 'MORN', 'MORN', // 4-9
-  'DAY', 'DAY', 'DAY', 'DAY', 'DAY', 'DAY', 'DAY', 'DAY', // 10-17
-  'EVE', 'EVE', 'EVE', // 18-20
-  'NITE', 'NITE', 'NITE', 'NITE', // 21-23
+  'DAY', 'DAY', 'DAY', 'DAY', 'DAY', 'DAY', 'DAY', // 10-16
+  'EVE', 'EVE', 'EVE', // 17-19
+  'NITE', 'NITE', 'NITE', 'NITE', // 20-23
 ];
 
 export function getTimeOfDayByHour(hour: number): RtcTimeOfDay {
@@ -170,13 +177,14 @@ export interface DayNightBlend {
  * Gradual transition: during the last hour of a period, blend the
  * palette toward the next period by minute/60. Outside that hour
  * t = 0 (pure current palette). Boundary hours: MORN ends 09,
- * DAY ends 17, EVE ends 20, NITE ends 23 (then LATE/NITE visual
+ * DAY ends 16, EVE ends 19, NITE ends 23 (then LATE/NITE visual
  * continues into 0-3, so no blend is shown at midnight — the
- * visual does not change there, which is correct).
+ * visual does not change there, which is correct). Corrected
+ * gap-fill S1 with the table above (was DAY 17 / EVE 20).
  */
 export function dayNightBlend(hour: number, minute: number): DayNightBlend {
   const current = visualStateOf(getTimeOfDayByHour(hour));
-  const lastHours: Record<DayNightVisual, number> = { MORN: 9, DAY: 17, EVE: 20, NITE: 23 };
+  const lastHours: Record<DayNightVisual, number> = { MORN: 9, DAY: 16, EVE: 19, NITE: 23 };
   const next = nextVisual(current);
   const t = Math.floor(hour) === lastHours[current] ? Math.min(1, Math.max(0, minute / 60)) : 0;
   const cur = DAY_NIGHT_COLOURWAYS[current];

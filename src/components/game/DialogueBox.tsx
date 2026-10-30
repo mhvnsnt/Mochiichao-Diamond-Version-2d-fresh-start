@@ -6,7 +6,7 @@ import { TEXT_SPEED_MS } from '../../lib/gameSettings';
 import { messageWindowStyle } from '../../lib/hudCustom';
 import type { MessageWindowStyle } from '../../lib/hudCustom';
 import { isConfirmKey } from '../../lib/buttonMode';
-import { getDayNightMenuVariant } from '../../lib/dayNightMenuVariants';
+import { getDayNightMenuVariant, getWorldMenuVariant } from '../../lib/dayNightMenuVariants';
 import { useMenuSkin, menuSkinVars, menuSkinPanelShadow } from '../../lib/menuSkins';
 import type { DialoguePresentationMode } from '../../lib/personaDialogue';
 import { PERSONA_LETTERBOX_PX } from '../../lib/personaDialogue';
@@ -125,7 +125,13 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
   // here — only the frame accent is wired, via StdWindow's accent
   // prop (border colour only). No label, margin, font, or cursor
   // change; the box sits over game art, which is never repainted.
-  const dnVariant = getDayNightMenuVariant();
+  // S1 TAIL: dialogue reads the world clock when the save is
+  // anchored; unanchored saves fall back to the device-clock
+  // variant, exactly as before (the engine anchors on its first tick).
+  const worldClockAnchor = useGameStore(s => s.worldClock);
+  const dnVariant = worldClockAnchor
+    ? (getWorldMenuVariant(worldClockAnchor) ?? getDayNightMenuVariant())
+    : getDayNightMenuVariant();
   const page = pages[Math.min(pageIdx, pages.length - 1)];
   const typingDone = shown >= page.length;
   const isLast = pageIdx >= pages.length - 1;
