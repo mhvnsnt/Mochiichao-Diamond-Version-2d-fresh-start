@@ -1,3 +1,4 @@
+import { TRUE_TYPE_CHART, LEGACY_TO_TRUE_ELEMENT } from "../lib/battleTypeChart";
 export const GAME_DATA = {
   starters: [
     { id: 1, name: "Mochii", type: "Water", hp: 44, atk: 48, def: 65, spd: 43, color: "#4fc3f7", sprite: "🌊", desc: "A soft, wave-patterned creature that absorbs moisture from the air to power itself.", moves: ["Foam Burst", "Tackle", "Aqua Blast", "Tail Flick"] },
@@ -66,13 +67,27 @@ export const TYPE_COLORS: Record<string, string> = {
   Deep: "#283593", Flame: "#ff7043", Mythic: "#ffd700", Normal: "#bcaaa4",
 };
 
+export function typeEffectiveness(moveType: any, defTypes: string[]): number {
+  const toTrue = (t: any) => LEGACY_TO_TRUE_ELEMENT[String(t || '').toUpperCase()];
+  const atk = toTrue(moveType);
+  if (!atk || !TRUE_TYPE_CHART[atk]) return 1;
+  let m = 1;
+  for (const d of new Set(defTypes.map(toTrue).filter(Boolean))) m *= TRUE_TYPE_CHART[atk][d as string] ?? 1;
+  return m;
+}
+
 export function calcDamage(moveObj: any, attacker: any, defender: any) {
   if (!moveObj.power) return 0;
   const base = moveObj.power;
   const atkStat = attacker.atk || 50;
   const defStat = defender.def || 50;
   const lvlMod = (attacker.level || 5) * 2 / 5 + 2;
-  const dmg = Math.floor(lvlMod * base * (atkStat / defStat) / 50) + 2;
+  let dmg = Math.floor(lvlMod * base * (atkStat / defStat) / 50) + 2;
+  // STAB (same-type attack bonus), as in the main series
+  if (moveObj.type && (attacker.types || []).includes(String(moveObj.type).toUpperCase())) dmg = Math.floor(dmg * 1.5);
+  // Type effectiveness via the True-Elements chart (legacy type -> True element)
+  dmg = Math.floor(dmg * typeEffectiveness(moveObj.type, defender.types || []));
+  if (dmg <= 0) return 0;
   const roll = (Math.floor(Math.random() * 16) + 85) / 100;
   return Math.max(1, Math.floor(dmg * roll));
 }

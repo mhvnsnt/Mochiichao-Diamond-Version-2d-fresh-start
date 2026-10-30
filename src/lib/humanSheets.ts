@@ -47,6 +47,7 @@ import playerAAtlas from '../assets/human-characters/in-game-sheets/player-a-atl
 // consumed by BattleView's player figure and portrait cells by
 // DialogueBox's speaker portrait (see battleCell / portraitCell);
 // Player A's portrait cell is withheld (eye drift, see below).
+import falkAtlas from '../assets/human-characters/in-game-sheets/falk-atlas-64x64-CHIBI-2026-10-27.png'; // owner-locked Falk model sheet (docs/human-characters), chibi atlas
 import shopkeeperAtlas from '../assets/human-characters/in-game-sheets/shopkeeper-atlas-64x64.png';
 import krixAtlas from '../assets/human-characters/in-game-sheets/krix-atlas-64x64.png';
 import syndicateAtlas from '../assets/human-characters/in-game-sheets/syndicate-grunt-atlas-64x64.png';
@@ -73,7 +74,7 @@ import momWhiteAtlas from '../assets/human-characters/in-game-sheets/mom-white-a
 // left untouched on main; their slots keep the verified PR #100 imports.
 import playerBAtlas from '../assets/human-characters/in-game-sheets/player-b-atlas-core100-2026-10-26.png';
 import playerCAtlas from '../assets/human-characters/in-game-sheets/player-c-atlas-core100-2026-10-26.png';
-import playerDAtlas from '../assets/human-characters/in-game-sheets/player-d-atlas-core100-2026-10-26.png';
+import playerDAtlas from '../assets/human-characters/in-game-sheets/player-d-atlas-core100-2026-10-26-keyed.png'; // background keyed to alpha (same pixels, no new art)
 import hexAtlas from '../assets/human-characters/in-game-sheets/hex-atlas-core100-2026-10-26.png';
 import aeonAtlas from '../assets/human-characters/in-game-sheets/aeon-atlas-core100-2026-10-26.png';
 import mochikoAtlas from '../assets/human-characters/in-game-sheets/mochiko-atlas-core100-2026-10-26.png';
@@ -283,7 +284,13 @@ function m1MomSheet(): string {
 }
 
 export const HUMAN_SLOTS: Record<string, HumanSlot> = {
-  player_boy: slot('player_boy', 'Player (boy)', 'player', '#4fc3f7'),
+  // Boy player (2026-10-29, owner t348u "art has been added and updated
+  // for him 2 times over"): wired to the newest existing boy art, the
+  // Player D core100 atlas (model sheet 10-25 -> world views -> core100
+  // atlas 10-26). Walk is ROWS_WALK by pixel check: cells 4-7 are
+  // idle front/back/left/right, 8-11 the matching steps (its manifest
+  // labels them as pairs, which shows the wrong frames). No new art.
+  player_boy: { slotId: 'player_boy', label: 'Player (boy)', role: 'player', sheetUrl: playerDAtlas, frames: { front: 0, back: 64, left: 128, right: 192 }, walk: ROWS_WALK, battleCell: 12, portraitCell: 13, sheetCols: 4, sheetRows: 4, color: '#4fc3f7' },
   // Player A (young Black woman, teal/chrome jacket, chibi atlas, Mars-approved
   // 2026-10-25) wired to player_girl — the game has boy/girl slots only, no
   // A/B/C/D picker yet. Row-0 world cells: front 0, back 64, left 128,
@@ -496,6 +503,7 @@ export const HUMAN_SLOTS: Record<string, HumanSlot> = {
   // slotForNpc note: her specific route beats isDojoBoss, like
   // Tetsu in PR #265, because this is her own atlas).
   lin: atlasSlot('lin', 'Lin', 'dojo', linAtlas, '#ef5350'),
+  falk: atlasSlot('falk', 'Falk', 'dojo', falkAtlas, '#4fc3f7'),
   // Logo Tee (non-battle townsperson).
   logo_tee: atlasSlot('logo_tee', 'Logo Tee', 'npc', logoTeeAtlas, '#ffee58'),
   // PC Clerk (non-battle secondary).
@@ -599,14 +607,21 @@ export function slotForNpc(npc: any): HumanSlot {
   if (id.includes('ferry_captain') || name.includes('ferry captain')) return HUMAN_SLOTS.ferry_captain;
   if (id.includes('syndicate')) return HUMAN_SLOTS.syndicate;
   if (id.includes('liberation')) return HUMAN_SLOTS.liberation;
+  if (id.includes('falk') || name.includes('falk')) return HUMAN_SLOTS.falk;
   if (npc?.isShop) return HUMAN_SLOTS.shopkeeper;
-  if (npc?.isHeal) return HUMAN_SLOTS.academy_staff;
-  if (npc?.isDojoBoss) return HUMAN_SLOTS.dojo_trainer;
+  // M1 placeholder sweep (2026-10-29): no NPC on the player path falls
+  // back to the silhouette placeholder any more. Healers wear the PC
+  // Clerk atlas; unrouted bosses wear the dojo student atlas; generic
+  // trainers and townsfolk get a stable pick (hash of id) from the
+  // existing repo atlases, like Pokemon reusing class sprites.
+  if (npc?.isHeal || id.includes('healer') || id.includes('nurse')) return HUMAN_SLOTS.pc_clerk;
+  if (npc?.isDojoBoss) return HUMAN_SLOTS.dojo_student;
   // Dojo acolytes are dojo students (map ids dojo_acolyte_1-4,
   // dojo1_guard; event NPCs carry the name "Acolyte Ken" /
   // "Dojo Acolyte" with no id). Bosses are handled above and never
   // reach this branch.
   if (id.includes('dojo_acolyte') || id === 'dojo1_guard' || name.includes('acolyte')) return HUMAN_SLOTS.dojo_student;
-  if (id.includes('trainer') || npc?.battle) return HUMAN_SLOTS.trainer_generic;
-  return HUMAN_SLOTS.townspeople;
+  const pick = (keys: string[]) => { let h = 0; for (const c of id + name) h = (h * 31 + c.charCodeAt(0)) >>> 0; return (HUMAN_SLOTS as any)[keys[h % keys.length]] as HumanSlot; };
+  if (id.includes('trainer') || npc?.battle) return pick(['cowboy', 'flame_tee', 'logo_tee', 'racing', 'hono', 'kenji']);
+  return pick(['junkyard', 'tech_tinkerer', 'garden_keeper', 'logo_tee', 'racing', 'lab_assistant']);
 }

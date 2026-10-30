@@ -145,6 +145,9 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
     return () => clearInterval(iv);
   }, [page, pageIdx, typeInterval]);
 
+  const [choiceIdx, setChoiceIdx] = useState(0);
+  const choiceIdxRef = React.useRef(0);
+  choiceIdxRef.current = choiceIdx;
   const advance = React.useCallback(() => {
     const st = stateRef.current;
     if (!st.typingDone) { setShown(page.length); return; }
@@ -187,6 +190,16 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
         if (!stateRef.current.isLast && isConfirmKey(e, buttonMode)) {
           e.preventDefault();
           advance();
+          return;
+        }
+        // M1 (2026-10-29): Pokemon-style YES/NO cursor on the last
+        // page. Up/Down/Left/Right move the ► cursor, A/Enter/Space
+        // picks the highlighted answer (YES by default, as in the
+        // decomps' YesNo menu), B/Escape/Backspace answers NO.
+        if (stateRef.current.isLast && stateRef.current.typingDone) {
+          if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','s','a','d'].includes(e.key)) { e.preventDefault(); setChoiceIdx(i => 1 - i); return; }
+          if (isConfirmKey(e, buttonMode)) { e.preventDefault(); onChoice(choiceIdxRef.current === 0); return; }
+          if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'x' || e.key === 'X') { e.preventDefault(); onChoice(false); return; }
         }
         return;
       }
@@ -280,8 +293,8 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
           )}
           {isLast && typingDone && choice && onChoice && (
             <div className="flex gap-3 mt-3 justify-end">
-              <button onClick={(e) => { e.stopPropagation(); onChoice(true); }} className="game-button px-6 py-2 font-bold min-h-[48px]">YES</button>
-              <button onClick={(e) => { e.stopPropagation(); onChoice(false); }} className="game-button px-6 py-2 font-bold min-h-[48px]">NO</button>
+              <button onMouseEnter={() => setChoiceIdx(0)} onClick={(e) => { e.stopPropagation(); onChoice(true); }} className={`game-button px-6 py-2 font-bold min-h-[48px] ${choiceIdx === 0 ? 'ring-2 ring-yellow-300' : ''}`}>{choiceIdx === 0 ? '► ' : ''}YES</button>
+              <button onMouseEnter={() => setChoiceIdx(1)} onClick={(e) => { e.stopPropagation(); onChoice(false); }} className={`game-button px-6 py-2 font-bold min-h-[48px] ${choiceIdx === 1 ? 'ring-2 ring-yellow-300' : ''}`}>{choiceIdx === 1 ? '► ' : ''}NO</button>
             </div>
           )}
         </div>
