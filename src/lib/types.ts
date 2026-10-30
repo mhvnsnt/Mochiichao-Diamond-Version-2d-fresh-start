@@ -15,7 +15,12 @@ export interface Move {
   pri: number;
   effect: string;
   effectChance: number;
-  anim?: string;
+  // Stub-kill S-5 (2026-10-29): the old optional `anim` field is
+  // retired. It was write-only data — authored on all 122 moves,
+  // read by nothing but a type assertion in a test. Animation now
+  // derives from the move's stable id via
+  // src/lib/moveAnimation.ts (getMoveAnimationProfile); do not
+  // re-add a stored animation field here.
   desc: string;
 }
 
