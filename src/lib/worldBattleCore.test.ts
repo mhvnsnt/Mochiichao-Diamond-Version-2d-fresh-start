@@ -12,6 +12,7 @@ import {
   worldEndTurnTick,
   worldFullPp,
   worldNoPpLine,
+  worldEvolutionAfterPayoff,
   worldSpendPp,
   worldStatusTickLine,
 } from "./worldBattleCore";
@@ -415,5 +416,47 @@ describe("worldSpendPp (S6 step 6: PP write-back, resolver rule)", () => {
     expect(engine).toContain("worldNoPpLine(battleMonName(bs.player), resolved.display)");
     const store = readFileSync(join(here, "../store/gameStore.ts"), "utf8");
     expect(store).toContain("pp: worldFullPp(m.moves)");
+  });
+});
+
+describe("worldEvolutionAfterPayoff (S6 step 7: live-path evolution hook)", () => {
+  // Minimal payoff plans: only the fields the step reads. levelUps
+  // entries are opaque to the step (it reads length only), so a
+  // single marker stands for one level gained.
+  const plan = (endLevel: number, levelUps: unknown[]) => ({
+    recipients: [{ partyIndex: 0, levelUps, endLevel }],
+  });
+  it("Pupbble 013 levelling to 16 is ready for Terradog 014", () => {
+    const r = worldEvolutionAfterPayoff(plan(16, ["lv"]), 0, "013");
+    expect(r.ready).toBe(true);
+    expect(r.targetId).toBe("014");
+    expect(r.endLevel).toBe(16);
+    expect(r.rule).toEqual({ speciesId: "013", targetId: "014", method: "level", level: 16 });
+  });
+  it("Pupbble 013 at 15, and Terradog 014 at 31, are not ready", () => {
+    expect(worldEvolutionAfterPayoff(plan(15, ["lv"]), 0, "013").ready).toBe(false);
+    expect(worldEvolutionAfterPayoff(plan(31, ["lv"]), 0, "014").ready).toBe(false);
+    expect(worldEvolutionAfterPayoff(plan(32, ["lv"]), 0, "014").targetId).toBe("015");
+  });
+  it("Sproutle 038 levelling to 18 is ready for Shellguard 039", () => {
+    const r = worldEvolutionAfterPayoff(plan(18, ["lv"]), 0, "038");
+    expect(r.ready).toBe(true);
+    expect(r.targetId).toBe("039");
+  });
+  it("no level-up in the payoff, no recipient, no plan, and non-chain species are never ready", () => {
+    expect(worldEvolutionAfterPayoff(plan(16, []), 0, "013").ready).toBe(false);
+    expect(worldEvolutionAfterPayoff(plan(16, ["lv"]), 1, "013").ready).toBe(false);
+    expect(worldEvolutionAfterPayoff(null, 0, "013").ready).toBe(false);
+    expect(worldEvolutionAfterPayoff(plan(99, ["lv"]), 0, "001").ready).toBe(false);
+    expect(worldEvolutionAfterPayoff(plan(16, ["lv"]), 0, null).ready).toBe(false);
+  });
+  it("host source lock: the live host gates on endsBattle, builds the BattleView prompt, and evolves in place", () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const engine = readFileSync(join(here, "../world/WorldEngine.tsx"), "utf8");
+    expect(engine).toContain("worldEvolutionAfterPayoff(plan, bs.playerTeamIdx, member?.speciesId)");
+    expect(engine).toContain("payoffEndsBattleRef");
+    expect(engine).toContain("buildMidFightPrompt(");
+    expect(engine).toContain("evolveInstance(evolved, evo.rule.targetId)");
+    expect(engine).toContain('phase: "evolution"');
   });
 });

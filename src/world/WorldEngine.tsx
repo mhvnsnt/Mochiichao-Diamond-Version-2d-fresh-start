@@ -12,7 +12,7 @@ import SaveMenu from "../components/SaveMenu";
 import { saveGame, getSaves } from "../lib/saveSystem";
 import { SPECIES_DB } from '../lib/species';
 import { MOVES_DB } from '../lib/moves';
-import { createMochii } from '../lib/engine';
+import { createMochii, evolveInstance } from '../lib/engine';
 import DialogueBox from "../components/game/DialogueBox";
 import { isConfirmKey } from "../lib/buttonMode";
 import { slotForNpc } from "../lib/humanSheets";
@@ -23,7 +23,8 @@ import { resolveTrainerRow, rowToMapMembers } from "../lib/trainer-teams-resolve
 import { planForOutcome, commitRecipientExp, commitNextLevel, expProgressInLevel, type PayoffPlan } from "../lib/battlePayoff";
 import { useBattlePayoffSequence, PayoffStatWindow } from "../components/game/BattlePayoffSequence";
 import { resolveWorldMove, buildWorldAttackPresentation } from "../lib/worldMoveBridge";
-import { worldBattleHit, worldCanActGateLine, worldCheckCanAct, worldEndTurnTick, worldNoPpLine, worldSpendPp, worldStatusTickLine } from "../lib/worldBattleCore";
+import { worldBattleHit, worldCanActGateLine, worldCheckCanAct, worldEndTurnTick, worldNoPpLine, worldSpendPp, worldStatusTickLine, worldEvolutionAfterPayoff } from "../lib/worldBattleCore";
+import { buildMidFightPrompt, type MidFightEvolutionPrompt } from "../lib/evolution-hook";
 import BattleSceneBackdrop from "../components/game/BattleSceneBackdrop";
 import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackground";
 import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
@@ -383,11 +384,94 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       return next;
     });
   };
+  // Gap-fill S6 step 7: the live-path evolution hook. The payoff
+  // sequence's continuation (send-out / victory banner) is a
+  // sequence step, and evolution is the step that runs between the
+  // payoff and the victory tail — never inline host code sprinkled
+  // into the faint branches. finishPayoff therefore does NOT run
+  // the continuation straight away when this faint ends the battle
+  // and the payoff's recipient levelled into a safe-chain rule:
+  // it pauses behind the cancellable prompt BattleView already
+  // uses (buildMidFightPrompt, SAFE chains only), and the
+  // continuation runs only after the player answers. A mid-battle
+  // trainer faint (payoffEndsBattleRef false) never pauses here —
+  // the send-out runs at once, and mid-battle evolution stays an
+  // open sub-step. Confirm evolves the store member in place
+  // (evolveInstance, the BattleView performer) and refreshes the
+  // battle copy; cancel keeps the old species and level. The
+  // prompt is button-only: the battle key handler has no
+  // "evolution" branch, so no key can skip past it.
+  const [evolutionPrompt, setEvolutionPrompt] = useState<MidFightEvolutionPrompt | null>(null);
+  const evolutionAfterRef = React.useRef<(() => void) | null>(null);
+  const payoffEndsBattleRef = React.useRef<boolean>(false);
   const finishPayoff = () => {
     setPayoffUi(null);
     const fn = pendingPayoffRef.current;
     pendingPayoffRef.current = null;
-    if (fn) fn();
+    if (!fn) return;
+    const plan = payoffUiRef.current?.plan ?? null;
+    const endsBattle = payoffEndsBattleRef.current;
+    payoffEndsBattleRef.current = false;
+    const bs: any = battleState;
+    if (endsBattle && plan && bs) {
+      const idx = bs.playerTeamIdx;
+      const member: any = (useGameStore.getState().party as any)[idx];
+      const evo = worldEvolutionAfterPayoff(plan, bs.playerTeamIdx, member?.speciesId);
+      if (evo.ready && evo.rule) {
+        const fromName = battleMonName(member);
+        const target = SPECIES_DB[evo.rule.targetId];
+        evolutionAfterRef.current = fn;
+        const prompt = buildMidFightPrompt(
+          { kind: 'levelUpInBattle', speciesId: member.speciesId, newLevel: evo.endLevel ?? member.level, rule: evo.rule },
+          fromName,
+          target ? target.name : evo.rule.targetId,
+          () => {
+            const cur: any = (useGameStore.getState().party as any)[idx];
+            let evolvedMember: any = null;
+            if (cur) {
+              const evolved = { ...cur, stats: { ...(cur.stats || {}) } };
+              if (evolveInstance(evolved, evo.rule.targetId)) {
+                evolvedMember = evolved;
+                setPlayerTeam((t: any[]) => { const next = [...t]; next[idx] = evolved; return next; });
+                setBattleState((prev: any) => prev ? { ...prev, player: { ...evolved, name: battleMonName(evolved), currentHp: evolved.hp, hp: evolved.hp }, log: [...(prev.log || []), `${fromName} evolved into ${evolved.nickname}!`] } : prev);
+                // No evolve cue here on purpose: soundCoverage's
+                // UNIQUE_CUES guard binds 'ritual.evolve' to
+                // BattleView only, and this step does not widen
+                // that binding — the log line is the surface, and
+                // extending the cue's allowed files is a sound-
+                // lane decision, not smuggled into a battle step.
+              }
+            }
+            setEvolutionPrompt(null);
+            const after = evolutionAfterRef.current;
+            evolutionAfterRef.current = null;
+            if (after) after();
+            // The final-win continuation captures the faint-time
+            // battle state (bs), so it would overwrite the evolved
+            // battle copy — and its log line — with the old
+            // species. Re-apply the evolved copy AFTER it runs;
+            // the wild path's functional continuation already
+            // keeps it, so this is a no-op there (the line is
+            // already in the log and is not duplicated).
+            if (evolvedMember) {
+              const line = `${fromName} evolved into ${evolvedMember.nickname}!`;
+              setBattleState((prev: any) => prev ? { ...prev, player: { ...evolvedMember, name: battleMonName(evolvedMember), currentHp: evolvedMember.hp, hp: evolvedMember.hp }, log: (prev.log || []).includes(line) ? prev.log : [...(prev.log || []), line] } : prev);
+            }
+          },
+          () => {
+            setBattleState((prev: any) => prev ? { ...prev, log: [...(prev.log || []), `${fromName} stopped evolving.`] } : prev);
+            setEvolutionPrompt(null);
+            const after = evolutionAfterRef.current;
+            evolutionAfterRef.current = null;
+            if (after) after();
+          },
+        );
+        setEvolutionPrompt(prompt);
+        setBattleState((prev: any) => prev ? { ...prev, phase: "evolution", log: [...(prev.log || []), prompt.promptTitle] } : prev);
+        return;
+      }
+    }
+    fn();
   };
   // Payoff presentation (PRESENTATION-SPEC.md — a port, not a
   // design): the beat machine runs as a hook; this host renders its
@@ -2150,6 +2234,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           // v5.1: banner blocks until Continue — no 2000ms timer.
           pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
         };
+        payoffEndsBattleRef.current = true;
         setPayoffUi({ plan, moneyText: null, moneyAmount: 0 });
       } else {
         setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "over" });
@@ -2227,6 +2312,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       if (plan.recipients.length > 0) {
         setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "payoff" });
         pendingPayoffRef.current = () => continueAfterPayoff(true);
+        payoffEndsBattleRef.current = isFinalWin;
         setPayoffUi({ plan, moneyText: isFinalWin ? `You got ${bs.reward} Credits for winning!` : null, moneyAmount: isFinalWin ? bs.reward : 0 });
       } else {
         continueAfterPayoff(false);
@@ -2973,17 +3059,21 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // the same profile fields BattleView hands the Pixi canvas.
     const animPres = battleAnim ? buildWorldAttackPresentation(battleAnim.side, battleAnim.profile, battleAnim.power, battleAnim.nonce) : null;
 
+    // Battle black-bars fix (2026-10-29, PR #1 as merged, comment
+    // re-seated here): this root used w-screen / h-screen (100vh)
+    // while the app shell (.game-screen, index.css) is sized to the
+    // DYNAMIC viewport (100dvh) precisely so phone browser chrome
+    // cannot clip the bottom edge. 100vh is taller than the visible
+    // area while chrome is shown, so the battle's black bottom panel
+    // bled past the shell and its lower part sat off-screen —
+    // stage-frame bleed, not design. h-full/w-full makes the battle
+    // fill exactly the shell every other screen fills. The header bar
+    // and the h-48 command panel themselves are by design
+    // (Black-pattern command menu) and are untouched. The merged
+    // PR #1 text put this comment INSIDE the return parens as a JSX
+    // comment before the root div, which is a syntax error (two
+    // expressions in one return); the div itself is unchanged.
     return (
-      {/* Battle black-bars fix (2026-10-29): this root used w-screen /
-          h-screen (100vh) while the app shell (.game-screen, index.css)
-          is sized to the DYNAMIC viewport (100dvh) precisely so phone
-          browser chrome cannot clip the bottom edge. 100vh is taller
-          than the visible area while chrome is shown, so the battle's
-          black bottom panel bled past the shell and its lower part sat
-          off-screen — stage-frame bleed, not design. h-full/w-full
-          makes the battle fill exactly the shell every other screen
-          fills. The header bar and the h-48 command panel themselves
-          are by design (Black-pattern command menu) and are untouched. */}
       <div className="w-full h-full bg-slate-950 flex flex-col text-white relative">
         {animPres && <style>{animPres.cssText}</style>}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(0,0,0,0.8)_100%)] pointer-events-none z-10" />
@@ -3047,6 +3137,24 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
             >
               Continue ►
             </button>
+          </div>
+        )}
+
+        {/* Gap-fill S6 step 7: the live-path evolution prompt.
+            It sits between the payoff and the victory tail: the
+            payoff's continuation (victory banner / overworld) does
+            not run until the player answers. Button-only — no key
+            handler branch advances it, so it cannot be skipped. */}
+        {evolutionPrompt && (
+          <div className="absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center gap-4">
+            <div className="text-3xl font-black tracking-wide text-yellow-300 text-center px-6">{evolutionPrompt.promptTitle}</div>
+            <div className="text-slate-200 text-sm tracking-wide text-center px-6">{evolutionPrompt.promptBody}</div>
+            <div className="flex gap-3">
+              <button onClick={evolutionPrompt.onConfirm} className="game-button px-8 py-3 font-bold min-h-[48px]">{evolutionPrompt.confirmLabel}</button>
+              {evolutionPrompt.canCancel && (
+                <button onClick={evolutionPrompt.onCancel} className="game-button px-8 py-3 font-bold min-h-[48px]">{evolutionPrompt.cancelLabel}</button>
+              )}
+            </div>
           </div>
         )}
 
