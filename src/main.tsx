@@ -25,3 +25,12 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 );
+
+// QA hook (2026-10-29): only with ?qa in the URL, expose the store and
+// world data so the headless play-through script can read position and
+// route itself. Without ?qa nothing is exposed.
+if (new URLSearchParams(window.location.search).has('qa')) {
+  Promise.all([import('./store/gameStore'), import('./world/FullWorldMaps'), import('./lib/engine')]).then(([s, w, e]) => {
+    (window as any).__qa = { store: s.useGameStore, world: w.FULL_WORLD, create: (e as any).createMochii };
+  });
+}

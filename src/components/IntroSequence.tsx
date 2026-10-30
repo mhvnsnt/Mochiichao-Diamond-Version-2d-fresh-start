@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useGameStore } from "../store/gameStore";
 import { getSlotSummaries, getSaves, loadGame } from "../lib/saveSystem";
 import HumanPortrait from "./game/HumanPortrait";
@@ -56,7 +56,7 @@ function NamePad({ title, slot, value, setValue, confirmLabel, onConfirm, note }
     const handler = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === "Backspace") { e.preventDefault(); setValue(value.slice(0, -1)); }
-      else if (e.key === "Enter") { e.preventDefault(); onConfirm(value.trim() || "Hex"); }
+      else if (e.key === "Enter") { e.preventDefault(); onConfirm(value.trim()); }
       else if (e.key.length === 1 && letters.includes(e.key) && value.length < 10) {
         e.preventDefault(); setValue(value + e.key);
       }
@@ -95,7 +95,7 @@ function NamePad({ title, slot, value, setValue, confirmLabel, onConfirm, note }
             <button onClick={() => setValue(value.slice(0, -1))} className="game-button px-6 py-2 font-bold min-h-[48px] tracking-widest">
               ⌫ DEL
             </button>
-            <button onClick={() => onConfirm(value.trim() || "Hex")} className="game-button px-6 py-2 font-bold min-h-[48px] tracking-widest">
+            <button onClick={() => onConfirm(value.trim())} className="game-button px-6 py-2 font-bold min-h-[48px] tracking-widest">
               {confirmLabel}
             </button>
           </div>
@@ -338,6 +338,23 @@ export default function IntroSequence({ onComplete, onEnterWorld }: IntroSequenc
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [phase, titlePreset, titleFading]);
+
+  // M1 (2026-10-29): keyboard on the save-slot screen (Gen 3 style
+  // cursor). Up/Down move, Enter/Space/Z choose, Esc/X go back.
+  const [slotCursor, setSlotCursor] = useState(0);
+  const chooseSlotRef = useRef<((slot: number) => void) | null>(null);
+  useEffect(() => {
+    if (phase !== "SAVE_SLOTS" || pendingOverwriteSlot !== null) return;
+    const h = (e: KeyboardEvent) => {
+      const k = e.key;
+      if (k === "ArrowUp" || k === "w" || k === "W") { e.preventDefault(); setSlotCursor(c => (c + 2) % 3); }
+      else if (k === "ArrowDown" || k === "s" || k === "S") { e.preventDefault(); setSlotCursor(c => (c + 1) % 3); }
+      else if (k === "Enter" || k === " " || k === "z" || k === "Z") { e.preventDefault(); chooseSlotRef.current?.(slotCursor + 1); }
+      else if (k === "Escape" || k === "x" || k === "X" || k === "Backspace") { e.preventDefault(); setPhase("MAIN_MENU"); }
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [phase, pendingOverwriteSlot, slotCursor]);
 
   useEffect(() => {
     if (phase === "BOOT" || phase === "INTRO" || phase === "TITLE") {
@@ -938,23 +955,9 @@ export default function IntroSequence({ onComplete, onEnterWorld }: IntroSequenc
     // replaced only when the player later saves over the slot in-game.
     // CONTINUE mode keeps the old load path unchanged.
     const pendingSave = pendingOverwriteSlot !== null ? slots[pendingOverwriteSlot - 1] : null;
-    return (
-      <div className="game-screen bg-[#050810] flex flex-col items-center justify-center p-4 relative">
-        <h2 className="text-teal-300 text-xl font-bold tracking-widest mb-8">SELECT A SAVE FILE</h2>
-        <div className="text-slate-400 text-sm mb-4 text-center">
-          {saveSlotsMode === 'NEW_GAME'
-            ? 'Empty slots start fresh. Occupied slots ask before starting over — nothing is erased until you save over a slot.'
-            : 'Choose a save to continue, or an empty slot to start fresh.'}
-        </div>
-        <div className="flex flex-col gap-4 w-full max-w-lg">
-          {[1,2,3].map(slot => {
-            const save = slots[slot-1];
-            const isNewGameOccupied = saveSlotsMode === 'NEW_GAME' && !!save;
-            return (
-              <StdWindow
-                key={slot}
-                className="p-4 text-left flex justify-between items-center cursor-pointer"
-                onClick={() => {
+    chooseSlotRef.current = (slot: number) => {
+      const save = slots[slot-1];
+      const isNewGameOccupied = saveSlotsMode === 'NEW_GAME' && !!save;
                   if (save) {
                     if (isNewGameOccupied) {
                       setPendingOverwriteSlot(slot);
@@ -970,10 +973,28 @@ export default function IntroSequence({ onComplete, onEnterWorld }: IntroSequenc
                     setSelectedSlot(slot);
                     setPhase("PROF_INTRO_1");
                   }
-                }}
+    };
+    return (
+      <div className="game-screen bg-[#050810] flex flex-col items-center justify-center p-4 relative">
+        <h2 className="text-teal-300 text-xl font-bold tracking-widest mb-8">SELECT A SAVE FILE</h2>
+        <div className="text-slate-400 text-sm mb-4 text-center">
+          {saveSlotsMode === 'NEW_GAME'
+            ? 'Empty slots start fresh. Occupied slots ask before starting over — nothing is erased until you save over a slot.'
+            : 'Choose a save to continue, or an empty slot to start fresh.'}
+        </div>
+        <div className="flex flex-col gap-4 w-full max-w-lg">
+          {[1,2,3].map(slot => {
+            const save = slots[slot-1];
+            const isNewGameOccupied = saveSlotsMode === 'NEW_GAME' && !!save;
+            return (
+              <StdWindow
+                key={slot}
+                className={`p-4 text-left flex justify-between items-center cursor-pointer ${slotCursor === slot - 1 ? "ring-2 ring-yellow-400" : ""}`}
+                selected={slotCursor === slot - 1}
+                onClick={() => chooseSlotRef.current?.(slot)}
               >
                 <div>
-                  <div className="text-teal-400 font-bold mb-1">SLOT {slot}</div>
+                  <div className="text-teal-400 font-bold mb-1">{slotCursor === slot - 1 ? "► " : ""}SLOT {slot}</div>
                   {save ? (
                     <div className="text-white text-sm">
                       <span className="text-yellow-400">{save.player}</span> — {save.map}<br/>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { TYPE_COLORS, calcDamage, makeBattleMon, GAME_DATA as IMPORTED_GAME_DATA } from "./GameData";
+import { TYPE_COLORS, calcDamage, typeEffectiveness, makeBattleMon, GAME_DATA as IMPORTED_GAME_DATA } from "./GameData";
 import { FULL_WORLD } from "./FullWorldMaps";
 import { useGameStore } from "../store/gameStore";
 import PixiWorldCanvas from "../components/game/PixiWorldCanvas";
@@ -14,7 +14,8 @@ import { MOVES_DB } from '../lib/moves';
 import { createMochii } from '../lib/engine';
 import DialogueBox from "../components/game/DialogueBox";
 import { isConfirmKey } from "../lib/buttonMode";
-import { slotForNpc } from "../lib/humanSheets";
+import { slotForNpc, playerSlot as humanPlayerSlot } from "../lib/humanSheets";
+import GbaBattleScene from "../components/game/GbaBattleScene";
 import { personaPresentationForNpc } from "../lib/personaDialogue";
 import { playMusic } from "../lib/music";
 import { resolveTrainerRow, rowToMapMembers } from "../lib/trainer-teams-resolver";
@@ -150,7 +151,10 @@ export function resolveBattleMove(moveKey: string): { power: number; type: strin
 }
 /** Flat atk/def for calcDamage: MochiiInstance carries stats.*, not flat atk/def. */
 export function battleStats(mon: any): any {
-  return { ...mon, atk: mon.atk ?? mon.stats?.atk ?? 50, def: mon.def ?? mon.stats?.def ?? 50 };
+  // types feed STAB in calcDamage (Pokemon x1.5 same-type bonus)
+  const sp: any = (SPECIES_DB as any)[mon.speciesId || mon.id];
+  const types = (sp?.types || (mon.type ? [mon.type] : [])).map((t: string) => String(t).toUpperCase());
+  return { ...mon, types, atk: mon.atk ?? mon.stats?.atk ?? 50, def: mon.def ?? mon.stats?.def ?? 50 };
 }
 /**
  * v5 battle-name fix: MochiiInstance carries `nickname`, NOT `name`
@@ -196,7 +200,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   const defeatTrainer = useGameStore(s => s.defeatTrainer);
   const healParty = useGameStore(s => s.healParty);
   const useItem = useGameStore(s => s.useItem);
-  const inventory = useGameStore(s => s.inventory);
 
   const playerPos = useGameStore(s => s.playerPos);
   const playerGender = useGameStore(s => s.playerGender);
@@ -225,9 +228,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   const [playerName, setPlayerName] = useState("Netrunner");
   
   const [battleState, setBattleState] = useState<any>(null);
-  // Fix 2 submenu state lives next to battleState: the battle key
-  // handler (B button) references it long before doBattleAction.
-  const [battleMenu, setBattleMenu] = useState<"main" | "bag" | "mend" | "party">("main");
   // v5.1: pending end-of-battle cleanup, run ONLY when the player
   // advances past the win/lose banner. Before v5.1 the "over" phase
   // auto-advanced on a 2000-2500ms timer, so a playtest that did not
@@ -317,6 +317,13 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   };
   const npcRuntimeRef = React.useRef<Record<string, NpcRuntime>>({});
   const [npcStates, setNpcStates] = useState<Record<string, NpcWalkState>>({});
+  // QA hook (only with ?qa in the URL): headless play-through scripts
+  // read the engine's local battle/dialog/NPC state. No effect otherwise.
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('qa')) {
+      (window as any).__qaw = { battleState, dialog, npcStates }; if ((window as any).__qa) (window as any).__qa.resolve = resolveBattleMove;
+    }
+  });
   // Refs so the tick callback stays stable while the player
   // walks (otherwise the interval would restart on every step
   // and wandering NPCs would rarely move).
@@ -681,14 +688,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // and door tiles bypass the solid check.
     const exitFirst = (mapData as any).exits?.find((e: any) => e.x === nx && e.y === ny);
     if (exitFirst && !noclip) {
-      // Four-fixes lane (gap fix): a conditioned EXIT is gated like
-      // a conditioned door. Before this, only doors[] entries were
-      // checked with isDoorOpen — an exit's condition (the Silicon
-      // Town → Victory Route exit carries "badges>=8") was metadata
-      // nothing evaluated, so the player could walk north out of
-      // Silicon Town to Victory Route with zero badges. A closed
-      // exit blocks like a wall on the walk path, same as a door.
-      if (!isDoorOpen(exitFirst.condition, badges)) return;
       setIsTransitioning(true);
       setTimeout(() => {
         setMapState(exitFirst.to, exitFirst.enterAt);
@@ -722,10 +721,9 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     }
 
     // Check exits (noclip path; the normal path already handled
-    // exits/doors above, before the solid check). Same condition
-    // gate as the normal path.
+    // exits/doors above, before the solid check)
     const exit = (mapData as any).exits?.find((e: any) => e.x === nx && e.y === ny);
-    if (exit && isDoorOpen((exit as any).condition, badges)) {
+    if (exit) {
       setIsTransitioning(true);
       setTimeout(() => {
         setMapState(exit.to, exit.enterAt);
@@ -897,13 +895,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
             notify("Loaded Autosave", "#88ccff");
           }
         }
-      } else if (screen === "battle" && battleState?.phase === "menu" && battleMenu !== "main") {
-        // Fix 2: B button (Escape / X) backs out of an in-battle
-        // submenu to the main command panel, turn untouched.
-        if (e.key === "Escape" || e.key === "x" || e.key === "X") {
-          e.preventDefault();
-          setBattleMenu(battleMenu === "mend" ? "bag" : "main");
-        }
       } else if (screen === "battle" && battleState?.phase === "over") {
         // v5.1: the banner blocks until advanced. Enter/Space (and
         // the on-screen Continue button) advance it; without this
@@ -927,7 +918,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [screen, move, dialog, playerPos, playerDir, battleState, buttonMode, battleMenu]);
+  }, [screen, move, dialog, playerPos, playerDir, battleState, buttonMode]);
 
   const interact = () => {
     let dx = 0, dy = 0;
@@ -1103,14 +1094,39 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     npc: { id: "prof_aeon", name: "Prof. Aeon" },
   });
 
+  // M1 (2026-10-29): Gen-3 experience + level up (pokeemerald
+  // battle_script_commands.c Cmd_getexp: exp = baseExpYield * level / 7,
+  // x1.5 for trainer battles). Level threshold uses the existing
+  // engine curve (level^3, Medium Fast). On level up the stats are
+  // rebuilt from the species base stats via createMochii; current HP
+  // rises by the max-HP gain, and newly learned moves are kept.
+  const awardExp = (team: any[], idx: number, enemyMon: any, isTrainer: boolean, log: string[]) => {
+    const sp: any = (SPECIES_DB as any)[enemyMon.speciesId || enemyMon.id];
+    const yieldBase = sp?.baseExpYield || 60;
+    const gained = Math.max(1, Math.floor(yieldBase * (enemyMon.level || 5) / 7 * (isTrainer ? 1.5 : 1)));
+    const mon: any = { ...team[idx] };
+    const name = battleMonName(mon);
+    log.push(`${name} gained ${gained} EXP. Points!`);
+    mon.experience = (mon.experience ?? Math.pow(mon.level || 5, 3)) + gained;
+    while ((mon.level || 5) < 100 && mon.experience >= Math.pow((mon.level || 5) + 1, 3)) {
+      const nl = (mon.level || 5) + 1;
+      const rebuilt: any = mon.speciesId ? createMochii(mon.speciesId, nl) : null;
+      if (rebuilt) {
+        const gain = rebuilt.maxHp - (mon.maxHp || rebuilt.maxHp);
+        const cur = Math.max(1, Math.min(rebuilt.maxHp, (mon.currentHp ?? mon.hp ?? 0) + Math.max(0, gain)));
+        const newMoves = rebuilt.moves.filter((m: string) => !(mon.moves || []).includes(m));
+        const moves = [...(mon.moves || []), ...newMoves].slice(-4);
+        newMoves.forEach((m: string) => log.push(`${name} learned ${(MOVES_DB as any)[m]?.name || m}!`));
+        Object.assign(mon, { level: nl, maxHp: rebuilt.maxHp, stats: rebuilt.stats, hp: cur, currentHp: cur, moves, pp: moves.map((m: string) => (MOVES_DB as any)[m]?.pp || 10) });
+      } else {
+        mon.level = nl;
+      }
+      log.push(`${name} grew to Lv. ${nl}!`);
+    }
+    const t = [...team]; t[idx] = mon; return t;
+  };
+
   const doEnemyTurn = (bs: any) => {
-    // Four-fixes lane (Fix 2): read the party FRESH from the store.
-    // playerTeam is a render-time alias of the same array, but a
-    // battle action taken this turn (a Mend Patch heal, below) writes
-    // the store first; building the post-turn team from the stale
-    // render array would silently undo that heal when this function
-    // writes the team back.
-    const freshTeam: any[] = (useGameStore.getState().party as any) || playerTeam;
     const enemy = bs.type === "wild" ? bs.wild : bs.trainerTeam[bs.trainerTeamIdx];
     // v5.2: an empty moves array is truthy, so the old fallback
     // never fired and chosenMove came out undefined (power-40 move
@@ -1130,6 +1146,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     const newHp = Math.max(0, bs.player.currentHp - dmg);
     const newLog = [...bs.log, `${battleMonName(enemy)} used ${chosenMoveDisplay}!`];
     if (dmg > 0) newLog.push(`${battleMonName(bs.player)} took ${dmg} damage!`);
+    { const eff = typeEffectiveness(moveData.type, battleStats(bs.player).types); if (moveData.power && eff > 1) newLog.push("It's super effective!"); else if (moveData.power && eff > 0 && eff < 1) newLog.push("It's not very effective..."); }
 
     // v5.1 HP sync: battle copy keeps hp and currentHp together.
     const updatedPlayer = { ...bs.player, currentHp: newHp, hp: newHp };
@@ -1139,9 +1156,9 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       // v5.1 HP: a mon with hp 0 and no currentHp is fainted, not
       // alive — the old check (currentHp ?? maxHp) would have
       // treated it as alive at full HP.
-      const nextAlive = freshTeam.findIndex((m, i) => i > bs.playerTeamIdx && ((m.currentHp ?? m.hp) ?? m.maxHp) > 0);
+      const nextAlive = playerTeam.findIndex((m, i) => i > bs.playerTeamIdx && ((m.currentHp ?? m.hp) ?? m.maxHp) > 0);
       if (nextAlive === -1) {
-        newLog.push("You have no more Mochiichao! You blacked out...");
+        newLog.push(bs.npcId === 'hex_battle_event' ? "You lost to Hex... but it was a good fight!" : "You have no more Mochiichao! You blacked out...");
         setBattleState({ ...bs, player: updatedPlayer, log: newLog, phase: "over" });
         // v5.1: banner blocks until Continue — no 2500ms timer.
         // The cleanup below is identical to the old timer body,
@@ -1150,6 +1167,17 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         // showed full HP while the next battle entered damaged).
         pendingBattleEndRef.current = () => {
           setBattleState(null);
+          // M1 (2026-10-29): Pokemon-style blackout. The decomp's
+          // DoWhiteOut (pokeemerald overworld.c) calls HealPlayerParty,
+          // so the party IS healed on return. The first rival battle
+          // (Hex) is a loss-allowed story battle like Gen 3's lab
+          // battle: no money lost, stay in the lab, story continues.
+          setPlayerTeam(t => t.map((m: any) => ({ ...m, hp: m.maxHp, currentHp: m.maxHp })));
+          if (bs.npcId === 'hex_battle_event') {
+            setDefeatedTrainers(dt => dt.includes('hex_battle_event') ? dt : [...dt, 'hex_battle_event']);
+            if (!completedEvents.includes('v4_hex_goal')) { setDialog(hexGoalDialog()); setScreen("dialog"); } else setScreen("overworld");
+            return;
+          }
           // Audit-plan blackout rule (decomp-derived, NOT the old
           // 30% heal): lose HALF the wallet, rounded down, floor
           // 0 — no cap value was verified in the decomp data
@@ -1178,33 +1206,19 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           }
         };
       } else {
-        newLog.push(`Go, ${battleMonName(freshTeam[nextAlive])}!`);
-        const switchHp = (freshTeam[nextAlive].currentHp ?? freshTeam[nextAlive].hp) ?? freshTeam[nextAlive].maxHp;
-        setBattleState({ ...bs, player: { ...freshTeam[nextAlive], name: battleMonName(freshTeam[nextAlive]), currentHp: switchHp, hp: switchHp }, playerTeamIdx: nextAlive, log: newLog, phase: "menu" });
+        newLog.push(`Go, ${battleMonName(playerTeam[nextAlive])}!`);
+        const switchHp = (playerTeam[nextAlive].currentHp ?? playerTeam[nextAlive].hp) ?? playerTeam[nextAlive].maxHp;
+        setBattleState({ ...bs, player: { ...playerTeam[nextAlive], name: battleMonName(playerTeam[nextAlive]), currentHp: switchHp, hp: switchHp }, playerTeamIdx: nextAlive, log: newLog, phase: "menu" });
       }
     } else {
       setBattleState({ ...bs, player: updatedPlayer, log: newLog, phase: "menu" });
-      const updatedTeam = [...freshTeam];
-      // v5.1 HP sync: write BOTH fields, or Team (hp) and the
-      // next battle (currentHp) disagree — the v5 discrepancy.
-      updatedTeam[bs.playerTeamIdx] = { ...updatedTeam[bs.playerTeamIdx], currentHp: newHp, hp: newHp };
-      setPlayerTeam(updatedTeam);
+      // v5.1 HP sync: write BOTH fields. M1: functional update so a
+      // delayed enemy turn never overwrites EXP gained this battle.
+      setPlayerTeam((t: any[]) => t.map((m: any, i: number) => i === bs.playerTeamIdx ? { ...m, currentHp: newHp, hp: newHp } : m));
     }
   };
 
   const [battleAnim, setBattleAnim] = useState<"player" | "enemy" | null>(null);
-
-  // Four-fixes lane (Fix 2): in-battle submenus. The battle command
-  // panel gains BAG and PARTY submenus next to the move grid; every
-  // submenu carries a working BACK path (the on-screen BACK button,
-  // or Escape / X — the game's B button) that returns to the main
-  // command panel WITHOUT consuming the turn, the way Pokemon's B
-  // button backs out of the bag / party screens. Choosing an item
-  // target or a switch target is the action and consumes the turn.
-  // (State is declared next to battleState, above.)
-  useEffect(() => {
-    if (!battleState || battleState.phase !== "menu") setBattleMenu("main");
-  }, [battleState]);
 
   const doBattleAction = (action: any) => {
     if (!battleState || battleState.phase !== "menu") return;
@@ -1218,6 +1232,18 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       notify("Got away safely!");
       setScreen("overworld");
       setBattleState(null);
+      return;
+    }
+
+    if (action.type === "item" && action.item === "mend_patch") {
+      // Bag > Medicine (Pokemon Potion flow): heal 50 HP, item used, enemy moves.
+      if ((bs.player.currentHp ?? 0) >= bs.player.maxHp) { setBattleState({ ...bs, log: [...bs.log, "It won't have any effect."] }); return; }
+      if (!useItem('mend_patch')) { setBattleState({ ...bs, log: [...bs.log, "You have no Mend Patches left!"] }); return; }
+      const hp = Math.min(bs.player.maxHp, (bs.player.currentHp ?? 0) + 50);
+      const healed = hp - (bs.player.currentHp ?? 0);
+      const nb = { ...bs, player: { ...bs.player, currentHp: hp, hp }, log: [...bs.log, "You used a Mend Patch!", `${battleMonName(bs.player)} recovered ${healed} HP!`] };
+      setBattleState({ ...nb, phase: "enemy_turn" });
+      setTimeout(() => doEnemyTurn(nb), 1200);
       return;
     }
 
@@ -1250,9 +1276,10 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           : { ...bs.wild, currentHp: bs.wild.currentHp, hp: bs.wild.currentHp };
         setPlayerTeam(t => t.length < 6 ? [...t, caught] : t);
         setDex(d => ({ ...d, [caught.id]: "caught" }));
-        notify(`${caught.name} was caught!`, "#4fc3f7");
-        setScreen("overworld");
-        setBattleState(null);
+        const t0len = () => playerTeam.length;
+        const cname = battleMonName(caught);
+        setBattleState({ ...bs, wild: { ...bs.wild, caught: true }, log: [...bs.log, "You threw a Luigi Cube!", "...  ...  ...", `Gotcha! ${cname} was caught!`, t0len() < 6 ? `${cname} was added to your team.` : `Your team is full. ${cname} could not join.`], phase: "over" });
+        pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
       } else {
         // v5.1 naming: "Merkaba" appeared ONLY here (button + log)
         // and nowhere else as a canon item — Shop, Bag, Team and
@@ -1262,48 +1289,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         setBattleState({ ...bs, log: [...bs.log, "The Luigi Cube shook... and broke!"], phase: "enemy_turn" });
         setTimeout(() => doEnemyTurn({ ...bs, log: [...bs.log, "The Luigi Cube shook... and broke!"] }), 1200);
       }
-      return;
-    }
-
-    if (action.type === "switch") {
-      // Fix 2 (PARTY submenu): a voluntary switch consumes the turn —
-      // the enemy acts after the new member comes in. Backing out of
-      // the submenu (battleMenu state, render side) never reaches
-      // here and never consumes anything.
-      const idx = action.index;
-      const target: any = playerTeam[idx];
-      if (idx === bs.playerTeamIdx || !target) return;
-      const hp = (target.currentHp ?? target.hp) ?? target.maxHp;
-      if (hp <= 0) return;
-      const newLog = [...bs.log, `${battleMonName(bs.player)}, come back!`, `Go, ${battleMonName(target)}!`];
-      const next = { ...bs, player: { ...target, name: battleMonName(target), currentHp: hp, hp }, playerTeamIdx: idx, log: newLog, phase: "enemy_turn" };
-      setBattleState(next);
-      setTimeout(() => doEnemyTurn(next), 1200);
-      return;
-    }
-
-    if (action.type === "item") {
-      // Fix 2 (BAG submenu): Mend Patch is the one battle-usable item
-      // with a wired effect in this build (same 50 HP, same target
-      // rules as BagView: damaged, non-fainted members only; fainted
-      // are NOT revived). Using it consumes the turn.
-      if (action.itemId !== "mend_patch") return;
-      const target: any = playerTeam[action.index];
-      if (!target) return;
-      const cur = (target.currentHp ?? target.hp) ?? target.maxHp;
-      if (cur <= 0 || cur >= target.maxHp) return;
-      if (!useItem("mend_patch")) {
-        setBattleState({ ...bs, log: [...bs.log, "You have no Mend Patches left!"] });
-        return;
-      }
-      const healed = Math.min(target.maxHp, cur + 50);
-      const updatedTeam = [...playerTeam];
-      updatedTeam[action.index] = { ...target, hp: healed, currentHp: healed };
-      setPlayerTeam(updatedTeam);
-      const newLog = [...bs.log, `Used a Mend Patch on ${battleMonName(target)}!`, `${battleMonName(target)} restored to ${healed}/${target.maxHp} HP.`];
-      const next = { ...bs, player: action.index === bs.playerTeamIdx ? { ...bs.player, hp: healed, currentHp: healed } : bs.player, log: newLog, phase: "enemy_turn" };
-      setBattleState(next);
-      setTimeout(() => doEnemyTurn(next), 1200);
       return;
     }
 
@@ -1331,23 +1316,28 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
 
       const newHp = Math.max(0, enemyMon.currentHp - dmg);
       if (dmg > 0) newLog.push(`Dealt ${dmg} damage!`);
+      { const eff = typeEffectiveness(moveData.type, battleStats(enemyMon).types); if (moveData.power && eff > 1) newLog.push("It's super effective!"); else if (moveData.power && eff > 0 && eff < 1) newLog.push("It's not very effective..."); }
       
       if (newHp <= 0) {
         newLog.push(`${enemyMon.name} fainted!`);
         if (bs.type === "wild") {
-          const xp = (Math.floor(Math.random() * 30) + 20) * (enemyMon.level || 5);
-          newLog.push(`Gained ${xp} XP!`);
           setDex(d => ({ ...d, [enemyMon.id]: d[enemyMon.id] === "caught" ? "caught" : "seen" }));
-          const updatedTeam = [...playerTeam];
-          updatedTeam[bs.playerTeamIdx] = { ...updatedTeam[bs.playerTeamIdx], xp: (updatedTeam[bs.playerTeamIdx].xp || 0) + xp };
+          const synced = [...useGameStore.getState().party]; synced[bs.playerTeamIdx] = { ...synced[bs.playerTeamIdx], hp: bs.player.currentHp, currentHp: bs.player.currentHp };
+          const updatedTeam = awardExp(synced, bs.playerTeamIdx, enemyMon, false, newLog);
           setPlayerTeam(updatedTeam);
-          setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "over" });
+          setBattleState({ ...bs, player: { ...bs.player, ...updatedTeam[bs.playerTeamIdx], name: battleMonName(updatedTeam[bs.playerTeamIdx]) }, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "over" });
           // v5.1: banner blocks until Continue — no 2000ms timer.
           pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
         } else {
           const newTeam = [...bs.trainerTeam];
           newTeam[bs.trainerTeamIdx] = { ...enemyMon, currentHp: 0 };
           const nextAlive = newTeam.findIndex((m, i) => i > bs.trainerTeamIdx && m.currentHp > 0);
+          {
+            const synced = [...useGameStore.getState().party]; synced[bs.playerTeamIdx] = { ...synced[bs.playerTeamIdx], hp: bs.player.currentHp, currentHp: bs.player.currentHp };
+            const leveled = awardExp(synced, bs.playerTeamIdx, enemyMon, true, newLog);
+            setPlayerTeam(leveled);
+            bs.player = { ...bs.player, ...leveled[bs.playerTeamIdx], name: battleMonName(leveled[bs.playerTeamIdx]) };
+          }
           if (nextAlive === -1) {
             newLog.push(`${bs.trainerName} was defeated!`);
             if (bs.isDojo) { setBadges(b => [...b, bs.badge]); newLog.push(`You received the ${bs.badge}!`); }
@@ -1635,278 +1625,31 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     const bs = battleState;
     const enemy = bs.type === "wild" ? bs.wild : bs.trainerTeam[bs.trainerTeamIdx];
     const player = bs.player;
-    const playerHpPct = Math.max(0, (player.currentHp / player.maxHp) * 100);
-    const enemyHpPct = Math.max(0, (enemy.currentHp / enemy.maxHp) * 100);
-    const hpColor = (pct: number) => pct > 50 ? "#4caf50" : pct > 20 ? "#ff9800" : "#f44336";
-    const typeColor = TYPE_COLORS[enemy.type] || "#888";
-
+    // M1 (2026-10-29): Gen-3-layout battle scene (GbaBattleScene).
+    // The old SYS_BATTLE grid render is replaced; the battle logic
+    // (doBattleAction / doEnemyTurn / finishBattleEnd) is unchanged.
+    const mapName = String(mapData?.name || '').toLowerCase();
+    const terrain: 'grass' | 'indoor' | 'dojo' = currentMap.startsWith('dojo') ? 'dojo' : ((mapData as any)?.interior || mapName.includes('lab')) ? 'indoor' : 'grass';
+    const trainerSlot = bs.type === 'trainer' ? slotForNpc({ id: bs.npcId, name: bs.trainerName }) : null;
     return (
-      <div className="w-screen h-screen bg-slate-950 flex flex-col text-white relative">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(0,0,0,0.8)_100%)] pointer-events-none z-10" />
-        
-        {/* Header HUD */}
-        <div className="bg-black border-b-2 border-teal-500 px-3 sm:px-6 py-2 flex justify-between items-center gap-3 z-20">
-          <span className="text-teal-400 text-xs tracking-[0.3em] font-bold truncate min-w-0">
-            {bs.type === "wild" ? "WILD ENCOUNTER" : `SYS_BATTLE // ${bs.trainerName}`}
-          </span>
-          <span className="text-yellow-400 text-sm font-bold shrink-0">{credits} CR</span>
-        </div>
-
-        {/* v5.1 win/lose banner: full-screen blocking overlay, NOT
-            the v5 small row + 2000-2500ms timer. The v5 row was
-            never seen in any of the three v5 playtest battles —
-            whether it was missed between screenshots or hidden
-            behind the arena, a timed row is too easy to miss.
-            This overlay covers the battle, shows the outcome in
-            large text, and BLOCKS until the player presses
-            Continue (button, Enter, or Space — see the battle
-            key handler). Flow continues either way — a loss
-            blacks out and returns to the map, a win goes to the
-            goal dialogue or the overworld. Audit-plan note: the
-            WIN sub-line below ("Flow continues — your journey
-            goes on.") is PLACEHOLDER wording, NOT Mars canon —
-            no clear win line was found in story-fill-region1.md,
-            so it is kept and labelled here, not replaced with
-            invented dialogue. */}
-        {bs.phase === "over" && (
-          <div className="absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center gap-4">
-            <div className={`text-5xl font-black tracking-[0.25em] ${player.currentHp <= 0 ? "text-red-400" : "text-yellow-300"}`}>
-              {player.currentHp <= 0 ? "DEFEAT!" : "VICTORY!"}
-            </div>
-            <div className="text-slate-200 text-sm tracking-widest text-center px-6">
-              {player.currentHp <= 0 ? "You blacked out and were sent back — your journey continues." : "Flow continues — your journey goes on."}
-            </div>
-            <button
-              onClick={finishBattleEnd}
-              className="game-button px-8 py-3 font-bold min-h-[48px] tracking-widest"
-            >
-              Continue ►
-            </button>
-          </div>
-        )}
-
-        {/* 2.5D Battle Arena */}
-        <div className="flex-1 relative overflow-hidden flex" style={{ perspective: "1000px" }}>
-           <div className="absolute inset-0 bg-slate-900" />
-           {/* Floor Grid */}
-           <div 
-             className="absolute inset-0"
-             style={{ 
-               backgroundImage: "linear-gradient(rgba(0,255,200,0.1) 2px, transparent 2px), linear-gradient(90deg, rgba(0,255,200,0.1) 2px, transparent 2px)", 
-               backgroundSize: "60px 60px",
-               transform: "rotateX(60deg) scale(1.5)",
-               transformOrigin: "bottom center"
-             }} 
-            />
-
-           {/* Enemy Billboard */}
-           <div className="absolute top-[10%] right-3 sm:right-[15%] flex flex-col items-center">
-              <div className="bg-black/80 backdrop-blur border rounded-lg p-3 w-52 max-w-[60vw] mb-6" style={{ borderColor: typeColor }}>
-                 <div className="flex justify-between items-baseline gap-2 mb-1">
-                   <h3 className="font-bold tracking-wide sm:tracking-wider text-[13px] sm:text-base truncate min-w-0">{enemy.name || enemy.nickname || SPECIES_DB[enemy.speciesId || enemy.id]?.name}</h3>
-                   <span className="text-slate-400 text-xs shrink-0">Lv.{enemy.level}</span>
-                 </div>
-                 <div className="text-[10px] tracking-widest uppercase mb-2" style={{ color: typeColor }}>{enemy.type || SPECIES_DB[enemy.speciesId || enemy.id]?.types[0]} TYPE</div>
-                 <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                   <div className="h-full transition-all duration-500" style={{ width: `${enemyHpPct}%`, background: hpColor(enemyHpPct) }} />
-                 </div>
-              </div>
-              <div 
-                className="text-9xl drop-shadow-2xl animate-pulse flex items-center justify-center h-40 w-40" 
-                style={{ 
-                  filter: `drop-shadow(0 0 30px ${typeColor})`, 
-                  animation: battleAnim === "enemy" ? "attack_enemy 0.4s ease-out" : "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite" 
-                }}
-              >
-                <CreaturePortrait speciesId={enemy.speciesId || enemy.id} view="front" size={144} />
-              </div>
-           </div>
-
-           {/* Player Billboard */}
-           <div className="absolute bottom-[20%] left-3 sm:left-[10%] flex flex-col items-center z-10">
-              <div className="bg-black/80 backdrop-blur border-2 border-teal-400 rounded-lg p-3 w-52 max-w-[60vw] mb-6">
-                 <div className="flex justify-between items-baseline gap-2 mb-1">
-                   <h3 className="font-bold tracking-wide sm:tracking-wider text-[13px] sm:text-base text-teal-300 truncate min-w-0">{player.name || player.nickname || SPECIES_DB[player.speciesId || player.id]?.name}</h3>
-                   <span className="text-slate-400 text-xs shrink-0">Lv.{player.level}</span>
-                 </div>
-                 <div className="flex justify-between items-center mb-1 text-xs">
-                   <span className="text-teal-400 font-bold">{Math.max(0, player.currentHp)}/{player.maxHp} HP</span>
-                 </div>
-                 <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                   <div className="h-full transition-all duration-500" style={{ width: `${playerHpPct}%`, background: hpColor(playerHpPct) }} />
-                 </div>
-              </div>
-              <div 
-                className="text-8xl drop-shadow-2xl flex items-end justify-center h-48 w-48" 
-                style={{ 
-                  filter: "drop-shadow(0 0 20px rgba(0,255,255,0.6))", 
-                  animation: battleAnim === "player" ? "attack_player 0.4s ease-out" : "none" 
-                }}
-              >
-                <CreaturePortrait speciesId={player.speciesId || player.id} view="back" size={144} />
-              </div>
-           </div>
-        </div>
-
-        {/* Action Bottom Panel — the command menu (Pokemon Black
-            pattern: message/log window shrinks on the left, the 2x2
-            command grid is corner-anchored at a fixed share on the
-            right; neither may push the other off screen). On phone
-            widths the panel padding tightens so the grid buttons keep
-            usable width, and every flex child carries min-w-0 so long
-            names/log lines truncate instead of flooding the row. */}
-        <div className="h-48 bg-black border-t-4 border-teal-500 flex z-30 shrink-0">
-          {/* LOG TRAY */}
-          <div className="flex-1 min-w-0 p-2 sm:p-4 overflow-y-auto overflow-x-hidden border-r-2 border-slate-800 flex flex-col justify-end text-sm text-slate-300 leading-relaxed">
-             {bs.log.slice(-3).map((l: string, i: number, arr: any[]) => (
-               <div key={i} className={`mb-1 break-words ${i === arr.length -1 ? 'text-white font-bold opacity-100' : 'opacity-60'}`}>
-                 &gt; {l}
-               </div>
-             ))}
-          </div>
-
-          {/* CONTROLS */}
-          <div className="w-[54%] sm:w-[45%] lg:w-[30%] shrink-0 p-2 sm:p-4 bg-slate-950">
-             {bs.phase === "menu" ? (<>
-             {battleMenu === "main" && (
-               <div className="flex flex-col h-full gap-2">
-                 <div className="grid grid-cols-2 gap-1.5 sm:gap-2 flex-1 min-w-0">
-                   {(player.moves || []).map((mName: string) => {
-                     // v4 bridge: party moves are moveIds — display the
-                     // resolved name/type/power, not the raw id.
-                     const mDef = GAME_DATA.moves[mName as keyof typeof GAME_DATA.moves];
-                     const mResolved = resolveBattleMove(mName);
-                     const mDisplay = mResolved?.display || mName;
-                     const mType = mResolved?.type || mDef?.type;
-                     const mPower = mResolved?.power ?? mDef?.power;
-                     return (
-                       <button
-                         key={mName}
-                         onClick={() => doBattleAction({ type: 'move', move: mName })}
-                         className="bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded text-left p-2 transition-colors flex flex-col justify-center min-w-0"
-                       >
-                          <span className="font-bold text-white text-[12px] sm:text-[13px] leading-tight w-full line-clamp-2">{mDisplay}</span>
-                          <span className="text-[10px] mt-1 truncate w-full" style={{ color: TYPE_COLORS[mType] || "#888" }}>{mType} | PWR {mPower || '-'}</span>
-                       </button>
-                     )
-                   })}
-                 </div>
-                 <div className="flex gap-1.5 sm:gap-2 h-10 mt-2 shrink-0">
-                   {bs.canCatch && (
-                     <button
-                       onClick={() => doBattleAction({ type: 'catch' })}
-                       className="flex-1 min-w-0 truncate bg-teal-950/40 hover:bg-teal-900 border border-teal-700 text-teal-400 font-bold text-[13px] sm:text-sm rounded tracking-wider sm:tracking-widest px-1"
-                     >
-                       LUIGI CUBE
-                     </button>
-                   )}
-                   <button
-                     onClick={() => doBattleAction({ type: 'run' })}
-                     className="flex-1 min-w-0 truncate bg-red-950/40 hover:bg-red-900 border border-red-800 text-red-400 font-bold text-[13px] sm:text-sm rounded tracking-wider sm:tracking-widest px-1"
-                   >
-                     FLEE
-                   </button>
-                 </div>
-                 {/* Fix 2: BAG / PARTY submenu entries. Opening one
-                     never consumes the turn; each submenu has its
-                     own BACK button (and Escape / X) back here. */}
-                 <div className="flex gap-1.5 sm:gap-2 h-9 shrink-0">
-                   <button
-                     onClick={() => setBattleMenu("bag")}
-                     className="flex-1 min-w-0 truncate bg-amber-950/40 hover:bg-amber-900 border border-amber-700 text-amber-300 font-bold text-[13px] sm:text-sm rounded tracking-wider sm:tracking-widest px-1"
-                   >
-                     BAG
-                   </button>
-                   <button
-                     onClick={() => setBattleMenu("party")}
-                     className="flex-1 min-w-0 truncate bg-indigo-950/40 hover:bg-indigo-900 border border-indigo-700 text-indigo-300 font-bold text-[13px] sm:text-sm rounded tracking-wider sm:tracking-widest px-1"
-                   >
-                     PARTY
-                   </button>
-                 </div>
-               </div>
-             )} {battleMenu === "bag" && (
-               <div className="flex flex-col h-full gap-2">
-                 <div className="flex items-center justify-between shrink-0">
-                   <span className="font-bold text-amber-300 tracking-widest text-sm">BAG</span>
-                   <button onClick={() => setBattleMenu("main")} className="bg-slate-900 hover:bg-slate-800 border border-slate-600 text-white font-bold text-[13px] rounded px-3 py-1.5">◄ BACK</button>
-                 </div>
-                 {(() => {
-                   const mendCount = inventory?.["mend_patch"] || 0;
-                   const damaged = playerTeam.map((m: any, i: number) => ({ m, i })).filter(({ m }: any) => ((m.currentHp ?? m.hp) ?? m.maxHp) > 0 && ((m.currentHp ?? m.hp) ?? m.maxHp) < m.maxHp);
-                   return (
-                     <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2">
-                       <button
-                         disabled={mendCount <= 0 || damaged.length === 0}
-                         onClick={() => { if (damaged.length === 1) { doBattleAction({ type: 'item', itemId: 'mend_patch', index: damaged[0].i }); } else { setBattleMenu("mend"); } }}
-                         className="bg-slate-900 hover:bg-slate-800 disabled:opacity-40 border border-amber-700/60 rounded text-left p-2 flex flex-col justify-center min-w-0"
-                       >
-                         <span className="font-bold text-white text-[13px] leading-tight">Mend Patch ×{mendCount}</span>
-                         <span className="text-[10px] mt-1 text-slate-400">Restores 50 HP to one partner</span>
-                       </button>
-                       <div className="text-[11px] text-slate-400 leading-snug">
-                         {mendCount <= 0 ? "No Mend Patches left — the MochiiPlex clerk sells them." : damaged.length === 0 ? "No partner needs healing right now." : "Pick the partner to heal. Using an item uses your turn."}
-                       </div>
-                       <div className="text-[11px] text-slate-500 leading-snug">Luigi Cubes are thrown from the main panel (wild battles only).</div>
-                     </div>
-                   );
-                 })()}
-               </div>
-             )} {battleMenu === "mend" && (
-               <div className="flex flex-col h-full gap-2">
-                 <div className="flex items-center justify-between shrink-0">
-                   <span className="font-bold text-amber-300 tracking-widest text-sm">USE ON WHOM?</span>
-                   <button onClick={() => setBattleMenu("bag")} className="bg-slate-900 hover:bg-slate-800 border border-slate-600 text-white font-bold text-[13px] rounded px-3 py-1.5">◄ BACK</button>
-                 </div>
-                 <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2">
-                   {playerTeam.map((m: any, i: number) => {
-                     const cur = (m.currentHp ?? m.hp) ?? m.maxHp;
-                     if (!(cur > 0 && cur < m.maxHp)) return null;
-                     return (
-                       <button key={i} onClick={() => doBattleAction({ type: 'item', itemId: 'mend_patch', index: i })} className="bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded text-left p-2 flex items-center justify-between gap-2 min-w-0">
-                         <span className="font-bold text-white text-[13px] truncate">{battleMonName(m)}</span>
-                         <span className="text-[11px] text-teal-300 shrink-0">{cur}/{m.maxHp} HP</span>
-                       </button>
-                     );
-                   })}
-                 </div>
-               </div>
-             )} {battleMenu === "party" && (
-               <div className="flex flex-col h-full gap-2">
-                 <div className="flex items-center justify-between shrink-0">
-                   <span className="font-bold text-indigo-300 tracking-widest text-sm">PARTY</span>
-                   <button onClick={() => setBattleMenu("main")} className="bg-slate-900 hover:bg-slate-800 border border-slate-600 text-white font-bold text-[13px] rounded px-3 py-1.5">◄ BACK</button>
-                 </div>
-                 <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2">
-                   {playerTeam.map((m: any, i: number) => {
-                     const cur = (m.currentHp ?? m.hp) ?? m.maxHp;
-                     const isActive = i === bs.playerTeamIdx;
-                     const fainted = cur <= 0;
-                     return (
-                       <button
-                         key={i}
-                         disabled={isActive || fainted}
-                         onClick={() => doBattleAction({ type: 'switch', index: i })}
-                         className="bg-slate-900 hover:bg-slate-800 disabled:opacity-40 border border-slate-700 rounded text-left p-2 flex items-center justify-between gap-2 min-w-0"
-                       >
-                         <span className="font-bold text-white text-[13px] truncate">{battleMonName(m)} <span className="text-slate-400 font-normal">Lv.{m.level}</span></span>
-                         <span className="text-[11px] shrink-0" style={{ color: fainted ? "#f44336" : "#4caf50" }}>{isActive ? "IN BATTLE" : fainted ? "FAINTED" : `${cur}/${m.maxHp} HP`}</span>
-                       </button>
-                     );
-                   })}
-                   <div className="text-[11px] text-slate-500 leading-snug">Switching uses your turn. BACK never does.</div>
-                 </div>
-               </div>
-             )} </>) : (
-               <div className="w-full h-full flex items-center justify-center text-teal-500 animate-pulse tracking-widest font-bold">
-                  {bs.phase === "enemy_turn" ? "AWAITING ENEMY ROOT ACTION..." : "RESOLVING..."}
-               </div>
-             )}
-          </div>
-        </div>
-      </div>
+      <GbaBattleScene
+        bs={bs}
+        enemy={enemy}
+        player={player}
+        credits={credits}
+        battleAnim={battleAnim}
+        terrain={terrain}
+        playerSlot={humanPlayerSlot(playerGender)}
+        trainerSlot={trainerSlot}
+        cubes={useGameStore.getState().inventory?.luigi_cube ?? 0}
+        resolveMove={resolveBattleMove}
+        typeColors={TYPE_COLORS as any}
+        onAction={doBattleAction}
+        onFinish={finishBattleEnd}
+      />
     );
   }
+
 
 
   // --------------------------------------------------------

@@ -1,5 +1,23 @@
 import React, { useEffect, useRef } from 'react';
-import { Application, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
+
+// Flicker fix (2026-10-29): Texture.from(url) on a not-yet-loaded URL
+// gives an empty texture in pixi 8, so each walk-frame phase drew
+// nothing until (and, for cached sprites, even after) it loaded:
+// creatures vanished and came back on the anim tick. Frames are now
+// preloaded through Assets; a frame is only used once it is ready,
+// and the sheet cell stands in until then.
+const readyFrames = new Set<string>();
+const pendingFrames = new Set<string>();
+function readyUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (readyFrames.has(url)) return url;
+  if (!pendingFrames.has(url)) {
+    pendingFrames.add(url);
+    Assets.load(url).then(() => readyFrames.add(url)).catch(() => {});
+  }
+  return null;
+}
 import { getSheetDef, worldCell } from '../../lib/spriteSheets';
 import { fallbackColorFor } from '../../lib/spriteSheets';
 import { playerSlot, slotForNpc } from '../../lib/humanSheets';
@@ -387,7 +405,7 @@ export default function PixiWorldCanvas({
             // sheet-only walk sets keep the sheet cell — named as a
             // gap in docs/SEQUENCE-PLAN.md, never faked.
             const frameDir = npc.facing === 'up' ? 'up' : npc.facing === 'left' ? 'left' : npc.facing === 'right' ? 'right' : 'down';
-            const frameUrl = npc.creatureId ? creatureWalkFrameUrl(npc.creatureId, frameDir, animTick % 4) : null;
+            const frameUrl = npc.creatureId ? readyUrl(creatureWalkFrameUrl(npc.creatureId, frameDir, animTick % 4)) : null;
             if (frameUrl) {
               const key = `npc-${npc.id}-walk-${frameUrl}`;
               let sp = sheetSpritesRef.current.get(key);
@@ -474,7 +492,7 @@ export default function PixiWorldCanvas({
         build: (parent) => {
           const cx = (follower.x + 0.5) * tile;
           const cy = (follower.y + 0.5) * tile;
-          const frameUrl = creatureWalkFrameUrl(follower.speciesId, follower.dir, animTick % 4);
+          const frameUrl = readyUrl(creatureWalkFrameUrl(follower.speciesId, follower.dir, animTick % 4));
           if (frameUrl) {
             const key = `follower-walk-${frameUrl}`;
             let sp = sheetSpritesRef.current.get(key);
@@ -577,13 +595,16 @@ export default function PixiWorldCanvas({
         }
         // Pass 8: wired walk frame wins over the static sheet cell
         // when Creature Mode passes one; otherwise the old path runs.
-        if (playerWalkFrameUrl) {
-          const key = `player-walk-${playerWalkFrameUrl}`;
+        // Flicker fix: only use the walk frame once it is loaded;
+        // until then the static sheet path below draws the player.
+        const readyPlayerFrame = readyUrl(playerWalkFrameUrl);
+        if (readyPlayerFrame) {
+          const key = `player-walk-${readyPlayerFrame}`;
           let sp = sheetSpritesRef.current.get(key);
           if (!sp) {
             sp = new Sprite();
             sheetSpritesRef.current.set(key, sp);
-            sp.texture = Texture.from(playerWalkFrameUrl);
+            sp.texture = Texture.from(readyPlayerFrame);
           }
           sp.anchor.set(0.5, 1);
           sp.position.set(cx, cy + tile * 0.5 + bob);
