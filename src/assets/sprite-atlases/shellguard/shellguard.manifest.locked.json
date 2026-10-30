@@ -23,7 +23,7 @@
  "frames": [
   {
    "cell": 0,
-   "role": "battle_back",
+   "role": "battle_front",
    "file": "shellguard_cell_00.png",
    "game_ready": true,
    "source_cell": 0,
@@ -34,7 +34,7 @@
   },
   {
    "cell": 1,
-   "role": "battle_front",
+   "role": "battle_back",
    "file": "shellguard_cell_01.png",
    "game_ready": true,
    "source_cell": 1,
@@ -207,5 +207,6 @@
   245,
   245,
   245
- ]
+ ],
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): the frame labelled battle_front (64,0) holds the BACK art (shell) and the frame labelled battle_back (0,0) holds the FRONT art (face). Role labels swapped in this manifest and in src/lib/spriteSheets.ts so the player side renders the shell back and the opponent side the face."
 }
