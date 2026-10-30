@@ -53,13 +53,11 @@ export default function App() {
 
       {/* MochiiMind toggle — v4: moved below the HUD (top 4.5rem) so it
           no longer overlaps the WorldEngine A/B cluster at bottom-right,
-          which was partially clipped in the live playtest.
-          Four-fixes lane (gap fix): the WorldHud stacks two rows tall
-          on phones now (~12rem), so on phone widths the toggle sits
-          below the stacked bar (top 12.5rem); sm+ keeps 4.5rem. */}
+          which was partially clipped in the live playtest. */}
       <button
         onClick={() => setIsMindOpen(!isMindOpen)}
-        className="game-button fixed right-4 z-[100] px-3 py-2 text-sm font-bold top-[12.5rem] sm:top-[4.5rem]"
+        className="game-button fixed right-4 z-[100] px-3 py-2 text-sm font-bold"
+        style={{ top: '4.5rem' }}
         title="Open MochiiMind"
       >
         MochiiMind
