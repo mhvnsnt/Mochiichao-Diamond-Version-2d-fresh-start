@@ -405,6 +405,28 @@ export default function PixiWorldCanvas({
   const tileSpritesRef = useRef<Map<string, Sprite>>(new Map());
   const bw2TexRef = useRef<Map<string, Texture>>(new Map());
   const overlayRef = useRef<Graphics | null>(null);
+  // Flicker fix (ported from PR #3, 2026-10-30): the static ground
+  // layer — the base tile Graphics, the foreground shadow Graphics,
+  // and the door-label Texts — is built ONCE per static key and
+  // reused across draws. Before this, draw() ran on every React
+  // render (WorldEngine's animTick setState fires every 300 ms, plus
+  // the NPC tick and every step) and each draw destroyed and
+  // recreated the full ~900-tile Graphics and every door Text; any
+  // frame the renderer missed in that churn showed the bare canvas
+  // background (#0a1a0a) = the visible flicker. Everything the static
+  // layer draws depends only on the map's tiles/doors, the tile
+  // pixel size, and which ground texture URL each tile resolves to
+  // (whose null-ness is tick-invariant — the tick-varying URLs are
+  // water and the env cycle frames, and those are SPRITES, placed
+  // per draw exactly as before, so water/cycle animation is
+  // untouched). The day/night overlay is a separate persistent
+  // Graphics and was never part of the churn.
+  const staticBaseRef = useRef<Graphics | null>(null);
+  const staticFgRef = useRef<Graphics | null>(null);
+  const staticLabelsRef = useRef<Container | null>(null);
+  const staticKeyRef = useRef<string>('');
+  const staticMapRef = useRef<any>(null);
+  const staticFpRef = useRef<string>('');
 
   useEffect(() => {
     let cancelled = false;
@@ -446,6 +468,13 @@ export default function PixiWorldCanvas({
       sheetSpritesRef.current.clear();
       tileSpritesRef.current.forEach(s => s.destroy());
       tileSpritesRef.current.clear();
+      staticBaseRef.current?.destroy();
+      staticBaseRef.current = null;
+      staticFgRef.current?.destroy();
+      staticFgRef.current = null;
+      staticLabelsRef.current?.destroy({ children: true });
+      staticLabelsRef.current = null;
+      staticKeyRef.current = '';
       overlayRef.current = null;
       app.destroy(true);
       appRef.current = null;
@@ -477,6 +506,24 @@ export default function PixiWorldCanvas({
     const mapW = mapData.width || 30;
     const mapH = mapData.height || 30;
 
+    // Static-layer key (flicker fix): a content fingerprint of the
+    // tiles + door labels, recomputed only when the mapData object
+    // itself changes, so the per-draw cost of the check is one
+    // string comparison. The tile pixel size is in the key because
+    // every static coordinate and the label font size scale with it.
+    if (staticMapRef.current !== mapData) {
+      staticMapRef.current = mapData;
+      let h = 0;
+      for (let yy = 0; yy < mapH; yy++) {
+        for (let xx = 0; xx < mapW; xx++) {
+          h = (h * 33 + (mapData.tiles?.[yy]?.[xx] ?? 1) + 1) >>> 0;
+        }
+      }
+      staticFpRef.current = h.toString(36) + ':' + (mapData.doors || []).map((d: any) => d.label || '').join(',');
+    }
+    const staticKey = `${mapId ?? (mapData as any)?.id ?? (mapData as any)?.name ?? 'map'}|${mapW}x${mapH}|${tile.toFixed(2)}|${staticFpRef.current}`;
+    const buildStatic = staticKeyRef.current !== staticKey || !staticBaseRef.current || !staticFgRef.current || !staticLabelsRef.current;
+
     // Camera: centre the player, clamp so the map fills the view.
     let camX = (playerPos.x + 0.5) * tile - vw / 2;
     let camY = (playerPos.y + 0.5) * tile - vh / 2;
@@ -487,11 +534,19 @@ export default function PixiWorldCanvas({
     // Remove last frame's drawables; cached sheet sprites are reused, not destroyed.
     const removed = world.removeChildren();
     removed.forEach(child => {
+      if (child === staticBaseRef.current || child === staticFgRef.current || child === staticLabelsRef.current) return;
       if (child instanceof Sprite && [...sheetSpritesRef.current.values()].includes(child)) return;
       if (child instanceof Sprite && [...tileSpritesRef.current.values()].includes(child)) return;
       child.destroy();
     });
-    const g = new Graphics();
+    let g: Graphics;
+    if (buildStatic) {
+      staticBaseRef.current?.destroy();
+      g = new Graphics();
+      staticBaseRef.current = g;
+    } else {
+      g = staticBaseRef.current!;
+    }
     world.addChild(g);
 
     // BW2 proof pass: cached tile sprites (ground textures, foam,
@@ -516,7 +571,14 @@ export default function PixiWorldCanvas({
       world.addChild(sp);
       return sp;
     };
-    const gFg = new Graphics();
+    let gFg: Graphics;
+    if (buildStatic) {
+      staticFgRef.current?.destroy();
+      gFg = new Graphics();
+      staticFgRef.current = gFg;
+    } else {
+      gFg = staticFgRef.current!;
+    }
 
     for (let y = 0; y < mapH; y++) {
       for (let x = 0; x < mapW; x++) {
@@ -524,7 +586,7 @@ export default function PixiWorldCanvas({
         const base = TILE_COLORS[t] ?? TILE_COLORS[0];
         const px = x * tile;
         const py = y * tile;
-        g.rect(px, py, tile, tile).fill(base);
+        if (buildStatic) g.rect(px, py, tile, tile).fill(base);
         // Environment pull-in: exterior tiles resolve through the
         // HGSS/Diamond kit first (tile SETS + ported cycle frames);
         // anything the kit does not cover falls through to the BW2
@@ -534,7 +596,7 @@ export default function PixiWorldCanvas({
           ? envGroundFor(t, x, y, animeTicksRef.current, (nx, ny) => mapData.tiles?.[ny]?.[nx] ?? 1)
           : null;
         const bw2url = env?.base ?? ((mapId ? BW2_MAP_TILES[mapId]?.[t] : undefined)?.(x, y, animTick) ?? BW2_GROUND[t]?.(x, y, animTick) ?? null);
-        if (!bw2url && (x + y) % 2 === 0 && (t === 0 || t === 6)) g.rect(px, py, tile, tile).fill({ color: 0xffffff, alpha: 0.04 });
+        if (buildStatic && !bw2url && (x + y) % 2 === 0 && (t === 0 || t === 6)) g.rect(px, py, tile, tile).fill({ color: 0xffffff, alpha: 0.04 });
         if (bw2url) {
           // BW2 proof pass: texture over the flat rect; a painted
           // contact shadow (the 2D approximation of the Katana soft-
@@ -543,7 +605,7 @@ export default function PixiWorldCanvas({
           // water meets land to its north (shore transition).
           // (Exteriors only — indoors this painted scalloped shadow
           // ovals down both walls; caught on the house captures.)
-          if (!(mapData as any)?.interior && (t === 1 || t === 4)) {
+          if (buildStatic && !(mapData as any)?.interior && (t === 1 || t === 4)) {
             gFg.ellipse(px + tile * 0.55, py + tile * 1.02, tile * 0.52, tile * 0.13).fill({ color: 0x000000, alpha: 0.20 });
           }
           // Switcher relief flattening: ledge / waterfall / stairs
@@ -582,7 +644,11 @@ export default function PixiWorldCanvas({
           const wurl = phase === 'night' ? '/assets/bw2/window_night.png' : '/assets/bw2/window_day.png';
           placeTileSprite(`win:${mapId}:${x}:${y}:${wurl}`, wurl, px, py, tile, tile);
         }
-        if (!bw2url && t === 1) {
+        if (!buildStatic) {
+          // Static motif layer is cached (flicker fix) — the vector
+          // motifs below are drawn only when the static layer is
+          // (re)built; sprite placement above/below runs every draw.
+        } else if (!bw2url && t === 1) {
           // Border tree: drawn trunk + canopy, not an emoji.
           g.rect(px + tile * 0.44, py + tile * 0.55, tile * 0.12, tile * 0.35).fill(0x5d4037);
           g.circle(px + tile * 0.5, py + tile * 0.38, tile * 0.38).fill(0x2e7d32);
@@ -623,22 +689,32 @@ export default function PixiWorldCanvas({
     // graphics (draw() clears non-sprite children each frame).
     // (BW2 pass: labels are now added after the tile pass so the
     // ground textures can never cover them.)
-    (mapData.doors || []).forEach((door: any) => {
-      if (!door.label) return;
-      const label = new Text({
-        text: door.label,
-        style: {
-          fontFamily: 'Arial, sans-serif',
-          fontSize: Math.max(12, tile * 0.32),
-          fontWeight: 'bold',
-          fill: 0xffffff,
-          stroke: { color: 0x000000, width: 4 },
-        },
+    // (Flicker fix: the label Texts are built once per static key
+    // into a cached container and re-added per draw — Text layout
+    // was half the per-draw churn the fix removes.)
+    if (buildStatic) {
+      staticLabelsRef.current?.destroy({ children: true });
+      const lc = new Container();
+      (mapData.doors || []).forEach((door: any) => {
+        if (!door.label) return;
+        const label = new Text({
+          text: door.label,
+          style: {
+            fontFamily: 'Arial, sans-serif',
+            fontSize: Math.max(12, tile * 0.32),
+            fontWeight: 'bold',
+            fill: 0xffffff,
+            stroke: { color: 0x000000, width: 4 },
+          },
+        });
+        label.anchor.set(0.5, 1);
+        label.position.set((door.x + 0.5) * tile, door.y * tile - 2);
+        lc.addChild(label);
       });
-      label.anchor.set(0.5, 1);
-      label.position.set((door.x + 0.5) * tile, door.y * tile - 2);
-      world.addChild(label);
-    });
+      staticLabelsRef.current = lc;
+      staticKeyRef.current = staticKey;
+    }
+    if (staticLabelsRef.current) world.addChild(staticLabelsRef.current);
 
     // Depth-sorted drawables: NPCs and player, sorted by tile row.
     const bob = animWalk % 2 === 1 ? -tile * 0.05 : 0;
