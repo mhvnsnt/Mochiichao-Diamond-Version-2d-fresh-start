@@ -139,6 +139,21 @@ export default function PixiWorldCanvas({
   const worldRef = useRef<Container | null>(null);
   const sheetSpritesRef = useRef<Map<string, Sprite>>(new Map());
   const overlayRef = useRef<Graphics | null>(null);
+  // Flicker fix (2026-10-29): the static tile + door-label layer is
+  // built ONCE per (map, tile size) and reused across draws. Before
+  // this, draw() ran on every React render — WorldEngine's animTick
+  // setState fires every 300 ms, plus the 650 ms NPC tick and every
+  // step — and each draw destroyed and recreated the entire ~900-tile
+  // Graphics layer and every door Text label (~3.3x/sec forever).
+  // Any frame the renderer missed in that churn showed the bare
+  // canvas background (#0a1a0a) = the visible flicker. The static
+  // layer is drawn in world coordinates and depends only on the map
+  // and the tile pixel size — never on the camera or animTick — so
+  // caching it changes nothing visually except removing the churn.
+  // Dynamic drawables (NPCs, player, follower, wilds) still rebuild
+  // per draw exactly as before, so the world still animates.
+  const staticLayerRef = useRef<Container | null>(null);
+  const staticKeyRef = useRef<string>('');
 
   useEffect(() => {
     let cancelled = false;
@@ -160,6 +175,9 @@ export default function PixiWorldCanvas({
       cancelled = true;
       sheetSpritesRef.current.forEach(s => s.destroy());
       sheetSpritesRef.current.clear();
+      staticLayerRef.current?.destroy({ children: true });
+      staticLayerRef.current = null;
+      staticKeyRef.current = '';
       overlayRef.current = null;
       app.destroy(true);
       appRef.current = null;
@@ -188,40 +206,39 @@ export default function PixiWorldCanvas({
     camY = mapH * tile <= vh ? -(vh - mapH * tile) / 2 : Math.max(0, Math.min(camY, mapH * tile - vh));
     world.position.set(-camX, -camY);
 
-    // Remove last frame's drawables; cached sheet sprites are reused, not destroyed.
-    const removed = world.removeChildren();
-    removed.forEach(child => {
-      if (child instanceof Sprite && [...sheetSpritesRef.current.values()].includes(child)) return;
-      child.destroy();
-    });
-    const g = new Graphics();
-    world.addChild(g);
-
-    // v5.1 door labels: the v5 playtest never saw which building
-    // was the lab before entering it — the interact prompt only
-    // shows while facing an adjacent door tile, and walking up
-    // steps straight onto the door, so it is easy to miss. A
-    // persistent label drawn in the world itself (same camera
-    // transform as the tiles, so it sits above its door tile)
-    // identifies the building before entry. Walk-into entry is
-    // unchanged. Labels are recreated each draw like the tile
-    // graphics (draw() clears non-sprite children each frame).
-    (mapData.doors || []).forEach((door: any) => {
-      if (!door.label) return;
-      const label = new Text({
-        text: door.label,
-        style: {
-          fontFamily: 'Arial, sans-serif',
-          fontSize: Math.max(12, tile * 0.32),
-          fontWeight: 'bold',
-          fill: 0xffffff,
-          stroke: { color: 0x000000, width: 4 },
-        },
+    // Static layer: build only when the (map, tile size) key
+    // changes; otherwise reuse the cached container (flicker fix —
+    // see staticLayerRef above). Tile graphics and door labels both
+    // live in the static layer: neither depends on camera/animTick.
+    const staticKey = `${mapData?.id ?? mapData?.name ?? 'map'}|${mapW}x${mapH}|${tile.toFixed(2)}`;
+    if (staticKeyRef.current !== staticKey || !staticLayerRef.current) {
+      const sc = new Container();
+      const g = new Graphics();
+      sc.addChild(g);
+      // v5.1 door labels: the v5 playtest never saw which building
+      // was the lab before entering it — the interact prompt only
+      // shows while facing an adjacent door tile, and walking up
+      // steps straight onto the door, so it is easy to miss. A
+      // persistent label drawn in the world itself (same camera
+      // transform as the tiles, so it sits above its door tile)
+      // identifies the building before entry. Walk-into entry is
+      // unchanged.
+      (mapData.doors || []).forEach((door: any) => {
+        if (!door.label) return;
+        const label = new Text({
+          text: door.label,
+          style: {
+            fontFamily: 'Arial, sans-serif',
+            fontSize: Math.max(12, tile * 0.32),
+            fontWeight: 'bold',
+            fill: 0xffffff,
+            stroke: { color: 0x000000, width: 4 },
+          },
+        });
+        label.anchor.set(0.5, 1);
+        label.position.set((door.x + 0.5) * tile, door.y * tile - 2);
+        sc.addChild(label);
       });
-      label.anchor.set(0.5, 1);
-      label.position.set((door.x + 0.5) * tile, door.y * tile - 2);
-      world.addChild(label);
-    });
 
     for (let y = 0; y < mapH; y++) {
       for (let x = 0; x < mapW; x++) {
@@ -256,6 +273,21 @@ export default function PixiWorldCanvas({
         }
       }
     }
+
+      staticLayerRef.current?.destroy({ children: true });
+      staticLayerRef.current = sc;
+      staticKeyRef.current = staticKey;
+    }
+
+    // Remove last frame's dynamic drawables; cached sheet sprites
+    // and the static layer are reused, not destroyed.
+    const removed = world.removeChildren();
+    removed.forEach(child => {
+      if (child === staticLayerRef.current) return;
+      if (child instanceof Sprite && [...sheetSpritesRef.current.values()].includes(child)) return;
+      child.destroy();
+    });
+    if (staticLayerRef.current) world.addChild(staticLayerRef.current);
 
     // Depth-sorted drawables: NPCs and player, sorted by tile row.
     const bob = animWalk % 2 === 1 ? -tile * 0.05 : 0;
