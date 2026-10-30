@@ -5,6 +5,7 @@ import { fallbackColorFor } from '../../lib/spriteSheets';
 import { playerSlot, slotForNpc } from '../../lib/humanSheets';
 import type { HumanView } from '../../lib/humanSheets';
 import { creatureWalkFrameUrl } from '../../lib/creatureWalkFrames';
+import { loadTownTiles, townTilesReady, townTileLayers } from '../../world/townTiles';
 
 /**
  * PixiJS world renderer (Phase 2, world canvas only).
@@ -155,6 +156,8 @@ export default function PixiWorldCanvas({
       worldRef.current = world;
       appRef.current = app;
       draw();
+      // M1: redraw once the CC0 town/field sheet is ready.
+      loadTownTiles().then((tx) => { if (!cancelled && tx) draw(); });
     });
     return () => {
       cancelled = true;
@@ -223,12 +226,27 @@ export default function PixiWorldCanvas({
       world.addChild(label);
     });
 
+    const townTex = townTilesReady();
+    const tileLayer = new Container();
+    world.addChildAt(tileLayer, world.getChildIndex(g) + 1);
     for (let y = 0; y < mapH; y++) {
       for (let x = 0; x < mapW; x++) {
         const t = mapData.tiles?.[y]?.[x] ?? 1;
         const base = TILE_COLORS[t] ?? TILE_COLORS[0];
         const px = x * tile;
         const py = y * tile;
+        // M1: CC0 Kenney town/field tiles when the sheet is loaded;
+        // unmapped tiles (water, cave, tall grass...) keep the drawn look.
+        const layers = townTex ? townTileLayers(mapData.tiles, x, y) : null;
+        if (layers) {
+          for (const cell of layers) {
+            const sp = new Sprite(townTex![cell]);
+            sp.position.set(px, py);
+            sp.width = tile; sp.height = tile;
+            tileLayer.addChild(sp);
+          }
+          continue;
+        }
         g.rect(px, py, tile, tile).fill(base);
         if ((x + y) % 2 === 0 && (t === 0 || t === 6)) g.rect(px, py, tile, tile).fill({ color: 0xffffff, alpha: 0.04 });
         if (t === 1) {

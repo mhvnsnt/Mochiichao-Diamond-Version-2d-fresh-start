@@ -27,6 +27,7 @@ import { playUiMove, playUiConfirm, playUiBack } from "../lib/audioRouting";
 import TitleStartScreen from "./game/TitleStartScreen";
 import PresetTitleErrorBoundary from "./game/PresetTitleErrorBoundary";
 import { TITLE_BIOMES } from "../lib/titleBiomes";
+import { M1_SHOW_ALL } from "../lib/m1";
 import { getSelectedTitleStartScreenId, resolveTitleStartScreen, setSelectedTitleStartScreenId } from "../lib/titleStartScreens";
 
 /**
@@ -267,7 +268,8 @@ export default function IntroSequence({ onComplete, onEnterWorld }: IntroSequenc
   // the press-start sound only, never the boot sound.
   const bootPlayedRef = React.useRef(false);
   const advanceIntro = () => {
-    if (phase === "BOOT") setPhase("INTRO");
+    // M1: GAP placeholder scenes skipped unless ?all.
+    if (phase === "BOOT") setPhase(M1_SHOW_ALL ? "INTRO" : "TITLE");
     else if (phase === "INTRO") {
       // Restored locked path: step scenes 1 -> 4, then TITLE.
       if (introScene < 3) setIntroScene(s => s + 1);
@@ -280,6 +282,19 @@ export default function IntroSequence({ onComplete, onEnterWorld }: IntroSequenc
     }
   };
 
+  // M1: keyboard / pad for BOY-GIRL (was mouse-only). Left/Right
+  // picks, Enter/Space/Z confirms. The click path is unchanged.
+  useEffect(() => {
+    if (phase !== "GENDER_SELECT") return undefined;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" || e.key === "a") setGender("boy");
+      else if (e.key === "ArrowRight" || e.key === "d") setGender("girl");
+      else if (e.key === "Enter" || e.key === " " || e.key === "z") { e.preventDefault(); setPhase("NAME_ENTRY"); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [phase]);
+
   useEffect(() => {
     if (phase === "BOOT") {
       // Ref guard: StrictMode double-invokes effects in dev, which
@@ -289,7 +304,7 @@ export default function IntroSequence({ onComplete, onEnterWorld }: IntroSequenc
         bootPlayedRef.current = true;
         playBootSound();
       }
-      const t = setTimeout(() => setPhase("INTRO"), 2500);
+      const t = setTimeout(() => setPhase(M1_SHOW_ALL ? "INTRO" : "TITLE"), 2500);
       return () => clearTimeout(t);
     }
     return undefined;
@@ -1070,11 +1085,11 @@ export default function IntroSequence({ onComplete, onEnterWorld }: IntroSequenc
         <StdWindow className="relative z-10 p-8 flex flex-col items-center">
           <h2 className="text-white text-2xl font-bold tracking-widest mb-12">ARE YOU A BOY OR A GIRL?</h2>
           <div className="flex gap-16">
-            <button onClick={() => { setGender("boy"); setPhase("NAME_ENTRY"); }} className="group flex flex-col items-center transition-transform hover:scale-110">
+            <button onClick={() => { setGender("boy"); setPhase("NAME_ENTRY"); }} className={`group flex flex-col items-center transition-transform hover:scale-110 rounded-lg p-2 ${gender === 'boy' ? 'ring-2 ring-teal-400 scale-110' : ''}`}>
               <HumanPortrait slot={playerSlot('boy')} view="front" size={72} />
               <div className="text-gray-400 group-hover:text-teal-400 font-bold tracking-widest mt-2">BOY</div>
             </button>
-            <button onClick={() => { setGender("girl"); setPhase("NAME_ENTRY"); }} className="group flex flex-col items-center transition-transform hover:scale-110">
+            <button onClick={() => { setGender("girl"); setPhase("NAME_ENTRY"); }} className={`group flex flex-col items-center transition-transform hover:scale-110 rounded-lg p-2 ${gender === 'girl' ? 'ring-2 ring-pink-400 scale-110' : ''}`}>
               <HumanPortrait slot={playerSlot('girl')} view="front" size={72} />
               <div className="text-gray-400 group-hover:text-pink-400 font-bold tracking-widest mt-2">GIRL</div>
             </button>

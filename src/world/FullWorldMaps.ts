@@ -83,6 +83,11 @@ export const SECTOR_0: any = {
     { id:"mom", x:5, y:9, sprite:"👩", name:"Your Mom", facing:"down", movement:"wander", wanderRadius:1, isHeal: true, dialog:["There you are! The truck beat us here.","Come inside. Your room is upstairs. The boxes can wait. Go set the clock first — a new home needs a correct time.","Good. Now go say hello next door. Hex's family just moved in too. You two will need each other out there.","Wait. Before you run off — here. Sprint Boots. Hold B and you can run. A trainer who cannot run will always be late."] },
     { id:"rival_hex", x:15, y:10, sprite:"😤", name:"Hex", facing:"down", dialog:["You again? I already picked my starter. Razorgater, obviously.","Don't think I'll go easy on you just because we grew up here.","Next time we meet, we BATTLE. Count on it."], battle: { team:[{ id:"004", name:"Razorgater", hp:50, maxHp:50, atk:65, def:64, spd:48, moves:["Chrome Claw","Tackle"], type:"Water", level:5 }], reward:100, badge:null } },
     { id:"fat_guy", x:9, y:13, sprite:"🧑‍🦲", name:"Technology Enthusiast", facing:"down", movement:"wander", wanderRadius:1, dialog:["Technology is incredible!", "You can now store up to 6 Mochiichao in your party!", "Any more you catch are instantly sent to your PC!"] },
+    // M1 (2026-10-29): Local Kid + Fisherman moved over from the old
+    // Maps.ts Sector 0 list (same names and dialogue) so the town has
+    // its full M1 cast with walking art. Placed on free grass tiles.
+    { id:"local_kid", x:18, y:15, sprite:"👤", name:"Local Kid", facing:"down", movement:"wander", wanderRadius:1, dialog:["I heard there's a branded Kittember in the tall grass near the woods...","It had a glowing 'H' burned into its side. Creepy."] },
+    { id:"fisherman", x:12, y:19, sprite:"🎣", name:"Fisherman", facing:"down", dialog:["The waters here are calm, but I've seen something HUGE moving deep below...","The old-timers call it Astroleviathan. I call it my nightmare."] },
   ],
   signs: [
     // v5: Sector 0 had sign TILES (tile 10) but an empty signs array,
@@ -197,21 +202,13 @@ export const ROUTE_1: any = {
     { x:12, y:12, text:"TRAINER TIP:\nTap Mochiichao in the wild to encounter them!" }
   ],
   exits: [
-    // Four-fixes lane (gap fix): the south-edge exits used to land
-    // the player at sector0 (x,1) for the same x they crossed at —
-    // but sector0's row 1 is only walkable at x=15 (the gate
-    // corridor); x=13/14/16/17 are the Lab and east building's wall
-    // tiles, so returning players materialised INSIDE the wall and
-    // had to bump back out through the north exit. All five
-    // crossings now land on the corridor tile (15,1), the tile the
-    // northbound gate already uses.
-    ...[13, 14, 15, 16, 17].map(x => ({ x, y: 39, to: "sector0", enterAt: { x: 15, y: 1 }, dir: "down" })),
+    ...buildEdgeExits(13, 17, 39, "sector0", 1, "down"),
     ...buildEdgeExits(13, 17, 0, "binary_fields", 33, "up")
   ],
   doors: [],
   events: [],
   encounters: [
-    { mapZone:"tall_grass", rate:0.15, pool:[
+    { mapZone:"tall_grass", rate:0.15, pool:[ 
         {id:"038",name:"Sproutle",hp:35,maxHp:35,atk:35,def:35,spd:50,moves:["Tackle"],type:"Grass",level:3},
         {id:"001",name:"Mochii",hp:38,maxHp:38,atk:35,def:35,spd:45,moves:["Foam Burst","Tackle"],type:"Water",level:3},
         {id:"010",name:"Kittember",hp:34,maxHp:34,atk:42,def:28,spd:55,moves:["Claw","Tackle"],type:"Fire",level:4},
@@ -290,25 +287,15 @@ export const BINARY_FIELDS: any = {
   exits: [
     ...buildEdgeExits(13, 17, 34, "route_1", 1, "down"),
     ...buildVertExits(0, 15, 25, "binary_woods", 30, "left"),
-    // Victory Route gate: badges>=8, following the mauveville_arena
-    // 'ciphers>=10' precedent. LIVE since the four-fixes lane's gap
-    // fix: WorldEngine's move() now evaluates exit conditions with
-    // the same isDoorOpen check doors use (before this, the
-    // condition was unenforced metadata and the exit fired with
-    // zero badges).
+    // Victory Route gate: badges>=8 is metadata here, following the
+    // mauveville_arena 'ciphers>=10' precedent. WorldEngine enforces
+    // no exit condition except hasStarter/noStarter events, so the
+    // 8-badge enforcement is OWED by an engine-lane change and is
+    // NOT claimed as live in this PR.
     { x:14, y:0, to:"victory_route", enterAt:{x:14, y:39}, dir:"up", condition:"badges>=8" },
   ],
   doors: [
     { x:14, y:8, to:"dojo_1", enterAt:{x:7, y:16}, label:"Binary Dojo — Core Gate" },
-    // Four-fixes lane (Fix 4): the tile builder above declares BOTH
-    // (14,8) and (15,8) as the dojo's door (the DOOR rules are
-    // shadowed by the earlier BUILDING rule, which is harmless —
-    // doors fire by coordinate, checked before the solid-tile
-    // return in WorldEngine's move()). Only (14,8) had a doors[]
-    // entry, so the right half of the dojo's two-tile front door
-    // was a dead bump. It mirrors (14,8) now, the same two-tile
-    // pattern the MochiiPlex uses at (7,11)+(8,11).
-    { x:15, y:8, to:"dojo_1", enterAt:{x:7, y:16}, label:"Binary Dojo — Core Gate" },
     { x:24, y:6, to:"mochiiplex_1", enterAt:{x:7, y:10}, label:"MochiiPlex" },
     // Sequence 3 gate: Dojo 8 is the eighth dojo (Sequence 7's beat),
     // so its Silicon Town door stays sealed until the player holds
@@ -731,13 +718,7 @@ export const DOJO_2: any = {
     { id:"dojo_acolyte_gale", x:3, y:6, sprite:"🥋", name:"Acolyte Gale", facing:"down", dialog:["The wind tests everyone who climbs."], battle:{ team:[{id:"019",name:"Zephling",hp:40,maxHp:40,atk:55,def:35,spd:60,moves:["Tackle","Swift Movement"],type:"Aero",level:17}], reward:500, badge:null } },
     { id:"dojo_acolyte_skye", x:7, y:6, sprite:"🥋", name:"Acolyte Skye", facing:"down", dialog:["Master Falk's wind shows no mercy."], battle:{ team:[{id:"019",name:"Zephling",hp:40,maxHp:40,atk:55,def:35,spd:60,moves:["Tackle","Swift Movement"],type:"Aero",level:18},{id:"020",name:"Aerobeak",hp:60,maxHp:60,atk:75,def:55,spd:80,moves:["Tackle","Swift Movement"],type:"Aero",level:18}], reward:600, badge:null } },
   ],
-  // Four-fixes lane (gap fix): the exit used to land the player at
-  // binary_woods (7,37) — a BUILDING tile in the middle of the dojo's
-  // own exterior wall (escapable only by bumping back into the door).
-  // It now lands at (7,39), the grass in front of the door at (7,38),
-  // the same in-front-of-the-door pattern every other interior exit
-  // uses.
-  exits: [{ x:5, y:15, to:"binary_woods", enterAt:{x:7, y:39}, dir:"down" }], doors: [], events: [], encounters: []
+  exits: [{ x:5, y:15, to:"binary_woods", enterAt:{x:7, y:37}, dir:"down" }], doors: [], events: [], encounters: []
 };
 
 

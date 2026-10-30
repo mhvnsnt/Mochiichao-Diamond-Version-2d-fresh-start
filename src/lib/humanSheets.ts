@@ -33,7 +33,6 @@
  * later, and portrait eye colour must not be locked as canon.
  */
 import playerAAtlas from '../assets/human-characters/in-game-sheets/player-a-atlas-64x64.png';
-import playerBoyAtlas from '../assets/human-characters/in-game-sheets/player-boy-atlas-v5-2026-10-29.png';
 // PR #100 atlas batch (Human Characters lane, merged on main): every atlas
 // below is a 256x256 4x4 grid of 64x64 cells with the SAME row-0 layout
 // as the Player A atlas — row 0 = world front/back/left/right, row 3 =
@@ -58,6 +57,10 @@ import techTinkererAtlas from '../assets/human-characters/in-game-sheets/tech-ti
 import momBlackAtlas from '../assets/human-characters/in-game-sheets/mom-black-atlas-core100-2026-10-26.png';
 import momEastAsianAtlas from '../assets/human-characters/in-game-sheets/mom-east-asian-atlas-core100-2026-10-26.png';
 import momLatinaAtlas from '../assets/human-characters/in-game-sheets/mom-latina-atlas-core100-2026-10-26.png';
+import momLatinaWalkAtlas from '../assets/human-characters/in-game-sheets/mom-latina-atlas-64x64.png';
+import momBlackWalkAtlas from '../assets/human-characters/in-game-sheets/mom-black-atlas-64x64.png';
+import momEastAsianWalkAtlas from '../assets/human-characters/in-game-sheets/mom-east-asian-atlas-64x64.png';
+import momWhiteWalkAtlas from '../assets/human-characters/in-game-sheets/mom-white-atlas-64x64.png';
 import momWhiteAtlas from '../assets/human-characters/in-game-sheets/mom-white-atlas-core100-2026-10-26.png';
 // Human wiring PR (2026-10-26, art on main via PR #234 core/dojo closing
 // delta + PR #238 Tamsen redesign): core100 atlases for the new core
@@ -273,24 +276,14 @@ export const MOM_VARIANT_SHEETS: Record<'black' | 'east-asian' | 'latina' | 'whi
   white: momWhiteAtlas,
 };
 
+function m1MomSheet(): string {
+  const pick = (() => { try { return new URLSearchParams(window.location.search).get('mom'); } catch { return null; } })();
+  const all: Record<string, string> = { latina: momLatinaWalkAtlas, black: momBlackWalkAtlas, 'east-asian': momEastAsianWalkAtlas, white: momWhiteWalkAtlas };
+  return all[pick || ''] || momLatinaWalkAtlas;
+}
+
 export const HUMAN_SLOTS: Record<string, HumanSlot> = {
-  // Player (boy) — wired by the four-fixes lane (Fix 3, 2026-10-29)
-  // to the owner-confirmed v5 atlas: the Player D-derived boy art
-  // Jamar approved in full on 2026-10-29 ("confirm on all of these,
-  // all of it gets pushed"). Layout mirrors player_girl exactly:
-  // row-0 world cells (front 0, back 64, left 128, right 192), walk
-  // PAIRS (his own generated step frames, empty-handed), battle back
-  // cell 12 wired; portrait cell 13 deliberately NOT wired — same
-  // rule as Player A: dialogue portraits keep the row-0 front.
-  // The rest of the confirmed variant set is landed alongside in
-  // in-game-sheets/ (kept, per the owner's ruling, not discarded):
-  // player-boy-atlas-v2-tablet-walk-2026-10-29.png (walk cells WITH
-  // the tablet), player-boy-atlas-v3-2026-10-29.png (generated
-  // standing), player-boy-atlas-v4-fullbody-standing-2026-10-29.png
-  // and player-boy-atlas-v4-halfbody-standing-2026-10-29.png
-  // (original-art re-cuts, full-body + half-body standing framings).
-  // v5 atlas sha256 e6a634136f93c6231276f873da8bc47c5d82f4769db2395037601.
-  player_boy: { slotId: 'player_boy', label: 'Player (boy)', role: 'player', sheetUrl: playerBoyAtlas, frames: { front: 0, back: 64, left: 128, right: 192 }, walk: PAIRS_WALK, battleCell: 12, sheetCols: 4, sheetRows: 4, color: '#4fc3f7' },
+  player_boy: slot('player_boy', 'Player (boy)', 'player', '#4fc3f7'),
   // Player A (young Black woman, teal/chrome jacket, chibi atlas, Mars-approved
   // 2026-10-25) wired to player_girl — the game has boy/girl slots only, no
   // A/B/C/D picker yet. Row-0 world cells: front 0, back 64, left 128,
@@ -319,7 +312,12 @@ export const HUMAN_SLOTS: Record<string, HumanSlot> = {
   // battle 12 is her battle_front_fullsize cell, portrait 13, partial
   // walk. Her battle back is cell 14, queued for character-select.
   mochiko: partialAtlasSlot('mochiko', 'Assistant Mochiko', 'assistant', mochikoAtlas, '#80cbc4'),
-  mom: { ...slot('mom', 'Mom', 'family', '#ffcc80'), variantSheets: MOM_VARIANT_SHEETS },
+  // M1 (2026-10-29): Mom gets walking art so she is not a silhouette
+  // in the first town. Default is the latina PR #100 chibi atlas
+  // (transparent, idle/step rows); ?mom=black|east-asian|white|latina
+  // picks another. This is an M1 default for playtesting, NOT canon —
+  // the variant picker is still owed. variantSheets is unchanged.
+  mom: { ...atlasSlot('mom', 'Mom', 'family', m1MomSheet(), '#ffcc80'), variantSheets: MOM_VARIANT_SHEETS },
   dojo_trainer: slot('dojo_trainer', 'Dojo Trainer', 'trainer', '#ef9a9a'),
   // Dojo Student (PR #100 atlas): routed by slotForNpc below to the
   // dojo acolyte NPCs (dojo_acolyte_1-4, dojo1_guard "Dojo Acolyte"),
@@ -527,6 +525,10 @@ export function slotForNpc(npc: any): HumanSlot {
   const id = String(npc?.id || '').toLowerCase();
   const name = String(npc?.name || '').toLowerCase();
   if (id.includes('mom') || name.includes('mom')) return HUMAN_SLOTS.mom;
+  // M1 Sector 0 townsfolk: Local Kid wears the Racing atlas (young
+  // townsperson), Fisherman the Junkyard atlas (older townsperson).
+  if (id === 'local_kid' || name === 'local kid') return HUMAN_SLOTS.racing;
+  if (id === 'fisherman' || name === 'fisherman') return HUMAN_SLOTS.junkyard;
   if (id.includes('aeon') || name.includes('aeon')) return HUMAN_SLOTS.prof_aeon;
   if (id.includes('mochiko')) return HUMAN_SLOTS.mochiko;
   if (id.includes('hex') || name === 'hex') return HUMAN_SLOTS.hex;
