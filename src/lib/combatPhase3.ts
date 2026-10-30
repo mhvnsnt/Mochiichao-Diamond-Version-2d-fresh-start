@@ -23,11 +23,13 @@
  *       recoil/multiHit/highCrit/chargeTurn/flinch), applied by
  *       resolveTurn in pipeline order (can-act -> charge -> accuracy
  *       -> damage -> secondary -> recoil -> faint -> end-turn ticks).
- *       20 of the 28 distinct effect strings in moves.ts map to a live
- *       kind; the other 8 (ALL_UP1, CONFUSE, DRAIN, FORM_TYPE, FREEZE,
- *       PROTECT, SLEEP, TRAP) have no resolver kind -- FORM_TYPE is
- *       realized in mytharPick.ts instead, the other 7 are named as
- *       pending in the test, never silent (see test).
+ *       35 of the 43 distinct effect strings in moves.ts map to a live
+ *       kind (the batch-3 pool completion added 15 stat/recoil tokens,
+ *       all dispatched through the existing stat/recoil kinds); the
+ *       other 8 (ALL_UP1, CONFUSE, DRAIN, FORM_TYPE, FREEZE, PROTECT,
+ *       SLEEP, TRAP) have no resolver kind -- FORM_TYPE is realized in
+ *       mytharPick.ts instead, the other 7 are named as pending in the
+ *       test, never silent (see test).
  *   (3) Turn order — priority first, then effective Speed (stage-
  *       adjusted, paralysis quarters), then a coin flip on an exact
  *       tie (battle-math orderPair, via resolver orderActions).

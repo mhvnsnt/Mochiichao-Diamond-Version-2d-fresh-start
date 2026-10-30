@@ -2,9 +2,17 @@ export const TILE = {
   GRASS:0, WALL:1, WATER:2, PATH:3, BUILDING:4, DOOR:5,
   TALL_GRASS:6, SAND:7, CAVE:8, LEDGE:9, SIGN:10,
   NEON_PATH:11, INDUSTRIAL:12, SHALLOW:13, ICE:14,
-  HM_ROCK:15, HM_CUT:16, HM_WATERFALL:17, WARP:18,
+  HM_ROCK:15, HM_CUT:16, HM_WATERFALL:17, WARP:18, HM_BOULDER:26,
   STAIRS_UP:19, STAIRS_DOWN:20, FLOWER:21, DOCK:22,
   FENCE:23, SAND_DUNE:24, LAVA:25,
+  // BW2 world-upgrade lane (composed into this tree 2026-10-29,
+  // world-compose lane): interior furnishing tiles so interiors ship
+  // complete (counter/PC/stairs class pieces), never bare rooms of
+  // generic blocks. Solid; interactables sit on the NPC/sign data as
+  // before. NUMBERING: the BW2 lane numbered these 26–31 in its own
+  // tree; 26 is HM_BOULDER in this tree (fieldTechniques S-3), so at
+  // composition they sit at 32–37. Names and order are BW2's.
+  TERMINAL:32, COUNTER:33, PLANT:34, HEAL_MACHINE:35, BENCH:36, BED:37,
 };
 
 export const PASSABLE: Record<number, boolean> = {
@@ -13,10 +21,16 @@ export const PASSABLE: Record<number, boolean> = {
   11:true,12:true,13:true,14:true,
   15:false,16:false,17:false,18:true,
   19:true,20:true,21:true,22:true,
-  23:false,24:false,25:true,
+  23:false,24:false,25:true,26:false,
+  32:false,33:false,34:false,35:false,36:false,37:false,
 };
 
-export const HM_REQUIRED: Record<number, string> = { 2:"Surf", 15:"Strength", 16:"Cut", 17:"Waterfall" };
+// Technique gates, read by src/lib/fieldTechniques.ts (stub-kill
+// S-3). Values are OUR Rare verb names (RARE-FIELD-EFFECTS.md), not
+// the source games' move names. Tile 15 split (addenda S24): the old
+// single rock tile conflated Boulder Break (smash in place) with
+// Mighty Push (pushable boulder, new tile 26).
+export const HM_REQUIRED: Record<number, string> = { 2:"Wave", 15:"Boulder Break", 16:"Slice", 17:"Cascade", 26:"Mighty Push" };
 
 export const TILE_STYLE: Record<number, { bg: string, label: string }> = {
   0: { bg:"#3a7a2a", label:"" },
@@ -45,6 +59,13 @@ export const TILE_STYLE: Record<number, { bg: string, label: string }> = {
   23: { bg:"#8a6a40", label:"" },
   24: { bg:"#c8b080", label:"" },
   25: { bg:"#8a2a0a", label:"🔥" },
+  26: { bg:"#6a6a6a", label:"🪨" },
+  32: { bg:"#34404e", label:"💻" },
+  33: { bg:"#ccc2ba", label:"" },
+  34: { bg:"#4a7a30", label:"🪴" },
+  35: { bg:"#c4ccd2", label:"✚" },
+  36: { bg:"#96684a", label:"" },
+  37: { bg:"#f0eee8", label:"🛏️" },
 };
 
 export const getDayPhase = (h: number) => {

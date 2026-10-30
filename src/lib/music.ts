@@ -47,7 +47,21 @@
 
 import { routeMediaElement, resumeAudioGraph } from "./audioRouting";
 
-export type MusicTrack = "intro" | "title" | "mainMenu" | "world" | "battle";
+export type MusicTrack =
+  | "intro" | "title" | "mainMenu" | "world" | "battle"
+  // Soundtrack lane (2026-10-29): composed opening-stretch tracks.
+  // Placement is decided by musicPlacement.ts, never by call sites.
+  | "town" | "route" | "wildBattle" | "trainerBattle" | "center"
+  // Sound-full-coverage lane (2026-10-29): the classes the coverage
+  // audit found missing — a second town, the shop, dojo interior +
+  // dojo battle, cave, and the night arrangements of the three
+  // field classes (Gen 4/5 ship night variants for town/route).
+  | "town2" | "shop" | "dojo" | "dojoBattle" | "cave"
+  | "townNight" | "town2Night" | "routeNight"
+  // Sound-exceptions lane (2026-10-29): the Garden's OWN theme —
+  // the Chao Garden class is a place-class of its own (DECISIONS.md
+  // Sonic check), not a town ride-along. Closes COVERAGE slot 21.
+  | "garden";
 
 function audioUrl(file: string): string {
   const base = import.meta.env.BASE_URL ?? "/";
@@ -64,9 +78,44 @@ const TRACKS: Record<MusicTrack, { src: string | null; loop: boolean }> = {
   // loop or a guessed track.
   world: { src: null, loop: true },
   battle: { src: null, loop: true },
+  // Soundtrack lane (2026-10-29): original tracks composed in the
+  // sequenced-games method (see soundtrack/MUSIC-METHOD.md), rendered
+  // to public/audio/tracks/. "world"/"battle" above stay null as the
+  // legacy generic slots; placement now resolves to these.
+  town: { src: audioUrl("tracks/boot-harbor.wav"), loop: true },
+  route: { src: audioUrl("tracks/route-1.wav"), loop: true },
+  wildBattle: { src: audioUrl("tracks/wild-battle.wav"), loop: true },
+  trainerBattle: { src: audioUrl("tracks/trainer-battle.wav"), loop: true },
+  center: { src: audioUrl("tracks/mochi-center.wav"), loop: true },
+  // Sound-full-coverage lane (2026-10-29): original compositions in
+  // the same Region 1 method (tools/compose_tracks.py pattern,
+  // extended in the coverage lane's tools/compose_coverage_tracks.py).
+  town2: { src: audioUrl("tracks/silicon-town.wav"), loop: true },
+  shop: { src: audioUrl("tracks/shop-theme.wav"), loop: true },
+  dojo: { src: audioUrl("tracks/dojo-theme.wav"), loop: true },
+  dojoBattle: { src: audioUrl("tracks/dojo-battle.wav"), loop: true },
+  cave: { src: audioUrl("tracks/cave-theme.wav"), loop: true },
+  townNight: { src: audioUrl("tracks/boot-harbor-night.wav"), loop: true },
+  town2Night: { src: audioUrl("tracks/silicon-town-night.wav"), loop: true },
+  routeNight: { src: audioUrl("tracks/route-1-night.wav"), loop: true },
+  // Sound-exceptions lane: original composition, Region 1 method
+  // (tools/compose_garden_track.py in that lane), loudnorm-finished
+  // and measured from the final file (-14.13 LUFS / -3.18 dBTP).
+  garden: { src: audioUrl("tracks/garden-theme.wav"), loop: true },
 };
 
-const MUSIC_VOLUME = 0.8;
+let MUSIC_VOLUME = 0.8;
+
+/** Soundtrack lane: music volume is a module-level setting (the
+ * Settings screen's SOUND row owns stereo/mono routing only).
+ * musicPlacement.ts persists it; this is the live value. */
+export function setMusicVolume(v: number): void {
+  MUSIC_VOLUME = Math.min(1, Math.max(0, v));
+  if (musicEl && !musicEl.paused) musicEl.volume = MUSIC_VOLUME;
+}
+export function musicVolumeValue(): number {
+  return MUSIC_VOLUME;
+}
 const FADE_IN_MS = 500;
 
 let musicEl: HTMLAudioElement | null = null;

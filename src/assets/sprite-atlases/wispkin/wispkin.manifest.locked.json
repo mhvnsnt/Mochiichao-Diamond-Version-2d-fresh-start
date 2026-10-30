@@ -23,7 +23,7 @@
  "frames": [
   {
    "cell": 0,
-   "role": "battle_back",
+   "role": "battle_front",
    "file": "wispkin_cell_00.png",
    "game_ready": true,
    "source_cell": 0,
@@ -45,7 +45,7 @@
   },
   {
    "cell": 2,
-   "role": "battle_front",
+   "role": "battle_back",
    "file": "wispkin_cell_02.png",
    "game_ready": true,
    "source_cell": 2,
@@ -144,5 +144,6 @@
   246,
   239,
   230
- ]
+ ],
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): the frame labelled battle_front (128,0) holds the BACK art (dark orb rear) and the frame labelled battle_back (0,0) holds the FRONT art (skull mask face). Role labels swapped in this manifest and in src/lib/spriteSheets.ts so the player side renders the orb back and the opponent side the mask."
 }

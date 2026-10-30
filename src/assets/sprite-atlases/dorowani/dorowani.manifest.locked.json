@@ -34,11 +34,11 @@
   },
   {
    "cell": "1a",
-   "role": "battle_back",
+   "role": "3d_sprite_back",
    "file": "dorowani_cell_01a.png",
    "game_ready": true,
    "source_cell": 1,
-   "lock_note": "Split from merged-pair cell 1 (SPLIT: cell contains back (left) + front (right) figures; split in game-ready)",
+   "lock_note": "RELABELLED 2026-10-29 (back-choice correction, owner ruling): this cell is the 3D sprite back \u2014 a half-figure split out of the merged 3D-bake pair cell. Kept and labelled for what it is; NOT the battle back. The battle back is manifest cell 2 at atlas (192,0).",
    "atlas_x": 64,
    "atlas_y": 0
   },
@@ -58,10 +58,11 @@
    "file": "dorowani_cell_02.png",
    "game_ready": true,
    "source_cell": 2,
-   "lock_note": "",
+   "lock_note": "BACK-CHOICE CORRECTION 2026-10-29 (owner ruling): this cell \u2014 manifest cell 2, the full standing shell back \u2014 is Dorowani's battle back (spriteSheets.ts 147 back cell + worldCells.back already pointed here).",
    "eye_status": "extractor_assigned_spot_checked",
    "atlas_x": 192,
-   "atlas_y": 0
+   "atlas_y": 0,
+   "battle_role": "battle_back"
   },
   {
    "cell": 3,
@@ -175,5 +176,6 @@
   244,
   242,
   240
- ]
+ ],
+ "back_choice_correction_2026_10_29": "Owner ruling 2026-10-29: the previously wired battle back (atlas (64,0), split cell 1a) is the 3D sprite back \u2014 relabelled, kept, not wired. Battle back = cell 2 at atlas (192,0)."
 }

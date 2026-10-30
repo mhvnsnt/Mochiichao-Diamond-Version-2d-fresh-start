@@ -155,5 +155,6 @@
   240,
   240,
   240
- ]
+ ],
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): the frame labelled battle_back (0,0) holds FRONT art (owl face). The genuine back view already exists in this atlas at (192,0) (overworld_back). src/lib/spriteSheets.ts now uses (192,0) as the battle back cell. This frame's role is left as-is pending a Sprite Art lane re-lock; do not regenerate defs without applying this correction."
 }

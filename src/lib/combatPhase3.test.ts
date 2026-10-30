@@ -10,6 +10,8 @@
  * No creature or move names appear here except the game move ids the
  * wiring itself routes (moves.ts keys); battlers are generic numbers.
  */
+import { MOVES_DB } from "./moves";
+import gameMoveScriptMap from "./generated/gameMoveScriptMap.json";
 import { describe, expect, it } from "vitest";
 import {
   CRIT_LOCKED,
@@ -76,7 +78,15 @@ describe("phase 3: live-main verification (122-move script map: 86 routed, 36 na
     });
   });
   it("all 122 game moves have a schema and a script route; the 36 unrouted are named, never silent", () => {
-    const all = allGameMoveSchemas();
+    // scoped to the phase-3 set (the 122 live at that landing): batch-3 pool
+    // rows have since merged into MOVES_DB and are covered by moveFullPool.test
+    const smap = gameMoveScriptMap as unknown as {
+      exactIdMatches: string[]; mapping: Record<string, string>; unmatched: Record<string, string>;
+    };
+    const phase3Ids = new Set([
+      ...smap.exactIdMatches, ...Object.keys(smap.mapping), ...Object.keys(smap.unmatched),
+    ]);
+    const all = allGameMoveSchemas().filter((s) => phase3Ids.has(s.id));
     expect(all).toHaveLength(122);
     expect(all.filter((s) => s.scriptRoute === "exact-id")).toHaveLength(10);
     expect(all.filter((s) => s.scriptRoute === "mapped")).toHaveLength(76);
@@ -118,14 +128,16 @@ describe("phase 3: union schema counts (moveScripts.json)", () => {
 });
 
 describe("phase 3: effect dispatch covers every effect string in moves.ts", () => {
-  it("28 distinct effect strings: 20 dispatched, 8 named-pending, none silently falling through to none", () => {
+  it("43 distinct effect strings: 35 dispatched, 8 named-pending/by-design, none silently falling through to none", () => {
     const table = effectDispatchTable();
     expect(Object.keys(table).sort()).toEqual([
-      "ACC_DOWN1", "ALL_UP1", "ATK_DOWN1", "ATK_DOWN2", "ATK_UP1", "BURN",
-      "CHARGE_TURN", "CONFUSE", "DEF_DOWN1", "DEF_UP1", "DEF_UP2", "DRAIN",
+      "ACC_DOWN1", "ALL_UP1", "ATK_DOWN1", "ATK_DOWN2", "ATK_UP1", "ATK_UP2", "BURN",
+      "CHARGE_TURN", "CONFUSE", "DEF_DOWN1", "DEF_DOWN2", "DEF_UP1", "DEF_UP2", "DEF_UP3", "DRAIN",
+      "EVA_DOWN1", "EVA_UP1", "EVA_UP2",
       "FLINCH", "FORM_TYPE", "FREEZE", "HIGH_CRIT", "MULTI_HIT", "NONE", "PARALYSIS",
-      "POISON", "PROTECT", "RECOIL_25", "SLEEP", "SPDEF_DOWN1", "SPDEF_UP1",
-      "SPDEF_UP2", "SPE_DOWN1", "TRAP",
+      "POISON", "PROTECT", "RECOIL_25", "RECOIL_33", "RECOIL_50", "SLEEP", "SPATK_DOWN1", "SPATK_UP1",
+      "SPATK_UP2", "SPATK_UP3", "SPDEF_DOWN1", "SPDEF_DOWN2", "SPDEF_UP1",
+      "SPDEF_UP2", "SPE_DOWN1", "SPE_UP1", "SPE_UP2", "TRAP",
     ]);
     expect(table["NONE"]).toBe("none");
     expect(table["BURN"]).toBe("status");
@@ -148,6 +160,24 @@ describe("phase 3: effect dispatch covers every effect string in moves.ts", () =
     expect(table["DEF_UP2"]).toBe("stat");
     expect(table["SPDEF_UP1"]).toBe("stat");
     expect(table["SPDEF_UP2"]).toBe("stat");
+    // Batch 3 tokens (2026-10-29, move-completion): the full pool's
+    // decomp-constant bindings, dispatched through the same stat/recoil
+    // kinds — no new resolver kind was minted for any of them.
+    expect(table["ATK_UP2"]).toBe("stat");
+    expect(table["DEF_UP3"]).toBe("stat");
+    expect(table["DEF_DOWN2"]).toBe("stat");
+    expect(table["SPDEF_DOWN2"]).toBe("stat");
+    expect(table["SPATK_UP1"]).toBe("stat");
+    expect(table["SPATK_UP2"]).toBe("stat");
+    expect(table["SPATK_UP3"]).toBe("stat");
+    expect(table["SPATK_DOWN1"]).toBe("stat");
+    expect(table["SPE_UP1"]).toBe("stat");
+    expect(table["SPE_UP2"]).toBe("stat");
+    expect(table["EVA_UP1"]).toBe("stat");
+    expect(table["EVA_UP2"]).toBe("stat");
+    expect(table["EVA_DOWN1"]).toBe("stat");
+    expect(table["RECOIL_33"]).toBe("recoil");
+    expect(table["RECOIL_50"]).toBe("recoil");
     // Named-pending, NOT silent: these 7 have no resolver kind yet
     // (no multi-stat / confuse / drain / trap / protect kind; sleep and
     // freeze have no turn logic) -- see mochiichao_moves_provenance.json
@@ -230,12 +260,12 @@ describe("phase 3: turn order and accuracy (battle-math, via resolver order)", (
 describe("phase 3: targets (singles table, live in battleWiring)", () => {
   it("121 foe + EARTH_TREMOR allFoes, in both the table and the live move table", () => {
     const rows = targetTable();
-    expect(rows).toHaveLength(122);
+    expect(rows).toHaveLength(Object.keys(MOVES_DB).length); // 122 at phase-3 landing; batch-3 full pool has since merged
     expect(rows.filter((r) => r.resolverTarget === "allFoes").map((r) => r.moveId)).toEqual(["EARTH_TREMOR"]);
-    expect(rows.filter((r) => r.resolverTarget === "foe")).toHaveLength(121);
+    expect(rows.filter((r) => r.resolverTarget === "foe")).toHaveLength(Object.keys(MOVES_DB).length - 1);
     expect(rows.find((r) => r.moveId === "EARTH_TREMOR")?.black2Target).toBe("ADJACENT_FOES");
     const live = buildLegacyMoveTable();
-    expect(Object.keys(live.moves)).toHaveLength(122);
+    expect(Object.keys(live.moves)).toHaveLength(Object.keys(MOVES_DB).length);
     expect(live.moves["EARTH_TREMOR"].target).toBe("allFoes");
     expect(live.moves["TACKLE"].target).toBe("foe");
   });

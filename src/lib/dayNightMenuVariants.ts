@@ -7,6 +7,11 @@ import {
   type DayNightVisual,
   type MenuCustomSettings,
 } from './menuCustom';
+import {
+  deriveWorldState,
+  type WorldClockAnchor,
+  type WorldState,
+} from './worldClock';
 
 /**
  * Day/night menu variants — WIRING (stacked on PR #153's spec).
@@ -140,6 +145,46 @@ export function dayNightMenuVariantFor(
  */
 export function getDayNightMenuVariant(now: Date = new Date()): DayNightMenuVariant {
   return dayNightMenuVariantFor(loadMenuCustom(), now);
+}
+
+/**
+ * S1 TAIL — menus as worldClock readers (GAP-FILL-PLAN S1).
+ *
+ * The palette resolver reads ONLY hour/minute from its Date
+ * argument (menuCustom.ts: getGameVisualState -> getHours();
+ * dayNightBlend -> getHours()/getMinutes(); CUSTOM/OFF ignore the
+ * clock entirely). So the world state's hour/minute are carried on
+ * a synthetic Date at a fixed calendar day — the date parts are
+ * never read, and passing them through keeps AUTO + gradual
+ * transition behaviour byte-identical to the device-clock path
+ * for the same hour/minute (pinned by test, not assumed).
+ */
+export function worldDateForState(state: WorldState): Date {
+  return new Date(2000, 0, 1, state.hour, state.minute, 0, 0);
+}
+
+/** The device-clock resolver, driven by a world state instead. */
+export function dayNightMenuVariantForWorld(
+  settings: MenuCustomSettings,
+  state: WorldState,
+): DayNightMenuVariant {
+  return dayNightMenuVariantFor(settings, worldDateForState(state));
+}
+
+/**
+ * Resolve the menu variant from the store's world-clock anchor.
+ * Returns null when the save is unanchored (old saves before the
+ * engine's anchor effect runs) — callers fall back to
+ * getDayNightMenuVariant() in that case, exactly as before.
+ * Derives fresh from the anchor + nowMs at every call; nothing
+ * about the world time is stored here.
+ */
+export function getWorldMenuVariant(
+  anchor: WorldClockAnchor | null,
+  nowMs: number = Date.now(),
+): DayNightMenuVariant | null {
+  if (!anchor) return null;
+  return dayNightMenuVariantForWorld(loadMenuCustom(), deriveWorldState(anchor, nowMs));
 }
 
 /** The vars object as a React style prop (custom properties need the cast). */

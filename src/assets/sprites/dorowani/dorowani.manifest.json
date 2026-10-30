@@ -1,60 +1,75 @@
 {
-  "creature": "dorowani",
-  "roster_id": "147",
-  "roster_note": "Gen 2 choosable starter, confirmed 2026-10-25 per updated MEMORY (was unnumbered in the original bake brief).",
-  "source": "Locked 2D character sheet atlas (game path since PR #183). 3D bake PNGs deleted 2026-10-26 per Mars order - no 3D renders or T-pose assets in the game path.",
-  "game_rule": "2D character sheets, sprites, sprite sheets and GIFs only - no 3D renders, no T-pose assets.",
-  "cell_size": 64,
-  "sheet": {
-    "file": "src/assets/sprite-atlases/dorowani/dorowani_atlas_64_locked.png",
-    "width": 384,
-    "height": 192
+ "creature": "dorowani",
+ "roster_id": "147",
+ "roster_note": "Gen 2 choosable starter, confirmed 2026-10-25 per updated MEMORY (was unnumbered in the original bake brief).",
+ "source": "Locked 2D character sheet atlas (game path since PR #183). 3D bake PNGs deleted 2026-10-26 per Mars order - no 3D renders or T-pose assets in the game path.",
+ "game_rule": "2D character sheets, sprites, sprite sheets and GIFs only - no 3D renders, no T-pose assets.",
+ "cell_size": 64,
+ "sheet": {
+  "file": "src/assets/sprite-atlases/dorowani/dorowani_atlas_64_locked.png",
+  "width": 384,
+  "height": 192
+ },
+ "frames": [
+  {
+   "view": "front",
+   "atlas_cell": {
+    "x": 0,
+    "y": 0
+   },
+   "file": "src/assets/sprite-atlases/dorowani/dorowani_atlas_64_locked.png",
+   "x": 0,
+   "y": 0,
+   "width": 64,
+   "height": 64
   },
-  "frames": [
-    {
-      "view": "front",
-      "atlas_cell": {
-        "x": 0,
-        "y": 0
-      },
-      "file": "src/assets/sprite-atlases/dorowani/dorowani_atlas_64_locked.png",
-      "x": 0,
-      "y": 0,
-      "width": 64,
-      "height": 64
-    },
-    {
-      "view": "back",
-      "atlas_cell": {
-        "x": 64,
-        "y": 0
-      },
-      "file": "src/assets/sprite-atlases/dorowani/dorowani_atlas_64_locked.png",
-      "x": 64,
-      "y": 0,
-      "width": 64,
-      "height": 64
-    },
-    {
-      "view": "side",
-      "atlas_cell": {
-        "x": 256,
-        "y": 0
-      },
-      "file": "src/assets/sprite-atlases/dorowani/dorowani_atlas_64_locked.png",
-      "x": 256,
-      "y": 0,
-      "width": 64,
-      "height": 64
-    }
-  ],
-  "views_done": [
-    "front",
-    "back",
-    "side"
-  ],
-  "views_missing": [
-    "side facing the other direction - mirror the side frame in game code until a second side is drawn"
-  ],
-  "notes": "Game art is the locked 2D atlas above (same cells spriteSheets.ts loads for 147). Former 3D bake PNGs (dorowani_sheet.png, dorowani_front_64.png, dorowani_back_64.png, dorowani_side_64.png) deleted 2026-10-26 per Mars order and no longer in the repo. Walk frames live in src/assets/walk-frames/dorowani/; battle poses live in the locked 2D animation sets."
+  {
+   "view": "back",
+   "atlas_cell": {
+    "x": 192,
+    "y": 0
+   },
+   "file": "src/assets/sprite-atlases/dorowani/dorowani_atlas_64_locked.png",
+   "x": 192,
+   "y": 0,
+   "width": 64,
+   "height": 64,
+   "note": "BACK-CHOICE CORRECTION 2026-10-29 (owner ruling): battle back = locked atlas cell (192,0), manifest cell 2, the full standing shell back."
+  },
+  {
+   "view": "side",
+   "atlas_cell": {
+    "x": 256,
+    "y": 0
+   },
+   "file": "src/assets/sprite-atlases/dorowani/dorowani_atlas_64_locked.png",
+   "x": 256,
+   "y": 0,
+   "width": 64,
+   "height": 64
+  },
+  {
+   "view": "3d_sprite_back",
+   "atlas_cell": {
+    "x": 64,
+    "y": 0
+   },
+   "file": "src/assets/sprite-atlases/dorowani/dorowani_atlas_64_locked.png",
+   "x": 64,
+   "y": 0,
+   "width": 64,
+   "height": 64,
+   "note": "The previously wired back cell (64,0): a half-figure split from the merged 3D-bake pair cell. Owner ruling 2026-10-29: this is the 3D sprite back \u2014 kept in the atlas and labelled, NOT wired as the battle back."
+  }
+ ],
+ "views_done": [
+  "front",
+  "back",
+  "side",
+  "3d_sprite_back (labelled, not wired)"
+ ],
+ "views_missing": [
+  "side facing the other direction - mirror the side frame in game code until a second side is drawn"
+ ],
+ "notes": "Game art is the locked 2D atlas above (same cells spriteSheets.ts loads for 147). Former 3D bake PNGs (dorowani_sheet.png, dorowani_front_64.png, dorowani_back_64.png, dorowani_side_64.png) deleted 2026-10-26 per Mars order and no longer in the repo. Walk frames live in src/assets/walk-frames/dorowani/; battle poses live in the locked 2D animation sets."
 }

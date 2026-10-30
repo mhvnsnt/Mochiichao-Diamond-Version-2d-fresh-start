@@ -1,0 +1,10 @@
+{
+  "file": "mechapion-back-cut.png",
+  "role": "battle_back_player_cut",
+  "source_sheet": "src/assets/sprites-2d/mechapion/main.webp",
+  "source_region": "main sheet grid row 1, col 2 \u2014 standing back pose (helmet rear, twin back vents, belt core from behind)",
+  "cut_method": "background flood-fill / connected-component isolation from the sheet's off-white background; no ground shadow present in source pose, none added",
+  "audit": "back-sprite-fix 2026-10-29 \u2014 cut because the locked atlas carries no genuine battle back view for this species (see AUDIT.md)",
+  "sha256": "07ea8ed14e57b146f35c51f175b1bba42badcee4139f97b6f19e89de13ab32d8",
+  "bytes": 155124
+}

@@ -1926,3 +1926,256 @@ Google Flow / Veo 3.1 Lite, composite-first recipe, gate-recorded by the loop 20
 - V3-004 seg1: EP01-V3-004-flow-kittember-seg1.mp4 — gate PASS (loop record 2026-10-29): Kittember asleep on the gate post, eyes closed, tail flame burning in last frame; background persistent; no camera move.
 
 V3-004 seg2 retired under the reshot plan (beat already inside seg1); V3-001/002/003/004 now complete as shot coverage.
+
+
+## 2026-10-30 — Rig-and-sheet spec (PR #145) wired: registered CURRENT + implemented in BlairWitch
+
+PR #145 landed the donor-measured rig-and-sheet standard
+(`show/production/rigs/RIG-AND-SHEET-SPEC.md` — model-sheet
+format §1, palette format §2, puppet construction §3,
+compositing glue §4, open-movie folder discipline §5, per-cast
+gap list §6; provenance in `DONOR-PROVENANCE-2026-10-29.md`).
+This entry records the wiring, per the land-and-wire standing
+order — a spec in a folder is not done until the systems that
+consume it point at it and the tool that produces to it
+implements it.
+
+**Registered as the CURRENT standard, in the places production
+work actually reads:**
+- `show/production/rigs/README.md` — the standard bullet added
+  to the rig standard (sheet/palette/construction formats +
+  the two §1c height charts + SHARED hands + part naming), and
+  the Files list now names the spec, the provenance record and
+  the open-movie kit as current.
+- `show/production/tooling/TOOLING-INDEX.md` — BlairWitch added
+  as a Class A tool (canonical home `mhvnsnt/BlairWitch`); the
+  rig-and-sheet standard added as a Class B carried-in spec,
+  marked CURRENT; gray case 1 updated: the Big Buck Bunny
+  pyconstraints decision now records the verbatim CC-BY carry
+  (PR #145) and the BlairWitch wiring.
+- `show/production/animation-method/METHOD-REGISTRY.md` — the
+  standard registered as a CURRENT method reference (sheet
+  generation under the Industry Method follows this format);
+  change-log entry added; no method re-marked.
+- `show/production/rigs/RIG-AND-SHEET-SPEC.md` — header now
+  names its implementation (BlairWitch v0.3.0) so a reader
+  lands on the tool, not just the text.
+
+**Implemented in code — BlairWitch v0.3.0 (`mhvnsnt/BlairWitch`,
+PR #1, not merged at this log entry's writing):**
+- Palette engine (§2): CMYK-% base swatches
+  (Dominant/Support/Accent/Ink), pre-computed sanctioned
+  50%/75% tints, variant delta blocks, format validator;
+  `blairwitch palette-sheet`.
+- Sheet generator (§1): §1a sections in order, height-chart
+  entry against the two §1c charts, §2 palette sheet attached
+  to the sheet JSON/SVG, human §1b hands-set + costume
+  sections; `blairwitch height-chart`.
+- Puppet construction (§3): rig scaffold emits the root stack
+  (§3a), the four-piece masked eye system (§3b), the mouth
+  frame-chart — Blair 1–10 + expression mouths 11+, ≥25-frame
+  standard (§3c), pose-frame limbs + `torso_move` (§3d),
+  view-code part names `<view>-<part><L/R>-<###>` (FR/TQ/SD/BK),
+  part-per-file linked libraries and the locked SHARED/hands
+  reference (§3f), overlap skirts (§3g). Puppet packages carry
+  `parts/*.lib.json` and a `constraints/` folder; the validator
+  now checks palette format, part naming and the hands-library
+  reference alongside the standing no-baked-shadows + ROM rules.
+- Constraints (§5 kit): the five Big Buck Bunny pyconstraints
+  carried verbatim as BlairWitch package data (CC-BY 3.0,
+  Blender Foundation; blob SHAs match this repo's copies),
+  registered in `blairwitch.constraints` with modern ports of
+  the separable maths (volume preservation, foot roll,
+  rotation difference); rigs assign them by name to the parts
+  they govern.
+- Tests: 31/31 pass in the BlairWitch tree (12 pre-existing +
+  19 new spec-wiring tests); end-to-end CLI run built and
+  validated pilot puppets; a pip install confirms the verbatim
+  scripts ship as package data.
+
+**Open dependency (named, not faked):** the cast build-out the
+spec enables (§6: human model sheets for Mochiko/Hex/Aeon,
+pilot-six §2 palette sheets, the two height charts, the shared
+hands library) runs as its own build and had not landed a PR
+at this wiring's check. When it lands, its outputs get
+registered CURRENT in the rigs README / TOOLING-INDEX in a
+follow-up — this entry does not claim them.
+
+## 2026-10-30 — Donor hunt addendum: Harmony rig kit + settei/design-rules kit
+
+- The "missing donor" hunt (owner order 2026-10-30) located the
+  Rick & Morty Toon Boom files named as a gap in
+  DONOR-PROVENANCE-2026-10-29 §C.1: they were in the owner's own
+  holdings all along — release `tv-gigaleak-rickandmorty-v1` of
+  `cn-gigaleak-cartoon-vault`, asset
+  `rick-and-morty-toonboom-files.zip` (17,745,919 B), plus a
+  size-identical duplicate asset in `cn-gigaleak-bonus-non-cn`.
+  The earlier pass never enumerated release assets; the
+  cartoon-vault tree holds only the Smiling Friends zip, which is
+  how the files were missed.
+- Verified first-hand: five genuine Harmony Premium 21 character
+  templates (5,077 files; 3,182 .tvg drawings; the
+  scene.elementTable header confirms Harmony Premium 21.0.1).
+  Kit extracted into
+  show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md
+  (deformer/peg network census, substitution-chart conventions,
+  .plt palette discipline, hero-vs-standard build budgets).
+  Studio files themselves stay in local study only — specs land,
+  character files don't.
+- khsqgj.pdf identified: the Smiling Friends "Design & Cleanup
+  Rules" book (18 pp) — the addendum records its numbered
+  do/don't rulebook as a document type to adopt.
+- Digimon settei located on the public web (Settei Dreams index;
+  archive.org item digimon-adventure-2020-settei) — the addendum
+  records the settei pack's five-section completeness standard.
+  Lilo & Stitch: no sheet pack circulates; the production style
+  document of record is "Surfing the Sanders Style" (noted).
+  Monster Rancher: no production settei located anywhere
+  searched (named honestly; TMS 1999, physical-copy market only).
+- Provenance correction of record: the manifest's R&M line came
+  from the bonus-release pointer chain (PULL-IN-MAP "Bonus
+  non-CN" row + research INDEX pointer), not from a file in hand
+  at writing time; TOOLING-INDEX repeated it as held. The
+  material was real — the paperwork predated the pull.
+
+
+---
+
+## 2026-10-30 — Cast gaps build landed for review (PR #35)
+
+Built from the game's existing production art (owner correction: the humans were never sheetless): show model sheets (spec §1b) for **Mochiko, Hex, Aeon** under `show/production/model-sheets/humans/` (v2 likeness of record + world-views turnarounds + atlas portraits/battle cells + the built Blair-10 talking sets on record; ¾ views and expression sets carried as explicit OWED placeholders, gate H-2 open) · §2 CMYK palette files for the pilot six + the three humans under `model-sheets/palettes/`, sampled from the canon cutouts (Wispkin from the reference of record, sha256 b9de2318…) · principal + secondary height charts under `model-sheets/` (creature units repo-stated, human units derived and labelled) · shared generic-hands library v1 (15 poses) under `rigs/SHARED/hands/` · `rigs/BUILD-NOTES-cast-gaps-2026-10-30.md` with sources per piece, the canon-lock check, and five contradictions found in the game material (Mochiko/Hex world-pass divergences from the v2 locks, missing battle fullsize sources named by the atlas manifests, Kittember 'black coat' text vs sampled dark grey). Additions only; not merged — pending review.
+
+---
+
+## 2026-10-30 — Cast build-out (PR #35) registered CURRENT
+
+PR #35 merged (merge 67ecf40e0c) — the cast build-out the
+rig-and-sheet spec's §6 gap list called for: show model
+sheets (§1b) for Mochiko, Hex, Aeon
+(`show/production/model-sheets/humans/`), §2 CMYK palette
+files for the pilot six + the three humans
+(`show/production/model-sheets/palettes/`), the principal +
+secondary height charts (`show/production/model-sheets/
+height-chart-principal.png`, `height-chart-secondary.png`,
+`height-chart-data.md`), the shared generic-hands library v1
+(`show/production/rigs/SHARED/hands/`), and the build record
+(`show/production/rigs/BUILD-NOTES-cast-gaps-2026-10-30.md`).
+
+This registration closes the open dependency named in the
+PR #33 wiring entry above ("the cast build-out the spec
+enables … had not landed a PR at this wiring's check … this
+entry does not claim them"). It is claimed now, and
+registered where production work reads:
+
+- `show/production/rigs/README.md` — new CURRENT cast
+  artifacts section (every artifact named with its path and
+  status), a cast-artifacts bullet in the rig standard, and
+  Files entries for the build notes and the SHARED hands
+  library.
+- `show/production/tooling/TOOLING-INDEX.md` — dated
+  cast-artifacts section; the standard's Class B row now
+  points at the landed build-out.
+- `show/production/animation-method/METHOD-REGISTRY.md` —
+  the rig-and-sheet method reference now records the
+  build-out as landed + registered; change-log entry added;
+  no method re-marked, no gate changed.
+
+**Registered OWED, in the open (not complete):** ¾ (TQ)
+turnaround views ×3 (Mochiko, Hex, Aeon — no ¾ drawing exists
+in the game material); expression sets beyond the face of
+record ×3 — gate H-2 stays NOT PASS on all three human
+sheets until the registers named in each sheet are drawn;
+full-res battle views ×3 (only the 64px atlas cells survive
+in the repo); hands library v2 poses (point, generic grip,
+TQ set, wave, palm-up offer); Lustre palette deltas for
+Mochii, Gabu, Kittember, Sproutle. Mouth sets stand at gate
+H-1 material PASS, still pending the owner's eye-check;
+voice casting remains AWAITING OWNER for all three humans.
+
+## 2026-10-30 — Harmony + settei addendum (PR #34) wired: registered CURRENT + implemented in BlairWitch v0.4.0
+
+PR #34 landed the donor-hunt kit
+(`show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md`
+— the Harmony rig kit measured from the production templates
+recovered in the owner's own releases, and the settei /
+design-rules kit). This entry records the wiring, per the
+land-and-wire standing order — a kit in a folder is not done
+until the systems that consume it point at it and the tool
+that produces to it implements it.
+
+**Registered as CURRENT alongside the base spec, in the places
+production work actually reads:**
+- `show/production/rigs/README.md` — the addendum bullet added
+  to the rig standard (Harmony profile, substitution charts,
+  .plt discipline, settei pack standard, cleanup rules) and
+  the Files list; the Implemented-in-code bullet now names
+  BlairWitch v0.4.0 (PR #2).
+- `show/production/tooling/TOOLING-INDEX.md` — the addendum
+  added as a Class B carried-in spec, marked CURRENT
+  extension of the rig-and-sheet standard; the BlairWitch
+  Class A entry extended to v0.4.0.
+- `show/production/animation-method/METHOD-REGISTRY.md` — the
+  addendum registered as a CURRENT method reference alongside
+  the base rig-and-sheet standard; change-log entry added;
+  no method re-marked.
+- `show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md`
+  — header now names its implementation (BlairWitch v0.4.0),
+  so a reader lands on the tool, not just the text.
+
+**Implemented in code — BlairWitch v0.4.0 (`mhvnsnt/BlairWitch`,
+PR #2, not merged at this entry's writing):**
+- Harmony construction profile (`blairwitch.harmony`):
+  element inventory in prefix_part_side naming at the
+  measured bands (standard humanoid 42 elements, hero 55),
+  node-graph scaffold — one master peg, paired multi-port
+  region groups, a composite per region (hero) or region
+  group (standard 2-3), per-element pegs + drawing reads
+  with the LINE/COLOR/OVERLAY/UNDERLAY art split, hero
+  curve-deformer chains with offset modules, cutter pairs
+  keyed on the palette's Cutter matte colour, turnaround
+  transformation switches, hero colour-override switches —
+  with the measured production census recorded as the tier
+  budget the scaffold is grown toward.
+- Substitution charts: head/eye/brow angle charts (F/3Q/P/PQB
+  family; eyes at 4 lid variants per angle), mouths as the
+  Blair 10 per angle (F/3Q/P) + expression mouths per angle,
+  floored at the measured 44 drawings (standard band 44-48);
+  hand charts sized by tier (14 standard; hero measured
+  105 L / 107 R); an -empty drawing reserved per element —
+  visibility by substitution, never by deleting.
+- Palette discipline: real .plt text (ToonBoom palette file
+  format), LINKed from a single source (never embedded),
+  utility palettes travelling with the template, and the
+  functional colours `rig` (alpha 0) and `Cutter` (pure
+  green) validated exactly.
+- Settei + cleanup validators: the five-section model-pack
+  completeness check (sections filled; CG section present
+  exactly when CG assists are used; per-character
+  completeness; creatures grouped by stage line at
+  consistent scale; props ordered by story importance;
+  environments with multiple angles + a character-in-space
+  scale diagram), and sheet/puppet checks for the universal
+  line-weight declaration, the graded line-quality class,
+  body-under-clothes construction on costumed humans, and
+  the mouth-discipline record.
+- Puppet packages built with construction="harmony" carry a
+  harmony/ folder (network, charts, palette record + .plt);
+  the validator runs the network/palette/chart checks and
+  the sheet checks alongside the standing rules.
+- Tests: 48/48 pass in the BlairWitch tree (31 pre-existing
+  + 17 new addendum-wiring tests, tamper cases included);
+  end-to-end CLI runs built and validated flash and harmony
+  puppet packages.
+
+**Open dependency (named, not faked):** the cast build-out
+(PR #35 — human model sheets, pilot-six §2 palette sheets,
+the two height charts, the SHARED hands library) merged to
+main (67ecf40e) while this wiring was in flight, and
+PR #37 has since registered its outputs CURRENT in these
+same registries — but they were built before the
+addendum's validators existed and have not been re-run
+through them (the §B cleanup declarations and the settei
+per-sheet record are BlairWitch sheet-format checks; the
+cast sheets are markdown/PNG production sheets). A follow-up
+pass re-checks them and records the result; this entry does
+not claim it.

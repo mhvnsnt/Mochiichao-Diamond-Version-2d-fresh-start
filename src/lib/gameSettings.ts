@@ -33,6 +33,8 @@ export type BattleScene = 'ON' | 'OFF';
 export type BattleStyle = 'SHIFT' | 'SET';
 export type SoundMode = 'MONO' | 'STEREO';
 export type ButtonMode = 'NORMAL' | 'LR' | 'L_EQUALS_A';
+import { VISUAL_STYLE_ORDER, type VisualStyleId } from './styleProfiles';
+export type VisualStyle = VisualStyleId;
 
 export interface GameSettings {
   textSpeed: TextSpeed;
@@ -42,6 +44,10 @@ export interface GameSettings {
   buttonMode: ButtonMode;
   /** 1-20. */
   frame: number;
+  /** Visual generation switcher: a presentation-flatness profile
+   *  only (src/lib/styleProfiles.ts). It never selects a palette,
+   *  tileset, texture, sprite, lighting pass, or map. */
+  visualStyle: VisualStyle;
   /** Font ids from src/lib/fonts.ts, six independent placements
    *  (Mars font correction, 2026-10-25 18:22/18:30 CDT, overrides
    *  the 2-row version; Mars readability order, 2026-10-26):
@@ -103,6 +109,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
   sound: 'STEREO',
   buttonMode: 'NORMAL',
   frame: 1,
+  visualStyle: 'GEN5',
   mainFont: 'yagiza',
   menuFont: 'pokemon-base',
   dialogueFont: 'pokemon-base',
@@ -142,6 +149,7 @@ export const BATTLE_SCENES: BattleScene[] = ['ON', 'OFF'];
 export const BATTLE_STYLES: BattleStyle[] = ['SHIFT', 'SET'];
 export const SOUNDS: SoundMode[] = ['MONO', 'STEREO'];
 export const BUTTON_MODES: ButtonMode[] = ['NORMAL', 'LR', 'L_EQUALS_A'];
+export const VISUAL_STYLES: VisualStyle[] = [...VISUAL_STYLE_ORDER];
 
 /** Y2K accent colour per frame, cycling pink / yellow / blue / green /
  *  teal — the v32 main-menu panel colours, not Pokemon palettes. */

@@ -127,9 +127,9 @@ export const SYNDICATE_ADMINS: BattleLeader[] = Array.from({ length: 10 }, (_, i
 export const HACKER_LEADER: BattleLeader = {
   id: "hacker_leader", name: null, theme: null, town: null, badge: null, reward: null, fixedTeam: null, teamStatus: "AWAITING_MARS",
 };
-// Unplaced locked leader: Region 1 has no pure Rock dojo, so placement stays open.
+// Iwao: theme Earth + Chrome (not Rock). Mars ruling 2026-10-29: Earth comes first, Chrome comes later (Onix to Steelix logic). Dual placement: first fight Earth, return fight Chrome.
 export const UNPLACED_LEADER: BattleLeader = {
-  id: "unplaced_rock", name: "Iwao", theme: "Rock", town: null, badge: null, reward: null, fixedTeam: null, teamStatus: "AWAITING_MARS",
+  id: "iwao_dual", name: "Iwao", theme: "Earth + Chrome", town: null, badge: null, reward: null, fixedTeam: null, teamStatus: "AWAITING_MARS",
 };
 
 // ---- Fixed teams by default; randomized as a settings option; no per-draw lock ----

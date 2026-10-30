@@ -234,6 +234,39 @@ export function routeMediaElement(el: HTMLAudioElement): boolean {
   }
 }
 
+/**
+ * Fanfare ducking (sound-full-coverage lane, 2026-10-29 — the
+ * WebAudio equivalent of Emerald's fanfare behaviour, verified in
+ * pret-pokeemerald src/sound.c: PlayFanfare STOPS the BGM player,
+ * WaitFanfare resumes it when the fanfare's frame counter ends).
+ * Our music is a looping element, so instead of a hard stop the
+ * music bus dips to 25% for the fanfare's length and restores —
+ * same audible shape (fanfare alone in front, music returns after),
+ * no restart of the loop. Everyday SE cues never call this; only
+ * the fanfare class (heal / victory file stingers) does.
+ */
+let duckTimer: ReturnType<typeof setTimeout> | null = null;
+export function duckMusicBus(durationMs: number): void {
+  const bus = buses.music;
+  if (!ctx || !bus) return;
+  try {
+    const now = ctx.currentTime;
+    bus.gain.cancelScheduledValues(now);
+    bus.gain.setValueAtTime(bus.gain.value, now);
+    bus.gain.linearRampToValueAtTime(0.25, now + 0.08);
+    if (duckTimer) clearTimeout(duckTimer);
+    duckTimer = setTimeout(() => {
+      if (!ctx || !buses.music) return;
+      const t = ctx.currentTime;
+      buses.music.gain.cancelScheduledValues(t);
+      buses.music.gain.setValueAtTime(buses.music.gain.value, t);
+      buses.music.gain.linearRampToValueAtTime(1, t + 0.35);
+    }, Math.max(0, durationMs));
+  } catch {
+    // Ducking is garnish — a failure stays silent, never throws.
+  }
+}
+
 /** Resume the graph context after a user gesture (a music element
  * routed into a suspended context stays silent until this runs). */
 export function resumeAudioGraph(): void {

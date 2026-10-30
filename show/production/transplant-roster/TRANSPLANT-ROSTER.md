@@ -94,7 +94,7 @@ identification with one word if he meant her.
 
 **Mochiichao landing — OWNER-DIRECTED TRANSPLANT.**
 - **SUN RĀ** keeps his name (naming law). He becomes a spiritual
-  **ONI-type Mochichao**, legendary class — **THE volcano Mochichao of
+  **ONI-type Mochichao**, legendary class [**SUPERSEDED by owner t339u (2026-10-29): Mythical class, Mythic + Flame dual type; see docs/canon/UNIVERSE-CONVERGENCE.md**] — **THE volcano Mochichao of
   Region 3's MOCHICHAO FESTIVAL** (festival definition owner-locked
   2026-10-27: the festival is a festival *of* a volcano Mochichao,
   Susano-style). The fit is structural, not decorative: a fire god who
@@ -552,7 +552,7 @@ Wizard Gang controlled, Malakor-inspired.
 | EL TORO DE ORO | R3 | A golden-horned bull luchador — Rancher's farm/bull register meets lucha; Festival-adjacent spectacle species. |
 | PABLO | R3 | Minotaur-painted powerhouse with a dark second form (blackreign) — combination/weird-body drift is his home design already. |
 | BURGER | R1 | The Pokémon-like base region takes the pool's most Pokémon-shaped concept: a round eater whose body *is* his curse; uncursed slim form = a natural evolution-line seed. |
-| DEMONIO | R4 | A demon who fights like a saint — fusion region is where a demon species with a saint's learnset belongs. |
+| DEMONIO | R4 **(region OWNER-RULED 2026-10-29: physically R4/Season 4 only; seen earlier only in Pantera's S2 flashbacks and as background shadows; see `docs/canon/UNIVERSE-CONVERGENCE.md`. **t325u: a demon-beast outcast, distrusted and hated for his curse and transformation; whether he is a cursed human or a Mochiichao is OPEN**)** | A demon who fights like a saint — fusion region is where a demon species with a saint's learnset belongs. |
 | DIO | R4 | The second demon line, kept distinct from Demonio: pure destructive force, no element — R4's fusion register holds the contrast. |
 | GASHADOKURO | R4 | A named giant-skeleton yokai bear-companion at home becomes a legendary-class yokai species seed in the fusion region (folklore name — no proprietary flag, §5). |
 | BRUTUS | R5 | Juggernaut mass as a species argument in the owner's-own-universe region. |
@@ -588,7 +588,7 @@ Wizard Gang controlled, Malakor-inspired.
 | MASTER SENSEI | R4 | The most literal dojo fit in the pool: a martial-arts master among wrestlers, seated in the institute region where mastery is procedural. |
 | AARON RUBEN | R2 | Ring General — a grappling syllabus as a dojo; Twin/Return's mirrors suit a teacher who runs matches back. |
 | SLICE | R2 | The surgical blade — third of his home blade trio, seated apart from Phantom/Scimitar so the trio reads as a circuit, not a cluster. FLAG (§5). |
-| PHANTOM | R2 | The Ghost Blade as a dojo master of three personas. **Collision with R1's canon Phantom leader — owner's call (§5); if both stand, the regions must carry the distinction.** |
+| ~~PHANTOM~~ **SUPERSEDED (owner, 2026-10-29)** | ~~R2~~ | **One Phantom only: R1's Dojo 5 leader IS Western Heart's Phantom; this R2 seat is void. See `docs/canon/UNIVERSE-CONVERGENCE.md`.** Original proposal kept for record: The Ghost Blade as a dojo master of three personas. **Collision with R1's canon Phantom leader — owner's call (§5); if both stand, the regions must carry the distinction.** |
 | SCIMITAR | R3 | The desert vizier with a debt ledger — a land-side dojo that keeps accounts is a Rancher-drift institution. |
 | KING TYRANT | R3 | The wrestling king holds a showman dojo — Festival-region spectacle with a crown on it. FLAG (§5). |
 | KOBRA | R3 | Street-chaos dojo on the coasts; the informal school the official ones deny exists. |
@@ -614,7 +614,7 @@ and Cornerstone, whose entry follows the table.)*
 | Character | Region | Case |
 |---|---|---|
 | **BANNON** | R5 | **OWNER-LOCKED — Region 5 League Champion** (Anchor 3). Counted in this tier as the slot he holds. |
-| DIABLO | R4 | A devil who believes he's the final boss, seated one tier below the top so the belief stays dramatic. |
+| DIABLO | R4 **(region OWNER-RULED 2026-10-29 as Demonio; role still OPEN: dojo leader / Elite / boss antagonist. The 'one tier below the top' seat is a proposal only. **t341u: R4 CHAMPION/king, faced after the Elite Four; secretly a Mochiichao (t339u).** t325u: a feared HUMAN demon king, a Ranger, sole Goddgachuu owner; role framed as the R4 demon-king antagonist, to confirm; see `docs/canon/WESTERN-HEART-IN-MOCHIICHAO.md`**)** | A devil who believes he's the final boss, seated one tier below the top so the belief stays dramatic. |
 | SKULL | R2 | Violence as an Elite register: RETSU riding a man is an endgame fight, not a gym. |
 | THOR | R3 | A literal god in the Elite tier of the Festival region — the tier bends around him, as his home trial's seating chart did. FLAG (§5). |
 | CAIN ELIAS | R5 | "Ultimate Enforcer" is an Elite job description verbatim; the Corporate Structure's hand in a Gang-run region makes him a double agent of two empires. FLAG (§5). |
