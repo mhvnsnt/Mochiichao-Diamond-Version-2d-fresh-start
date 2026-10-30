@@ -125,6 +125,79 @@
     },
     "status": {
       "type": "string"
+    },
+    "meaning": {
+      "type": "object",
+      "description": "Item-meaning layer (item-meaning lane S-IM1, 2026-10-29): OPTIONAL and backwards-compatible — a record without it is a plain item. provenance = where it was made/found and by whom (existing canon only); appraisal = the fossil-service shape (a find is unidentified until a research seat names it); keepsake = a gift whose giver is part of the record (depth derives from the keepsake fact log on the bond band scale, never a stored number); unique = one-of-one discipline (exactly one mechEffect + one storyEffect, hand-placed, never shop stock or drop rows — guarded by src/lib/itemMeaning.test.ts). New relic display names carry draftName until the owner rules.",
+      "additionalProperties": false,
+      "properties": {
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "origin": { "type": "string" },
+            "foundAt": { "type": "string" },
+            "line": { "type": "string" }
+          },
+          "required": ["origin", "line"]
+        },
+        "appraisal": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "unknownName": { "type": "string" },
+            "unknownDesc": { "type": "string" },
+            "seat": { "type": "string" }
+          },
+          "required": ["unknownName", "unknownDesc", "seat"]
+        },
+        "keepsake": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "giver": { "type": "string" }
+          },
+          "required": ["giver"]
+        },
+        "unique": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mechEffect": { "type": "string" },
+            "storyEffect": { "type": "string" }
+          },
+          "required": ["mechEffect", "storyEffect"]
+        },
+        "placement": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "npcId": { "type": "string" },
+            "eventId": { "type": "string" }
+          },
+          "required": ["npcId", "eventId"]
+        },
+        "returnTo": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "npcId": { "type": "string" },
+            "eventId": { "type": "string" },
+            "deed": { "type": "string" }
+          },
+          "required": ["npcId", "eventId", "deed"]
+        },
+        "fieldEffect": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "type": "string", "enum": ["encounter-rate"] },
+            "factor": { "type": "number" }
+          },
+          "required": ["kind", "factor"]
+        },
+        "draftName": { "type": "boolean" }
+      }
     }
   },
   "required": [
