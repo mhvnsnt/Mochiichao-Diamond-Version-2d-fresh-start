@@ -136,6 +136,11 @@ import {
 } from "./battle-math";
 import { MOVES_DB } from "./moves";
 import { SPECIES_DB } from "./species";
+import {
+  getSafeEvolutionRule,
+  safeEvolutionReady,
+  type EvolutionRule,
+} from "./evolution-hook";
 
 /** Display-type spellings (what resolveBattleMove returns) -> the
  * legacy element vocabulary battle-math and SPECIES_DB use. Already-
@@ -587,4 +592,55 @@ export function worldCanActGateLine(name: string, reason: string | null): string
     default:
       return `${name} can't move!`;
   }
+}
+
+export type WorldEvolutionPayoff = {
+  recipients: Array<{
+    partyIndex: number;
+    levelUps: unknown[];
+    endLevel: number;
+  }>;
+};
+
+export type WorldEvolutionAfterPayoffResult = {
+  /** True only when the payoff's recipient levelled into a safe-chain rule. */
+  ready: boolean;
+  /** The safe-chain rule, or null when not ready. */
+  rule: EvolutionRule | null;
+  /** The rule's target species id, or null when not ready. */
+  targetId: string | null;
+  /** The recipient's level after the payoff, or null when not ready. */
+  endLevel: number | null;
+};
+
+/**
+ * Step 7: the payoff -> evolution sequence step, pure. The host
+ * calls this AFTER the payoff's EXP/level commits have landed and
+ * BEFORE it runs the payoff's continuation (send-out / victory).
+ * It returns ready only when the plan's recipient for partyIndex
+ * actually gained a level in this payoff (levelUps non-empty) AND
+ * that recipient's post-payoff level meets its safe-chain rule
+ * (evolution-hook safeEvolutionReady: level method, roster
+ * verbatim, SAFE chains only — 013/014/015 and 038/039/040).
+ * The host owns the endsBattle gate (this function cannot see it:
+ * the plan carries no endsBattle flag) and the prompt itself, so a
+ * mid-battle faint that reaches this function by mistake still
+ * returns ready — the host must not call it there. No species
+ * outside the safe chains, no rule-less species, and no payoff
+ * with no level-up ever returns ready.
+ */
+export function worldEvolutionAfterPayoff(
+  plan: WorldEvolutionPayoff | null | undefined,
+  partyIndex: number,
+  speciesId: string | null | undefined,
+): WorldEvolutionAfterPayoffResult {
+  const notReady: WorldEvolutionAfterPayoffResult = {
+    ready: false, rule: null, targetId: null, endLevel: null,
+  };
+  if (!plan || !speciesId) return notReady;
+  const rec = plan.recipients.find((r) => r.partyIndex === partyIndex);
+  if (!rec || rec.levelUps.length === 0) return notReady;
+  const rule = getSafeEvolutionRule(speciesId);
+  if (!rule || !safeEvolutionReady(speciesId, rec.endLevel)) return notReady;
+  return { ready: true, rule, targetId: rule.targetId, endLevel: rec.endLevel };
 }
