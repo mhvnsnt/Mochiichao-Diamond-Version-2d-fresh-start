@@ -7,14 +7,11 @@ import type { GuardianAssignment } from '../lib/monster-tamer-systems';
 import type { DeedEntry } from '../lib/honor';
 import { emptyLivingWorldState } from '../lib/livingWorld';
 import type { LivingWorldState } from '../lib/livingWorld';
-import type { KeepsakeFact } from '../lib/itemMeaning';
 import { GameSettings, DEFAULT_SETTINGS, loadStoredSettings, persistSettings } from '../lib/gameSettings';
 import { deriveRangerMaxHp, applyRangerDamage, applyRangerHeal, applyRangerFullHeal } from '../lib/rangerDefense';
 import { setAutosaveHold, getAutosaveHold } from '../lib/saveSystem';
-import type { WorldClockAnchor } from '../lib/worldClock';
 import { applyFontRoles } from '../lib/fonts';
 import { applySoundMode } from '../lib/audioRouting';
-import { worldFullPp } from '../lib/worldBattleCore';
 
 interface GameState {
   playerName: string;
@@ -51,17 +48,6 @@ interface GameState {
   // Preserved from Chao Garden PR #225 (live main): Garden minutes.
   gardenMinutes: number;
   setGardenMinutes: (minutes: number) => void;
-
-  // World clock (gap-fill S1, CLOCK-FROM-POKEMON §3.2): the anchor
-  // is the ONLY stored clock state. Phase, weekday, season and
-  // day-of-year are derived from it by src/lib/worldClock.ts and
-  // are never stored. Null = not yet anchored (old saves, and
-  // fresh games before their first WorldEngine tick); the engine
-  // anchors a new game at day 0, 10:00 via newGameAnchor(). Old
-  // saves carry no field and load with null through loadState's
-  // spread, exactly like the ledger/living-world defaults above.
-  worldClock: WorldClockAnchor | null;
-  setWorldClock: (anchor: WorldClockAnchor) => void;
   // Creature Mode Pass 7 — Daycare steps: persisted tile steps taken
   // in Creature Mode while a Guardian is assigned (deposited).
   // FireRed daycare.c: steps accumulate for deposited creatures
@@ -127,19 +113,6 @@ interface GameState {
   damageRanger: (amount: number) => { hp: number; dealt: number; downedNow: boolean };
   healRangerBy: (amount: number) => void;
   healRangerFull: () => void;
-  // Item meaning (item-meaning lane S-IM1): FACTS ONLY, the same
-  // derived-reads discipline as the deed ledger. identifiedItems
-  // lists item ids the appraisal service has named for this
-  // Ranger — what an item IS lives in its record
-  // (src/lib/itemMeaning.ts), never here. keepsakeLog is
-  // append-only: a keepsake's depth is derived from it at read
-  // (keepsakeBand), never stored as a number. Old saves carry
-  // neither field and load with the empty defaults through
-  // loadState's spread.
-  identifiedItems: string[];
-  identifyItem: (itemId: string) => void;
-  keepsakeLog: KeepsakeFact[];
-  appendKeepsakeFact: (fact: Omit<KeepsakeFact, 'seq'>) => void;
 
   // Overworld state
   currentMap: string;
@@ -254,8 +227,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   setGuardian: (guardian) => set({ guardian }),
   gardenMinutes: 0,
   setGardenMinutes: (minutes) => set({ gardenMinutes: minutes }),
-  worldClock: null,
-  setWorldClock: (anchor) => set({ worldClock: anchor }),
   daycareSteps: 0,
   setDaycareSteps: (steps) => set({ daycareSteps: steps }),
   daycarePartner: null,
@@ -320,14 +291,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   setLivingWorld: (state) => set({ livingWorld: state }),
   techniqueFlags: {},
   setTechniqueFlag: (flag, held) => set(s => ({ techniqueFlags: { ...s.techniqueFlags, [flag]: held } })),
-  identifiedItems: [],
-  identifyItem: (itemId) => set(s => ({
-    identifiedItems: s.identifiedItems.includes(itemId) ? s.identifiedItems : [...s.identifiedItems, itemId]
-  })),
-  keepsakeLog: [],
-  appendKeepsakeFact: (fact) => set(s => ({
-    keepsakeLog: [...s.keepsakeLog, { ...fact, seq: s.keepsakeLog.length + 1 }]
-  })),
   currentMap: 'sector0',
   playerPos: { x: 21, y: 14 },
   hasSprintBoots: false,
@@ -404,14 +367,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     // same beat (Mochi Center / Mom, every isHeal path calls this).
     // His pool is only touched once it exists (maxHp > 0), so a
     // pre-creature-mode heal never founds it early.
-    // Gap-fill S6 step 6: a healer restores PP to full too (the
-    // restore half of PP write-back — without it, spent PP would
-    // deplete with no recovery, the reason battleWiring left the
-    // resolver's PP unwritten). A member with no moves keeps an
-    // empty pp array; a member whose pp was never tracked gains
-    // its full list, the same initialisation createMochii uses.
     set(state => ({
-      party: state.party.map(m => ({ ...m, hp: m.maxHp, currentHp: m.maxHp, status: null, pp: worldFullPp(m.moves) })),
+      party: state.party.map(m => ({ ...m, hp: m.maxHp, currentHp: m.maxHp, status: null })),
       rangerHp: state.rangerMaxHp > 0 ? state.rangerMaxHp : state.rangerHp
     }));
   },

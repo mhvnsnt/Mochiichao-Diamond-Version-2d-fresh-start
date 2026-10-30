@@ -13,7 +13,6 @@ import {
   dominantStat, typeVariant,
 } from './mochiichao-systems';
 import { GARDEN_CRITTERS } from './garden-data';
-import { deriveWorldState, type WorldClockAnchor } from './worldClock';
 
 export interface FarmPlot {
   id: string;
@@ -77,35 +76,6 @@ export function newGardenRecord(speciesId: string, seed: number): GardenSaveReco
     ],
     raceWins: 0, sparWins: 0, egg: null, collectedCritters: [],
   };
-}
-
-/**
- * Garden "now" in game minutes — S1 TAIL part 2 (DORO-DERIVED design,
- * not an owner ruling): the Garden becomes a reader of the world
- * clock instead of its own manual counter. An anchored save reads
- * the world clock's totalGameMinutes (the #19 running total, from
- * worldClock.ts); an unanchored save keeps the manual gardenMinutes
- * counter exactly as before, so old saves still work before the
- * engine anchors them. plantPlot / harvestPlot / enterCocoon /
- * tickCocoon are unchanged and take this value as their nowMinutes
- * — DURATIONS ARE UNCHANGED (plots +7, cocoon +10), only the driver
- * changes. Two consequences, stated plainly, not hidden:
- * (1) at the world clock's 4 game-minutes/real-second rate, 7 world
- * minutes pass in under 2 real seconds, so anchored plots ripen
- * fast — pacing redesign belongs to S14's phase-4 garden machine
- * (the 480-minute berry model), and no new duration is invented
- * here; (2) plots/cocoons planted under the old manual counter
- * carry readyAt/endsAt in that counter's small scale, so they read
- * as ready on the first world-clock read — a one-time migration
- * artefact, not a second clock kept alongside.
- */
-export function gardenNowMinutes(
-  anchor: WorldClockAnchor | null | undefined,
-  fallbackMinutes: number,
-  nowMs: number,
-): number {
-  if (!anchor) return fallbackMinutes;
-  return deriveWorldState(anchor, nowMs).totalGameMinutes;
 }
 
 /** Cocoon: enter at Form I/II threshold, emerge after 10 Garden minutes. */

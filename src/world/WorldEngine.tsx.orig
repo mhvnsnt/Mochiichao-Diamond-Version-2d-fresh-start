@@ -16,60 +16,15 @@ import DialogueBox from "../components/game/DialogueBox";
 import { isConfirmKey } from "../lib/buttonMode";
 import { slotForNpc } from "../lib/humanSheets";
 import { personaPresentationForNpc } from "../lib/personaDialogue";
-import { applyMusic, playHealJingle, playVictoryJingle } from "../lib/musicPlacement";
-import { playCry } from "../lib/cries";
+import { playMusic } from "../lib/music";
 import { resolveTrainerRow, rowToMapMembers } from "../lib/trainer-teams-resolver";
 import { planForOutcome, commitRecipientExp, commitNextLevel, expProgressInLevel, type PayoffPlan } from "../lib/battlePayoff";
 import { useBattlePayoffSequence, PayoffStatWindow } from "../components/game/BattlePayoffSequence";
 import { resolveWorldMove, buildWorldAttackPresentation } from "../lib/worldMoveBridge";
 import BattleSceneBackdrop from "../components/game/BattleSceneBackdrop";
 import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackground";
-import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
 import type { MoveAnimationProfile } from "../lib/moveAnimation";
 import { isDoorOpen, sealedDoorText } from "../lib/doorGate";
-// Creature Mode + Dual Encounters (PMD-mode package, owner orders
-// 2026-10-29 ~20:12–20:17 CDT): mode swap, the companion Ranger, visible
-// roamers and the engagement layer. All rules live in lib/creatureMode.ts
-// (the decided battle-style rule included); bindings + area mix are data
-// in data/core/encounter-modes.json. The tall-grass path below is NOT
-// touched by this package — grass encounters stay exactly as they were.
-import {
-  swapTarget,
-  nextCompanionCommand,
-  effectiveCompanionCommand,
-  companionFreeStep,
-  encounterMixFor,
-  createRoamer,
-  stepRoamer,
-  rangedAction,
-  contactResolution,
-  overworldMoveset,
-  type ControlMode,
-  type CompanionCommand,
-  type Roamer,
-} from "../lib/creatureMode";
-// Ranger Companion Defence + Health (ranger-defense package, owner
-// ruling 2026-10-29 ~21:21 CDT): the Ranger companion can DEFEND the
-// player-creature (step in, take the hit's real damage on his own
-// store-held health pool, go DOWN, need healing), DISTRACT roamers
-// onto himself, and the swap locks while he is down. All rules live
-// in lib/rangerDefense.ts; numbers are data (encounter-modes.json →
-// rangerDefense). The Ranger still NEVER deals damage personally.
-import {
-  rollDefend,
-  rangerDamageFromHit,
-  rangerDamageFromClassicHit,
-  distractRoamer,
-  swapLockForRanger,
-  rangerDown,
-  isHostileHuman,
-  humanStrikeDamage,
-  HUMAN_STRIKES,
-  RANGER_DEFENSE,
-  type RangerHealth,
-} from "../lib/rangerDefense";
-import { REGULAR_ATTACK as RANGER_REGULAR_ATTACK, battlerFromMon as rangerBattlerFromMon } from "../lib/creatureMode";
-import encounterModesConfig from "../data/core/encounter-modes.json";
 // Stub-kill (2026-10-29): S-2 living-world director hook, S-3 field
 // techniques, S-6 encounter binding, S-7 drops, S-8 honor greetings.
 // Each system lives in its own module with its provenance written on
@@ -80,9 +35,7 @@ import { tableFor, rollEncounterStep } from "../lib/encounters";
 import { evaluateTileGate, performedText } from "../lib/fieldTechniques";
 import { rollWildHeldItem, resolveBattleEndDrop, DROP_ITEM_NAMES } from "../lib/drops";
 import { greetingFor, isGreeter } from "../lib/greetings";
-import { RELIC_NPCS, APPRAISAL_TERMINAL_NPC_ID, appraisalTerminalLines, appraiseCarried, recordFor, canGrantUnique, encounterRateFactor, keepsakeBand } from "../lib/itemMeaning";
-import { deriveMorale, recordDeed } from "../lib/honor";
-import { playCue } from "../lib/soundCues";
+import { deriveMorale } from "../lib/honor";
 // Sequence build (2026-10-28): the engine now CONSUMES the movement
 // config (docs/MOCHII-MOVEMENT-SYSTEM.md; the file landed with PR #66
 // on its branch and is carried onto main by the sequence build). The
@@ -266,11 +219,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   // nothing here (NEED, labelled in buttonMode.ts); the pause
   // menu itself has no keyboard selection to remap (NEED).
   const buttonMode = useGameStore(s => s.settings.buttonMode);
-  // Visual generation switcher: the inline arena's billboard
-  // anchors resolve through the registry (Gen 5 = the master
-  // top 10% / bottom 20% the Tailwind classes used to hardcode).
-  const visualStyle = useGameStore(s => s.settings.visualStyle);
-  const styleProfile = getStyleProfile(visualStyle);
 
   const [screen, setScreen] = useState("overworld"); 
 
@@ -280,24 +228,15 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   // music keeps playing under pause/menus. With no world/battle file
   // on main yet, both entries are null-src silence (see music.ts) —
   // the calls land now so the tracks start the day files land.
-  // Soundtrack lane (2026-10-29): placement resolves per map + battle
-  // kind (musicPlacement.ts) — battles interrupt the field track with
-  // the wild/trainer battle track and the field track returns after;
-  // SCORE-STATE ABSENCE (Dark Forest rule) resolves to authored
-  // silence. Menus/dialogue resolve "unchanged" and leave music alone.
+  useEffect(() => {
+    if (screen === "battle") playMusic("battle");
+    else if (screen === "overworld") playMusic("world");
+  }, [screen]);
+
   const [playerDir, setPlayerDir] = useState("down");
   const [playerName, setPlayerName] = useState("Netrunner");
   
   const [battleState, setBattleState] = useState<any>(null);
-  // Soundtrack lane: placement effect (declared here, below
-  // battleState, for the same TDZ reason as Fix 2 below).
-  useEffect(() => {
-    applyMusic({
-      screen,
-      mapId: currentMap,
-      battleKind: screen === "battle" ? (battleState?.isDojo ? "dojo" : battleState?.type === "trainer" ? "trainer" : "wild") : null,
-    });
-  }, [screen, currentMap, battleState?.type, battleState?.isDojo]);
   // Fix 2 submenu state lives next to battleState: the battle key
   // handler (B button) references it long before doBattleAction.
   const [battleMenu, setBattleMenu] = useState<"main" | "bag" | "mend" | "party">("main");
@@ -763,19 +702,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     return o !== undefined ? o : mapData.tiles[y]?.[x];
   }, [tileOverrides, currentMap, mapData]);
   const { gameHour, phase, tint, ambient } = useDayNight(1000);
-  // Sound-full-coverage: phase-aware placement — when the clock
-  // crosses into night, the resolver swaps the field classes to
-  // their night arrangements (Gen 4/5 ship night variants for
-  // town/route); every other phase keeps the day track. Declared
-  // here, below useDayNight, for the same TDZ reason as Fix 2.
-  useEffect(() => {
-    applyMusic({
-      screen,
-      mapId: currentMap,
-      battleKind: screen === "battle" ? (battleState?.isDojo ? "dojo" : battleState?.type === "trainer" ? "trainer" : "wild") : null,
-      phase,
-    });
-  }, [phase]);
   const weatherCfg = WEATHER_CONFIG[(mapData as any).weather ?? "clear"];
 
   // Playtest 2026-10-26 (attempt 6): autosaves are HELD for a START
@@ -920,7 +846,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     };
 
     pendingBattleEndRef.current = null;
-    classicDefendsRef.current = 0; // ranger-defense: per-battle defend budget resets
     setBattleState({
       type: "wild",
       wild: wildMon,
@@ -937,11 +862,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       canCatch: true,
       reward: 0
     });
-    // Soundtrack lane: battle entry cries, both sides (the source
-    // grammar: the wild cry sounds on appearance, yours on send-out).
-    void playCry(wildMonId);
-    if (playerMon.speciesId) void playCry(playerMon.speciesId);
-    playCue('encounter.sting');
     setScreen("battle");
     return true;
   }, [playerTeam]);
@@ -975,13 +895,8 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       : (rowMembers ?? npc.battle.team).map((m: any) => trainerBattleMon(m));
     const trainerName = isHexBattle ? rivalName : npc.name;
     pendingBattleEndRef.current = null;
-    classicDefendsRef.current = 0; // ranger-defense: per-battle defend budget resets
     setBattleState({
       type: "trainer",
-      // ranger-defense: the villain flag rides the battle state —
-      // a hostileHuman NPC may strike creatures directly (weak
-      // human-scale hits) on his own turns. Ordinary NPCs: false.
-      hostileHuman: isHostileHuman(npc),
       npcId: npc.id,
       trainerName,
       trainerTeam: battleTeam.map((m: any) => ({ ...m, currentHp: m.currentHp ?? m.hp, speciesId: m.speciesId || m.id })),
@@ -998,12 +913,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       isDojo: !!npc.isDojoBoss,
       badge: npc.battle.badge
     });
-    // Soundtrack lane: battle entry cries, both sides — the trainer's
-    // lead creature on send-out, the player's on theirs.
-    const leadFoe: any = battleTeam[0];
-    if (leadFoe) void playCry(leadFoe.speciesId || leadFoe.id);
-    if (playerMon.speciesId) void playCry(playerMon.speciesId);
-    playCue('encounter.sting');
     setScreen("battle");
     return true;
   }, [playerTeam, rivalName]);
@@ -1016,7 +925,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     setPlayerDir(dir);
 
     if (!mapData) return;
-    if (nx < 0 || nx >= mapData.width || ny < 0 || ny >= mapData.height) { playCue('world.bump'); return; }
+    if (nx < 0 || nx >= mapData.width || ny < 0 || ny >= mapData.height) return;
 
     const tile = effectiveTile(nx, ny);
     lwBeatRef.current += 1; // Stub-kill S-2: one step, one beat.
@@ -1030,7 +939,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // and door tiles bypass the solid check.
     const exitFirst = (mapData as any).exits?.find((e: any) => e.x === nx && e.y === ny);
     if (exitFirst && !noclip) {
-      playCue('world.exit');
       setIsTransitioning(true);
       setTimeout(() => {
         setMapState(exitFirst.to, exitFirst.enterAt);
@@ -1044,8 +952,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       // blocks like a wall here — the player simply stays put.
       // The sealed message lives on the interact path, where the
       // player is facing the door and can read it.
-      if (!isDoorOpen(doorFirst.condition, badges)) { playCue('world.bump'); return; }
-      playCue('world.door');
+      if (!isDoorOpen(doorFirst.condition, badges)) return;
       setMapState(currentMap, { x: nx, y: ny }); // Step on door
       setIsTransitioning(true);
       setTimeout(() => {
@@ -1090,20 +997,19 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         }
         // Wave / Cascade: the step proceeds onto the gated tile.
       } else if (tile === 1 || tile === 4 || tile === 2) {
-        playCue('world.bump'); return; // solid (ungated)
+        return; // solid (ungated)
       }
       // Basic NPC collision (solid) — live wanderer tiles win
       // over home tiles, so the player can neither walk through
       // a moved NPC nor be blocked by its empty home tile.
       const npcHere = npcAt(nx, ny);
-      if (npcHere) { playCue('world.bump'); return; } // can't walk through them
+      if (npcHere) return; // can't walk through them
     }
 
     // Check exits (noclip path; the normal path already handled
     // exits/doors above, before the solid check)
     const exit = (mapData as any).exits?.find((e: any) => e.x === nx && e.y === ny);
     if (exit) {
-      playCue('world.exit');
       setIsTransitioning(true);
       setTimeout(() => {
         setMapState(exit.to, exit.enterAt);
@@ -1115,7 +1021,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // Check doors in move (auto-enter, noclip path)
     const door = (mapData as any).doors?.find((d: any) => d.x === nx && d.y === ny);
     if (door) {
-      playCue('world.door');
       setMapState(currentMap, { x: nx, y: ny }); // Step on door
       setIsTransitioning(true);
       setTimeout(() => {
@@ -1126,7 +1031,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     }
 
     setMapState(currentMap, { x: nx, y: ny });
-    playCue('world.step');
     setAnimWalk(w => (w + 1) % 4);
 
     // Check events
@@ -1193,16 +1097,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // the read sits at the S-6 roll site, as the expansion's landing
     // record prescribes for this tree.
     if (tile === 6 && hasStarter && !eventTriggered && !useGameStore.getState().noEncounters) {
-      const baseTable = tableFor(currentMap, "grass") ?? tableFor(currentMap, "cave");
-      // Item meaning S-IM1: an identified, carried relic can bend
-      // this roll (the Echo Shard's one mechanical effect) — the
-      // factor reads the real inventory at the step, and the table
-      // itself is never edited.
-      const st = useGameStore.getState();
-      const factor = encounterRateFactor(st.inventory, st.identifiedItems);
-      const table = baseTable && factor !== 1 && baseTable.rate != null
-        ? { ...baseTable, rate: baseTable.rate * factor }
-        : baseTable;
+      const table = tableFor(currentMap, "grass") ?? tableFor(currentMap, "cave");
       if (table) {
         const pick = rollEncounterStep(table, Math.random);
         if (pick) {
@@ -1256,320 +1151,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       }
     : null;
 
-  // ── Creature Mode + roamers (PMD-mode package) ──────────────────
-  // Control mode: "ranger" (default, the game as it was) or "creature"
-  // (you ARE the lead Mochiichao; the Ranger becomes your companion).
-  const [controlMode, setControlMode] = useState<ControlMode>("ranger");
-  const [companionCommand, setCompanionCommand] = useState<CompanionCommand>("follow");
-  const [roamers, setRoamers] = useState<Roamer[]>([]);
-  const [companionPos, setCompanionPos] = useState<{ x: number; y: number } | null>(null);
-  const roamersRef = React.useRef<Roamer[]>([]);
-  const companionHoldRef = React.useRef<{ x: number; y: number } | null>(null);
-  // ── Ranger defence state (ranger-defense package) ──────────────
-  // The pool itself lives in the STORE (persists, heals, damages
-  // only through store actions). Here: the moment-grammar plate
-  // (PMD partner plate — appears ONLY when he is hurt, defending,
-  // distracted-upon, or down; never a permanent HUD bar, restraint
-  // law), the classic-battle defend budget, and the step-in pose
-  // timer (his sprite stands on your tile for the beat he takes).
-  const [rangerPlate, setRangerPlate] = useState<{ hp: number; maxHp: number; down: boolean } | null>(null);
-  const rangerPlateTimerRef = React.useRef<any>(null);
-  const classicDefendsRef = React.useRef(0);
-  const defendPoseUntilRef = React.useRef(0);
-  const rangerHealthNow = (): RangerHealth => {
-    const s: any = useGameStore.getState();
-    return { hp: s.rangerHp ?? 0, maxHp: s.rangerMaxHp ?? 0 };
-  };
-  const companionPosRef = React.useRef<{ x: number; y: number } | null>(null);
-  useEffect(() => { companionPosRef.current = companionPos; }, [companionPos]);
-  const showRangerPlate = () => {
-    const h = rangerHealthNow();
-    if (h.maxHp <= 0) return;
-    setRangerPlate({ hp: h.hp, maxHp: h.maxHp, down: rangerDown(h) });
-    if (rangerPlateTimerRef.current) clearTimeout(rangerPlateTimerRef.current);
-    rangerPlateTimerRef.current = setTimeout(() => setRangerPlate(null), 3200);
-  };
-  const swapLead = swapTarget(party as any[]);
-  const effCompanionCommand = effectiveCompanionCommand(companionCommand, completedEvents as any, currentMap);
-  const cmBindings: any = (encounterModesConfig as any).bindings || {};
-
-  // Roamer spawn: on map entry, maps whose encounter mix includes
-  // roamers get visible creatures drawn from the map's OWN encounter
-  // pool (same population as the grass), standing on its grass tiles.
-  useEffect(() => {
-    roamersRef.current = [];
-    setRoamers([]);
-    if (!hasStarter) return;
-    const pool = mapData.encounters?.[0]?.pool;
-    const mix = encounterMixFor(currentMap, !!(pool && pool.length > 0), !!(mapData as any).interior);
-    if (mix === "grass" || !pool || pool.length === 0) return;
-    const grassTiles: { x: number; y: number }[] = [];
-    (mapData.tiles || []).forEach((row: any[], y: number) =>
-      row.forEach((t: any, x: number) => { if (t === 6) grassTiles.push({ x, y }); }),
-    );
-    if (grassTiles.length === 0) return;
-    // Spawn near the player's entry point: visible life where you
-    // arrive is the Arceus legibility lesson — a population scattered
-    // across a whole map reads as an empty world.
-    const here = (useGameStore.getState() as any).playerPos || { x: 0, y: 0 };
-    const near = [...grassTiles].sort((a, b) =>
-      (Math.abs(a.x - here.x) + Math.abs(a.y - here.y)) - (Math.abs(b.x - here.x) + Math.abs(b.y - here.y)));
-    const temperaments = ["docile", "timid", "curious", "bold", "aggressive"] as const;
-    const spawned: Roamer[] = [];
-    const max = Math.min((encounterModesConfig as any).roamers?.maxPerMap ?? 3, pool.length);
-    for (let i = 0; i < max; i++) {
-      const entry: any = pool[i % pool.length];
-      const spot = near[Math.min(i * 3, near.length - 1)] || near[0];
-      const r = createRoamer(entry.id, entry.level || 3, spot, {
-        temperament: temperaments[i % temperaments.length],
-        hp: entry.hp || undefined,
-      });
-      (r as any).poolEntry = entry;
-      spawned.push(r);
-    }
-    roamersRef.current = spawned;
-    setRoamers(spawned);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentMap]);
-
-  // Roamer heartbeat + contact. Roamers step on their own timer
-  // (PMD's step-synchrony); contact resolves by the DECIDED rule in
-  // lib/creatureMode.ts (battleStyleFor): ranger contact and any
-  // stakes fight = the classic duel via the existing triggerWildBattle;
-  // a creature-mode wild scrap resolves as a real-time exchange here.
-  useEffect(() => {
-    if (screen !== "overworld" || isTransitioning) return;
-    const tickMs = (encounterModesConfig as any).roamers?.tickMs ?? 700;
-    const iv = setInterval(() => {
-      // Ranger pool: founded on the first tick the dyad exists
-      // (store-derived from the lead's level band; heals/damage
-      // after that flow through the store only).
-      if (hasStarter) {
-        const leadNow: any = swapTarget(useGameStore.getState().party as any[]);
-        if (leadNow) useGameStore.getState().ensureRangerHealth(leadNow.level ?? 5);
-      }
-      // Companion Ranger position (creature mode), by command:
-      // follow = the movement.json trail tile; wait = hold the last
-      // tile; free = Bethesda sandboxing around the player (anchor).
-      if (controlMode === "creature") {
-        const pp0 = playerPosRef.current;
-        setCompanionPos((prev) => {
-          // DOWN: he does not walk. He holds the tile he fell on
-          // until he is healed (the Fallout down shape).
-          if (rangerDown(rangerHealthNow())) {
-            return companionHoldRef.current || prev || pp0;
-          }
-          // The defend pose: for the beat he takes a hit, he stands
-          // ON your tile — between you and the wild (see contact
-          // resolution below).
-          if (Date.now() < defendPoseUntilRef.current) {
-            return pp0;
-          }
-          if (effCompanionCommand === "wait") {
-            return companionHoldRef.current || prev || pp0;
-          }
-          if (effCompanionCommand === "free") {
-            const base = prev || pp0;
-            return companionFreeStep(base, pp0, Math.random).pos;
-          }
-          const tile = trailRef.current[Math.max(2, (movementConfig as any)?.follower?.trail?.minBufferedSteps ?? 2) - 1];
-          const next = tile || prev || pp0;
-          companionHoldRef.current = next;
-          return next;
-        });
-      }
-      if (roamersRef.current.length === 0) return;
-      const pp = playerPosRef.current;
-      let contact: Roamer | null = null;
-      const next = roamersRef.current.map((r) => {
-        // DISTRACTED (ranger-defense): while the Ranger holds its
-        // attention, the roamer's world is HIM — it steps toward the
-        // companion, spends a beat, and cannot make contact with the
-        // player-creature. Attention is a counter on the record, set
-        // by doDistract via lib/rangerDefense.distractRoamer.
-        const beats = (r as any).distractedBeats ?? 0;
-        if (beats > 0 && r.state !== "down") {
-          const anchor = companionPosRef.current || pp;
-          const dx = Math.sign(anchor.x - r.pos.x);
-          const dy = Math.sign(anchor.y - r.pos.y);
-          const stepPos = Math.abs(anchor.x - r.pos.x) >= Math.abs(anchor.y - r.pos.y) && dx !== 0
-            ? { x: r.pos.x + dx, y: r.pos.y }
-            : dy !== 0 ? { x: r.pos.x, y: r.pos.y + dy } : { x: r.pos.x + dx, y: r.pos.y };
-          const t = mapData.tiles?.[stepPos.y]?.[stepPos.x];
-          const ok = t !== undefined && t !== 1 && t !== 4 && t !== 2;
-          const distracted = { ...r, pos: ok ? stepPos : r.pos, state: "approach" as const, distractedBeats: beats - 1 };
-          (distracted as any).poolEntry = (r as any).poolEntry;
-          return distracted;
-        }
-        const stepped = stepRoamer(r, pp, Math.random);
-        (stepped as any).poolEntry = (r as any).poolEntry;
-        // Keep roamers on walkable ground: never step onto a wall tile.
-        const t = mapData.tiles?.[stepped.pos.y]?.[stepped.pos.x];
-        const ok = t !== undefined && t !== 1 && t !== 4 && t !== 2;
-        const kept = ok ? stepped : { ...stepped, pos: r.pos };
-        if (kept.state !== "down" && kept.pos.x === pp.x && kept.pos.y === pp.y) contact = kept;
-        return kept;
-      });
-      roamersRef.current = next;
-      setRoamers(next);
-      if (contact) {
-        const place = (mapData as any).interior ? "cave" : "open";
-        const res = contactResolution(controlMode, place as any, contact);
-        if (res.style === "classic") {
-          roamersRef.current = next.filter((r) => r.id !== (contact as Roamer).id);
-          setRoamers(roamersRef.current);
-          triggerWildBattle((contact as Roamer).speciesId);
-        } else {
-          // PMD skirmish exchange: your creature and the wild trade
-          // one real-time blow each (battle-math via creatureMode).
-          const lead: any = swapTarget(useGameStore.getState().party as any[]);
-          const out = rangedAction(lead, contact as Roamer, "strike", overworldMoveset(lead, MOVES_DB as any)[0], { mode: "creature" }, Math.random);
-          const updated = next.map((r) =>
-            r.id === (contact as Roamer).id
-              ? { ...r, hp: out.targetHp, state: out.targetHp <= 0 ? ("down" as const) : r.state }
-              : r,
-          );
-          roamersRef.current = updated;
-          setRoamers(updated);
-          notify(out.note, out.targetHp <= 0 ? "#ffd700" : "#ff9966");
-          // The wild's return blow — and the DEFEND beat
-          // (ranger-defense): if the wild is still standing, its
-          // blow comes back at your creature, and the Ranger may
-          // step in and take it on his own health. One defend per
-          // beat (this tick IS the beat — the budget is 1 here).
-          // Party-creature HP in skirmishes stays notification-level
-          // (the base package's fence — the classic battle is the HP
-          // ledger); the Ranger's pool is REAL store state, so his
-          // damage below is not notification-level, it persists.
-          if (out.targetHp > 0) {
-            const health = rangerHealthNow();
-            const wildBattler = rangerBattlerFromMon({
-              level: (contact as Roamer).level,
-              hp: (contact as Roamer).hp,
-              maxHp: (contact as Roamer).maxHp,
-              stats: { atk: 10, def: 10, spa: 10, spd: 10, spe: 10 },
-            });
-            const defended = rollDefend(
-              { command: effCompanionCommand, bondBand: 0, health, defendsSpent: 0, defendsBudget: 1 },
-              Math.random,
-            );
-            if (defended) {
-              const hit = rangerDamageFromHit(wildBattler, RANGER_REGULAR_ATTACK as any, health.maxHp, Math.random);
-              const res = useGameStore.getState().damageRanger(hit.damage);
-              defendPoseUntilRef.current = Date.now() + tickMs;
-              showRangerPlate();
-              if (res.downedNow) {
-                notify(`${playerName} threw himself in front of ${lead?.nickname || lead?.name || "your partner"} — and went DOWN under the ${RANGER_REGULAR_ATTACK.name}! He needs healing.`, "#ff5252");
-              } else {
-                notify(`${playerName} stepped in and took the hit for ${lead?.nickname || lead?.name || "your partner"}! (-${res.dealt} HP)`, "#ffd700");
-              }
-            } else {
-              // No defend: the blow lands on your creature —
-              // bookkeeping stays notification-level per the base
-              // package's fence (the classic battle is the party HP
-              // ledger; only the Ranger's pool is real state here).
-              notify(`The wild ${(contact as Roamer).speciesId} strikes back at ${lead?.nickname || lead?.name || "your partner"}!`, "#ff9966");
-            }
-          }
-        }
-      }
-    }, tickMs);
-    return () => clearInterval(iv);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, isTransitioning, currentMap, controlMode, companionCommand]);
-
-  // The swap itself. OWNER SLOT: the binding is data
-  // (encounter-modes.json bindings.swapControl, default KeyT) — the
-  // owner's pick changes the data, never this code.
-  const doModeSwap = useCallback(() => {
-    if (!hasStarter || !swapLead) { notify("You need a partner first.", "#f44336"); return; }
-    // Ranger-defense lock: while the Ranger is DOWN, control cannot
-    // pass — he can't take the lead and he can't walk with you. The
-    // reason is spoken in-fiction on the notification line (never a
-    // silent no-op). Healing is the only key that opens this lock.
-    const lock = swapLockForRanger(rangerHealthNow());
-    if (lock.locked) { notify(lock.reason!, "#ff5252"); showRangerPlate(); return; }
-    setControlMode((m) => {
-      const nextMode: ControlMode = m === "ranger" ? "creature" : "ranger";
-      notify(
-        nextMode === "creature"
-          ? `You are ${(swapLead as any).nickname || swapLead.name || "your partner"} now. The Ranger walks with you.`
-          : "You are the Ranger again.",
-        "#7CFC9A",
-      );
-      return nextMode;
-    });
-  }, [hasStarter, swapLead]);
-
-  // Ranged engagement on the nearest living roamer in range.
-  const doEngage = useCallback(() => {
-    const range = (encounterModesConfig as any).engagement?.rangeTiles ?? 3;
-    const pp = playerPosRef.current;
-    const near = roamersRef.current
-      .filter((r) => r.state !== "down")
-      .map((r) => ({ r, d: Math.abs(r.pos.x - pp.x) + Math.abs(r.pos.y - pp.y) }))
-      .filter((x) => x.d <= range)
-      .sort((a, b) => a.d - b.d)[0];
-    if (!near) { notify("Nothing in range.", "#aaaaaa"); return; }
-    const lead: any = swapTarget(useGameStore.getState().party as any[]);
-    if (controlMode === "ranger") {
-      // Approach play only — a catch attempt. The Ranger never deals
-      // damage personally (canon, enforced in creatureMode.ts too).
-      const out = rangedAction(lead, near.r, "catchAttempt", null, { mode: "ranger" }, Math.random);
-      if (out.result === "caught") {
-        roamersRef.current = roamersRef.current.filter((r) => r.id !== near.r.id);
-        setRoamers(roamersRef.current);
-        notify(`Caught the wild ${(near.r as any).poolEntry?.name || near.r.speciesId} from range!`, "#ffd700");
-      } else {
-        notify(out.note, "#ff9966");
-      }
-    } else {
-      const mv = overworldMoveset(lead, MOVES_DB as any)[0];
-      const out = rangedAction(lead, near.r, "strike", mv, { mode: "creature", habitatFit: "near" }, Math.random);
-      const updated = roamersRef.current.map((r) =>
-        r.id === near.r.id ? { ...r, hp: out.targetHp, state: out.targetHp <= 0 ? ("down" as const) : r.state } : r,
-      );
-      roamersRef.current = updated;
-      setRoamers(updated);
-      notify(out.note, out.targetHp <= 0 ? "#ffd700" : "#ff9966");
-    }
-  }, [controlMode]);
-
-  // DISTRACT (ranger-defense): creature mode only — the Ranger is
-  // the companion here, and this is HIS verb: harm-free attention
-  // work. The nearest roamer in range turns onto him for a few
-  // beats (aggro + contact threat move to him via distractedBeats,
-  // honoured in the heartbeat); if it snaps, HE pays for the noise.
-  const doDistract = useCallback(() => {
-    if (controlMode !== "creature") { notify("Only your companion Ranger can run interference — swap first.", "#aaaaaa"); return; }
-    const health = rangerHealthNow();
-    if (rangerDown(health)) { notify("He's down — he can't draw anything. Heal him first.", "#ff5252"); showRangerPlate(); return; }
-    const range = RANGER_DEFENSE.distractRangeTiles;
-    const pp = playerPosRef.current;
-    const near = roamersRef.current
-      .filter((r) => r.state !== "down")
-      .map((r) => ({ r, d: Math.abs(r.pos.x - pp.x) + Math.abs(r.pos.y - pp.y) }))
-      .filter((x) => x.d <= range)
-      .sort((a, b) => a.d - b.d)[0];
-    if (!near) { notify("Nothing near enough to distract.", "#aaaaaa"); return; }
-    const out = distractRoamer(near.r, health, Math.random);
-    if (out.beats > 0) {
-      const updated = roamersRef.current.map((r) =>
-        r.id === near.r.id ? ({ ...r, distractedBeats: out.beats } as Roamer) : r,
-      );
-      roamersRef.current = updated;
-      setRoamers(updated);
-    }
-    if (out.exposureHit) {
-      const res = useGameStore.getState().damageRanger(out.exposureDamage);
-      showRangerPlate();
-      notify(res.downedNow ? `${out.note} — and he's DOWN! He needs healing.` : out.note, "#ff9966");
-    } else {
-      notify(out.note, "#88ccff");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controlMode]);
-
   // Poll for held direction movement. Sprint (sequence build): with
   // the Sprint Boots owned and B/Shift held, the interval runs at
   // the 70 ms rate — the same fast rate fastForward already proved;
@@ -1616,7 +1197,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           e.preventDefault();
           setAutosaveHeldForSlot(null);
           saveGame(saveSlot, 'manual', `QUICKSAVE - ${FULL_WORLD[currentMap]?.name || currentMap}`, useGameStore.getState());
-          playCue('ui.save');
           notify("Game Quicksaved", "#88ccff");
         }
         if (e.key === "F9") {
@@ -1627,34 +1207,11 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
             notify("Loaded Autosave", "#88ccff");
           }
         }
-        // PMD-mode keys (bindings are DATA — encounter-modes.json;
-        // swapControl is the owner's slot, default KeyT).
-        if (e.code === (cmBindings.swapControl?.code || "KeyT")) {
-          e.preventDefault();
-          doModeSwap();
-        }
-        if (e.code === (cmBindings.engage?.code || "KeyF")) {
-          e.preventDefault();
-          doEngage();
-        }
-        if (e.code === (cmBindings.companionCommand?.code || "KeyG")) {
-          e.preventDefault();
-          setCompanionCommand((c) => {
-            const n = nextCompanionCommand(c);
-            notify(`Companion: ${n.toUpperCase()}`, "#88ccff");
-            return n;
-          });
-        }
-        if (e.code === (cmBindings.distract?.code || "KeyH")) {
-          e.preventDefault();
-          doDistract();
-        }
       } else if (screen === "battle" && battleState?.phase === "menu" && battleMenu !== "main") {
         // Fix 2: B button (Escape / X) backs out of an in-battle
         // submenu to the main command panel, turn untouched.
         if (e.key === "Escape" || e.key === "x" || e.key === "X") {
           e.preventDefault();
-          playCue('ui.cancel');
           setBattleMenu(battleMenu === "mend" ? "bag" : "main");
         }
       } else if (screen === "battle" && battleState?.phase === "over") {
@@ -1680,7 +1237,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [screen, move, dialog, playerPos, playerDir, battleState, buttonMode, battleMenu, doModeSwap, doEngage, doDistract]);
+  }, [screen, move, dialog, playerPos, playerDir, battleState, buttonMode, battleMenu]);
 
   const interact = () => {
     let dx = 0, dy = 0;
@@ -1694,37 +1251,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
 
     let npcHere = npcAt(nx, ny);
     if (npcHere) {
-      // Item meaning S-IM1: placed relic objects, the lab's
-      // appraisal terminal, and the Harbor Bell's return. Dialogue
-      // is computed from live state (claimed? carrying? still
-      // unidentified?) and the effects resolve in finishDialog —
-      // the same pattern as Mom's Sprint Boots grant below.
-      const relicObj = RELIC_NPCS[npcHere.id];
-      if (relicObj) {
-        const evId = recordFor(relicObj.itemId)?.meaning?.placement?.eventId;
-        const claimed = !!evId && completedEvents.includes(evId);
-        setDialog({ lines: claimed ? relicObj.emptyLines : relicObj.findLines, npc: npcHere });
-        setScreen("dialog");
-        return;
-      }
-      if (npcHere.id === APPRAISAL_TERMINAL_NPC_ID) {
-        const st = useGameStore.getState();
-        setDialog({ lines: appraisalTerminalLines(st.inventory, st.identifiedItems), npc: npcHere });
-        setScreen("dialog");
-        return;
-      }
-      if (npcHere.id === "bh_net_mender"
-        && (useGameStore.getState().inventory["harbor_bell"] ?? 0) > 0
-        && !completedEvents.includes("relic_bell_returned")) {
-        setDialog({ lines: [
-          "Mending nets is just knots, all the way down. Like most honest—",
-          "Wait. That knot on the rim — I'd know my own knots in the dark. That's my bell, Ranger. She went off the dock in the big storm.",
-          "You dug her out of the sand? …Thank you. She belongs back at the harbor mouth, where she can be heard.",
-          "(You returned the Harbor Bell.)",
-        ], npc: npcHere });
-        setScreen("dialog");
-        return;
-      }
       if (npcHere.eventId && npcHere.eventId.startsWith("pick_starter_") && hasStarter) {
         setDialog({ lines: ["You already have a partner!"], npc: npcHere });
         setScreen("dialog");
@@ -1800,12 +1326,10 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     const door = mapData.doors?.find(d => d.x === nx && d.y === ny);
     if (door) {
       if (!isDoorOpen(door.condition, badges)) {
-        playCue('ui.error');
         setDialog({ lines: [sealedDoorText(door.label, door.condition)] });
         setScreen("dialog");
         return;
       }
-      playCue('world.door');
       setIsTransitioning(true);
       setTimeout(() => {
         setMapState(door.to, door.enterAt);
@@ -1857,55 +1381,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // its lines never mention the boots, so it must not grant them.
     if ((dialog.npc?.id === 'mom' || dialog.npc?.id === 'mom_house') && !dialog.isEvent && !useGameStore.getState().hasSprintBoots) {
       useGameStore.getState().setHasSprintBoots(true);
-      playCue('item.get');
-      // Item meaning S-IM1: the gift is also a keepsake FACT —
-      // the boots' depth derives from this log at read, never
-      // from a stored number (src/lib/itemMeaning.ts keepsakeBand).
-      useGameStore.getState().appendKeepsakeFact({ itemId: 'sprint_boots', kind: 'received' });
       notify("Received the Sprint Boots! Hold B to run.", "#ffd700");
-    }
-    // Item meaning S-IM1: a placed unique enters the bag once,
-    // through this one channel; the find is written as a completed
-    // event so the world object goes quiet afterwards. One-of-one
-    // is enforced at the grant (canGrantUnique), not by the map.
-    const relicDef = dialog.npc?.id ? RELIC_NPCS[dialog.npc.id] : undefined;
-    if (relicDef && !dialog.isEvent) {
-      const st = useGameStore.getState();
-      const evId = recordFor(relicDef.itemId)?.meaning?.placement?.eventId;
-      if (evId && !st.completedEvents.includes(evId) && canGrantUnique(st.inventory, relicDef.itemId)) {
-        st.addItem(relicDef.itemId);
-        st.completeEvent(evId);
-      }
-    }
-    // Item meaning S-IM1: the appraisal service — finishing a talk
-    // with the lab terminal names everything carried that needed
-    // naming. Facts only: the ids join identifiedItems; what each
-    // item IS stays in its record.
-    if (dialog.npc?.id === APPRAISAL_TERMINAL_NPC_ID && !dialog.isEvent) {
-      const st = useGameStore.getState();
-      for (const id of appraiseCarried(st.inventory, st.identifiedItems)) {
-        st.identifyItem(id);
-        notify(`Identified: ${recordFor(id)?.displayName ?? id}!`, "#ffd700");
-      }
-    }
-    // Item meaning S-IM1: the bell comes home. The return removes
-    // the unique from the bag and writes a WITNESSED deed into the
-    // real ledger (deed row: return-lost-item) — prices and
-    // greetings downstream read it like any other deed.
-    if (dialog.npc?.id === 'bh_net_mender' && !dialog.isEvent) {
-      const st = useGameStore.getState();
-      if ((st.inventory['harbor_bell'] ?? 0) > 0 && !st.completedEvents.includes('relic_bell_returned')) {
-        st.useItem('harbor_bell');
-        st.completeEvent('relic_bell_returned');
-        recordDeed(st, {
-          deed: 'return-lost-item',
-          subject: { individualId: 'bh_net_mender', itemId: 'harbor_bell' },
-          areaId: 'sector0',
-          beat: lwBeatRef.current,
-          witnessedBy: ['bh_net_mender'],
-        });
-        notify("Returned the Harbor Bell to the Net Mender.", "#ffd700");
-      }
     }
     if (dialog.isEvent && dialog.eventId) {
       setCompletedEvents(ce => [...ce, dialog.eventId]);
@@ -1924,23 +1400,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       if (setView) setView("SHOP");
       setDialog(null);
     } else if (dialog.npc?.isHeal) {
-      // Ranger-defense: the heal beat includes the Ranger — one
-      // line, on the game's existing notification surface, no new
-      // screen (healParty restores his pool with the party's).
-      const rangerBefore = rangerHealthNow();
-      playCue('plex.heal');
       healParty();
-      // Soundtrack lane: the heal sting is this lane's claimed jingle
-      // (the source games sting the heal over the Center theme).
-      playHealJingle();
-      if (rangerBefore.maxHp > 0 && rangerBefore.hp < rangerBefore.maxHp) {
-        notify(
-          rangerDown(rangerBefore)
-            ? `${playerName} is back on his feet — patched up, thanks to you.`
-            : `${playerName} is patched up too.`,
-          "#7CFC9A",
-        );
-      }
       // Record this healer's map as the blackout return point
       // (its playerStart is the map entrance, next to the healer).
       lastHealRef.current = { map: currentMap, pos: mapData.playerStart };
@@ -1968,7 +1428,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       // Inventory note: the wallet starts with 10 Luigi Cubes and
       // initializeStarter adds 5, so the player now holds 15 — the
       // "gifted you 5" wording is the +5 gift, not a total of 5.
-      playCue('item.get');
       setDialog({ lines: ["You chose your partner! A white flash envelopes you...", "Prof. Aeon: A fine choice!", "I've also gifted you 5 Luigi Cubes. You can use them to catch wild Mochiichao in the tall grass!", "Good luck on your journey!"], isEvent: false, npc: { id: "prof_aeon", name: "Prof. Aeon" } });
       setScreen("dialog");
     } else {
@@ -2027,76 +1486,15 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
 
     startBattleAnim("enemy", resolvedEnemyMove);
 
-    // ── Villain humans (ranger-defense, owner exception) ─────────
-    // A hostileHuman-flagged opponent sometimes doesn't order an
-    // attack at all — he lunges in HIMSELF (punch / tackle). The
-    // damage is human-scale through the real math (lib/
-    // rangerDefense.humanStrikeDamage): feeble against a creature,
-    // exactly the owner's "too weak" ruling — the evil is in the
-    // trying. Unflagged battles never take this branch.
-    let humanStrikeLog: string | null = null;
-    let humanStrikeDmg: number | null = null;
-    if ((bs as any).hostileHuman && Math.random() < 0.35) {
-      const strikeId = Math.random() < 0.5 ? "HUMAN_PUNCH" : "HUMAN_TACKLE";
-      humanStrikeDmg = humanStrikeDamage(enemy.level ?? 5, bs.player, strikeId as any, Math.random);
-      humanStrikeLog = `${bs.trainerName} lunged in himself — ${HUMAN_STRIKES[strikeId].name}!`;
-    }
-    const attackLine = humanStrikeLog ?? `${battleMonName(enemy)} used ${chosenMoveDisplay}!`;
-
-    setBattleAnim("enemy");
-    setTimeout(() => setBattleAnim(null), 500);
-
-    const dmg = humanStrikeDmg ?? calcDamage(moveData, battleStats(enemy), battleStats(bs.player));
-
-    // ── DEFEND — the classic-battle intercept (ranger-defense) ────
-    // Only in creature mode is the Ranger standing beside you as a
-    // companion who can step in (in Ranger mode there is no second
-    // body — you ARE the Ranger). The hit's damage was computed by
-    // this battle's own math above; the intercept redirects it to
-    // his store-held pool (per-hit cap, lib/rangerDefense — this
-    // path's formula carries no type term, so the no-chart rule for
-    // a human body holds). The moment is MARKED in the battle log,
-    // the only surface a classic battle speaks on. Budget: data
-    // (maxDefendsPerBattle) — he is a person, not a wall.
-    if (controlMode === "creature" && dmg > 0) {
-      const health = rangerHealthNow();
-      const defended = rollDefend(
-        { command: effCompanionCommand, bondBand: 0, health, defendsSpent: classicDefendsRef.current, defendsBudget: RANGER_DEFENSE.maxDefendsPerBattle },
-        Math.random,
-      );
-      if (defended) {
-        classicDefendsRef.current += 1;
-        const hit = rangerDamageFromClassicHit(dmg, health.maxHp);
-        const res = useGameStore.getState().damageRanger(hit.damage);
-        showRangerPlate();
-        const defendLog = [
-          ...bs.log,
-          attackLine,
-          `${playerName} threw himself in front of ${battleMonName(bs.player)}!`,
-          `${playerName} took ${res.dealt} damage!`,
-          ...(res.downedNow ? [`${playerName} is DOWN! He took the hit — now he needs healing.`] : []),
-        ];
-        setBattleState({ ...bs, log: defendLog, phase: "menu" });
-        const updatedTeam = [...freshTeam];
-        updatedTeam[bs.playerTeamIdx] = { ...updatedTeam[bs.playerTeamIdx], currentHp: bs.player.currentHp, hp: bs.player.currentHp };
-        setPlayerTeam(updatedTeam);
-        return;
-      }
-    }
-
+    const dmg = calcDamage(moveData, battleStats(enemy), battleStats(bs.player));
     const newHp = Math.max(0, bs.player.currentHp - dmg);
-    const newLog = [...bs.log, attackLine];
-    // Sound-full-coverage: hit voice on a damaging hit (the inline
-    // engine computes no type multiplier, so the plain SE_EFFECTIVE
-    // class fires here; effectiveness voices live in BattleView,
-    // whose resolver carries the multiplier).
-    if (dmg > 0) { playCue('battle.hit'); newLog.push(`${battleMonName(bs.player)} took ${dmg} damage!`); }
+    const newLog = [...bs.log, `${battleMonName(enemy)} used ${chosenMoveDisplay}!`];
+    if (dmg > 0) newLog.push(`${battleMonName(bs.player)} took ${dmg} damage!`);
 
     // v5.1 HP sync: battle copy keeps hp and currentHp together.
     const updatedPlayer = { ...bs.player, currentHp: newHp, hp: newHp };
 
     if (newHp <= 0) {
-      playCue('battle.faint');
       newLog.push(`${battleMonName(bs.player)} fainted!`);
       // v5.1 HP: a mon with hp 0 and no currentHp is fainted, not
       // alive — the old check (currentHp ?? maxHp) would have
@@ -2140,7 +1538,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           }
         };
       } else {
-        playCue('battle.switch');
         newLog.push(`Go, ${battleMonName(freshTeam[nextAlive])}!`);
         const switchHp = (freshTeam[nextAlive].currentHp ?? freshTeam[nextAlive].hp) ?? freshTeam[nextAlive].maxHp;
         setBattleState({ ...bs, player: { ...freshTeam[nextAlive], name: battleMonName(freshTeam[nextAlive]), currentHp: switchHp, hp: switchHp }, playerTeamIdx: nextAlive, log: newLog, phase: "menu" });
@@ -2184,18 +1581,13 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
 
   const doBattleAction = (action: any) => {
     if (!battleState || battleState.phase !== "menu") return;
-    // Sound (2026-10-29): every battle command is a decision — one
-    // confirm voice at the single dispatcher choke point.
-    playCue('ui.confirm');
     const bs = { ...battleState };
 
     if (action.type === "run") {
       if (bs.type === "trainer") {
-        playCue('ui.error');
         setBattleState({ ...bs, log: [...bs.log, "You can't run from a trainer battle!"] });
         return;
       }
-      playCue('battle.flee');
       notify("Got away safely!");
       setScreen("overworld");
       setBattleState(null);
@@ -2209,11 +1601,9 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       // inventory, so the Bag still showed x15 after a throw. If
       // the player has no cubes left, no throw happens at all.
       if (!useItem('luigi_cube')) {
-        playCue('ui.error');
         setBattleState({ ...bs, log: [...bs.log, "You have no Luigi Cubes left!"] });
         return;
       }
-      playCue('capture.throw');
       const hpRatio = bs.wild.currentHp / bs.wild.maxHp;
       const catchRate = 0.7 - hpRatio * 0.5;
       // PERFECT CATCH cheat (cheat-expansion; recorded in cheatLog
@@ -2235,16 +1625,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           ? { ...built, hp: bs.wild.currentHp, currentHp: bs.wild.currentHp }
           : { ...bs.wild, currentHp: bs.wild.currentHp, hp: bs.wild.currentHp };
         setPlayerTeam(t => t.length < 6 ? [...t, caught] : t);
-        // GAP-FILL S0 (G-8 dex-key fix): the dex is keyed by speciesId
-        // (DexView.statusOf + gameStore.addMochii both read speciesId).
-        // caught.id is a generated instance id (createMochii's
-        // generateId), which no reader can resolve back to a species,
-        // so keying by it orphaned the entry. caught.speciesId is
-        // present on both the rebuilt instance and the wild fallback.
-        setDex(d => ({ ...d, [caught.speciesId]: "caught" }));
-        // The lock click, then the success jingle a beat later.
-        playCue('capture.click');
-        setTimeout(() => playCue('capture.success'), 150);
+        setDex(d => ({ ...d, [caught.id]: "caught" }));
         notify(`${caught.name} was caught!`, "#4fc3f7");
         setScreen("overworld");
         setBattleState(null);
@@ -2254,9 +1635,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         // the gift dialogue all say Luigi Cube. Renamed to the
         // in-game item name for consistency; if Mars wants Merkaba
         // as a separate item, that is a new decision, not a rename.
-        // The shake the log narrates, then the break-out buzz.
-        playCue('capture.wobble');
-        setTimeout(() => playCue('capture.fail'), 450);
         setBattleState({ ...bs, log: [...bs.log, "The Luigi Cube shook... and broke!"], phase: "enemy_turn" });
         setTimeout(() => doEnemyTurn({ ...bs, log: [...bs.log, "The Luigi Cube shook... and broke!"] }), 1200);
       }
@@ -2327,10 +1705,9 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       const newLog = [...bs.log, `${battleMonName(bs.player)} used ${resolved.display}!`];
 
       const newHp = Math.max(0, enemyMon.currentHp - dmg);
-      if (dmg > 0) { playCue('battle.hit'); newLog.push(`Dealt ${dmg} damage!`); }
-
+      if (dmg > 0) newLog.push(`Dealt ${dmg} damage!`);
+      
       if (newHp <= 0) {
-        playCue('battle.faint');
         newLog.push(`${enemyMon.name} fainted!`);
         if (bs.type === "wild") {
           // Stub-kill S-7: battle-end drop read — a defeated wild
@@ -2342,23 +1719,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
             useGameStore.getState().addItem(dropItem);
             newLog.push(`The wild ${enemyMon.name} dropped a ${DROP_ITEM_NAMES[dropItem] ?? dropItem}!`);
           }
-          // Item meaning S-IM1: a won battle walked in Mom's boots
-          // is a keepsake fact; when the derived band rises, the
-          // rise SPEAKS in the log — the visible cue #180's
-          // declaration law requires of any keepsake effect.
-          {
-            const kst = useGameStore.getState();
-            if (kst.hasSprintBoots) {
-              const before = keepsakeBand(kst.keepsakeLog, "sprint_boots").band;
-              kst.appendKeepsakeFact({ itemId: "sprint_boots", kind: "battle-won-with" });
-              const after = keepsakeBand(useGameStore.getState().keepsakeLog, "sprint_boots");
-              if (after.band !== before) newLog.push(`The Sprint Boots feel different now. ${after.word}`);
-            }
-          }
-          // GAP-FILL S0 (G-8 dex-key fix): same keying as the catch
-          // write above — the wild battle mon carries speciesId
-          // (bs.wild.speciesId), while enemyMon.id is its instance id.
-          setDex(d => ({ ...d, [enemyMon.speciesId]: d[enemyMon.speciesId] === "caught" ? "caught" : "seen" }));
+          setDex(d => ({ ...d, [enemyMon.id]: d[enemyMon.id] === "caught" ? "caught" : "seen" }));
           // Payoff (lib/battlePayoff.ts): the source EXP sequence
           // replaces the old stub, which rolled a random XP number
           // into a `xp` field on the member that NOTHING reads (the
@@ -2371,11 +1732,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           // member that cannot take a payoff (legacy flat battle
           // shape) keeps the old instant path to the banner.
           const plan = planForOutcome('foeFainted', playerTeam, { speciesId: bs.wild.speciesId, level: bs.wild.level || 5 }, { participants: [bs.playerTeamIdx], activeIndex: bs.playerTeamIdx, trainerBattle: false, endsBattle: true, expMultiplier: useGameStore.getState().expMultiplier });
-          // Sound composition (2026-10-29): the wild-win jingle
-          // (MUS_VICTORY_WILD slot) fires as the payoff sequence
-          // opens — one seat covers the sequence path and the
-          // no-recipients fallback below.
-          playVictoryJingle('wild');
           if (plan.recipients.length > 0) {
             setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "payoff" });
             pendingPayoffRef.current = () => {
@@ -2407,13 +1763,8 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           const plan = planForOutcome('foeFainted', playerTeam, { speciesId: enemyMon.speciesId || enemyMon.id, level: enemyMon.level || 5 }, { participants: [bs.playerTeamIdx], activeIndex: bs.playerTeamIdx, trainerBattle: true, endsBattle: isFinalWin, expMultiplier: useGameStore.getState().expMultiplier });
           const continueAfterPayoff = (moneyShown: boolean) => {
           if (isFinalWin) {
-            // Sound composition (2026-10-29): trainer-win jingle
-            // (MUS_VICTORY_TRAINER slot; dojo wins share it) at the
-            // victory flow — both the sequence path and the direct
-            // fallback call arrive here exactly once.
-            playVictoryJingle('trainer');
             newLog.push(`${bs.trainerName} was defeated!`);
-            if (bs.isDojo) { setBadges(b => [...b, bs.badge]); playCue('ritual.badge'); newLog.push(`You received the ${bs.badge}!`); }
+            if (bs.isDojo) { setBadges(b => [...b, bs.badge]); newLog.push(`You received the ${bs.badge}!`); }
             if (!moneyShown) setCredits(c => c + bs.reward);
             setDefeatedTrainers(dt => [...dt, bs.npcId]);
             setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "over" });
@@ -2440,7 +1791,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
               }
             };
           } else {
-            playCue('battle.switch');
             newLog.push(`${bs.trainerName} sends out ${newTeam[nextAlive].name}!`);
             // Refresh the player's battle copy from the store: the
             // payoff may have levelled the member, and the rest of
@@ -2451,10 +1801,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
             const refreshed = fresh ? { ...fresh, name: battleMonName(fresh), currentHp: fresh.hp, hp: fresh.hp } : bs.player;
             const nextBs = { ...bs, player: refreshed, trainerTeam: newTeam, trainerTeamIdx: nextAlive, log: newLog, phase: "enemy_turn" };
             setBattleState(nextBs);
-            // Landing composition: move-completion's handoff rule
-            // (wait max(1200, animMs) so long profiles are not cut
-            // off) applied to the payoff flow's no-recipients branch.
-            setTimeout(() => doEnemyTurn(nextBs), Math.max(1200, animMs));
+            setTimeout(() => doEnemyTurn(nextBs), 1200);
           }
           };
           if (plan.recipients.length > 0) {
@@ -2758,27 +2105,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           <span className="text-yellow-400 text-sm font-bold shrink-0">{credits} CR</span>
         </div>
 
-        {/* Ranger companion plate (ranger-defense): same PMD
-            partner-plate grammar as the overworld — visible only
-            while its news is fresh (a defend just happened, or he
-            is DOWN). Never a standing element of the battle HUD. */}
-        {controlMode === "creature" && (rangerPlate || rangerDown(rangerHealthNow())) && (() => {
-          const h = rangerHealthNow();
-          const plate = rangerDown(h) ? { hp: h.hp, maxHp: h.maxHp, down: true } : rangerPlate!;
-          const pct = plate.maxHp > 0 ? Math.max(0, (plate.hp / plate.maxHp) * 100) : 0;
-          return (
-            <div className="absolute left-3 top-16 z-30 bg-black/80 backdrop-blur border border-teal-700 rounded-lg px-3 py-2 w-48 pointer-events-none">
-              <div className="flex justify-between items-baseline gap-2">
-                <span className="font-bold text-[13px] tracking-wide truncate">{playerName}</span>
-                <span className={`text-[11px] font-bold ${plate.down ? "text-red-400" : "text-slate-300"}`}>{plate.down ? "DOWN" : `${plate.hp}/${plate.maxHp}`}</span>
-              </div>
-              <div className="h-2 bg-slate-800 rounded-full overflow-hidden mt-1">
-                <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: pct > 50 ? "#4caf50" : pct > 20 ? "#ff9800" : "#f44336" }} />
-              </div>
-            </div>
-          );
-        })()}
-
         {/* v5.1 win/lose banner: full-screen blocking overlay, NOT
             the v5 small row + 2000-2500ms timer. The v5 row was
             never seen in any of the three v5 playtest battles —
@@ -2857,7 +2183,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
            )}
 
            {/* Enemy Billboard */}
-           <div className="absolute right-3 sm:right-[15%] flex flex-col items-center" style={{ top: `${battleEnemyTopPct(styleProfile)}%` }}>
+           <div className="absolute top-[10%] right-3 sm:right-[15%] flex flex-col items-center">
               <div className="bg-black/80 backdrop-blur border rounded-lg p-3 w-52 max-w-[60vw] mb-6" style={{ borderColor: typeColor }}>
                  <div className="flex justify-between items-baseline gap-2 mb-1">
                    <h3 className="font-bold tracking-wide sm:tracking-wider text-[13px] sm:text-base truncate min-w-0">{enemy.name || enemy.nickname || SPECIES_DB[enemy.speciesId || enemy.id]?.name}</h3>
@@ -2880,7 +2206,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
            </div>
 
            {/* Player Billboard */}
-           <div className="absolute left-3 sm:left-[10%] flex flex-col items-center z-10" style={{ bottom: `${battlePlayerBottomPct(styleProfile)}%` }}>
+           <div className="absolute bottom-[20%] left-3 sm:left-[10%] flex flex-col items-center z-10">
               <div className="bg-black/80 backdrop-blur border-2 border-teal-400 rounded-lg p-3 w-52 max-w-[60vw] mb-6">
                  <div className="flex justify-between items-baseline gap-2 mb-1">
                    <h3 className="font-bold tracking-wide sm:tracking-wider text-[13px] sm:text-base text-teal-300 truncate min-w-0">{player.name || player.nickname || SPECIES_DB[player.speciesId || player.id]?.name}</h3>
@@ -2999,13 +2325,13 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
                      own BACK button (and Escape / X) back here. */}
                  <div className="flex gap-1.5 sm:gap-2 h-9 shrink-0">
                    <button
-                     onClick={() => { playCue('ui.cursor'); setBattleMenu("bag"); }}
+                     onClick={() => setBattleMenu("bag")}
                      className="flex-1 min-w-0 truncate bg-amber-950/40 hover:bg-amber-900 border border-amber-700 text-amber-300 font-bold text-[13px] sm:text-sm rounded tracking-wider sm:tracking-widest px-1"
                    >
                      BAG
                    </button>
                    <button
-                     onClick={() => { playCue('ui.cursor'); setBattleMenu("party"); }}
+                     onClick={() => setBattleMenu("party")}
                      className="flex-1 min-w-0 truncate bg-indigo-950/40 hover:bg-indigo-900 border border-indigo-700 text-indigo-300 font-bold text-[13px] sm:text-sm rounded tracking-wider sm:tracking-widest px-1"
                    >
                      PARTY
@@ -3016,7 +2342,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
                <div className="flex flex-col h-full gap-2">
                  <div className="flex items-center justify-between shrink-0">
                    <span className="font-bold text-amber-300 tracking-widest text-sm">BAG</span>
-                   <button onClick={() => { playCue('ui.cancel'); setBattleMenu("main"); }} className="bg-slate-900 hover:bg-slate-800 border border-slate-600 text-white font-bold text-[13px] rounded px-3 py-1.5">◄ BACK</button>
+                   <button onClick={() => setBattleMenu("main")} className="bg-slate-900 hover:bg-slate-800 border border-slate-600 text-white font-bold text-[13px] rounded px-3 py-1.5">◄ BACK</button>
                  </div>
                  {(() => {
                    const mendCount = inventory?.["mend_patch"] || 0;
@@ -3043,7 +2369,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
                <div className="flex flex-col h-full gap-2">
                  <div className="flex items-center justify-between shrink-0">
                    <span className="font-bold text-amber-300 tracking-widest text-sm">USE ON WHOM?</span>
-                   <button onClick={() => { playCue('ui.cancel'); setBattleMenu("bag"); }} className="bg-slate-900 hover:bg-slate-800 border border-slate-600 text-white font-bold text-[13px] rounded px-3 py-1.5">◄ BACK</button>
+                   <button onClick={() => setBattleMenu("bag")} className="bg-slate-900 hover:bg-slate-800 border border-slate-600 text-white font-bold text-[13px] rounded px-3 py-1.5">◄ BACK</button>
                  </div>
                  <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2">
                    {playerTeam.map((m: any, i: number) => {
@@ -3062,7 +2388,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
                <div className="flex flex-col h-full gap-2">
                  <div className="flex items-center justify-between shrink-0">
                    <span className="font-bold text-indigo-300 tracking-widest text-sm">PARTY</span>
-                   <button onClick={() => { playCue('ui.cancel'); setBattleMenu("main"); }} className="bg-slate-900 hover:bg-slate-800 border border-slate-600 text-white font-bold text-[13px] rounded px-3 py-1.5">◄ BACK</button>
+                   <button onClick={() => setBattleMenu("main")} className="bg-slate-900 hover:bg-slate-800 border border-slate-600 text-white font-bold text-[13px] rounded px-3 py-1.5">◄ BACK</button>
                  </div>
                  <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2">
                    {playerTeam.map((m: any, i: number) => {
@@ -3104,34 +2430,19 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   return (
     <div className="game-screen">
       <PixiWorldCanvas
-        mapData={
-          controlMode === "creature"
-            ? { ...displayMapData, npcs: [...(displayMapData.npcs || []), { id: "__ranger_companion", name: playerName, x: companionPos?.x ?? playerPos.x, y: companionPos?.y ?? playerPos.y }] }
-            : displayMapData
-        }
+        mapData={displayMapData}
         mapId={currentMap}
         playerPos={playerPos}
         playerDir={playerDir}
-        playerSpeciesId={controlMode === "creature" ? (swapLead?.speciesId || party[0]?.speciesId || null) : (party[0]?.speciesId || null)}
-        playerKind={controlMode === "creature" ? "creature" : "human"}
+        playerSpeciesId={party[0]?.speciesId || null}
+        playerKind="human"
         playerGender={playerGender}
         defeatedIds={defeatedTrainers}
         phase={phase}
         animWalk={animWalk}
         animTick={animTick}
-        follower={controlMode === "creature" ? null : follower}
-        wilds={roamers.filter((r) => r.state !== "down").map((r) => ({
-          id: r.id,
-          speciesId: r.speciesId,
-          x: r.pos.x,
-          y: r.pos.y,
-          telegraph: r.state === "chase",
-        }))}
-        npcStates={
-          controlMode === "creature" && companionPos
-            ? { ...npcStates, __ranger_companion: { x: companionPos.x, y: companionPos.y, dir: "front" as const, moving: effCompanionCommand !== "wait", step: animTick } }
-            : npcStates
-        }
+        follower={follower}
+        npcStates={npcStates}
       />
 
       {/* v4 goal line: the missing "where do I start". The route
@@ -3154,37 +2465,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         onMenu={() => setPauseOpen(true)}
         onRoster={() => { if (setView) setView("ROSTER"); }}
       />
-
-      {/* Presentation-restraint law (owner, 2026-10-29): NO mode
-          dashboard. PMD/HGSS grammar is the presentation: the sprite
-          you control IS the mode indicator, the companion's body
-          shows the command (at your heel / holding / wandering), and
-          feedback rides the game's existing notification line only —
-          the same surface the game already uses for its own events. */}
-
-      {/* Ranger companion plate (ranger-defense): PMD partner-plate
-          grammar — the plate exists ONLY in the moment it carries
-          news: he defended, he was hurt, he is DOWN. It is shown by
-          showRangerPlate() for a few seconds after such an event and
-          never as a standing HUD element. While he is DOWN it stays
-          until he is healed (a state, not a moment). */}
-      {(rangerPlate || (controlMode === "creature" && rangerDown(rangerHealthNow()))) && (() => {
-        const h = rangerHealthNow();
-        const plate = rangerDown(h) ? { hp: h.hp, maxHp: h.maxHp, down: true } : rangerPlate!;
-        const pct = plate.maxHp > 0 ? Math.max(0, (plate.hp / plate.maxHp) * 100) : 0;
-        return (
-          <div className="absolute left-3 bottom-24 z-30 bg-black/80 backdrop-blur border border-teal-700 rounded-lg px-3 py-2 w-48 pointer-events-none">
-            <div className="flex justify-between items-baseline gap-2">
-              <span className="font-bold text-[13px] tracking-wide truncate">{playerName}</span>
-              <span className={`text-[11px] font-bold ${plate.down ? "text-red-400" : "text-slate-300"}`}>{plate.down ? "DOWN" : `${plate.hp}/${plate.maxHp}`}</span>
-            </div>
-            <div className="h-2 bg-slate-800 rounded-full overflow-hidden mt-1">
-              <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: pct > 50 ? "#4caf50" : pct > 20 ? "#ff9800" : "#f44336" }} />
-            </div>
-            {plate.down && <div className="text-[11px] text-red-300 mt-1">He took a hit for you. Heal him.</div>}
-          </div>
-        );
-      })()}
 
       {pauseOpen && (
         <PauseMenu

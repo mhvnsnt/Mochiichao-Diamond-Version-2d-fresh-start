@@ -134,15 +134,13 @@ function GatedDetail({ kind, speciesId, status, name, num, species, detailPortra
  *   filled in for the rest.
  * - Discovered = the store dex says 'seen'/'caught' for that
  *   speciesId, OR the creature is in party/PC. The second rule
- *   stays as a safety net for saves written before GAP-FILL S0:
- *   WorldEngine's wild-battle code used to write the creature
- *   instance id (not the speciesId) into the store dex, so a
- *   speciesId-only lookup missed those catches. Since S0 the
- *   catch and wild-defeat writes are keyed by speciesId, matching
- *   this lookup; party/PC membership remains the ground truth for
- *   'caught'. A legacy store-dex key that is an instance id cannot
- *   be resolved back to a species here and is NOT guessed at — it
- *   simply does not light up an entry on its own.
+ *   matters because WorldEngine's wild-battle code writes the
+ *   creature instance id (not the speciesId) into the store dex,
+ *   so a speciesId-only lookup would miss catches; party/PC
+ *   membership is the ground truth for 'caught'. A store-dex key
+ *   that is an instance id cannot be resolved back to a species
+ *   here and is NOT guessed at — it simply does not light up an
+ *   entry on its own.
  * - Undiscovered roster entries render CreaturePortrait with
  *   undiscovered=true, i.e. the PR #175 discovery silhouette for
  *   that creature — never the real art, never a name (the label

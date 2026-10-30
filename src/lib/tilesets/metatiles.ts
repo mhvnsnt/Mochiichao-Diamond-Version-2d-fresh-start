@@ -66,10 +66,24 @@ export const METATILES: Metatile[] = [
   m('flower', 'Flowers', 'walk', false, 'middle', 21),
   m('dock', 'Dock', 'dock', false, 'bottom', 22),
   m('fence', 'Fence', 'solid', false, 'middle', 23),
-  m('sand_dune', 'Sand dune', 'solid', false, 'middle', 24),
+  // Traversal-build lane (2026-10-30): WorldConstants PASSABLE[24]
+  // changed in that lane — deep sand is passable movement-cost
+  // terrain (pokeemerald MB_DEEP_SAND); the cost rule lives in
+  // src/lib/tileBehaviors.ts. This mirror follows its source.
+  m('sand_dune', 'Sand dune (deep sand, movement cost)', 'sand', false, 'bottom', 24),
   // PASSABLE says lava is walkable on main; no damage rule is
   // defined anywhere on main, so none is defined here either.
   m('lava', 'Lava (damage rule owed)', 'lava', false, 'bottom', 25, null, true),
+  // Traversal part 2 (2026-10-30): the completion family mirrors
+  // WorldConstants PASSABLE 50-56 the same way — passability copied,
+  // the RULES live in tileBehaviors.ts / boulders.ts / bike.ts.
+  m('rock_climb', 'Rock climb face (Rock Climb)', 'solid', false, 'middle', 50, 'Rock Climb'),
+  m('seaweed', 'Seaweed ground (underwater encounters)', 'walk', true, 'bottom', 51),
+  m('dive_spot', 'Dive spot (Dive)', 'water', false, 'bottom', 52, 'Dive', true),
+  m('hop_rail', 'Hop rail (acro-bike hop)', 'solid', false, 'middle', 53),
+  m('slope', 'Muddy slope (speed/wheelie ascent)', 'sand', false, 'bottom', 54),
+  m('floor_switch', 'Floor switch (held by weight)', 'walk', false, 'bottom', 55),
+  m('switch_gate', 'Switch gate (opens while a floor switch is held)', 'solid', false, 'middle', 56),
 ];
 
 export const METATILE_BY_ID: Record<string, Metatile> = Object.fromEntries(

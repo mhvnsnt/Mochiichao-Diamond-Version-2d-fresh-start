@@ -13,6 +13,26 @@ export const TILE = {
   // tree; 26 is HM_BOULDER in this tree (fieldTechniques S-3), so at
   // composition they sit at 32–37. Names and order are BW2's.
   TERMINAL:32, COUNTER:33, PLANT:34, HEAL_MACHINE:35, BENCH:36, BED:37,
+  // Traversal-build lane (2026-10-30): the tile-behaviour family —
+  // behaviour lives in src/lib/tileBehaviors.ts, ported from
+  // pret-pokeemerald's metatile-behaviour / forced-movement code
+  // (see that file for per-system provenance). Numbers 27 and 38–49
+  // were free in this numbering.
+  CRACKED_FLOOR:27,
+  SPIN:38,
+  CONVEYOR_E:39, CONVEYOR_N:40, CONVEYOR_W:41, CONVEYOR_S:42,
+  HOLE:43, SNOW:44, MUD:45,
+  CURRENT_E:46, CURRENT_N:47, CURRENT_W:48, CURRENT_S:49,
+  // Traversal part 2 (2026-10-30): the completion family's tiles.
+  // Behaviour in src/lib/tileBehaviors.ts (climb/cascade chains),
+  // src/lib/boulders.ts (switches), src/lib/bike.ts (hop/slope).
+  ROCK_CLIMB:50,   // HGSS climbable rock face (Crag Climb verb)
+  SEAWEED:51,      // underwater encounter ground (RSE seaweed)
+  DIVE_SPOT:52,    // deep-water dive / emerge point (emerald dive warp)
+  HOP_RAIL:53,     // acro-bike hop obstacle (ledge-class hop target)
+  SLOPE:54,        // muddy slope — speed/wheelie ascent (MB_MUDDY_SLOPE)
+  FLOOR_SWITCH:55, // floor switch plate — held by weight
+  SWITCH_GATE:56,  // barrier linked to the map's floor switches
 };
 
 export const PASSABLE: Record<number, boolean> = {
@@ -21,8 +41,26 @@ export const PASSABLE: Record<number, boolean> = {
   11:true,12:true,13:true,14:true,
   15:false,16:false,17:false,18:true,
   19:true,20:true,21:true,22:true,
-  23:false,24:false,25:true,26:false,
+  // 24 SAND_DUNE: traversal-build lane (2026-10-30) — deep sand is
+  // PASSABLE movement-cost terrain (pokeemerald MB_DEEP_SAND), not a
+  // wall; the cost rule lives in src/lib/tileBehaviors.ts. The
+  // tilesets mirror (src/lib/tilesets/metatiles.ts) is updated to
+  // match in the same lane.
+  23:false,24:true,25:true,26:false,
   32:false,33:false,34:false,35:false,36:false,37:false,
+  // Traversal family: all steppable — their rules (slide, spin,
+  // convey, drop, cost, current) run in tileBehaviors.ts, not here.
+  27:true, 38:true, 39:true, 40:true, 41:true, 42:true, 43:true,
+  44:true, 45:true, 46:true, 47:true, 48:true, 49:true,
+  // Part 2 family. ROCK_CLIMB and HOP_RAIL are solid: their crossing
+  // rules (climb chain, acro hop) live in the behaviour layer, like
+  // the ledge. SEAWEED / DIVE_SPOT / FLOOR_SWITCH are steppable
+  // grounds. SLOPE is steppable; its ascent rule is the bike layer's.
+  // SWITCH_GATE is solid here and opened dynamically by the boulder
+  // layer when a floor switch on the map is held (WorldEngine reads
+  // switchesHeld before PASSABLE, the same override pattern as the
+  // technique gates).
+  50:false, 51:true, 52:true, 53:false, 54:true, 55:true, 56:false,
 };
 
 // Technique gates, read by src/lib/fieldTechniques.ts (stub-kill
@@ -66,6 +104,25 @@ export const TILE_STYLE: Record<number, { bg: string, label: string }> = {
   35: { bg:"#c4ccd2", label:"✚" },
   36: { bg:"#96684a", label:"" },
   37: { bg:"#f0eee8", label:"🛏️" },
+  // Traversal family fallback styles (DOM renderer only — the Pixi
+  // canvas draws these from the HGSS kit / drawn motifs; see
+  // PixiWorldCanvas). Labels stay empty: no emoji tiles.
+  27: { bg:"#4a4038", label:"" }, // cracked floor
+  38: { bg:"#7050a0", label:"" }, // spin tile
+  39: { bg:"#607080", label:"" }, 40: { bg:"#607080", label:"" },
+  41: { bg:"#607080", label:"" }, 42: { bg:"#607080", label:"" }, // conveyor / arrow floors
+  43: { bg:"#0a0a0a", label:"" }, // hole
+  44: { bg:"#eef4fa", label:"" }, // deep snow
+  45: { bg:"#6a5136", label:"" }, // mud
+  46: { bg:"#1a6ab0", label:"" }, 47: { bg:"#1a6ab0", label:"" },
+  48: { bg:"#1a6ab0", label:"" }, 49: { bg:"#1a6ab0", label:"" }, // currents (on water)
+  50: { bg:"#6a5136", label:"" }, // rock climb face
+  51: { bg:"#0e4a6e", label:"" }, // seaweed ground (underwater)
+  52: { bg:"#0a3a6e", label:"" }, // dive spot (deep water)
+  53: { bg:"#8a6a40", label:"" }, // hop rail
+  54: { bg:"#7a5c36", label:"" }, // muddy slope
+  55: { bg:"#b0a060", label:"" }, // floor switch
+  56: { bg:"#5a4a3a", label:"" }, // switch gate
 };
 
 export const getDayPhase = (h: number) => {

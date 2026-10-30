@@ -103,11 +103,6 @@ export const SECTOR_0: any = {
     // the sand/dock strip on the existing NPC step; talking to it is
     // a cry, as creatures speak in cries.
     { id:"dock_mochii", creatureId:"001", x:12, y:17, sprite:"", name:"Mochii", facing:"down", movement:"wander", wanderRadius:2, dialog:["Mochi! Mochii~!", "(The harbor Mochii watches the water. It seems to live here.)"] },
-    // Item meaning S-IM1: the Harbor Bell relic object (unique,
-    // hand-placed — src/lib/itemMeaning.ts RELIC_NPCS). Its grant
-    // resolves in WorldEngine interact/finishDialog; once claimed
-    // it shows its empty lines. Never in shop stock or drop tables.
-    { id:"relic_harbor_bell", x:24, y:18, sprite:"🔔", name:"Something in the Sand", facing:"down", dialog:["Something green with salt is half-buried by the dock steps…"] },
   ],
   signs: [
     // v5: Sector 0 had sign TILES (tile 10) but an empty signs array,
@@ -180,13 +175,7 @@ export const AEON_LAB: any = {
     { id:"starter_kittember", creatureId:"010", x:8, y:6, sprite:"😼", name:"Kittember Ball", facing:"down", dialog:["Kittember! (A fast and fiery feline)","Are you sure you want to choose Kittember?", ""], isChoice: true, eventId: "pick_starter_010" },
     { id:"starter_sproutle", creatureId:"038", x:10, y:6, sprite:"🐢", name:"Sproutle Ball", facing:"down", dialog:["Sproutle! (A grassy plant turtle)","Are you sure you want to choose Sproutle?", ""], isChoice: true, eventId: "pick_starter_038" },
     { id:"dorowani_display", x:3, y:10, sprite:"", creatureId:"147", name:"Dorowani", facing:"down", dialog:["Dorowani! A Gen 2 starter.","Dorowani arrives later in the journey."] },
-    { id:"gabu_display", x:9, y:10, sprite:"", creatureId:"148", name:"Gabu", facing:"down", dialog:["Gabu! A Gen 2 starter.","Gabu arrives later in the journey."] },
-    // Item meaning S-IM1: the appraisal service's first seat. Its
-    // dialogue is COMPUTED at interact time from the player's bag
-    // (src/lib/itemMeaning.ts appraisalTerminalLines) and the
-    // identification is applied in WorldEngine.finishDialog — the
-    // static lines here are only a fallback.
-    { id:"appraisal_terminal", x:6, y:10, sprite:"🔭", name:"Research Terminal", facing:"down", dialog:["LAB RESEARCH TERMINAL","Bring me anything you can't name. Fossils, finds, things that hum — the Lab will tell you what they are."] }
+    { id:"gabu_display", x:9, y:10, sprite:"", creatureId:"148", name:"Gabu", facing:"down", dialog:["Gabu! A Gen 2 starter.","Gabu arrives later in the journey."] }
   ],
   signs: [],
   exits: [],
@@ -213,6 +202,14 @@ export const ROUTE_1: any = {
       if ((x>=8&&x<=13&&y>=18&&y<=24)||(x>=15&&x<=20&&y>=18&&y<=24)) return TILE.TALL_GRASS;
       if ((x===13||x===14||x===15)&&y>=0&&y<=38) return TILE.PATH;
       if (y===15&&x>=3&&x<=24) return TILE.PATH;
+      // Traversal-build lane (2026-10-30): a second ledge row, south
+      // edge of the east tall-grass block (x18–24, y5–10). Follows
+      // WORLD-EXPERIENCES §1's route grammar — visible from the
+      // y=15 cross path and the centre path long before it is used:
+      // southbound you jump it as a shortcut out of the grass;
+      // northbound it is a cliff face, and the way back is the path
+      // column, exactly the one-way shape ledges make in Pokémon.
+      if (y===11&&x>=18&&x<=24) return TILE.LEDGE;
       if (y===28&&x>=2&&x<=26&&(x<13||x>15)) return TILE.LEDGE;
       if (x>=22&&x<=26&&y>=30&&y<=38) return TILE.WATER;
       if (x===22&&y===15) return TILE.HM_CUT;
@@ -225,6 +222,17 @@ export const ROUTE_1: any = {
     m[1][0] = TILE.SIGN;
     m[1][15] = TILE.SIGN;
     m[30][24] = TILE.HM_WATERFALL;
+    // Traversal part 2 (2026-10-30): two cells of the ledge rows
+    // become Crag Climb faces (HGSS grammar: a climb face sits IN a
+    // cliff band beside one-way ledges and makes the band two-way
+    // for whoever holds the verb). (18,11): the west end of the
+    // east grass block's ledge row — climb from (18,12) up to the
+    // plateau grass at (18,10), or descend back. (20,28): the south
+    // ledge row — climb from the pond-shore ground at (20,29) back
+    // up to the mid-route grass at (20,27). Both faces are visible
+    // from the centre path long before they can be used.
+    m[11][18] = TILE.ROCK_CLIMB;
+    m[28][20] = TILE.ROCK_CLIMB;
     return m;
   })(),
   npcs: [
@@ -397,6 +405,14 @@ export const DOJO_1: any = {
     const W=16, H=18;
     return buildMap(W, H, (x,y) => {
       if (x===0||x===W-1||y===0) return TILE.BUILDING;
+      // Traversal part 2 (2026-10-30): the dojo's training devices
+      // (the arrow-panel / spin-mat grammar of the source gyms).
+      // Two spin pads flank the approach to Master Lin; a two-tile
+      // northbound conveyor runs up the central aisle from the door
+      // side and stops against Acolyte Ken's row — a taught ride,
+      // not a trap.
+      if ((x===5||x===10)&&y===5) return TILE.SPIN;
+      if (x===7&&(y===13||y===14)) return TILE.CONVEYOR_N;
       if ((x+y)%4===0) return TILE.PATH;
       if (y===7&&(x===3||x===7||x===11)) return TILE.HM_ROCK;
       if (y<=3&&x>=4&&x<=11) return TILE.WARP;
@@ -495,15 +511,63 @@ export const CAVE_OF_ECHOES: any = {
     const W=28, H=30;
     return buildMap(W, H, (x,y) => {
       if (x===0||x===W-1||y===0||y===H-1) return TILE.BUILDING;
+      // Traversal part 2 (2026-10-30) — claims first; the generic
+      // chamber rules below would otherwise take these cells.
+      // (a) The junction boulder gate on the y=20 corridor: a HOLE
+      // at (14,20) and a pushable boulder at (17,20). From the
+      // entrance-gallery side you push the boulder west three
+      // tiles; it falls into the hole, the hole fills, and the
+      // corridor to the Neon stairs shaft walks both ways. From
+      // the shaft side the unfilled hole is itself the way
+      // through — stepping in drops you to the entrance stairs
+      // (this map's dropTarget), the one-way hole grammar.
+      if (x===14&&y===20) return TILE.HOLE;
+      if (x===17&&y===20) return TILE.HM_BOULDER;
+      // (b) The deep pool (x14–22, y22–26) was sealed inside rock
+      // — no shore touched it. Its north shore row (y=21) and west
+      // shore column (x=13) are cave floor now, and the pool
+      // carries a DIVE_SPOT at (18,24): the underground water
+      // table connects this pool to Boot Bay's dive area (the
+      // Sootopolis pattern — dive in open water, surface inside).
+      if (x>=14&&x<=22&&y===21) return TILE.CAVE;
+      if (x===13&&y>=21&&y<=26) return TILE.CAVE;
+      if (x===18&&y===24) return TILE.DIVE_SPOT;
       if (x>=3&&x<=7&&y>=1&&y<=8) return TILE.CAVE;
       if (x>=3&&x<=20&&y===8) return TILE.CAVE;
       if (x>=18&&x<=20&&y>=8&&y<=20) return TILE.CAVE;
       if (x>=10&&x<=20&&y===20) return TILE.CAVE;
       if (x>=10&&x<=12&&y>=20&&y<=28) return TILE.CAVE;
+      // Traversal-build ice room (see the fuller note below at the
+      // passage rule): this chamber's floor is ICE with authored
+      // stoppers — it must be claimed BEFORE the generic chamber
+      // rule under it, which otherwise returns CAVE for these cells.
+      if (x>=8&&x<=14&&y>=12&&y<=16) {
+        if ((x===11&&y===13)||(x===13&&y===15)) return TILE.BUILDING;
+        if (x===10&&y===16) return TILE.HM_ROCK;
+        if (x===8&&y===16) return TILE.HOLE;
+        if (x===14&&y===12) return TILE.CRACKED_FLOOR;
+        return TILE.ICE;
+      }
       if (x>=8&&x<=14&&y>=12&&y<=16) return TILE.CAVE;
       if (x>=14&&x<=22&&y>=22&&y<=26) return TILE.WATER;
       if (x===15&&y===8) return TILE.HM_ROCK;
       if (x===10&&y===16) return TILE.HM_ROCK;
+      // Traversal-build lane (2026-10-30): the chamber at
+      // x8–14, y12–16 was an ISOLATED cave-floor pocket — no tile
+      // path joined it to the rest of the cave, so the Miner placed
+      // in it could never be reached. It is now the cave's ice
+      // room (WORLD-EXPERIENCES §4: the first ice floor is a room,
+      // taught with stoppers and a forgiving reset edge), joined
+      // to the y=8 gallery by a one-wide passage at x=14.
+      // Layout: ice floor; rock stoppers at (11,13) and (13,15)
+      // (BUILDING = cave rock in this map's set) plus the existing
+      // HM_ROCK at (10,16); a HOLE at (8,16) drops you back to the
+      // entrance stairs (this map's dropTarget) — the forgiving
+      // reset; the passage tile at (14,12) is CRACKED_FLOOR: it
+      // cracks under your first crossing and gives way on the
+      // second, dropping you to the same entrance (the cracked-
+      // floor grammar from pokeemerald's MB_CRACKED_FLOOR).
+      if (x===14&&y>=9&&y<=11) return TILE.CAVE;
       if (x===11&&y===27) return TILE.STAIRS_DOWN;
       if (x===5&&y===2) return TILE.STAIRS_UP;
       return TILE.BUILDING;
@@ -518,16 +582,23 @@ export const CAVE_OF_ECHOES: any = {
     // entrance, clear of the STAIRS_UP tile at (5,2). No battle.
     { id:"cave_guide", x:4, y:2, sprite:"🕯️", name:"Cave Guide", facing:"down", dialog:["The cave echoes what you bring into it. Bring a steady team, and it echoes back steady."] },
     { id:"trainer_caverunner_pike", x:19, y:10, sprite:"🏃", name:"Cave Runner Pike", facing:"down", dialog:["I run these tunnels every day."], battle:{ team:[{id:"013",name:"Pupbble",hp:45,maxHp:45,atk:60,def:50,spd:50,moves:["Tackle","Swift Movement"],type:"Earth",level:16},{id:"036",name:"Cragarm",hp:65,maxHp:65,atk:105,def:130,spd:30,moves:["Tackle","Swift Movement"],type:"Steel",level:17}], reward:380, badge:null } },
-    // Item meaning S-IM1: the Singing Stone relic object (unique,
-    // hand-placed in the cave's deep chamber — RELIC_NPCS). Grant
-    // resolves in WorldEngine; never in shop stock or drop tables.
-    { id:"relic_echo_shard", x:14, y:16, sprite:"🪨", name:"Singing Stone", facing:"down", dialog:["Something at the back of the chamber is humming…"] },
   ],
   exits: [
     { x:5, y:0, to:"binary_woods", enterAt:{x:27, y:38}, dir:"up" },
     // Phase A: STAIRS_DOWN tile at (11,27) was a dead end — no exit.
     // It now leads to Neon City at its STAIRS_DOWN tile (18,35).
     { x:11, y:27, to:"neon_city", enterAt:{x:18, y:35}, dir:"down" }
+  ],
+  // Traversal-build lane (2026-10-30): hole/cracked-floor drops in
+  // this map land back at the entrance stairs (5,2) — the ice
+  // room's forgiving reset edge (WORLD-EXPERIENCES §4). Read by
+  // WorldEngine's traversal trigger handling (tileBehaviors.ts).
+  dropTarget: { to:"cave_of_echoes", enterAt:{x:5, y:2} },
+  // Traversal part 2: boulder vacated cells restore to cave floor,
+  // and the pool's dive spot pairs with the Boot Bay dive area.
+  boulderFloor: TILE.CAVE,
+  diveLinks: [
+    { x:18, y:24, to:"boot_bay_deep", enterAt:{x:15, y:5} }
   ],
   doors: [],
   events: [],
@@ -590,6 +661,16 @@ export const NEON_CITY: any = {
     { x:18, y:6, to:"mauveville_arena", enterAt:{x:8, y:18}, label:"Mauveville Arena", condition:"ciphers>=10" },
     { x:13, y:18, to:"dojo_3", enterAt:{x:7, y:16}, label:"Dojo 3 — Chrome Gate" }
   ],
+  // Traversal-build lane (2026-10-30): the warp-painted strip
+  // (TILE.WARP at x17–19, y2–6 — the columns the building blocks
+  // don't claim) was dead paint — no warp data read it. Its two
+  // far corners are now a warp PAIR (pokeemerald's warp-tile
+  // grammar: step on one end, arrive at the other). Read by
+  // WorldEngine's traversal trigger handling.
+  warps: [
+    { x:17, y:2, to:"neon_city", enterAt:{x:19, y:6} },
+    { x:19, y:6, to:"neon_city", enterAt:{x:17, y:2} }
+  ],
   events: [],
   encounters: []
 };
@@ -605,6 +686,34 @@ export const SCRAP_JUNKYARD: any = {
     const W=34, H=36;
     return buildMap(W, H, (x,y) => {
       if (x===0||x===W-1||y===0||y===H-1) return TILE.WALL;
+      // Traversal part 2 (2026-10-30) — claims first; the scatter
+      // rule below would otherwise take several of these cells.
+      // THE SCRAP CACHE PEN (x15–21, y20–24, backed by the melt
+      // pool's north edge): a fenced cache yard in the junkyard's
+      // south field, gated by the two source boulder grammars.
+      //  - Its mouth is a HOLE at (18,20): a boulder authored at
+      //    (18,17) pushes south down a cleared lane and falls in,
+      //    filling the mouth so the pen can be entered on foot.
+      //  - Inside, a second boulder at (18,22) pushes east onto a
+      //    FLOOR_SWITCH at (19,22) — the player works around it
+      //    through the pen's west column; while it rests there
+      //    the SWITCH_GATE at (19,21) stands open into the cache
+      //    nook (20,21–22). A service WARP at (16,21) returns to
+      //    the yard entrance — the escape-pad grammar.
+      if (x===18&&y===17) return TILE.HM_BOULDER;
+      if (x===18&&y>=18&&y<=19) return TILE.INDUSTRIAL;
+      if (x===18&&y===20) return TILE.HOLE;
+      if ((x===17||x===19)&&y===20) return TILE.WALL;
+      if ((x===15&&y===22)||(x===15&&y===23)) return TILE.WALL;
+      if (x===20&&y===20) return TILE.WALL;
+      if (x===20&&y===23) return TILE.WALL;
+      if ((x===21&&y===21)||(x===21&&y===22)) return TILE.WALL;
+      if (x===16&&y===21) return TILE.WARP;
+      if (x===19&&y===21) return TILE.SWITCH_GATE;
+      if (x===18&&y===22) return TILE.HM_BOULDER;
+      if (x===19&&y===22) return TILE.FLOOR_SWITCH;
+      if ((x===20&&y===21)||(x===20&&y===22)) return TILE.INDUSTRIAL;
+      if (x>=16&&x<=19&&y>=21&&y<=23) return TILE.INDUSTRIAL;
       if (y>=2&&y<=6&&x>=2&&x<=6) return TILE.WALL;
       if (y>=2&&y<=6&&x>=28&&x<=32) return TILE.WALL;
       if ((x+y)%6===0) return TILE.WALL;
@@ -625,14 +734,22 @@ export const SCRAP_JUNKYARD: any = {
     });
   })(),
   npcs: [
-    { id:"junk_boss", x:16, y:9, sprite:"🏭", name:"Junk Warlord Krix", dialog:["Think you can survive the Junkyard?"], battle:{ team:[{id:"005",name:"Chromejaww",hp:75,maxHp:75,atk:72,def:80,spd:48,moves:["Chrome Claw"],type:"Steel",level:24}], reward:750, badge:null } },
-    // Item meaning S-IM1: the Ticking Junk relic object (unique,
-    // hand-placed on the junkyard's central aisle — RELIC_NPCS).
-    { id:"relic_scrap_core", x:20, y:18, sprite:"⚙️", name:"Ticking Junk", facing:"down", dialog:["Buried in the scrap: something warm, ticking…"] }
+    { id:"junk_boss", x:16, y:9, sprite:"🏭", name:"Junk Warlord Krix", dialog:["Think you can survive the Junkyard?"], battle:{ team:[{id:"005",name:"Chromejaww",hp:75,maxHp:75,atk:72,def:80,spd:48,moves:["Chrome Claw"],type:"Steel",level:24}], reward:750, badge:null } }
   ],
   exits: [
     ...buildVertExits(33, 15, 25, "neon_city", 1, "right")
   ],
+  // Traversal part 2: the cache pen's service warp (step on the
+  // pad inside the pen, arrive back at the yard entrance approach),
+  // and the floor boulder-vacated cells restore to.
+  warps: [
+    { x:16, y:21, to:"scrap_junkyard", enterAt:{x:29, y:18} }
+  ],
+  // The unfilled cache-pen mouth is a forgiving hazard: stepping
+  // in drops you back at the yard entrance (the ice-room reset
+  // grammar), never a soft-lock.
+  dropTarget: { to:"scrap_junkyard", enterAt:{x:29, y:18} },
+  boulderFloor: TILE.INDUSTRIAL,
   doors: [],
   events: [],
   encounters: []
@@ -650,13 +767,20 @@ export const CORAL_APPROACH: any = {
       if (x===29||y===0||y===34||x===0) return TILE.WALL;
       if (x>=2&&x<=10&&y>=2&&y<=12) return TILE.SAND;
       if (x>=1&&x<=10&&y>=13&&y<=32) return TILE.SAND;
+      // Traversal part 2 (2026-10-30): the reef falls at (12,20)
+      // was authored AFTER the shallow rule in this chain and so
+      // never appeared (the cell read SHALLOW). Claimed here,
+      // before the shallow band, as it was always meant to be:
+      // a falls face on the dock row where the shallows drop to
+      // the reef water — ridable end-to-end on the Wave.
+      if (y===20&&x===12) return TILE.HM_WATERFALL;
       if (x>=8&&x<=14&&y>=18&&y<=28) return TILE.SHALLOW;
       if (x>=12&&x<=28&&y>=10&&y<=32) return TILE.WATER;
       if (x>=12&&x<=28&&y>=2&&y<=8) return TILE.WATER;
       if (y===20&&x<=10) return TILE.DOCK;
       if (x>=8&&x<=10&&y>=8&&y<=12) return TILE.TALL_GRASS;
       if (x>=6&&x<=8&&y>=26&&y<=30) return TILE.TALL_GRASS;
-      if (y===20&&x===12) return TILE.HM_WATERFALL;
+      // (the (12,20) falls is claimed above, before the shallow band)
       if (x>=18&&x<=22&&y>=16&&y<=20) return TILE.SHALLOW;
       if (x===20&&y===18) return TILE.SAND;
       return TILE.SAND;
@@ -739,6 +863,13 @@ export const MAUVEVILLE_ARENA: any = {
     { x:9, y:27, to:"neon_city", enterAt:{x:18, y:6}, dir:"down" }
   ],
   doors: [],
+  // Traversal-build lane (2026-10-30): the arena floor is painted
+  // TILE.WARP edge to edge (x3–16, y4–20) and read as nothing. Its
+  // two far corners are now a warp pair across the gauntlet floor.
+  warps: [
+    { x:3, y:20, to:"mauveville_arena", enterAt:{x:16, y:4} },
+    { x:16, y:4, to:"mauveville_arena", enterAt:{x:3, y:20} }
+  ],
   events: [],
   encounters: []
 };
@@ -752,10 +883,70 @@ export const BOOT_BAY: any = {
   tiles: (() => {
     return buildMap(32, 20, (x, y) => {
       if (x===0||x===31||y===19) return TILE.WALL;
+      // Traversal-build lane (2026-10-30): the bay's currents
+      // (completeness audit D7, the Pacifidlog pattern from
+      // pokeemerald's MB_*WARD_CURRENT): a southward lane at x=10
+      // carries you down the bay, a northward lane at x=20
+      // carries you back. Both lanes end on open water — the eddy
+      // rule from WORLD-EXPERIENCES §2.3: a current can
+      // inconvenience, never soft-lock; open water surrounds every
+      // lane end, and the harbour entrance column (x=15) is
+      // current-free.
+      if (x===10&&y>=2&&y<=12) return TILE.CURRENT_S;
+      if (x===20&&y>=7&&y<=17) return TILE.CURRENT_N;
+      // Traversal part 2 (2026-10-30): two dive spots — the dark
+      // deep-water patches where the bay floor drops away (the
+      // emerald dive grammar). One in the west basin, clear of the
+      // south current lane; one in the east basin below the north
+      // lane's end. Both pair into the one dive area below.
+      if ((x===8&&y===9)||(x===24&&y===14)) return TILE.DIVE_SPOT;
       return TILE.WATER;
     });
   })(),
+  diveLinks: [
+    { x:8, y:9, to:"boot_bay_deep", enterAt:{x:6, y:11} },
+    { x:24, y:14, to:"boot_bay_deep", enterAt:{x:24, y:11} }
+  ],
   npcs: [], exits: [{ x:15, y:0, to:"sector0", enterAt:{x:15, y:27}, dir:"up" }], doors: [], events: [], encounters: []
+};
+
+// Traversal part 2 (2026-10-30): BOOT BAY — DIVE AREA. The paired
+// underwater map for Boot Bay (and, through the deep water table,
+// the Cave of Echoes pool — see that map's diveLinks). Emerald's
+// dive areas are single maps serving several surface spots; this
+// one serves the bay's two spots and the cave pool. The floor is
+// seabed (drawn from the map-scoped set in PixiWorldCanvas), the
+// seaweed patches are the encounter ground (the selector's "dive"
+// method — no species table exists for it yet, so the ground is
+// honestly empty), and the bright DIVE_SPOT columns are the way
+// back up. `underwater: true` drives the depth palette.
+export const BOOT_BAY_DEEP: any = {
+  name: "Boot Bay — Dive Area",
+  music: "water_theme",
+  underwater: true,
+  // Interior by the light law's own terms (never day-tinted; its
+  // light is the depth palette) — the flag also routes its tiles
+  // through the map-scoped set instead of the exterior kit.
+  interior: true,
+  width: 32, height: 20,
+  playerStart: { x:6, y:11 },
+  tiles: (() => {
+    return buildMap(32, 20, (x, y) => {
+      if (x===0||x===31||y===0||y===19) return TILE.WALL;
+      if ((x===6&&y===10)||(x===24&&y===10)||(x===15&&y===4)) return TILE.DIVE_SPOT;
+      // Seaweed encounter ground (three meadows).
+      if ((x>=4&&x<=7&&y>=13&&y<=15)||(x>=21&&x<=24&&y>=6&&y<=8)||(x>=13&&x<=16&&y>=15&&y<=17)) return TILE.SEAWEED;
+      // Rock outcrops on the seabed.
+      if ((x===10&&y===6)||(x===11&&y===6)||(x===19&&y===12)||(x===26&&y===16)||(x===9&&y===16)||(x===20&&y===3)) return TILE.WALL;
+      return TILE.SHALLOW;
+    });
+  })(),
+  diveLinks: [
+    { x:6, y:10, to:"boot_bay", enterAt:{x:8, y:9} },
+    { x:24, y:10, to:"boot_bay", enterAt:{x:24, y:14} },
+    { x:15, y:4, to:"cave_of_echoes", enterAt:{x:18, y:24} }
+  ],
+  npcs: [], exits: [], doors: [], events: [], encounters: []
 };
 
 export const LUIGI_MANSION: any = {
@@ -953,6 +1144,24 @@ export const ROUTE_2: any = {
   tiles: (() => {
     return buildMap(28, 40, (x, y) => {
       if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      // Traversal part 2 (2026-10-30): the harbour road's bike
+      // grammar (emerald's Cycling Road family), claimed before
+      // the path rule. The route sign at (14,10) stands at the
+      // foot of the slope, as route signs do.
+      //  - A muddy SLOPE band across the road at y=8: northbound
+      //    it needs Mach speed or an Acro wheelie; southbound
+      //    (downhill) is free, and on foot the grass flanks are
+      //    the walk-around — the slope gates the ROAD, not the
+      //    route.
+      //  - HOP RAILS at y=14 with a centre gap at x=14: riders on
+      //    the Acro gear hop them; everyone else uses the gap.
+      //  - A CRACKED stretch at y=24 (centre cell sound): on foot
+      //    it cracks, then gives way to the road's underpass (this
+      //    map's dropTarget, the Neon end); a Mach bike at full
+      //    speed crosses clean.
+      if (y===8&&x>=12&&x<=16) return TILE.SLOPE;
+      if (y===14&&(x===12||x===13||x===15||x===16)) return TILE.HOP_RAIL;
+      if (y===24&&(x===12||x===13||x===15||x===16)) return TILE.CRACKED_FLOOR;
       if (x>=12&&x<=16) return TILE.PATH;
       if (y>=18&&y<=20) return TILE.PATH;
       return TILE.TALL_GRASS;
@@ -968,6 +1177,9 @@ export const ROUTE_2: any = {
     { x:14, y:0, to:"stoneport_city", enterAt:{x:14, y:29}, dir:"up" },
     { x:14, y:39, to:"neon_city", enterAt:{x:18, y:1}, dir:"down" }
   ],
+  // Traversal part 2: cracked-floor drops on this road land at
+  // its Neon end (the underpass), the forgiving reset.
+  dropTarget: { to:"route_2", enterAt:{x:14, y:38} },
   doors: [],
   events: [],
   encounters: [] // wild pool owed: 022 name not verified in live species data, not invented here
@@ -1745,6 +1957,7 @@ export const FULL_WORLD: Record<string, any> = {
   castagnoli_island: CASTAGNOLI_ISLAND,
   mauveville_arena: MAUVEVILLE_ARENA,
   boot_bay: BOOT_BAY,
+  boot_bay_deep: BOOT_BAY_DEEP,
   luigi_mansion: LUIGI_MANSION,
   dojo_2: DOJO_2,
   sector0_truck: SECTOR0_TRUCK,

@@ -60,6 +60,9 @@ export const MAP_PLACEMENT: Record<string, Placement> = {
   sector0_rival_house: "town",
   aeon_lab: "town",
   boot_bay: "town",
+  // Traversal part 2: the dive area is the bay's own underwater
+  // half — same placement class as its surface.
+  boot_bay_deep: "town",
   mochiiplex_1: "center",
   route_1: "route",
   binary_fields: "town2",

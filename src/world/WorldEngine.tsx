@@ -1,13 +1,26 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { TYPE_COLORS, makeBattleMon, GAME_DATA as IMPORTED_GAME_DATA } from "./GameData";
+import { TYPE_COLORS, calcDamage, makeBattleMon, GAME_DATA as IMPORTED_GAME_DATA } from "./GameData";
 import { FULL_WORLD } from "./FullWorldMaps";
 import { useGameStore } from "../store/gameStore";
 import PixiWorldCanvas from "../components/game/PixiWorldCanvas";
 import type { NpcWalkState } from "../components/game/PixiWorldCanvas";
 import CreaturePortrait from "../components/game/CreaturePortrait";
 import { PauseMenu, WorldHud } from "../components/game/GameShell";
-import { DAY_TINT, DAY_AMBIENT, WEATHER_CONFIG } from "./WorldConstants";
-import { deriveWorldState, checkRollover, newGameAnchor } from "../lib/worldClock";
+import { getDayPhase, DAY_TINT, DAY_AMBIENT, WEATHER_CONFIG, TILE, PASSABLE } from "./WorldConstants";
+import {
+  resolveTraversalStep, resolveStandingChain, CHAIN_SOLID_TILES,
+  resolveClimb, resolveCascade,
+  type DirName, type TraversalEffect,
+} from "../lib/tileBehaviors";
+import {
+  tryPushBoulder as tryPushBoulderObj, switchesHeld, mapHasSwitch,
+  isLooseBoulderOverride,
+} from "../lib/boulders";
+import {
+  BIKE_ITEM_ID, BIKE_DRAFT_NAME, stepIntervalMs, crossesCrackedClean,
+  canClimbSlope, tryAcroHop, MACH_FULL_CHARGE,
+  type RideMode,
+} from "../lib/bike";
 import SaveMenu from "../components/SaveMenu";
 import { saveGame, getSaves } from "../lib/saveSystem";
 import { SPECIES_DB } from '../lib/species';
@@ -23,7 +36,6 @@ import { resolveTrainerRow, rowToMapMembers } from "../lib/trainer-teams-resolve
 import { planForOutcome, commitRecipientExp, commitNextLevel, expProgressInLevel, type PayoffPlan } from "../lib/battlePayoff";
 import { useBattlePayoffSequence, PayoffStatWindow } from "../components/game/BattlePayoffSequence";
 import { resolveWorldMove, buildWorldAttackPresentation } from "../lib/worldMoveBridge";
-import { worldBattleHit, worldCanActGateLine, worldCheckCanAct, worldEndTurnTick, worldNoPpLine, worldSpendPp, worldStatusTickLine } from "../lib/worldBattleCore";
 import BattleSceneBackdrop from "../components/game/BattleSceneBackdrop";
 import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackground";
 import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
@@ -79,11 +91,10 @@ import encounterModesConfig from "../data/core/encounter-modes.json";
 import { eligibleEvents, resolveOutcome, arcAvailability, currentArcStage, completeArcStage, routineFor, phaseForHour, WITNESSED_EVENTS, STRANGER_ARCS } from "../lib/livingWorld";
 import type { DirectorContext, WitnessedEvent } from "../lib/livingWorld";
 import { tableFor, rollEncounterStep } from "../lib/encounters";
-import { evaluateTileGate, performedText } from "../lib/fieldTechniques";
+import { evaluateTileGate, performedText, techniqueByName, techniqueHeld, performerFor } from "../lib/fieldTechniques";
 import { rollWildHeldItem, resolveBattleEndDrop, DROP_ITEM_NAMES } from "../lib/drops";
 import { greetingFor, isGreeter } from "../lib/greetings";
-import { RELIC_NPCS, APPRAISAL_TERMINAL_NPC_ID, appraisalTerminalLines, appraiseCarried, recordFor, canGrantUnique, encounterRateFactor, keepsakeBand } from "../lib/itemMeaning";
-import { deriveMorale, recordDeed } from "../lib/honor";
+import { deriveMorale } from "../lib/honor";
 import { playCue } from "../lib/soundCues";
 // Sequence build (2026-10-28): the engine now CONSUMES the movement
 // config (docs/MOCHII-MOVEMENT-SYSTEM.md; the file landed with PR #66
@@ -208,10 +219,7 @@ export function resolveBattleMove(moveKey: string): { power: number; type: strin
   if (!r) return null;
   return { power: r.power, type: r.type, display: r.display, moveId: r.moveId, animProfile: r.profile };
 }
-/** Flat atk/def helper, retained for callers that still need the flat
- * shape: MochiiInstance carries stats.*, not flat atk/def. (Gap-fill
- * S6: the live damage path no longer uses this — it goes through
- * src/lib/worldBattleCore.ts into battle-math.) */
+/** Flat atk/def for calcDamage: MochiiInstance carries stats.*, not flat atk/def. */
 export function battleStats(mon: any): any {
   return { ...mon, atk: mon.atk ?? mon.stats?.atk ?? 50, def: mon.def ?? mon.stats?.def ?? 50 };
 }
@@ -229,52 +237,16 @@ export function battleMonName(mon: any): string {
   return mon.name || mon.nickname || SPECIES_DB[mon.speciesId || mon.id]?.name || "Mochiichao";
 }
 
-/**
- * Gap-fill S1 (CLOCK-FROM-POKEMON §3.4): the engine is the ONE
- * driver of the world clock. The old hook kept its own simulated
- * hour in useState (10, +1 per 15 s) and derived the phase from
- * WorldConstants.getDayPhase — a second phase producer that no
- * other system read. This hook reads the store's `worldClock`
- * anchor and derives the state from src/lib/worldClock.ts on
- * each tick, so canvas, HUD and every later consumer share one
- * phase. Return shape stays { gameHour, phase, tint, ambient }
- * compatible (phase is now the producer's gamePhase, which uses
- * the same dawn/day/dusk/night vocabulary the canvas tint table
- * already keys on), plus `state` for consumers moving over one
- * by one. Rollover: this hook is the single fan-out site — when
- * a read's dayIndex passes the anchor's lastSeenDayIndex it
- * persists the advanced marker; the daily HANDLERS themselves
- * land with their own steps, and this hook owns no daily logic.
- * Rate is preserved exactly: 4 game-minutes per real second
- * (1 game hour per 15 real seconds, the old hook's rate).
- */
 export function useDayNight(tickMs = 1000) {
-  const worldClock = useGameStore(s => s.worldClock);
-  const setWorldClock = useGameStore(s => s.setWorldClock);
-  const [tick, setTick] = useState(0);
-  // Anchor an unanchored game (fresh game, or an old save with no
-  // anchor field) at day 0, 10:00 — the old hook's start hour.
+  const [gameHour, setGameHour] = useState(10);
   useEffect(() => {
-    if (!worldClock) setWorldClock(newGameAnchor(Date.now()));
-  }, [worldClock, setWorldClock]);
-  useEffect(() => {
-    const interval = setInterval(() => setTick(t => t + 1), tickMs);
+    const interval = setInterval(() => {
+      setGameHour(h => (h + 1) % 24);
+    }, tickMs * 15);
     return () => clearInterval(interval);
   }, [tickMs]);
-  // Before the anchor effect lands, derive transiently from a
-  // fresh day-0 10:00 anchor so the first paint is already 10:00.
-  const anchor = worldClock ?? newGameAnchor(Date.now());
-  const state = deriveWorldState(anchor, Date.now());
-  // Rollover fan-out site (once per tick, effect — never in render).
-  useEffect(() => {
-    if (!worldClock) return;
-    const current = deriveWorldState(worldClock, Date.now());
-    const { daysPassed, nextAnchor } = checkRollover(worldClock, current);
-    if (daysPassed > 0) setWorldClock(nextAnchor);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick]);
-  const phase = state.gamePhase;
-  return { gameHour: state.hour, phase, tint: DAY_TINT[phase], ambient: DAY_AMBIENT[phase], state };
+  const phase = getDayPhase(gameHour);
+  return { gameHour, phase, tint: DAY_TINT[phase], ambient: DAY_AMBIENT[phase] };
 }
 
 export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any, setBattleEnemy?: any }) {
@@ -424,6 +396,52 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   // "mapId:x,y" -> tile id. Presentation + collision both read the
   // effective tile, never the authored one alone.
   const [tileOverrides, setTileOverrides] = useState<Record<string, number>>({});
+  // Traversal-build lane (2026-10-30): tile-behaviour state.
+  // crackedRef — tiles that have taken one stand (tileBehaviors'
+  // cracked-floor rule); per map visit, cleared on map change
+  // below, the way emerald restores cracked floors on reload.
+  // slowNextRef — the movement-cost rule: ending a move on cost
+  // terrain (deep snow / mud / deep sand) consumes the next press.
+  // traversalFx — the last traversal effect for the canvas (the
+  // ledge-jump hop); cleared on a timer so it reads as a hop, not
+  // a pose.
+  const crackedRef = React.useRef<Set<string>>(new Set());
+  const slowNextRef = React.useRef(false);
+  const [traversalFx, setTraversalFx] = useState<{ kind: string; n: number } | null>(null);
+  // Traversal part 2 (2026-10-30): the bike programme's mode state
+  // (src/lib/bike.ts). rideMode persists across map edges the way
+  // the source avatar state does; doors and water transitions
+  // dismount (the avatar transitions in field_player_avatar.c).
+  // machCharge counts consecutive same-direction Mach steps — the
+  // acceleration the cracked-floor and slope rules read.
+  const [rideMode, setRideMode] = useState<RideMode>("foot");
+  const [machCharge, setMachCharge] = useState(0);
+  const rideDirRef = React.useRef<string | null>(null);
+  useEffect(() => {
+    crackedRef.current = new Set(); slowNextRef.current = false;
+    // Boulder reload rule (pret-pokeemerald: object events restore
+    // to their authored coordinates when the area reloads): on map
+    // ENTRY, this map's loose-boulder overrides clear — pushed
+    // boulders stand home again and a switch they held releases.
+    // Hole-fills persist (src/lib/boulders.ts isLooseBoulderOverride
+    // decides which keys are which).
+    const md: any = FULL_WORLD[currentMap];
+    if (md) {
+      setTileOverrides((o) => {
+        let changed = false;
+        const next = { ...o };
+        for (const k of Object.keys(next)) {
+          if (!k.startsWith(`${currentMap}:`)) continue;
+          const [xs, ys] = k.slice(currentMap.length + 1).split(",").map(Number);
+          if (isLooseBoulderOverride(md.tiles[ys]?.[xs], next[k])) {
+            delete next[k];
+            changed = true;
+          }
+        }
+        return changed ? next : o;
+      });
+    }
+  }, [currentMap]);
   const finishBattleEnd = () => {
     // Stub-kill S-2: a witnessed event's battle resolves FIRST —
     // the outcome (and its witnessed deed) is written from the
@@ -660,6 +678,25 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   useEffect(() => { defeatedRef.current = defeatedTrainers; }, [defeatedTrainers]);
   const npcFacingToDir = (facing: any): NpcWalkState["dir"] =>
     facing === "up" ? "back" : facing === "left" ? "left" : facing === "right" ? "right" : "front";
+  // Traversal part 2: are this map's floor switches held right now
+  // (src/lib/boulders.ts)? Reads authored tiles + effective tiles +
+  // live occupants (the player and every NPC at its live tile).
+  // Used by the mover's switch-gate branch, the chain solids, and
+  // the canvas prop that draws the gate open or shut.
+  const switchesHeldNow = (): boolean => {
+    const md: any = mapData;
+    if (!md) return false;
+    const authoredAt = (x: number, y: number) => md.tiles[y]?.[x] as number | undefined;
+    if (!mapHasSwitch(authoredAt, md.width, md.height)) return false;
+    const occupants = [
+      { x: playerPos.x, y: playerPos.y },
+      ...(md.npcs || []).map((n: any) => {
+        const s = npcStatesRef.current[n.id];
+        return s ? { x: s.x, y: s.y } : { x: n.x, y: n.y };
+      }),
+    ];
+    return switchesHeld(authoredAt, (x, y) => effectiveTile(x, y), occupants, md.width, md.height);
+  };
   // Reset wanderers to home on map/slot change (fresh world entry).
   useEffect(() => {
     currentMapRef.current = currentMap;
@@ -1049,7 +1086,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     return true;
   }, [playerTeam, rivalName]);
 
-  const move = useCallback((dx: number, dy: number) => {
+  const moveInner = useCallback((dx: number, dy: number) => {
     if (screen !== "overworld" || isTransitioning) return;
     const nx = playerPos.x + dx;
     const ny = playerPos.y + dy;
@@ -1062,6 +1099,20 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     const tile = effectiveTile(nx, ny);
     lwBeatRef.current += 1; // Stub-kill S-2: one step, one beat.
     const noclip = useGameStore.getState().noclip;
+    // Traversal-build lane: movement-cost terrain (tileBehaviors'
+    // ported cost rule) — ending the last move on deep snow / mud /
+    // deep sand consumes this press: you trudge, you don't advance.
+    if (slowNextRef.current && !noclip) {
+      slowNextRef.current = false;
+      playCue('world.step');
+      return;
+    }
+    // Traversal-build lane: the resolved destination of this press
+    // (a ledge jump or a forced chain can carry the player past
+    // the pressed tile). Defaults to the pressed tile itself.
+    let sx = nx, sy = ny;
+    let travTrigger: { type: "warp" | "drop"; at: { x: number; y: number } } | null = null;
+    let travEffects: TraversalEffect[] = [];
     // v5: exits and doors are checked BEFORE the solid-tile return.
     // Before v5 the solid check ran first, so any exit or door whose
     // tile was wall/building (sector0's route_1 exit row was all
@@ -1087,6 +1138,8 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       // player is facing the door and can read it.
       if (!isDoorOpen(doorFirst.condition, badges)) { playCue('world.bump'); return; }
       playCue('world.door');
+      // Part 2: doors dismount the bike (avatar transition).
+      if (rideMode !== "foot") { setRideMode("foot"); setMachCharge(0); }
       setMapState(currentMap, { x: nx, y: ny }); // Step on door
       setIsTransitioning(true);
       setTimeout(() => {
@@ -1095,7 +1148,47 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       }, 400);
       return;
     }
+    // Traversal part 2: the resolved destination flags the new
+    // systems set when they carry this press themselves (climb,
+    // cascade ride, boulder push, acro hop, clean cracked crossing).
+    let skipChain = false;
     if (!noclip) {
+      // Part 2 pre-checks. onWater: the mover's standing tile is
+      // water-family — the surf state the falls rides and the dive
+      // grammar read (Wave's end-to-end state, part-1 census §7).
+      const standingTile = effectiveTile(playerPos.x, playerPos.y);
+      const onWater = standingTile !== undefined
+        && [TILE.WATER, TILE.SHALLOW, TILE.HM_WATERFALL, TILE.DIVE_SPOT,
+            TILE.CURRENT_E, TILE.CURRENT_N, TILE.CURRENT_W, TILE.CURRENT_S].includes(standingTile);
+      // Muddy slope ascent (bike.ts, MB_MUDDY_SLOPE): a northward
+      // step onto or off of a slope tile needs Mach speed or the
+      // Acro wheelie; on foot you stay (the slide-back). Downhill
+      // and lateral steps are free.
+      if (dy < 0 && (tile === TILE.SLOPE || standingTile === TILE.SLOPE)
+        && !canClimbSlope(rideMode, machCharge)) {
+        playCue('world.bump');
+        if (machCharge !== 0) setMachCharge(0);
+        return;
+      }
+      // Waterfall DOWN-ride: while on the water, entering a falls
+      // tile with the flow rides it down with no verb (emerald's
+      // waterfall avatar path). The up-ride stays behind the
+      // Cascade gate below.
+      if (tile === TILE.HM_WATERFALL && dy > 0 && onWater) {
+        const ride = resolveCascade({ x: nx, y: ny }, dir as DirName,
+          (x, y) => effectiveTile(x, y),
+          (x, y) => {
+            const t = effectiveTile(x, y);
+            if (t === undefined || npcAt(x, y)) return false;
+            return [TILE.WATER, TILE.SHALLOW, TILE.DIVE_SPOT].includes(t)
+              || (PASSABLE[t] === true && !CHAIN_SOLID_TILES.has(t));
+          });
+        if (!ride.rode || !ride.to) { playCue('world.bump'); return; }
+        sx = ride.to.x; sy = ride.to.y;
+        skipChain = true;
+        setTraversalFx({ kind: "cascade", n: Date.now() });
+        setTimeout(() => setTraversalFx(null), 600);
+      }
       // Stub-kill S-3: technique gates read the HM_REQUIRED table
       // through src/lib/fieldTechniques.ts. A refused gate speaks
       // its reason and blocks; a performed tile verb changes the
@@ -1103,7 +1196,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       // press steps); a traverse verb (Wave / Cascade) lets the
       // step happen.
       const gate = evaluateTileGate(tile, techniqueFlags, party);
-      if (gate) {
+      if (gate && !skipChain) {
         if (gate.open === false) {
           setDialog({ lines: [gate.text] });
           setScreen("dialog");
@@ -1116,20 +1209,77 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           return;
         }
         if (gate.tech.name === "Mighty Push") {
-          const bx = nx + dx, by = ny + dy;
-          const beyond = effectiveTile(bx, by);
-          const beyondOpen = beyond !== undefined && ![1, 2, 4, 15, 16, 17, 23, 26].includes(beyond) && !npcAt(bx, by);
-          if (!beyondOpen) {
+          // Traversal part 2: the full boulder OBJECT system
+          // (src/lib/boulders.ts, ported from TryPushBoulder) —
+          // one tile per push, falls into holes (hole fills),
+          // rests on switches, source blocked cases. The S-3
+          // one-shot override swap that stood here is replaced;
+          // the gate verdict above is unchanged. The player
+          // follows into the boulder's vacated cell, the way the
+          // source's push task moves both. Pushing is on foot:
+          // the bike avatar state swaps out first.
+          if (rideMode !== "foot") { setRideMode("foot"); setMachCharge(0); }
+          const res = tryPushBoulderObj(nx, ny, dx, dy,
+            (x, y) => effectiveTile(x, y),
+            (x, y) => {
+              const authored = mapData.tiles[y]?.[x];
+              return authored === TILE.HM_BOULDER
+                ? ((mapData as any).boulderFloor ?? TILE.PATH)
+                : (authored ?? TILE.PATH);
+            },
+            (x, y) => !!npcAt(x, y),
+            (mapData as any).boulderFloor ?? TILE.PATH);
+          if (!res.moved) {
             setDialog({ lines: ["The boulder won't budge — there's no room beyond it."] });
             setScreen("dialog");
             return;
           }
-          setTileOverrides((o) => ({ ...o, [`${currentMap}:${nx},${ny}`]: 3, [`${currentMap}:${bx},${by}`]: 26 }));
-          setDialog({ lines: [performedText(gate.tech, gate.performer)] });
-          setScreen("dialog");
-          return;
+          setTileOverrides((o) => {
+            const next = { ...o };
+            for (const [k, v] of Object.entries(res.writes)) {
+              const key = `${currentMap}:${k}`;
+              const [wx, wy] = k.split(",").map(Number);
+              // Writing back the authored tile = no override.
+              if (mapData.tiles[wy]?.[wx] === v) delete next[key];
+              else next[key] = v;
+            }
+            return next;
+          });
+          sx = nx; sy = ny;
+          skipChain = true;
+          playCue('world.step');
         }
-        // Wave / Cascade: the step proceeds onto the gated tile.
+        if (gate.tech.name === "Cascade" && !skipChain) {
+          // The up-ride (and any falls entry) rides the whole
+          // falls run from the water — see resolveCascade. On
+          // foot the falls stays a wall: the ride exists only in
+          // the Wave state.
+          if (!onWater) {
+            setDialog({ lines: ["The falls can only be ridden from the water."] });
+            setScreen("dialog");
+            return;
+          }
+          const ride = resolveCascade({ x: nx, y: ny }, dir as DirName,
+            (x, y) => effectiveTile(x, y),
+            (x, y) => {
+              const t = effectiveTile(x, y);
+              if (t === undefined || npcAt(x, y)) return false;
+              return [TILE.WATER, TILE.SHALLOW, TILE.DIVE_SPOT].includes(t)
+                || (PASSABLE[t] === true && !CHAIN_SOLID_TILES.has(t));
+            });
+          if (!ride.rode || !ride.to) { playCue('world.bump'); return; }
+          sx = ride.to.x; sy = ride.to.y;
+          skipChain = true;
+          setTraversalFx({ kind: "cascade", n: Date.now() });
+          setTimeout(() => setTraversalFx(null), 600);
+        }
+        if (gate.tech.name === "Wave" && rideMode !== "foot") {
+          // Avatar transition: entering the water swaps the bike
+          // state out (field_player_avatar.c's surf transition).
+          setRideMode("foot");
+          setMachCharge(0);
+        }
+        // Wave: the step proceeds onto the gated tile.
       } else if (tile === 1 || tile === 4 || tile === 2) {
         playCue('world.bump'); return; // solid (ungated)
       }
@@ -1138,11 +1288,124 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       // a moved NPC nor be blocked by its empty home tile.
       const npcHere = npcAt(nx, ny);
       if (npcHere) { playCue('world.bump'); return; } // can't walk through them
+
+      // ── Traversal part 2 branches ────────────────────────────
+      // Crag Climb faces: pressing into a climb face with the
+      // verb's context verdict (held + living performer, the
+      // fieldTechniques shapes) scales the whole face run to the
+      // ledge beyond (tileBehaviors.resolveClimb, HGSS seam).
+      if (tile === TILE.ROCK_CLIMB && !skipChain) {
+        const tech = techniqueByName("Crag Climb");
+        const performer = tech ? performerFor(tech, party) : null;
+        if (!tech || !techniqueHeld(tech, techniqueFlags) || !performer) {
+          setDialog({ lines: [`${tech?.obstacleText ?? "A sheer rock face rises here."} A partner who knows Crag Climb could scale it.`] });
+          setScreen("dialog");
+          return;
+        }
+        const climb = resolveClimb(playerPos, dir as DirName,
+          (x, y) => effectiveTile(x, y),
+          (x, y) => {
+            const t = effectiveTile(x, y);
+            if (t === undefined || npcAt(x, y)) return false;
+            return PASSABLE[t] === true && !CHAIN_SOLID_TILES.has(t)
+              && ![TILE.WATER, TILE.SHALLOW, TILE.DIVE_SPOT].includes(t);
+          });
+        if (!climb.climbed || !climb.to) { playCue('world.bump'); return; }
+        if (rideMode !== "foot") { setRideMode("foot"); setMachCharge(0); }
+        sx = climb.to.x; sy = climb.to.y;
+        skipChain = true;
+        setTraversalFx({ kind: "climb", n: Date.now() });
+        setTimeout(() => setTraversalFx(null), 520);
+        playCue('world.step');
+      }
+      // Switch gates: solid while no floor switch on the map is
+      // held; a held switch lets the press through as a plain step.
+      if (tile === TILE.SWITCH_GATE && !skipChain && !switchesHeldNow()) {
+        playCue('world.bump');
+        return;
+      }
+      // Acro hop: pressing toward a hop-class obstacle on the
+      // Acro gear hops it (bike.ts tryAcroHop — rails, ledges
+      // side-on, one-tile holes). On foot / Mach the rail is a
+      // plain solid.
+      if ((tile === TILE.HOP_RAIL || tile === TILE.HOLE
+        || (tile === TILE.LEDGE && dir !== "down")) && !skipChain) {
+        if (rideMode === "acro") {
+          const lx = nx + dx, ly = ny + dy;
+          const lt = effectiveTile(lx, ly);
+          const standable = lt !== undefined && !npcAt(lx, ly)
+            && PASSABLE[lt] === true && !CHAIN_SOLID_TILES.has(lt)
+            && ![TILE.WATER, TILE.SHALLOW, TILE.DIVE_SPOT].includes(lt);
+          const hop = tryAcroHop(rideMode, dx, dy, tile, lt, standable);
+          if (hop.hop) {
+            sx = lx; sy = ly;
+            skipChain = true;
+            setTraversalFx({ kind: "hop", n: Date.now() });
+            setTimeout(() => setTraversalFx(null), 380);
+            playCue('world.step');
+          } else if (tile === TILE.HOP_RAIL) { playCue('world.bump'); return; }
+          // A hole the hop can't clear falls through to the
+          // normal chain below (the drop grammar).
+        } else if (tile === TILE.HOP_RAIL) { playCue('world.bump'); return; }
+      }
+      // Cracked floor at Mach full speed crosses clean (bike.ts):
+      // the press lands as plain floor — no crack state, no drop.
+      if (tile === TILE.CRACKED_FLOOR && !skipChain && crossesCrackedClean(rideMode, machCharge)) {
+        sx = nx; sy = ny;
+        skipChain = true;
+      }
+
+      // Traversal-build lane (src/lib/tileBehaviors.ts): the step
+      // is legal — now resolve what the TILES do. A ledge target
+      // resolves at collision time (jump south over it, or bump);
+      // every other landing runs the forced-movement chain from
+      // the tile landed on (ice slip, conveyor arrows, currents
+      // after a Wave landing, spin, cracked floors, warp/hole
+      // triggers, cost terrain). Chain steps treat exits/doors as
+      // solid: a slide never carries you through a doorway.
+      const travSolid = (x: number, y: number) => {
+        if (!mapData || x < 0 || y < 0 || x >= mapData.width || y >= mapData.height) return true;
+        if (npcAt(x, y)) return true;
+        if ((mapData as any).exits?.some((e: any) => e.x === x && e.y === y)) return true;
+        if ((mapData as any).doors?.some((d: any) => d.x === x && d.y === y)) return true;
+        const tt = effectiveTile(x, y);
+        if (tt === undefined) return false;
+        // Part 2: climb faces, hop rails and a shut switch gate
+        // are chain solids too (a slide never carries you through
+        // a face or a shut gate).
+        return CHAIN_SOLID_TILES.has(tt)
+          || tt === TILE.ROCK_CLIMB || tt === TILE.HOP_RAIL
+          || (tt === TILE.SWITCH_GATE && !switchesHeldNow());
+      };
+      const travArgs = {
+        tileAt: (x: number, y: number) => effectiveTile(x, y),
+        solid: travSolid,
+        cracked: crackedRef.current,
+        keyOf: (x: number, y: number) => `${currentMap}:${x},${y}`,
+      };
+      if (!skipChain && tile === TILE.LEDGE) {
+        const res = resolveTraversalStep(travArgs, playerPos, dir as DirName);
+        if (res.blocked) { playCue('world.bump'); return; }
+        sx = res.final.x; sy = res.final.y;
+        travTrigger = res.trigger; travEffects = res.effects;
+        if (res.costTerrain) slowNextRef.current = true;
+      } else if (!skipChain) {
+        const chain = resolveStandingChain(travArgs, { x: nx, y: ny }, dir as DirName);
+        sx = chain.final.x; sy = chain.final.y;
+        travTrigger = chain.trigger; travEffects = chain.effects;
+        if (chain.costTerrain) slowNextRef.current = true;
+      }
+      for (const fx of travEffects) {
+        if (fx.type === "ledge-jump") {
+          setTraversalFx({ kind: "ledge-jump", n: Date.now() });
+          setTimeout(() => setTraversalFx(null), 420);
+        }
+      }
     }
 
     // Check exits (noclip path; the normal path already handled
     // exits/doors above, before the solid check)
-    const exit = (mapData as any).exits?.find((e: any) => e.x === nx && e.y === ny);
+    const exit = (mapData as any).exits?.find((e: any) => e.x === sx && e.y === sy);
     if (exit) {
       playCue('world.exit');
       setIsTransitioning(true);
@@ -1154,10 +1417,11 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     }
 
     // Check doors in move (auto-enter, noclip path)
-    const door = (mapData as any).doors?.find((d: any) => d.x === nx && d.y === ny);
+    const door = (mapData as any).doors?.find((d: any) => d.x === sx && d.y === sy);
     if (door) {
       playCue('world.door');
-      setMapState(currentMap, { x: nx, y: ny }); // Step on door
+      if (rideMode !== "foot") { setRideMode("foot"); setMachCharge(0); }
+      setMapState(currentMap, { x: sx, y: sy }); // Step on door
       setIsTransitioning(true);
       setTimeout(() => {
         setMapState(door.to, door.enterAt);
@@ -1166,14 +1430,52 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       return;
     }
 
-    setMapState(currentMap, { x: nx, y: ny });
+    setMapState(currentMap, { x: sx, y: sy });
     playCue('world.step');
     setAnimWalk(w => (w + 1) % 4);
+    // Traversal part 2: Mach acceleration bookkeeping — consecutive
+    // steps in one direction build the charge the cracked-floor and
+    // slope rules read; a turn sheds it back to the first tier.
+    if (rideMode === "mach") {
+      if (rideDirRef.current === dir) setMachCharge(c => Math.min(c + 1, MACH_FULL_CHARGE + 2));
+      else setMachCharge(1);
+    } else if (machCharge !== 0) setMachCharge(0);
+    rideDirRef.current = dir;
+
+    // Traversal triggers (tileBehaviors): a warp pad with an entry
+    // in this map's warps list, or a hole / cracked-through floor
+    // with a drop target, fires on the tile the move ENDED on.
+    // Arrival never re-fires a trigger (triggers are read here, in
+    // the move path only), so warp pairs can't ping-pong.
+    if (travTrigger?.type === "warp") {
+      const warp = (mapData as any).warps?.find((w: any) => w.x === sx && w.y === sy);
+      if (warp) {
+        playCue('world.exit');
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setMapState(warp.to, warp.enterAt);
+          setIsTransitioning(false);
+        }, 400);
+        return;
+      }
+    } else if (travTrigger?.type === "drop") {
+      const hole = (mapData as any).holes?.find((h: any) => h.x === sx && h.y === sy);
+      const drop = hole ?? (mapData as any).dropTarget;
+      if (drop) {
+        playCue('world.exit');
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setMapState(drop.to, drop.enterAt);
+          setIsTransitioning(false);
+        }, 400);
+        return;
+      }
+    }
 
     // Check events
     let eventTriggered = false;
     mapData.events?.forEach(ev => {
-      if (ev.x === nx && ev.y === ny && !completedEvents.includes(ev.id)) {
+      if (ev.x === sx && ev.y === sy && !completedEvents.includes(ev.id)) {
         let conditionMet = false;
         if (!ev.condition) conditionMet = true;
         if (ev.condition === "hasStarter" && hasStarter) conditionMet = true;
@@ -1203,7 +1505,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       }
     });
 
-    if (eventTriggered && mapData.events?.find((e: any) => e.x === nx && e.y === ny)?.id.startsWith("block_")) {
+    if (eventTriggered && mapData.events?.find((e: any) => e.x === sx && e.y === sy)?.id.startsWith("block_")) {
       setMapState(currentMap, { x: playerPos.x, y: playerPos.y }); // Step back
     }
 
@@ -1215,12 +1517,12 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // itself — the refusal is the director's law, not an engine
     // special case.
     if (!eventTriggered) {
-      const ev = eligibleEvents(lwCtx("step", { x: nx, y: ny }))[0];
+      const ev = eligibleEvents(lwCtx("step", { x: sx, y: sy }))[0];
       if (ev) {
         presentLwEvent(ev);
         eventTriggered = true;
       } else {
-        lwArcTile(currentMap, nx, ny);
+        lwArcTile(currentMap, sx, sy);
       }
     }
 
@@ -1233,17 +1535,8 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // toggled): while the flag is on, grass steps never roll at all —
     // the read sits at the S-6 roll site, as the expansion's landing
     // record prescribes for this tree.
-    if (tile === 6 && hasStarter && !eventTriggered && !useGameStore.getState().noEncounters) {
-      const baseTable = tableFor(currentMap, "grass") ?? tableFor(currentMap, "cave");
-      // Item meaning S-IM1: an identified, carried relic can bend
-      // this roll (the Echo Shard's one mechanical effect) — the
-      // factor reads the real inventory at the step, and the table
-      // itself is never edited.
-      const st = useGameStore.getState();
-      const factor = encounterRateFactor(st.inventory, st.identifiedItems);
-      const table = baseTable && factor !== 1 && baseTable.rate != null
-        ? { ...baseTable, rate: baseTable.rate * factor }
-        : baseTable;
+    if (effectiveTile(sx, sy) === 6 && hasStarter && !eventTriggered && !useGameStore.getState().noEncounters) {
+      const table = tableFor(currentMap, "grass") ?? tableFor(currentMap, "cave");
       if (table) {
         const pick = rollEncounterStep(table, Math.random);
         if (pick) {
@@ -1255,7 +1548,83 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         }
       }
     }
-  }, [screen, isTransitioning, playerPos, mapData, hasStarter, defeatedTrainers, completedEvents, triggerWildBattle, badges, techniqueFlags, party, effectiveTile, currentMap, gameHour]);
+    // Traversal part 2: the water encounter consumers. SEAWEED
+    // ground rolls the selector's "dive" method; deep-water family
+    // tiles roll "surf" (wading shallows never roll — the source
+    // rolls while surfing, not while wading). Both read the
+    // selector's own tables and rates: where no table binds the
+    // map (today: every dive table, and the surf tables, whose one
+    // authored table is keyed to a zone id no map carries), the
+    // roll simply never fires — no species invented here.
+    const endTile = effectiveTile(sx, sy);
+    if (hasStarter && !eventTriggered && !useGameStore.getState().noEncounters) {
+      const method = endTile === TILE.SEAWEED ? "dive"
+        : (!(mapData as any).underwater
+          && [TILE.WATER, TILE.DIVE_SPOT, TILE.CURRENT_E, TILE.CURRENT_N, TILE.CURRENT_W, TILE.CURRENT_S].includes(endTile))
+          ? "surf" : null;
+      if (method) {
+        const table = tableFor(currentMap, method);
+        if (table) {
+          const pick = rollEncounterStep(table, Math.random);
+          if (pick) {
+            setIsTransitioning(true);
+            setTimeout(() => {
+              triggerWildBattle(pick.speciesId, pick.level);
+              setIsTransitioning(false);
+            }, 800);
+          }
+        }
+      }
+    }
+  }, [screen, isTransitioning, playerPos, mapData, hasStarter, defeatedTrainers, completedEvents, triggerWildBattle, badges, techniqueFlags, party, effectiveTile, currentMap, gameHour, rideMode, machCharge]);
+
+  // Traversal part 2: the movement press every caller uses. It
+  // wraps moveInner with the Mach collision rule from the source
+  // (pokeemerald bike.c: a bump kills the build-up) — a press that
+  // does not move the player while the Mach gear is engaged sheds
+  // the charge back to zero. Position is a synchronous store
+  // field (setMapState), so the before/after read is exact: steps,
+  // pushes, rides, chains and warps all land inside moveInner
+  // before it returns; refusals, gate dialogs and plain bumps
+  // return without touching it.
+  const move = useCallback((dx: number, dy: number) => {
+    if (rideMode !== "mach" || machCharge === 0) { moveInner(dx, dy); return; }
+    const before = useGameStore.getState().playerPos;
+    moveInner(dx, dy);
+    const after = useGameStore.getState().playerPos;
+    if (after.x === before.x && after.y === before.y) setMachCharge(0);
+  }, [moveInner, rideMode, machCharge]);
+
+  // Traversal part 2: the bike control (KeyC cycles foot → Mach
+  // gear → Acro gear → foot; src/lib/bike.ts). Mounting needs the
+  // key item in the bag and ground that takes a bike — not
+  // indoors, not underwater, not standing in water.
+  const cycleBike = () => {
+    if (!(inventory[BIKE_ITEM_ID] > 0)) {
+      notify("You don't have a bike yet.", "#ffcc88");
+      return;
+    }
+    if (rideMode === "mach") {
+      setRideMode("acro");
+      notify("Acro gear — press toward a rail or ledge to hop it.", "#88ccff");
+      return;
+    }
+    if (rideMode === "acro") {
+      setRideMode("foot");
+      setMachCharge(0);
+      notify("Off the bike.", "#88ccff");
+      return;
+    }
+    const md: any = mapData;
+    const standing = effectiveTile(playerPos.x, playerPos.y);
+    if (md?.interior || md?.underwater || controlMode === "creature"
+      || (standing !== undefined && [TILE.WATER, TILE.SHALLOW, TILE.DIVE_SPOT].includes(standing))) {
+      notify("You can't ride here.", "#ffcc88");
+      return;
+    }
+    setRideMode("mach");
+    notify(`${BIKE_DRAFT_NAME} — Mach gear. C again for Acro, C again to step off.`, "#88ccff");
+  };
 
   // FOLLOWER (sequence build, 2026-10-28) — consumes movement.json:
   // follower.trail.model is "command_buffer_replay": the player's
@@ -1620,9 +1989,11 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     if (!heldDir || screen !== "overworld" || isTransitioning) return;
     const interval = setInterval(() => {
       move(heldDir.dx, heldDir.dy);
-    }, (useGameStore.getState().fastForward || (sprintHeld && hasSprintBoots)) ? 70 : 140);
+    }, rideMode !== "foot"
+      ? stepIntervalMs(rideMode, machCharge)
+      : (useGameStore.getState().fastForward || (sprintHeld && hasSprintBoots)) ? 70 : 140);
     return () => clearInterval(interval);
-  }, [heldDir, move, screen, isTransitioning, sprintHeld, hasSprintBoots]);
+  }, [heldDir, move, screen, isTransitioning, sprintHeld, hasSprintBoots, rideMode, machCharge]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -1690,6 +2061,11 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           e.preventDefault();
           doDistract();
         }
+        // Traversal part 2: the bike gear control.
+        if (e.code === "KeyC") {
+          e.preventDefault();
+          cycleBike();
+        }
       } else if (screen === "battle" && battleState?.phase === "menu" && battleMenu !== "main") {
         // Fix 2: B button (Escape / X) backs out of an in-battle
         // submenu to the main command panel, turn untouched.
@@ -1733,39 +2109,36 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     const nx = playerPos.x + dx;
     const ny = playerPos.y + dy;
 
+    // Traversal part 2: dive / emerge. Standing on a dive spot,
+    // the confirm press is the dive check (emerald's A-press dive
+    // path, field_control_avatar.c TrySetDiveWarp): the map's
+    // diveLinks pair the spot with its other side. The Deep Dive
+    // verdict (held + living performer) is required both ways —
+    // the source asks for the move to come back up, too.
+    if (effectiveTile(playerPos.x, playerPos.y) === TILE.DIVE_SPOT) {
+      const link = (mapData as any).diveLinks?.find((l: any) => l.x === playerPos.x && l.y === playerPos.y);
+      if (link) {
+        const tech = techniqueByName("Deep Dive");
+        const performer = tech ? performerFor(tech, party) : null;
+        if (!tech || !techniqueHeld(tech, techniqueFlags) || !performer) {
+          setDialog({ lines: [`${tech?.obstacleText ?? "Deep water, dark below."} A partner who knows Deep Dive could take you down.`] });
+          setScreen("dialog");
+          return;
+        }
+        if (rideMode !== "foot") { setRideMode("foot"); setMachCharge(0); }
+        setTraversalFx({ kind: (mapData as any).underwater ? "emerge" : "dive", n: Date.now() });
+        playCue('world.exit');
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setMapState(link.to, link.enterAt);
+          setIsTransitioning(false);
+        }, 400);
+        return;
+      }
+    }
+
     let npcHere = npcAt(nx, ny);
     if (npcHere) {
-      // Item meaning S-IM1: placed relic objects, the lab's
-      // appraisal terminal, and the Harbor Bell's return. Dialogue
-      // is computed from live state (claimed? carrying? still
-      // unidentified?) and the effects resolve in finishDialog —
-      // the same pattern as Mom's Sprint Boots grant below.
-      const relicObj = RELIC_NPCS[npcHere.id];
-      if (relicObj) {
-        const evId = recordFor(relicObj.itemId)?.meaning?.placement?.eventId;
-        const claimed = !!evId && completedEvents.includes(evId);
-        setDialog({ lines: claimed ? relicObj.emptyLines : relicObj.findLines, npc: npcHere });
-        setScreen("dialog");
-        return;
-      }
-      if (npcHere.id === APPRAISAL_TERMINAL_NPC_ID) {
-        const st = useGameStore.getState();
-        setDialog({ lines: appraisalTerminalLines(st.inventory, st.identifiedItems), npc: npcHere });
-        setScreen("dialog");
-        return;
-      }
-      if (npcHere.id === "bh_net_mender"
-        && (useGameStore.getState().inventory["harbor_bell"] ?? 0) > 0
-        && !completedEvents.includes("relic_bell_returned")) {
-        setDialog({ lines: [
-          "Mending nets is just knots, all the way down. Like most honest—",
-          "Wait. That knot on the rim — I'd know my own knots in the dark. That's my bell, Ranger. She went off the dock in the big storm.",
-          "You dug her out of the sand? …Thank you. She belongs back at the harbor mouth, where she can be heard.",
-          "(You returned the Harbor Bell.)",
-        ], npc: npcHere });
-        setScreen("dialog");
-        return;
-      }
       if (npcHere.eventId && npcHere.eventId.startsWith("pick_starter_") && hasStarter) {
         setDialog({ lines: ["You already have a partner!"], npc: npcHere });
         setScreen("dialog");
@@ -1899,54 +2272,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     if ((dialog.npc?.id === 'mom' || dialog.npc?.id === 'mom_house') && !dialog.isEvent && !useGameStore.getState().hasSprintBoots) {
       useGameStore.getState().setHasSprintBoots(true);
       playCue('item.get');
-      // Item meaning S-IM1: the gift is also a keepsake FACT —
-      // the boots' depth derives from this log at read, never
-      // from a stored number (src/lib/itemMeaning.ts keepsakeBand).
-      useGameStore.getState().appendKeepsakeFact({ itemId: 'sprint_boots', kind: 'received' });
       notify("Received the Sprint Boots! Hold B to run.", "#ffd700");
-    }
-    // Item meaning S-IM1: a placed unique enters the bag once,
-    // through this one channel; the find is written as a completed
-    // event so the world object goes quiet afterwards. One-of-one
-    // is enforced at the grant (canGrantUnique), not by the map.
-    const relicDef = dialog.npc?.id ? RELIC_NPCS[dialog.npc.id] : undefined;
-    if (relicDef && !dialog.isEvent) {
-      const st = useGameStore.getState();
-      const evId = recordFor(relicDef.itemId)?.meaning?.placement?.eventId;
-      if (evId && !st.completedEvents.includes(evId) && canGrantUnique(st.inventory, relicDef.itemId)) {
-        st.addItem(relicDef.itemId);
-        st.completeEvent(evId);
-      }
-    }
-    // Item meaning S-IM1: the appraisal service — finishing a talk
-    // with the lab terminal names everything carried that needed
-    // naming. Facts only: the ids join identifiedItems; what each
-    // item IS stays in its record.
-    if (dialog.npc?.id === APPRAISAL_TERMINAL_NPC_ID && !dialog.isEvent) {
-      const st = useGameStore.getState();
-      for (const id of appraiseCarried(st.inventory, st.identifiedItems)) {
-        st.identifyItem(id);
-        notify(`Identified: ${recordFor(id)?.displayName ?? id}!`, "#ffd700");
-      }
-    }
-    // Item meaning S-IM1: the bell comes home. The return removes
-    // the unique from the bag and writes a WITNESSED deed into the
-    // real ledger (deed row: return-lost-item) — prices and
-    // greetings downstream read it like any other deed.
-    if (dialog.npc?.id === 'bh_net_mender' && !dialog.isEvent) {
-      const st = useGameStore.getState();
-      if ((st.inventory['harbor_bell'] ?? 0) > 0 && !st.completedEvents.includes('relic_bell_returned')) {
-        st.useItem('harbor_bell');
-        st.completeEvent('relic_bell_returned');
-        recordDeed(st, {
-          deed: 'return-lost-item',
-          subject: { individualId: 'bh_net_mender', itemId: 'harbor_bell' },
-          areaId: 'sector0',
-          beat: lwBeatRef.current,
-          witnessedBy: ['bh_net_mender'],
-        });
-        notify("Returned the Harbor Bell to the Net Mender.", "#ffd700");
-      }
     }
     if (dialog.isEvent && dialog.eventId) {
       setCompletedEvents(ce => [...ce, dialog.eventId]);
@@ -2037,261 +2363,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     npc: { id: "prof_aeon", name: "Prof. Aeon" },
   });
 
-  // Gap-fill S6 step 5: the foe-faint and player-faint transitions,
-  // factored out of the inline branches below so the end-of-round
-  // tick can run them too (a tick that faints a battler must run
-  // the same payoff / send-out / blackout flow as a move that
-  // faints it — no second, divergent faint path). The bodies are
-  // the inline blocks verbatim, dedented; the branches below now
-  // call these instead of carrying the code inline.
-  const handlePlayerFaint = (bs: any, updatedPlayer: any, newLog: string[], freshTeam: any[]) => {
-    playCue('battle.faint');
-    newLog.push(`${battleMonName(bs.player)} fainted!`);
-    // v5.1 HP: a mon with hp 0 and no currentHp is fainted, not
-    // alive — the old check (currentHp ?? maxHp) would have
-    // treated it as alive at full HP.
-    const nextAlive = freshTeam.findIndex((m, i) => i > bs.playerTeamIdx && ((m.currentHp ?? m.hp) ?? m.maxHp) > 0);
-    if (nextAlive === -1) {
-      newLog.push("You have no more Mochiichao! You blacked out...");
-      setBattleState({ ...bs, player: updatedPlayer, log: newLog, phase: "over" });
-      // v5.1: banner blocks until Continue — no 2500ms timer.
-      // The cleanup below is identical to the old timer body,
-      // except the blackout heal now writes BOTH hp and
-      // currentHp (old code wrote currentHp only, so Team
-      // showed full HP while the next battle entered damaged).
-      pendingBattleEndRef.current = () => {
-        setBattleState(null);
-        // Audit-plan blackout rule (decomp-derived, NOT the old
-        // 30% heal): lose HALF the wallet, rounded down, floor
-        // 0 — no cap value was verified in the decomp data
-        // audited, so no cap is invented here. Return to the
-        // last heal point visited (home Sector 0 if none yet:
-        // Mom heals there). Do NOT heal the party on blackout:
-        // fainted/damaged members stay that way until a healer
-        // NPC or an item heals them. SOLO-PLAYABILITY WARNING,
-        // stated plainly: a player who blacks out with an all-
-        // fainted party must walk to a healer before battling
-        // again; that is the decomp rule, not a softlock fix.
-        // (Mars gave no blackout-heal concession percentage, so
-        // the 30% heal is removed, not kept as a concession.)
-        useGameStore.setState(s => ({ wallet: Math.max(0, Math.floor(s.wallet / 2)) }));
-        const ret = lastHealRef.current || { map: 'sector0', pos: { x: 15, y: 18 } };
-        setMapState(ret.map, ret.pos);
-        notify("You blacked out and were sent back...", "#ff5252");
-        // v5: goal after a loss too (see hexGoalDialog above).
-        // This dialogue states the goal once, then finishDialog
-        // returns to the overworld. It never re-gifts cubes.
-        if (bs.npcId === 'hex_battle_event' && !completedEvents.includes('v4_hex_goal')) {
-          setDialog(hexGoalDialog());
-          setScreen("dialog");
-        } else {
-          setScreen("overworld");
-        }
-      };
-    } else {
-      playCue('battle.switch');
-      newLog.push(`Go, ${battleMonName(freshTeam[nextAlive])}!`);
-      const switchHp = (freshTeam[nextAlive].currentHp ?? freshTeam[nextAlive].hp) ?? freshTeam[nextAlive].maxHp;
-      setBattleState({ ...bs, player: { ...freshTeam[nextAlive], name: battleMonName(freshTeam[nextAlive]), currentHp: switchHp, hp: switchHp }, playerTeamIdx: nextAlive, log: newLog, phase: "menu" });
-    }
-  };
-
-  const handleFoeFaint = (bs: any, enemyMon: any, newLog: string[], animMs: number) => {
-    playCue('battle.faint');
-    newLog.push(`${enemyMon.name} fainted!`);
-    if (bs.type === "wild") {
-      // Stub-kill S-7: battle-end drop read — a defeated wild
-      // transfers its carried item through the defeat channel,
-      // once, into the real inventory. Kept individuals keep
-      // theirs; fled battles transfer nothing (resolveBattleEndDrop).
-      const dropItem = resolveBattleEndDrop(bs.wild.heldItem ?? null, "defeat", bs.wild.speciesId);
-      if (dropItem) {
-        useGameStore.getState().addItem(dropItem);
-        newLog.push(`The wild ${enemyMon.name} dropped a ${DROP_ITEM_NAMES[dropItem] ?? dropItem}!`);
-      }
-      // Item meaning S-IM1: a won battle walked in Mom's boots
-      // is a keepsake fact; when the derived band rises, the
-      // rise SPEAKS in the log — the visible cue #180's
-      // declaration law requires of any keepsake effect.
-      {
-        const kst = useGameStore.getState();
-        if (kst.hasSprintBoots) {
-          const before = keepsakeBand(kst.keepsakeLog, "sprint_boots").band;
-          kst.appendKeepsakeFact({ itemId: "sprint_boots", kind: "battle-won-with" });
-          const after = keepsakeBand(useGameStore.getState().keepsakeLog, "sprint_boots");
-          if (after.band !== before) newLog.push(`The Sprint Boots feel different now. ${after.word}`);
-        }
-      }
-      // GAP-FILL S0 (G-8 dex-key fix): same keying as the catch
-      // write above — the wild battle mon carries speciesId
-      // (bs.wild.speciesId), while enemyMon.id is its instance id.
-      setDex(d => ({ ...d, [enemyMon.speciesId]: d[enemyMon.speciesId] === "caught" ? "caught" : "seen" }));
-      // Payoff (lib/battlePayoff.ts): the source EXP sequence
-      // replaces the old stub, which rolled a random XP number
-      // into a `xp` field on the member that NOTHING reads (the
-      // store tracks `experience`; gainExp was never called, so
-      // overworld battles never levelled anyone). The finishing
-      // member is the participant of record — this host runs
-      // single-active battles and the game has no held items,
-      // so there is no share split to model. The VICTORY banner
-      // still gates the exit afterwards, unchanged (v5.1). A
-      // member that cannot take a payoff (legacy flat battle
-      // shape) keeps the old instant path to the banner.
-      const plan = planForOutcome('foeFainted', playerTeam, { speciesId: bs.wild.speciesId, level: bs.wild.level || 5 }, { participants: [bs.playerTeamIdx], activeIndex: bs.playerTeamIdx, trainerBattle: false, endsBattle: true, expMultiplier: useGameStore.getState().expMultiplier });
-      // Sound composition (2026-10-29): the wild-win jingle
-      // (MUS_VICTORY_WILD slot) fires as the payoff sequence
-      // opens — one seat covers the sequence path and the
-      // no-recipients fallback below.
-      playVictoryJingle('wild');
-      if (plan.recipients.length > 0) {
-        setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "payoff" });
-        pendingPayoffRef.current = () => {
-          setBattleState((prev: any) => prev ? { ...prev, phase: "over" } : prev);
-          // v5.1: banner blocks until Continue — no 2000ms timer.
-          pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
-        };
-        setPayoffUi({ plan, moneyText: null, moneyAmount: 0 });
-      } else {
-        setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "over" });
-        // v5.1: banner blocks until Continue — no 2000ms timer.
-        pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
-      }
-    } else {
-      const newTeam = [...bs.trainerTeam];
-      newTeam[bs.trainerTeamIdx] = { ...enemyMon, currentHp: 0 };
-      const nextAlive = newTeam.findIndex((m, i) => i > bs.trainerTeamIdx && m.currentHp > 0);
-      const isFinalWin = nextAlive === -1;
-      // Payoff (lib/battlePayoff.ts): the source runs the EXP
-      // sequence PER FAINTED FOE, mid-battle too (Task_GetExp),
-      // so the beats play now and the send-out / victory flow
-      // below resumes when the sequence finishes. Before this,
-      // trainer faints granted no XP at all, and the final win
-      // credited bs.reward SILENTLY — no text anywhere. The
-      // money is now the sequence's closing beat on the final
-      // win ("You got {reward} Credits for winning!"); when no
-      // member can take a payoff (legacy flat shape), the old
-      // instant path runs unchanged, silent credit included.
-      const plan = planForOutcome('foeFainted', playerTeam, { speciesId: enemyMon.speciesId || enemyMon.id, level: enemyMon.level || 5 }, { participants: [bs.playerTeamIdx], activeIndex: bs.playerTeamIdx, trainerBattle: true, endsBattle: isFinalWin, expMultiplier: useGameStore.getState().expMultiplier });
-      const continueAfterPayoff = (moneyShown: boolean) => {
-      if (isFinalWin) {
-        // Sound composition (2026-10-29): trainer-win jingle
-        // (MUS_VICTORY_TRAINER slot; dojo wins share it) at the
-        // victory flow — both the sequence path and the direct
-        // fallback call arrive here exactly once.
-        playVictoryJingle('trainer');
-        newLog.push(`${bs.trainerName} was defeated!`);
-        if (bs.isDojo) { setBadges(b => [...b, bs.badge]); playCue('ritual.badge'); newLog.push(`You received the ${bs.badge}!`); }
-        if (!moneyShown) setCredits(c => c + bs.reward);
-        setDefeatedTrainers(dt => [...dt, bs.npcId]);
-        setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "over" });
-        // v5.1: banner blocks until Continue — no 2500ms timer.
-        // The cleanup below is identical to the old timer body.
-        pendingBattleEndRef.current = () => {
-          setBattleState(null);
-          // v4 step 7: after the Hex first battle (win), Aeon
-          // states the goal in dialogue, in order — dojos,
-          // Champion Mythar, Hackers/Syndicate — not in a menu
-          // header. The MochiDex + 5 Luigi Cubes were already
-          // given at the starter beat (see handleChoice); this
-          // dialogue names the goal, it does not re-gift.
-          // Win OR lose the flow continues: a loss blacks out
-          // and reaches the goal via its own branch (v5), so
-          // this win branch and the loss branch share the same
-          // goal dialogue; the route gate is unaffected either way.
-          if (bs.npcId === 'hex_battle_event' && !completedEvents.includes('v4_hex_goal')) {
-            // v5: same goal dialogue as the loss path (hexGoalDialog).
-            setDialog(hexGoalDialog());
-            setScreen("dialog");
-          } else {
-            setScreen("overworld");
-          }
-        };
-      } else {
-        playCue('battle.switch');
-        newLog.push(`${bs.trainerName} sends out ${newTeam[nextAlive].name}!`);
-        // Refresh the player's battle copy from the store: the
-        // payoff may have levelled the member, and the rest of
-        // this battle fights with the new stats/HP (in this host
-        // the store member's hp tracks battle hp — doEnemyTurn
-        // writes both back every turn).
-        const fresh: any = (useGameStore.getState().party as any)[bs.playerTeamIdx];
-        const refreshed = fresh ? { ...fresh, name: battleMonName(fresh), currentHp: fresh.hp, hp: fresh.hp } : bs.player;
-        const nextBs = { ...bs, player: refreshed, trainerTeam: newTeam, trainerTeamIdx: nextAlive, log: newLog, phase: "enemy_turn" };
-        setBattleState(nextBs);
-        // Landing composition: move-completion's handoff rule
-        // (wait max(1200, animMs) so long profiles are not cut
-        // off) applied to the payoff flow's no-recipients branch.
-        setTimeout(() => doEnemyTurn(nextBs), Math.max(1200, animMs));
-      }
-      };
-      if (plan.recipients.length > 0) {
-        setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "payoff" });
-        pendingPayoffRef.current = () => continueAfterPayoff(true);
-        setPayoffUi({ plan, moneyText: isFinalWin ? `You got ${bs.reward} Credits for winning!` : null, moneyAmount: isFinalWin ? bs.reward : 0 });
-      } else {
-        continueAfterPayoff(false);
-      }
-    }
-  };
-
-  // Gap-fill S6 step 5: end-of-round status ticks (battle-math
-  // endTurnStatusDamage, via worldEndTurnTick — the resolver's
-  // rule). Runs only on a round's return to the menu (the enemy
-  // turn's menu returns, below); never on a faint branch, and
-  // never for a mon just sent out. Order is the resolver's
-  // (player, then foe). If a tick faints a battler, that side's
-  // factored faint transition runs and the round's tick phase
-  // ends there — in the double-faint edge the first-fainted
-  // side's transition wins, because the battle state it sets
-  // (payoff / send-out / blackout) replaces the round's state.
-  // The foe copy carries currentHp only (the host's foe-HP
-  // convention — its hp field is the battle-start value and
-  // is never the live HP); the player copy keeps hp and
-  // currentHp together (v5.1 sync), and the store copy is
-  // written back, as the non-faint enemy path already did.
-  const runEndOfRoundTicks = (baseBs: any, foeMon: any, playerMon: any, freshTeam: any[], baseLog: string[]) => {
-    const log = [...baseLog];
-    const pTick = worldEndTurnTick(playerMon);
-    let tickedPlayer = playerMon;
-    if (pTick.damage > 0) {
-      const pHp = Math.max(0, (playerMon.currentHp ?? playerMon.hp) - pTick.damage);
-      log.push(worldStatusTickLine(battleMonName(playerMon), pTick.status, pTick.damage));
-      tickedPlayer = { ...playerMon, currentHp: pHp, hp: pHp, ...(pTick.toxicCounter != null ? { toxicCounter: pTick.toxicCounter } : {}) };
-      if (pHp <= 0) { handlePlayerFaint(baseBs, tickedPlayer, log, freshTeam); return; }
-    }
-    const fTick = worldEndTurnTick(foeMon);
-    let tickedFoe = foeMon;
-    if (fTick.damage > 0) {
-      const fHp = Math.max(0, (foeMon.currentHp ?? foeMon.hp) - fTick.damage);
-      log.push(worldStatusTickLine(battleMonName(foeMon), fTick.status, fTick.damage));
-      tickedFoe = { ...foeMon, currentHp: fHp, ...(fTick.toxicCounter != null ? { toxicCounter: fTick.toxicCounter } : {}) };
-      if (fHp <= 0) {
-        // Write the player's tick back FIRST: the foe-faint send-out
-        // refreshes the player's battle copy from the store, and
-        // without this write that refresh would silently undo the
-        // player's tick damage for the rest of the battle.
-        if (pTick.damage > 0) {
-          const preFaintTeam = [...freshTeam];
-          preFaintTeam[baseBs.playerTeamIdx] = { ...preFaintTeam[baseBs.playerTeamIdx], currentHp: tickedPlayer.currentHp, hp: tickedPlayer.hp, ...("status" in tickedPlayer ? { status: tickedPlayer.status } : {}) };
-          setPlayerTeam(preFaintTeam);
-        }
-        handleFoeFaint(baseBs, tickedFoe, log, 1200); return;
-      }
-    }
-    let nextBs: any = { ...baseBs, player: tickedPlayer, log, phase: "menu" };
-    if (baseBs.type === "wild") {
-      nextBs = { ...nextBs, wild: tickedFoe };
-    } else {
-      const team = [...baseBs.trainerTeam];
-      team[baseBs.trainerTeamIdx] = tickedFoe;
-      nextBs = { ...nextBs, trainerTeam: team };
-    }
-    setBattleState(nextBs);
-    const updatedTeam = [...freshTeam];
-    updatedTeam[baseBs.playerTeamIdx] = { ...updatedTeam[baseBs.playerTeamIdx], currentHp: tickedPlayer.currentHp, hp: tickedPlayer.hp, ...("status" in tickedPlayer ? { status: tickedPlayer.status } : {}) };
-    setPlayerTeam(updatedTeam);
-  };
-
   const doEnemyTurn = (bs: any) => {
     // Four-fixes lane (Fix 2): read the party FRESH from the store.
     // playerTeam is a render-time alias of the same array, but a
@@ -2301,34 +2372,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // writes the team back.
     const freshTeam: any[] = (useGameStore.getState().party as any) || playerTeam;
     const enemy = bs.type === "wild" ? bs.wild : bs.trainerTeam[bs.trainerTeamIdx];
-    // Gap-fill S6 step 4: the paralysis can-act gate (battle-math
-    // checkCanAct, via worldCheckCanAct) — before the foe picks a
-    // move. A fully-paralyzed foe (25% per turn) does not act and
-    // the turn hands back to the menu, with a log line; the gate
-    // patch (a wake / thaw clearing, a sleep countdown) rides the
-    // foe copy. Switches, items, and catches are not moves, so
-    // they are never gated — only the move branches gate, both
-    // sides. Burn and poison pass this gate (they act); their
-    // end-turn tick is the next S6 sub-step, not this one.
-    const enemyGate = worldCheckCanAct(enemy);
-    if (!enemyGate.canAct) {
-      const gateLog = [...bs.log, worldCanActGateLine(battleMonName(enemy), enemyGate.reason)];
-      let gatedBs = bs;
-      if (Object.keys(enemyGate.patch).length > 0) {
-        if (bs.type === "wild") {
-          gatedBs = { ...bs, wild: { ...bs.wild, ...enemyGate.patch } };
-        } else {
-          const gatedTeam = [...bs.trainerTeam];
-          gatedTeam[bs.trainerTeamIdx] = { ...enemy, ...enemyGate.patch };
-          gatedBs = { ...bs, trainerTeam: gatedTeam };
-        }
-      }
-      // Gap-fill S6 step 5: a gated enemy turn still ends the round
-      // (the player already acted), so the tick phase runs here on
-      // the gated foe copy, not on the pre-gate one.
-      runEndOfRoundTicks(gatedBs, gatedBs.type === "wild" ? gatedBs.wild : gatedBs.trainerTeam[gatedBs.trainerTeamIdx], bs.player, freshTeam, gateLog);
-      return;
-    }
     // v5.2: an empty moves array is truthy, so the old fallback
     // never fired and chosenMove came out undefined (power-40 move
     // with no display name). Empty now falls back to Tackle too.
@@ -2343,9 +2386,10 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // this branch is a guard, not an expected path.
     const resolvedEnemyMove = resolveBattleMove(chosenMove);
     if (!resolvedEnemyMove) {
-      runEndOfRoundTicks(bs, enemy, bs.player, freshTeam, [...bs.log, `${battleMonName(enemy)} used ${chosenMove}!`, `But it could not be resolved — no damage dealt.`]);
+      setBattleState({ ...bs, log: [...bs.log, `${battleMonName(enemy)} used ${chosenMove}!`, `But it could not be resolved — no damage dealt.`], phase: "menu" });
       return;
     }
+    const moveData = { power: resolvedEnemyMove.power, type: resolvedEnemyMove.type };
     const chosenMoveDisplay = resolvedEnemyMove.display;
 
     startBattleAnim("enemy", resolvedEnemyMove);
@@ -2366,14 +2410,10 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     }
     const attackLine = humanStrikeLog ?? `${battleMonName(enemy)} used ${chosenMoveDisplay}!`;
 
+    setBattleAnim("enemy");
+    setTimeout(() => setBattleAnim(null), 500);
 
-    // Gap-fill S6 step 2: the enemy hit goes through the converged
-    // core (battle-math) — one accuracy roll, then 2–5 damage rolls
-    // for a MULTI_HIT move. The human-strike branch above keeps its
-    // own rangerDefense math, untouched (a lunge is not a move, so
-    // it takes no accuracy or multi-hit roll).
-    const enemyBattleResult = humanStrikeDmg != null ? null : worldBattleHit(enemy, bs.player, { power: resolvedEnemyMove.power, type: resolvedEnemyMove.type, moveId: resolvedEnemyMove.moveId });
-    const dmg = humanStrikeDmg ?? enemyBattleResult!.totalDamage;
+    const dmg = humanStrikeDmg ?? calcDamage(moveData, battleStats(enemy), battleStats(bs.player));
 
     // ── DEFEND — the classic-battle intercept (ranger-defense) ────
     // Only in creature mode is the Ranger standing beside you as a
@@ -2403,10 +2443,10 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           `${playerName} took ${res.dealt} damage!`,
           ...(res.downedNow ? [`${playerName} is DOWN! He took the hit — now he needs healing.`] : []),
         ];
-        // Gap-fill S6 step 5: a defended hit still ends the round,
-        // so the tick phase runs here too (the Ranger took the hit,
-        // the battlers' own statuses still tick).
-        runEndOfRoundTicks(bs, enemy, bs.player, freshTeam, defendLog);
+        setBattleState({ ...bs, log: defendLog, phase: "menu" });
+        const updatedTeam = [...freshTeam];
+        updatedTeam[bs.playerTeamIdx] = { ...updatedTeam[bs.playerTeamIdx], currentHp: bs.player.currentHp, hp: bs.player.currentHp };
+        setPlayerTeam(updatedTeam);
         return;
       }
     }
@@ -2417,30 +2457,68 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // engine computes no type multiplier, so the plain SE_EFFECTIVE
     // class fires here; effectiveness voices live in BattleView,
     // whose resolver carries the multiplier).
-    if (enemyBattleResult && !enemyBattleResult.hit) newLog.push(`But it missed!`);
-    if (dmg > 0) { playCue('battle.hit'); if (enemyBattleResult?.isCrit) newLog.push(`A critical hit!`); if (enemyBattleResult && enemyBattleResult.hits > 1) newLog.push(`Hit ${enemyBattleResult.hits} times!`); newLog.push(`${battleMonName(bs.player)} took ${dmg} damage!`); }
-
-    // Gap-fill S6 step 3: secondary status on the player. The defend
-    // intercept above already returned, so an intercepted hit never
-    // inflicts a status here; a fainting hit never stores one either
-    // (newHp 0 -> null), and the hostile-human lunge has no
-    // worldBattleHit result, so it inflicts nothing. The status
-    // rides the battle copy AND the store copy below, so it survives
-    // a voluntary switch and persists after the battle until a
-    // healer clears it (gameStore healParty already clears status).
-    const enemyStatusApplied = enemyBattleResult?.statusApplied && newHp > 0 ? enemyBattleResult.statusApplied : null;
-    if (enemyStatusApplied) newLog.push(`${battleMonName(bs.player)} was ${enemyStatusApplied === "paralysis" ? "paralyzed" : enemyStatusApplied === "burn" ? "burned" : "poisoned"}!`);
+    if (dmg > 0) { playCue('battle.hit'); newLog.push(`${battleMonName(bs.player)} took ${dmg} damage!`); }
 
     // v5.1 HP sync: battle copy keeps hp and currentHp together.
-    const updatedPlayer = { ...bs.player, currentHp: newHp, hp: newHp, ...(enemyStatusApplied ? { status: enemyStatusApplied } : {}) };
+    const updatedPlayer = { ...bs.player, currentHp: newHp, hp: newHp };
 
     if (newHp <= 0) {
-      handlePlayerFaint(bs, updatedPlayer, newLog, freshTeam);
+      playCue('battle.faint');
+      newLog.push(`${battleMonName(bs.player)} fainted!`);
+      // v5.1 HP: a mon with hp 0 and no currentHp is fainted, not
+      // alive — the old check (currentHp ?? maxHp) would have
+      // treated it as alive at full HP.
+      const nextAlive = freshTeam.findIndex((m, i) => i > bs.playerTeamIdx && ((m.currentHp ?? m.hp) ?? m.maxHp) > 0);
+      if (nextAlive === -1) {
+        newLog.push("You have no more Mochiichao! You blacked out...");
+        setBattleState({ ...bs, player: updatedPlayer, log: newLog, phase: "over" });
+        // v5.1: banner blocks until Continue — no 2500ms timer.
+        // The cleanup below is identical to the old timer body,
+        // except the blackout heal now writes BOTH hp and
+        // currentHp (old code wrote currentHp only, so Team
+        // showed full HP while the next battle entered damaged).
+        pendingBattleEndRef.current = () => {
+          setBattleState(null);
+          // Audit-plan blackout rule (decomp-derived, NOT the old
+          // 30% heal): lose HALF the wallet, rounded down, floor
+          // 0 — no cap value was verified in the decomp data
+          // audited, so no cap is invented here. Return to the
+          // last heal point visited (home Sector 0 if none yet:
+          // Mom heals there). Do NOT heal the party on blackout:
+          // fainted/damaged members stay that way until a healer
+          // NPC or an item heals them. SOLO-PLAYABILITY WARNING,
+          // stated plainly: a player who blacks out with an all-
+          // fainted party must walk to a healer before battling
+          // again; that is the decomp rule, not a softlock fix.
+          // (Mars gave no blackout-heal concession percentage, so
+          // the 30% heal is removed, not kept as a concession.)
+          useGameStore.setState(s => ({ wallet: Math.max(0, Math.floor(s.wallet / 2)) }));
+          const ret = lastHealRef.current || { map: 'sector0', pos: { x: 15, y: 18 } };
+          setMapState(ret.map, ret.pos);
+          notify("You blacked out and were sent back...", "#ff5252");
+          // v5: goal after a loss too (see hexGoalDialog above).
+          // This dialogue states the goal once, then finishDialog
+          // returns to the overworld. It never re-gifts cubes.
+          if (bs.npcId === 'hex_battle_event' && !completedEvents.includes('v4_hex_goal')) {
+            setDialog(hexGoalDialog());
+            setScreen("dialog");
+          } else {
+            setScreen("overworld");
+          }
+        };
+      } else {
+        playCue('battle.switch');
+        newLog.push(`Go, ${battleMonName(freshTeam[nextAlive])}!`);
+        const switchHp = (freshTeam[nextAlive].currentHp ?? freshTeam[nextAlive].hp) ?? freshTeam[nextAlive].maxHp;
+        setBattleState({ ...bs, player: { ...freshTeam[nextAlive], name: battleMonName(freshTeam[nextAlive]), currentHp: switchHp, hp: switchHp }, playerTeamIdx: nextAlive, log: newLog, phase: "menu" });
+      }
     } else {
-      // Gap-fill S6 step 5: end of round — the enemy turn's return
-      // to the menu ticks both still-standing battlers (or runs
-      // the factored faint transition if a tick faints one).
-      runEndOfRoundTicks(bs, enemy, updatedPlayer, freshTeam, newLog);
+      setBattleState({ ...bs, player: updatedPlayer, log: newLog, phase: "menu" });
+      const updatedTeam = [...freshTeam];
+      // v5.1 HP sync: write BOTH fields, or Team (hp) and the
+      // next battle (currentHp) disagree — the v5 discrepancy.
+      updatedTeam[bs.playerTeamIdx] = { ...updatedTeam[bs.playerTeamIdx], currentHp: newHp, hp: newHp };
+      setPlayerTeam(updatedTeam);
     }
   };
 
@@ -2524,13 +2602,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           ? { ...built, hp: bs.wild.currentHp, currentHp: bs.wild.currentHp }
           : { ...bs.wild, currentHp: bs.wild.currentHp, hp: bs.wild.currentHp };
         setPlayerTeam(t => t.length < 6 ? [...t, caught] : t);
-        // GAP-FILL S0 (G-8 dex-key fix): the dex is keyed by speciesId
-        // (DexView.statusOf + gameStore.addMochii both read speciesId).
-        // caught.id is a generated instance id (createMochii's
-        // generateId), which no reader can resolve back to a species,
-        // so keying by it orphaned the entry. caught.speciesId is
-        // present on both the rebuilt instance and the wild fallback.
-        setDex(d => ({ ...d, [caught.speciesId]: "caught" }));
+        setDex(d => ({ ...d, [caught.id]: "caught" }));
         // The lock click, then the success jingle a beat later.
         playCue('capture.click');
         setTimeout(() => playCue('capture.success'), 150);
@@ -2595,30 +2667,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     }
 
     if (action.type === "move") {
-      // Gap-fill S6 step 4: the paralysis can-act gate, player side
-      // — before the move resolves, so a stopped battler never
-      // "uses" its move (no move log line, no damage roll). The
-      // turn hands to the enemy exactly like any other completed
-      // player action (phase enemy_turn + 1200ms handoff, the same
-      // handoff the catch / switch / item branches use). A gate
-      // patch (wake / thaw / countdown) rides the battle copy and
-      // the store copy, so the cleared status survives a switch
-      // and the battle's end, like a step-3 infliction does.
-      const playerGate = worldCheckCanAct(bs.player);
-      if (!playerGate.canAct) {
-        const gateLog = [...bs.log, worldCanActGateLine(battleMonName(bs.player), playerGate.reason)];
-        const gatedPlayer = { ...bs.player, ...playerGate.patch };
-        const next = { ...bs, player: gatedPlayer, log: gateLog, phase: "enemy_turn" };
-        setBattleState(next);
-        if (Object.keys(playerGate.patch).length > 0) {
-          const freshGateTeam: any[] = (useGameStore.getState().party as any) || playerTeam;
-          const gatedTeam = [...freshGateTeam];
-          gatedTeam[bs.playerTeamIdx] = { ...gatedTeam[bs.playerTeamIdx], ...playerGate.patch };
-          setPlayerTeam(gatedTeam);
-        }
-        setTimeout(() => doEnemyTurn(next), 1200);
-        return;
-      }
       // v4 bridge (see resolveBattleMove): without this, a starter
       // party's moveIds never matched GAME_DATA.moves and the move
       // silently did nothing. Display name is the MOVES_DB name.
@@ -2631,75 +2679,144 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         setBattleState({ ...bs, log: [...bs.log, `${battleMonName(bs.player)} used ${action.move}!`, `But it could not be resolved — no damage dealt.`] });
         return;
       }
-      // Gap-fill S6 step 6: PP write-back, player side — on the
-      // resolver's rule (worldSpendPp, in src/lib/worldBattleCore):
-      // 1 PP for the used move, spent BEFORE the hit resolves, so
-      // a miss still costs PP (the resolver decrements before its
-      // accuracy roll) and a gated battler never spends (the gate
-      // above returns before this branch). A move at 0 PP fails
-      // with the resolver's line and stays in the menu, like an
-      // unresolved move — the player picks another move instead
-      // of losing the turn to a move that never fired. The spend
-      // is written to the STORE copy first (below), before the
-      // hit's faint branch runs, so the payoff's EXP/level commits
-      // — which copy the store member — carry the spent PP forward
-      // instead of silently restoring it; the battle copy is spent
-      // too, so the rest of this battle reads the same PP. A
-      // foe spends nothing: wild / trainer-team battle shapes
-      // carry no pp array (worldSpendPp is untracked for them).
-      // No PP readout is added to the move buttons here: battle
-      // presentation / menus belong to the combat-menus lane (the
-      // 2026-10-30 ~12:04 seam — this lane owns battle core math),
-      // and the blocked-move log line is this step's surface, the
-      // same log-only surface steps 3–5 used for status.
-      const ppSpend = worldSpendPp(bs.player, resolved.moveId, action.move);
-      if (ppSpend.blocked) {
-        setBattleState({ ...bs, log: [...bs.log, worldNoPpLine(battleMonName(bs.player), resolved.display)] });
-        return;
-      }
-      if (ppSpend.tracked && ppSpend.pp) {
-        bs.player = { ...bs.player, pp: ppSpend.pp };
-        const freshSpendTeam: any[] = (useGameStore.getState().party as any) || playerTeam;
-        const spentTeam = [...freshSpendTeam];
-        spentTeam[bs.playerTeamIdx] = { ...spentTeam[bs.playerTeamIdx], pp: ppSpend.pp };
-        setPlayerTeam(spentTeam);
-      }
+      const moveData = { power: resolved.power, type: resolved.type };
+
       const animMs = startBattleAnim("player", resolved);
 
       const enemyMon = bs.type === "wild" ? bs.wild : bs.trainerTeam[bs.trainerTeamIdx];
-      // Gap-fill S6 step 2: the player hit goes through the converged
-      // core (battle-math) — one accuracy roll, then 2–5 damage
-      // rolls for a MULTI_HIT move. A miss deals nothing and still
-      // hands the turn over (the else branch below, unchanged).
-      const playerBattleResult = worldBattleHit(bs.player, enemyMon, { power: resolved.power, type: resolved.type, moveId: resolved.moveId });
-      const dmg = playerBattleResult.totalDamage;
+      const dmg = calcDamage(moveData, battleStats(bs.player), battleStats(enemyMon));
       const newLog = [...bs.log, `${battleMonName(bs.player)} used ${resolved.display}!`];
 
       const newHp = Math.max(0, enemyMon.currentHp - dmg);
-      if (!playerBattleResult.hit) newLog.push(`But it missed!`);
-      if (dmg > 0) { playCue('battle.hit'); if (playerBattleResult.isCrit) newLog.push(`A critical hit!`); if (playerBattleResult.hits > 1) newLog.push(`Hit ${playerBattleResult.hits} times!`); newLog.push(`Dealt ${dmg} damage!`); }
-
-      // Gap-fill S6 step 3: secondary status on the foe. Only on a
-      // standing foe (a fainting hit drops the status — the faint
-      // branches below never see it, so no status is ever stored on
-      // a fainted mon). The statused foe copy in the non-faint
-      // branch below is the one the enemy turn receives, so the
-      // status is live for the foe's next hit (a burn halves its
-      // Physical damage through battle-math) — the core already
-      // reads attacker status, so no second wiring is needed.
-      const playerStatusApplied = playerBattleResult.statusApplied && newHp > 0 ? playerBattleResult.statusApplied : null;
-      if (playerStatusApplied) newLog.push(`${battleMonName(enemyMon)} was ${playerStatusApplied === "paralysis" ? "paralyzed" : playerStatusApplied === "burn" ? "burned" : "poisoned"}!`);
+      if (dmg > 0) { playCue('battle.hit'); newLog.push(`Dealt ${dmg} damage!`); }
 
       if (newHp <= 0) {
-        handleFoeFaint(bs, enemyMon, newLog, animMs);
-      } else {
+        playCue('battle.faint');
+        newLog.push(`${enemyMon.name} fainted!`);
         if (bs.type === "wild") {
-          const statusedWild = { ...bs.wild, currentHp: newHp, ...(playerStatusApplied ? { status: playerStatusApplied } : {}) };
-          setBattleState({ ...bs, wild: statusedWild, log: newLog, phase: "enemy_turn" });
-          setTimeout(() => doEnemyTurn({ ...bs, wild: statusedWild, log: newLog }), Math.max(1200, animMs));
+          // Stub-kill S-7: battle-end drop read — a defeated wild
+          // transfers its carried item through the defeat channel,
+          // once, into the real inventory. Kept individuals keep
+          // theirs; fled battles transfer nothing (resolveBattleEndDrop).
+          const dropItem = resolveBattleEndDrop(bs.wild.heldItem ?? null, "defeat", bs.wild.speciesId);
+          if (dropItem) {
+            useGameStore.getState().addItem(dropItem);
+            newLog.push(`The wild ${enemyMon.name} dropped a ${DROP_ITEM_NAMES[dropItem] ?? dropItem}!`);
+          }
+          setDex(d => ({ ...d, [enemyMon.id]: d[enemyMon.id] === "caught" ? "caught" : "seen" }));
+          // Payoff (lib/battlePayoff.ts): the source EXP sequence
+          // replaces the old stub, which rolled a random XP number
+          // into a `xp` field on the member that NOTHING reads (the
+          // store tracks `experience`; gainExp was never called, so
+          // overworld battles never levelled anyone). The finishing
+          // member is the participant of record — this host runs
+          // single-active battles and the game has no held items,
+          // so there is no share split to model. The VICTORY banner
+          // still gates the exit afterwards, unchanged (v5.1). A
+          // member that cannot take a payoff (legacy flat battle
+          // shape) keeps the old instant path to the banner.
+          const plan = planForOutcome('foeFainted', playerTeam, { speciesId: bs.wild.speciesId, level: bs.wild.level || 5 }, { participants: [bs.playerTeamIdx], activeIndex: bs.playerTeamIdx, trainerBattle: false, endsBattle: true, expMultiplier: useGameStore.getState().expMultiplier });
+          // Sound composition (2026-10-29): the wild-win jingle
+          // (MUS_VICTORY_WILD slot) fires as the payoff sequence
+          // opens — one seat covers the sequence path and the
+          // no-recipients fallback below.
+          playVictoryJingle('wild');
+          if (plan.recipients.length > 0) {
+            setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "payoff" });
+            pendingPayoffRef.current = () => {
+              setBattleState((prev: any) => prev ? { ...prev, phase: "over" } : prev);
+              // v5.1: banner blocks until Continue — no 2000ms timer.
+              pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
+            };
+            setPayoffUi({ plan, moneyText: null, moneyAmount: 0 });
+          } else {
+            setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "over" });
+            // v5.1: banner blocks until Continue — no 2000ms timer.
+            pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
+          }
         } else {
           const newTeam = [...bs.trainerTeam];
-          newTeam[bs.trainerTeamIdx] = { ...enemyMon, currentHp: newHp, ...(playerStatusApplied ? { status: playerStatusApplied } : {}) };
+          newTeam[bs.trainerTeamIdx] = { ...enemyMon, currentHp: 0 };
+          const nextAlive = newTeam.findIndex((m, i) => i > bs.trainerTeamIdx && m.currentHp > 0);
+          const isFinalWin = nextAlive === -1;
+          // Payoff (lib/battlePayoff.ts): the source runs the EXP
+          // sequence PER FAINTED FOE, mid-battle too (Task_GetExp),
+          // so the beats play now and the send-out / victory flow
+          // below resumes when the sequence finishes. Before this,
+          // trainer faints granted no XP at all, and the final win
+          // credited bs.reward SILENTLY — no text anywhere. The
+          // money is now the sequence's closing beat on the final
+          // win ("You got {reward} Credits for winning!"); when no
+          // member can take a payoff (legacy flat shape), the old
+          // instant path runs unchanged, silent credit included.
+          const plan = planForOutcome('foeFainted', playerTeam, { speciesId: enemyMon.speciesId || enemyMon.id, level: enemyMon.level || 5 }, { participants: [bs.playerTeamIdx], activeIndex: bs.playerTeamIdx, trainerBattle: true, endsBattle: isFinalWin, expMultiplier: useGameStore.getState().expMultiplier });
+          const continueAfterPayoff = (moneyShown: boolean) => {
+          if (isFinalWin) {
+            // Sound composition (2026-10-29): trainer-win jingle
+            // (MUS_VICTORY_TRAINER slot; dojo wins share it) at the
+            // victory flow — both the sequence path and the direct
+            // fallback call arrive here exactly once.
+            playVictoryJingle('trainer');
+            newLog.push(`${bs.trainerName} was defeated!`);
+            if (bs.isDojo) { setBadges(b => [...b, bs.badge]); playCue('ritual.badge'); newLog.push(`You received the ${bs.badge}!`); }
+            if (!moneyShown) setCredits(c => c + bs.reward);
+            setDefeatedTrainers(dt => [...dt, bs.npcId]);
+            setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "over" });
+            // v5.1: banner blocks until Continue — no 2500ms timer.
+            // The cleanup below is identical to the old timer body.
+            pendingBattleEndRef.current = () => {
+              setBattleState(null);
+              // v4 step 7: after the Hex first battle (win), Aeon
+              // states the goal in dialogue, in order — dojos,
+              // Champion Mythar, Hackers/Syndicate — not in a menu
+              // header. The MochiDex + 5 Luigi Cubes were already
+              // given at the starter beat (see handleChoice); this
+              // dialogue names the goal, it does not re-gift.
+              // Win OR lose the flow continues: a loss blacks out
+              // and reaches the goal via its own branch (v5), so
+              // this win branch and the loss branch share the same
+              // goal dialogue; the route gate is unaffected either way.
+              if (bs.npcId === 'hex_battle_event' && !completedEvents.includes('v4_hex_goal')) {
+                // v5: same goal dialogue as the loss path (hexGoalDialog).
+                setDialog(hexGoalDialog());
+                setScreen("dialog");
+              } else {
+                setScreen("overworld");
+              }
+            };
+          } else {
+            playCue('battle.switch');
+            newLog.push(`${bs.trainerName} sends out ${newTeam[nextAlive].name}!`);
+            // Refresh the player's battle copy from the store: the
+            // payoff may have levelled the member, and the rest of
+            // this battle fights with the new stats/HP (in this host
+            // the store member's hp tracks battle hp — doEnemyTurn
+            // writes both back every turn).
+            const fresh: any = (useGameStore.getState().party as any)[bs.playerTeamIdx];
+            const refreshed = fresh ? { ...fresh, name: battleMonName(fresh), currentHp: fresh.hp, hp: fresh.hp } : bs.player;
+            const nextBs = { ...bs, player: refreshed, trainerTeam: newTeam, trainerTeamIdx: nextAlive, log: newLog, phase: "enemy_turn" };
+            setBattleState(nextBs);
+            // Landing composition: move-completion's handoff rule
+            // (wait max(1200, animMs) so long profiles are not cut
+            // off) applied to the payoff flow's no-recipients branch.
+            setTimeout(() => doEnemyTurn(nextBs), Math.max(1200, animMs));
+          }
+          };
+          if (plan.recipients.length > 0) {
+            setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "payoff" });
+            pendingPayoffRef.current = () => continueAfterPayoff(true);
+            setPayoffUi({ plan, moneyText: isFinalWin ? `You got ${bs.reward} Credits for winning!` : null, moneyAmount: isFinalWin ? bs.reward : 0 });
+          } else {
+            continueAfterPayoff(false);
+          }
+        }
+      } else {
+        if (bs.type === "wild") {
+          setBattleState({ ...bs, wild: { ...bs.wild, currentHp: newHp }, log: newLog, phase: "enemy_turn" });
+          setTimeout(() => doEnemyTurn({ ...bs, wild: { ...bs.wild, currentHp: newHp }, log: newLog }), Math.max(1200, animMs));
+        } else {
+          const newTeam = [...bs.trainerTeam];
+          newTeam[bs.trainerTeamIdx] = { ...enemyMon, currentHp: newHp };
           setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "enemy_turn" });
           setTimeout(() => doEnemyTurn({ ...bs, trainerTeam: newTeam, log: newLog }), Math.max(1200, animMs));
         }
@@ -3347,6 +3464,9 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         phase={phase}
         animWalk={animWalk}
         animTick={animTick}
+        traversalFx={traversalFx}
+        rideMode={rideMode}
+        switchesPressed={switchesHeldNow()}
         follower={controlMode === "creature" ? null : follower}
         wilds={roamers.filter((r) => r.state !== "down").map((r) => ({
           id: r.id,

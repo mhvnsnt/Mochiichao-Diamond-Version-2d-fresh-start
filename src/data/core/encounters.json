@@ -1,8 +1,104 @@
 {
   "$schema": "./schemas/encounters.schema.json",
   "version": "1.0.0",
-  "source": "Seed encounter tables (1 map, 1 method table — cave-route-01 only), written for this core from roster species only. Gap-fill S5 (2026-10-30): the meadow-route-01 and pond-route-01 seed rows were retired as duplicates of the garden-complex spawn bundle, which is now their single source via src/lib/spawnSelector.ts (species, levels, weights verbatim — see that module's exit test). Full region encounter tables are owed. Map ids reference the maps schema; map definitions themselves are owed by the maps/world lane.",
+  "source": "Seed encounter tables (3 maps, 4 method tables), written for this core from roster species only. Full region encounter tables are owed. Map ids reference the maps schema; map definitions themselves are owed by the maps/world lane.",
   "encounters": [
+    {
+      "mapId": "meadow-route-01",
+      "method": "grass",
+      "slots": [
+        {
+          "speciesId": "038",
+          "minLevel": 2,
+          "maxLevel": 4,
+          "weight": 30
+        },
+        {
+          "speciesId": "013",
+          "minLevel": 2,
+          "maxLevel": 4,
+          "weight": 25
+        },
+        {
+          "speciesId": "016",
+          "minLevel": 2,
+          "maxLevel": 3,
+          "weight": 20
+        },
+        {
+          "speciesId": "019",
+          "minLevel": 2,
+          "maxLevel": 4,
+          "weight": 15
+        },
+        {
+          "speciesId": "010",
+          "minLevel": 3,
+          "maxLevel": 5,
+          "weight": 10
+        }
+      ],
+      "timeOfDay": null,
+      "weather": null
+    },
+    {
+      "mapId": "pond-route-01",
+      "method": "surf",
+      "slots": [
+        {
+          "speciesId": "001",
+          "minLevel": 3,
+          "maxLevel": 5,
+          "weight": 40
+        },
+        {
+          "speciesId": "026",
+          "minLevel": 3,
+          "maxLevel": 5,
+          "weight": 30
+        },
+        {
+          "speciesId": "022",
+          "minLevel": 4,
+          "maxLevel": 6,
+          "weight": 20
+        },
+        {
+          "speciesId": "024",
+          "minLevel": 5,
+          "maxLevel": 7,
+          "weight": 10
+        }
+      ],
+      "timeOfDay": null,
+      "weather": null
+    },
+    {
+      "mapId": "pond-route-01",
+      "method": "fish",
+      "slots": [
+        {
+          "speciesId": "001",
+          "minLevel": 3,
+          "maxLevel": 5,
+          "weight": 40
+        },
+        {
+          "speciesId": "022",
+          "minLevel": 4,
+          "maxLevel": 6,
+          "weight": 35
+        },
+        {
+          "speciesId": "026",
+          "minLevel": 3,
+          "maxLevel": 5,
+          "weight": 25
+        }
+      ],
+      "timeOfDay": null,
+      "weather": null
+    },
     {
       "mapId": "cave-route-01",
       "method": "cave",
@@ -150,5 +246,5 @@
       ]
     }
   ],
-  "_worldAreasNote": "Stub-kill S-6 (2026-10-29): the four live overworld tables MIGRATED VERBATIM from the inline zone arrays that used to sit in src/world/FullWorldMaps.ts (species and levels unchanged; fixed level -> minLevel=maxLevel; the old uniform pool pick -> equal weights; the zone rate carried on the table). sector0-placed carries the creature-mode roamer seeds that used to be hard-coded in CreatureModeView.initialWilds (species/levels verbatim; positions and temperaments stay authored in the view). src/lib/encounters.ts is the only reader; FullWorldMaps derives its per-map mirror from these tables at module load — one source, no dual truth."
+  "_worldAreasNote": "Stub-kill S-6 (2026-10-29): the four live overworld tables MIGRATED VERBATIM from the inline zone arrays that used to sit in src/world/FullWorldMaps.ts (species and levels unchanged; fixed level -> minLevel=maxLevel; the old uniform pool pick -> equal weights; the zone rate carried on the table). sector0-placed carries the creature-mode roamer seeds that used to be hard-coded in CreatureModeView.initialWilds (species/levels verbatim; positions and temperaments stay authored in the view). src/lib/encounters.ts is the only reader; FullWorldMaps derives its per-map mirror from these tables at module load \u2014 one source, no dual truth."
 }

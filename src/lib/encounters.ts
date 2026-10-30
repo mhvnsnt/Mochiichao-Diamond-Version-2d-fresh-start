@@ -1,4 +1,4 @@
-// Encounter binding — stub-kill S-6 (2026-10-29), gap-fill S5 (2026-10-30).
+// Encounter binding — stub-kill S-6 (2026-10-29).
 //
 // Before this module, the core encounter tables in
 // src/data/core/encounters.json had NO reader anywhere in src, and
@@ -9,17 +9,6 @@
 // below, FullWorldMaps derives its per-map mirror from these tables
 // at module load, and creature mode reads its roamer seeds from the
 // sector0 "placed" table. No dual truth.
-//
-// S5: the meadow-route-01 and pond-route-01 tables no longer come
-// from encounters.json at all — their duplicate seed rows were
-// retired in the same step, and the tables are built here from
-// src/lib/spawnSelector.ts over the garden-complex bundle (the
-// bundle is the single source; the conversion below is mechanical:
-// bundle name -> roster id, levels and weights verbatim, no rate,
-// because the bundles author none). encounters.json keeps only the
-// cave-route-01 seed table, which has no bundle file yet, plus the
-// live worldAreas tables, which are a separate set (live map ids,
-// not bundle area ids) and are untouched by S5.
 //
 // PROVENANCE (source-first): the roll shape is Pokémon's own —
 // per-step rate roll: pret-pokeheartgold
@@ -38,9 +27,8 @@
 // rather than silently matched.
 
 import encountersJson from "../data/core/encounters.json";
-import { BUNDLE_POOLS, bundlePoolCanRoll } from "./spawnSelector";
 
-export type EncounterMethod = "grass" | "surf" | "fish" | "cave" | "placed";
+export type EncounterMethod = "grass" | "surf" | "fish" | "cave" | "placed" | "dive";
 
 export interface EncounterSlot {
   speciesId: string;
@@ -87,26 +75,7 @@ const data = encountersJson as unknown as {
   worldAreas?: RawTable[];
 };
 
-/** S5: rollable bundle pools converted to encounter tables, verbatim. */
-export const BUNDLE_ENCOUNTER_TABLES: EncounterTable[] = BUNDLE_POOLS.filter(
-  bundlePoolCanRoll,
-).map((pool) => ({
-  areaId: pool.areaId,
-  mapId: pool.areaId,
-  method: pool.method,
-  rate: undefined,
-  timeOfDay: null,
-  weather: null,
-  slots: pool.slots.map((s) => ({
-    speciesId: s.speciesId,
-    minLevel: s.minLevel as number,
-    maxLevel: s.maxLevel as number,
-    weight: s.weight as number,
-  })),
-}));
-
 export const ENCOUNTER_TABLES: EncounterTable[] = [
-  ...BUNDLE_ENCOUNTER_TABLES,
   ...data.encounters.map(normalise),
   ...(data.worldAreas ?? []).map(normalise),
 ];

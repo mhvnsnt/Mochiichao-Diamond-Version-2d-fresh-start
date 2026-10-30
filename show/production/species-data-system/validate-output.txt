@@ -1,2 +1,0 @@
-checks run: 343 | passed: 343 | failed: 0 | absence-claims not machine-verifiable: 49
-ALL VERIFIABLE CLAIMS IN gap-audit.json MATCH THE LIVE REPO.

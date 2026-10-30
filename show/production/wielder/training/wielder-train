@@ -1,4 +1,0 @@
-#!/bin/sh
-# Wielder Train — entry point.
-# Usage: wielder-train [--trainer-dir DIR] preflight|train|collect ...
-exec python3 "$(dirname "$0")/wielder_train/cli.py" "$@"
