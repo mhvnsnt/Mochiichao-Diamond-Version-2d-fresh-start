@@ -2235,7 +2235,13 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           ? { ...built, hp: bs.wild.currentHp, currentHp: bs.wild.currentHp }
           : { ...bs.wild, currentHp: bs.wild.currentHp, hp: bs.wild.currentHp };
         setPlayerTeam(t => t.length < 6 ? [...t, caught] : t);
-        setDex(d => ({ ...d, [caught.id]: "caught" }));
+        // GAP-FILL S0 (G-8 dex-key fix): the dex is keyed by speciesId
+        // (DexView.statusOf + gameStore.addMochii both read speciesId).
+        // caught.id is a generated instance id (createMochii's
+        // generateId), which no reader can resolve back to a species,
+        // so keying by it orphaned the entry. caught.speciesId is
+        // present on both the rebuilt instance and the wild fallback.
+        setDex(d => ({ ...d, [caught.speciesId]: "caught" }));
         // The lock click, then the success jingle a beat later.
         playCue('capture.click');
         setTimeout(() => playCue('capture.success'), 150);
@@ -2349,7 +2355,10 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
               if (after.band !== before) newLog.push(`The Sprint Boots feel different now. ${after.word}`);
             }
           }
-          setDex(d => ({ ...d, [enemyMon.id]: d[enemyMon.id] === "caught" ? "caught" : "seen" }));
+          // GAP-FILL S0 (G-8 dex-key fix): same keying as the catch
+          // write above — the wild battle mon carries speciesId
+          // (bs.wild.speciesId), while enemyMon.id is its instance id.
+          setDex(d => ({ ...d, [enemyMon.speciesId]: d[enemyMon.speciesId] === "caught" ? "caught" : "seen" }));
           // Payoff (lib/battlePayoff.ts): the source EXP sequence
           // replaces the old stub, which rolled a random XP number
           // into a `xp` field on the member that NOTHING reads (the
