@@ -1,0 +1,11 @@
+SAVE-SET: set boot_bay 15 6
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-dive-spot.png
+SAVEPROBE dive spot (expect boot_bay 8,9) {"map":"boot_bay","pos":{"x":8,"y":2}}
+SHOT p2-underwater.png
+SAVEPROBE underwater (expect boot_bay_deep 6,11) {"map":"boot_bay","pos":{"x":8,"y":2}}
+SHOT p2-emerged.png
+SAVEPROBE emerged (expect boot_bay 8,9) {"map":"boot_bay","pos":{"x":8,"y":1}}
+DRIVE4 DONE dive

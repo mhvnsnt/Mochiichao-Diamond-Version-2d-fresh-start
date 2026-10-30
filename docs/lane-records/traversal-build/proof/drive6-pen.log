@@ -1,0 +1,12 @@
+BUILD IDENTITY: served assets/index-Cp_pQhCf.js | dist assets/index-Cp_pQhCf.js
+SAVE-SET: set scrap_junkyard 18 16
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-pen-lane.png
+SHOT p2-pen-inside.png
+SAVEPROBE pen inside (expect scrap_junkyard 18,21) {"map":"scrap_junkyard","pos":{"x":18,"y":21}}
+SHOT p2-pen-switch.png
+SHOT p2-pen-nook.png
+SAVEPROBE pen nook (expect scrap_junkyard 20,21) {"map":"scrap_junkyard","pos":{"x":20,"y":21}}
+DRIVE4 DONE pen

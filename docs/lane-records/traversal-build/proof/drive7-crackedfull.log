@@ -1,0 +1,8 @@
+BUILD IDENTITY: served assets/index-BkV62VyG.js | dist assets/index-BkV62VyG.js
+SAVE-SET: set route_2 13 28
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-cracked-full.png
+SAVEPROBE cracked full (expect route_2 13,24) {"map":"route_2","pos":{"x":13,"y":24}}
+DRIVE4 DONE crackedfull

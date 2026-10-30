@@ -1,0 +1,407 @@
+127.0.0.1 - - [30/Oct/2026 15:51:09] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:51:12] "GET /assets/idle_c-doKfOdP7.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:51:23] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:51:23] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:51:23] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:51:23] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:51:23] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:51:27] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:51:27] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:51:27] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:51:27] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:51:27] "GET /assets/index-Bll-aFpU.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:51:27] "GET /assets/idle_a-BQfaqeJD.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:51:30] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:51:30] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:51:30] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:51:30] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:51:30] "GET /assets/index-Bll-aFpU.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:52:06] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:52:06] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:52:06] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:52:06] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:52:09] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:10] "GET /assets/index-Cp_pQhCf.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:10] "GET /assets/index-Dy_3RSUj.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:30] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:30] "GET /assets/index-Cp_pQhCf.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:30] "GET /assets/index-Dy_3RSUj.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:33] "GET /assets/m-heavensent-studios-logo-b2ZtfZzQ.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:33] "GET /assets/yagiza-D6d9Cl_X.woff HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:33] "GET /audio/mochiichao-boot-ui-art-option-b-rising-arpeggio.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:36] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:47] "GET /assets/player-boy-atlas-v5-2026-10-29-BgHUjO2z.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:52:50] "GET /assets/idle_a-BQfaqeJD.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:52:53] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:52:53] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:52:53] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:52:53] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:52:53] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:52:54] "GET /assets/idle_c-doKfOdP7.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:52:57] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:57] "GET /assets/index-Dy_3RSUj.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:57] "GET /assets/index-Cp_pQhCf.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:58] "GET /assets/m-heavensent-studios-logo-b2ZtfZzQ.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:59] "GET /audio/mochiichao-boot-ui-art-option-b-rising-arpeggio.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:52:59] "GET /assets/yagiza-D6d9Cl_X.woff HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:53:01] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:53:02] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:53:05] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:53:09] "GET /assets/mochiichao-main-logo-BVWmfoDA.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:53:10] "GET /audio/mochiichao-title-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:53:10] "GET /audio/mochiichao-boot-M3-mochii-chirp.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:53:10] "GET /assets/mochiichao-main-logo-v32-orbitfix-20261026-BJtZN4AJ.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:53:10] "GET /assets/mochii-walk-cutout-6A6R1SJz.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:53:12] "GET /audio/mochiichao-main-menu-v1.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:53:20] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:53:21] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:53:21] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:53:21] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:53:21] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:53:22] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 57398)
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/socketserver.py", line 692, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.12/http/server.py", line 1311, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+  File "/usr/lib/python3.12/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.12/socketserver.py", line 761, in __init__
+    self.handle()
+  File "/usr/lib/python3.12/http/server.py", line 436, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.12/http/server.py", line 424, in handle_one_request
+    method()
+  File "/usr/lib/python3.12/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+  File "/usr/lib/python3.12/http/server.py", line 878, in copyfile
+    shutil.copyfileobj(source, outputfile)
+  File "/usr/lib/python3.12/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
+127.0.0.1 - - [30/Oct/2026 15:53:57] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:53:57] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:53:57] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:53:57] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:53:57] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:54:02] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:02] "GET /assets/index-Dy_3RSUj.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:02] "GET /assets/index-Cp_pQhCf.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:03] "GET /assets/m-heavensent-studios-logo-b2ZtfZzQ.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:04] "GET /assets/yagiza-D6d9Cl_X.woff HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:04] "GET /audio/mochiichao-boot-ui-art-option-b-rising-arpeggio.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:06] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:54:06] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58836)
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/socketserver.py", line 692, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.12/http/server.py", line 1311, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+  File "/usr/lib/python3.12/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.12/socketserver.py", line 761, in __init__
+    self.handle()
+  File "/usr/lib/python3.12/http/server.py", line 436, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.12/http/server.py", line 424, in handle_one_request
+    method()
+  File "/usr/lib/python3.12/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+  File "/usr/lib/python3.12/http/server.py", line 878, in copyfile
+    shutil.copyfileobj(source, outputfile)
+  File "/usr/lib/python3.12/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
+127.0.0.1 - - [30/Oct/2026 15:54:09] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:13] "GET /assets/mochiichao-main-logo-BVWmfoDA.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:14] "GET /audio/mochiichao-boot-M3-mochii-chirp.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:14] "GET /audio/mochiichao-title-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:14] "GET /assets/mochiichao-main-logo-v32-orbitfix-20261026-BJtZN4AJ.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:14] "GET /assets/mochii-walk-cutout-6A6R1SJz.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:16] "GET /audio/mochiichao-main-menu-v1.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:16] "GET /assets/getTexelRangeRects-b16kpQaG.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:16] "GET /assets/WebGLRenderer-DX3_L72s.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:16] "GET /assets/RenderTargetSystem-BnVF4pVe.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:16] "GET /assets/idle_a-BRRJVwob.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:16] "GET /assets/mochii_atlas_64_locked-Cb-Wm8yA.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:16] "GET /audio/tracks/cave-theme.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:16] "GET /assets/idle_a-BQfaqeJD.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:16] "GET /assets/browserAll-Bt9DvDlx.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:16] "GET /assets/webworkerAll-xwOKA72q.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:17] "GET /assets/bw2/grass_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:17] "GET /assets/player-boy-atlas-v5-2026-10-29-BgHUjO2z.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:17] "GET /assets/bw2/grass_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:17] "GET /assets/bw2/water_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:17] "GET /assets/bw2/water_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:17] "GET /assets/bw2/tree_base.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:17] "GET /assets/bw2/path.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:17] "GET /assets/bw2/wall.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/door.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/tallgrass.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/sand.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/shallow.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/flower.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/dock.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/canopy.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/foam.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/roof.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/stairs_up.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/sign.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/ledge.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/stairs_down.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/counter.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/terminal.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/bench.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/plant.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/heal_machine.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/floor_lab.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/bed.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/floor_wood.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/floor_plex.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/wall_int.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/furniture_house.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/wall_lab.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/furniture_lab.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/shelf.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/crate.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/dojo_mat.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/dojo_wall.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/cave_rock.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/window_day.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/window_night.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/bw2/rock.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/grass_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/grass_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/grass_d.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/grass_c.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/grass_flower.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/tallgrass_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/path_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/sand_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/path_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/path_c.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/shallow.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:18] "GET /assets/hgss/sand_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/shore.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/water.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/cliff_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/cliff.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/cliff_c.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/rock_water.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/rock.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/tree_base.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/waterfall.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/canopy_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/canopy_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/dock_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/dock_c.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/dock.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/dock_d.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/cave_floor.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/cave_floor_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/cave_strata.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/city_road.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/ice.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/ice_c.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/snow.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/ice_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/crest_2.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/crest_1.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/industrial.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/crest_5.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/crest_4.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/crest_3.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/shoref_2.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/shoref_1.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:19] "GET /assets/hgss/crest_6.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:20] "GET /assets/hgss/shoref_5.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:20] "GET /assets/hgss/shoref_3.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:20] "GET /assets/hgss/shoref_4.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:20] "GET /assets/hgss/flower_2.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:20] "GET /assets/hgss/shoref_6.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:20] "GET /assets/hgss/flower_1.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:20] "GET /assets/hgss/flower_3.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:23] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:54:23] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:54:23] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:54:23] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:54:23] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:54:23] "GET /assets/idle_b-f9U66G8i.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:54:30] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:00] "GET /assets/idle_b-DP_5G4X1.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:03] "GET /assets/idle_c-ReiEZdLg.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:07] "GET /assets/idle_c-doKfOdP7.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:30] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:55:30] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:55:30] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:55:30] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:55:30] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:55:34] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:34] "GET /assets/index-Cp_pQhCf.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:34] "GET /assets/index-Dy_3RSUj.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:35] "GET /assets/m-heavensent-studios-logo-b2ZtfZzQ.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:35] "GET /assets/yagiza-D6d9Cl_X.woff HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:35] "GET /audio/mochiichao-boot-ui-art-option-b-rising-arpeggio.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:38] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:55:41] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:45] "GET /assets/mochiichao-main-logo-BVWmfoDA.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:46] "GET /audio/mochiichao-boot-M3-mochii-chirp.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:46] "GET /audio/mochiichao-title-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:46] "GET /assets/mochiichao-main-logo-v32-orbitfix-20261026-BJtZN4AJ.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:46] "GET /assets/mochii-walk-cutout-6A6R1SJz.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/getTexelRangeRects-b16kpQaG.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/WebGLRenderer-DX3_L72s.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/RenderTargetSystem-BnVF4pVe.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/idle_a-BRRJVwob.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/mochii_atlas_64_locked-Cb-Wm8yA.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /audio/tracks/route-1.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/idle_a-BQfaqeJD.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/browserAll-Bt9DvDlx.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/webworkerAll-xwOKA72q.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/player-boy-atlas-v5-2026-10-29-BgHUjO2z.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/krix-atlas-64x64-C9CEywef.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:48] "GET /assets/bw2/grass_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/water_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/tree_base.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/grass_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/water_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/path.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/wall.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/door.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/shallow.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/tallgrass.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/sand.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/flower.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/canopy.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/dock.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/roof.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/foam.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/ledge.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/stairs_up.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/stairs_down.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/sign.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/terminal.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/counter.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/plant.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/heal_machine.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/bench.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/bed.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/floor_wood.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/floor_lab.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/floor_plex.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/wall_int.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/wall_lab.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/furniture_house.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/furniture_lab.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/shelf.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/crate.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/dojo_mat.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/dojo_wall.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/cave_rock.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/window_day.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/window_night.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/bw2/rock.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/grass_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/grass_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/grass_c.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/grass_d.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/grass_flower.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/tallgrass_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/path_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/path_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/path_c.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/sand_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/sand_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/shore.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/water.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/shallow.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/cliff_c.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/cliff.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/cliff_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/rock.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/rock_water.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:49] "GET /assets/hgss/waterfall.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/tree_base.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/canopy_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/canopy_a.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/dock.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/dock_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/dock_c.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/cave_floor.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/dock_d.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/city_road.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/cave_floor_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/cave_strata.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/ice_b.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/ice.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/ice_c.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/crest_1.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/snow.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/industrial.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/crest_4.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/crest_2.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/crest_3.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/crest_6.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/crest_5.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/shoref_1.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/shoref_3.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/shoref_2.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/shoref_4.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/shoref_6.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/shoref_5.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/flower_1.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/flower_2.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:50] "GET /assets/hgss/flower_3.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:55:52] "GET /assets/idle_b-f9U66G8i.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:56:02] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:56:32] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:56:32] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:56:32] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:56:32] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:56:40] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:56:43] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:56:46] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:56:46] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:56:46] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:56:46] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:56:46] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:56:48] "GET /audio/mochiichao-title-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:56:50] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:56:51] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:56:51] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:56:51] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:56:51] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:57:04] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:57:44] "GET /assets/mochii_atlas_64_locked-Cb-Wm8yA.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:57:53] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:57:53] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:57:53] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:57:53] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:58:00] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:58:03] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:58:07] "GET /audio/mochiichao-title-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:58:23] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:58:32] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:58:32] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:58:32] "GET /assets/index-CjynPROs.css HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:58:32] code 404, message File not found
+127.0.0.1 - - [30/Oct/2026 15:58:32] "GET /assets/index-P3s_AH9n.js HTTP/1.1" 404 -
+127.0.0.1 - - [30/Oct/2026 15:58:40] "GET /assets/idle_b-DP_5G4X1.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:58:41] "GET /assets/idle_c-ReiEZdLg.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:58:44] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:58:44] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:59:01] "GET /assets/idle_c-doKfOdP7.png HTTP/1.1" 200 -

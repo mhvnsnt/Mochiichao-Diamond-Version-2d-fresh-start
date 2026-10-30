@@ -1,0 +1,10 @@
+BUILD IDENTITY: served assets/index-BJftaqV1.js | dist assets/index-BJftaqV1.js
+SAVE-SET: set dojo_1 7 15
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-conveyor2-before.png
+SHOT p2-conveyor2-carried.png
+SHOT p2-conveyor2-dismissed.png
+SAVEPROBE conveyor2 (expect dojo_1 7,13) {"map":"dojo_1","pos":{"x":7,"y":15}}
+DRIVE4 DONE conveyor2

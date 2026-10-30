@@ -1,0 +1,9 @@
+BUILD IDENTITY: served assets/index-Cp_pQhCf.js | dist assets/index-Cp_pQhCf.js
+SAVE-SET: set cave_of_echoes 18 20
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-boulder-before.png
+SHOT p2-boulder-after.png
+SAVEPROBE cave (expect cave_of_echoes 14,20) {"map":"cave_of_echoes","pos":{"x":14,"y":20}}
+DRIVE4 DONE cave2

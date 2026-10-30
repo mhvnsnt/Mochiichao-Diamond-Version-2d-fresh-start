@@ -1,0 +1,28 @@
+SAVE PRESENT (env profile): true
+SAVE INJECTED
+SAVE-SET: set route_1 20 8
+LOAD CLICK: no-dialog
+IN WORLD: false
+PROBE: {"map":"route_1","pos":{"x":20,"y":8}}
+SHOT p2-route-depth.png
+SAVE-SET: set route_1 18 12
+LOAD CLICK: no-dialog
+IN WORLD: false
+PROBE: {"map":"route_1","pos":{"x":18,"y":12}}
+SHOT p2-climb-bottom.png
+CLIMB PROBE (expect route_1 18,10): {"map":"route_1","pos":{"x":18,"y":12}}
+SHOT p2-climb-top.png
+SAVE-SET: set cave_of_echoes 18 20
+LOAD CLICK: no-dialog
+IN WORLD: false
+PROBE: {"map":"cave_of_echoes","pos":{"x":18,"y":20}}
+SHOT p2-boulder-before.png
+BOULDER PROBE (expect cave_of_echoes 15,20): {"map":"cave_of_echoes","pos":{"x":18,"y":20}}
+SHOT p2-boulder-after.png
+SAVE-SET: set scrap_junkyard 18 16
+LOAD CLICK: no-dialog
+DRIVE2 FAIL keyboard.press: Target page, context or browser has been closed
+    at seedAt (/home/hatch/workspace/traversal-build/proof/drive2.cjs:98:25)
+    at async /home/hatch/workspace/traversal-build/proof/drive2.cjs:160:3 {
+  log: []
+}

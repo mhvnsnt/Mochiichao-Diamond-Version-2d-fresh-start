@@ -1,0 +1,224 @@
+// Traversal proof drive, part 2c (2026-10-30). One scene per
+// invocation: node drive4.cjs <scene>. Fixes the earlier drives'
+// two failure modes: (1) world detection now matches the HUD text
+// this save actually shows ("MochiiMind") and STOPS pressing keys
+// the moment the world is up — the old "Goal:" probe never matched,
+// leaving ~28 s of stray Enter presses per scene while roamers
+// engaged the player; (2) position evidence comes from the game's
+// OWN save: after each scene's moves the drive presses F5 (the
+// game's save key) and reads playerPos back out of localStorage.
+const { chromium } = require('/home/hatch/workspace/menu-parity-work/tree/node_modules/playwright');
+const EXE = '/home/hatch/.cache/ms-playwright/chromium_headless_shell-1228/chrome-headless-shell-linux64/chrome-headless-shell';
+const OUT = '/home/hatch/workspace/traversal-build/proof';
+const MINE = 'http://127.0.0.1:4399/';
+const SCENE = process.argv[2];
+
+async function clickLoad(page) {
+  return page.evaluate(() => {
+    if (!/start over in slot/i.test(document.body.innerText.replace(/\s+/g, ' '))) return 'no-dialog';
+    const btns = [...document.querySelectorAll('button, [role="button"], div, span')]
+      .filter(e => /load this save/i.test(e.textContent || '') && (e.textContent || '').trim().length < 40);
+    if (!btns.length) return 'no-button';
+    btns.sort((a, b) => (a.textContent || '').length - (b.textContent || '').length);
+    btns[0].click();
+    return 'clicked';
+  }).catch(() => 'eval-err');
+}
+
+async function inWorld(page) {
+  const t = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' ')).catch(() => '');
+  return /MochiiMind/.test(t);
+}
+
+async function seedAt(page, map, x, y) {
+  const set = await page.evaluate(({ m, x, y }) => {
+    const raw = localStorage.getItem('mochii_saves_1');
+    if (!raw) return 'no-save';
+    const v = JSON.parse(raw);
+    const slot = Array.isArray(v) ? v[0] : v;
+    if (!slot || !slot.data) return 'bad-shape';
+    const d = slot.data;
+    d.currentMap = m;
+    d.playerPos = { x, y };
+    d.techniqueFlags = {
+      ...(d.techniqueFlags || {}),
+      'tech.Mighty Push': true, 'tech.Wave': true, 'tech.Cascade': true,
+      'tech.Deep Dive': true, 'tech.Crag Climb': true,
+    };
+    d.inventory = { ...(d.inventory || {}), bike: 1 };
+    d.party = [{
+      id: 'drive2-performer', speciesId: '001', nickname: 'Mochii',
+      level: 20, experience: 8000, hp: 90, maxHp: 90,
+      stats: { atk: 50, def: 50, spa: 50, spd: 50, spe: 50 },
+      stages: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 },
+      status: null,
+      moves: ['Strength', 'Surf', 'Waterfall', 'Dive', 'Rock Climb', 'Tackle'],
+      pp: [10, 10, 10, 10, 10, 10],
+    }];
+    localStorage.setItem('mochii_saves_1', JSON.stringify(v));
+    return 'set';
+  }, { m: map, x, y }).catch(e => 'eval-err ' + String(e).slice(0, 80));
+  console.log('SAVE-SET:', set, map, x, y);
+  await page.reload({ waitUntil: 'load' }).catch(() => {});
+  await page.waitForTimeout(3000);
+  // Advance the title flow with Enter ONLY until the slot list shows.
+  for (let i = 0; i < 12; i++) {
+    if (await inWorld(page)) break;
+    const t = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' ')).catch(() => '');
+    if (/SLOT 1/.test(t)) break;
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(800);
+  }
+  const slotEl = await page.evaluate(() => {
+    const els = [...document.querySelectorAll('div, button, span')].filter(e => /SLOT 1/.test(e.textContent || ''));
+    els.sort((a, b) => { const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(); return ra.width * ra.height - rb.width * rb.height; });
+    if (!els.length) return null;
+    const r = els[0].getBoundingClientRect();
+    return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  }).catch(() => null);
+  if (slotEl) await page.mouse.click(slotEl.x, slotEl.y);
+  await page.waitForTimeout(700);
+  console.log('LOAD CLICK:', await clickLoad(page));
+  for (let i = 0; i < 25; i++) {
+    if (await inWorld(page)) break;
+    if (await clickLoad(page) === 'clicked') { await page.waitForTimeout(1000); continue; }
+    await page.waitForTimeout(500);
+  }
+  console.log('IN WORLD:', await inWorld(page));
+  await page.waitForTimeout(700);
+}
+
+async function tap(page, key, holdMs = 60) {
+  await page.keyboard.down(key);
+  await page.waitForTimeout(holdMs);
+  await page.keyboard.up(key);
+  await page.waitForTimeout(300);
+}
+async function shot(page, name) {
+  await page.screenshot({ path: `${OUT}/${name}`, timeout: 90000 });
+  console.log('SHOT', name);
+}
+async function saveProbe(page, label) {
+  await page.keyboard.press('F5');
+  await page.waitForTimeout(700);
+  const s = await page.evaluate(() => {
+    const v = JSON.parse(localStorage.getItem('mochii_saves_1') || 'null');
+    const slot = Array.isArray(v) ? v[0] : v;
+    return slot && slot.data ? { map: slot.data.currentMap, pos: slot.data.playerPos } : null;
+  }).catch(() => null);
+  console.log('SAVEPROBE', label, JSON.stringify(s));
+  // F5's save toast may linger; a confirm tap clears dialogs.
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(300);
+}
+
+(async () => {
+  const src = await chromium.launchPersistentContext('/home/hatch/workspace/env-pullin-hgss-bw2/pw-profile', { executablePath: EXE, viewport: { width: 1440, height: 900 }, args: ['--mute-audio', '--disable-gpu', '--disable-dev-shm-usage'] });
+  const sp = src.pages()[0] || await src.newPage();
+  await sp.goto(MINE, { waitUntil: 'load', timeout: 60000 }).catch(() => {});
+  await sp.waitForTimeout(2500);
+  const rawSave = await sp.evaluate(() => localStorage.getItem('mochii_saves_1')).catch(() => null);
+  await src.close();
+  if (!rawSave) { console.error('NO SAVE AVAILABLE'); process.exit(1); }
+
+  const ctx = await chromium.launchPersistentContext(`/home/hatch/workspace/traversal-build/pw-profile-${SCENE}`, { executablePath: EXE, viewport: { width: 1440, height: 900 }, args: ['--mute-audio', '--disable-gpu', '--disable-dev-shm-usage'] });
+  const page = ctx.pages()[0] || await ctx.newPage();
+  page.on('pageerror', e => console.log('PAGEERROR:', String(e).slice(0, 160)));
+  await page.goto(MINE, { waitUntil: 'load', timeout: 60000 }).catch(() => {});
+  await page.waitForTimeout(2500);
+  await page.evaluate((raw) => localStorage.setItem('mochii_saves_1', raw), rawSave);
+
+  if (SCENE === 'cave2') {
+    await seedAt(page, 'cave_of_echoes', 18, 20);
+    await shot(page, 'p2-boulder-before.png');
+    await tap(page, 'ArrowLeft');
+    await tap(page, 'ArrowLeft');
+    await tap(page, 'ArrowLeft');
+    await tap(page, 'ArrowLeft');       // onto the filled hole (14,20)
+    await shot(page, 'p2-boulder-after.png');
+    await saveProbe(page, 'cave (expect cave_of_echoes 14,20)');
+  } else if (SCENE === 'pen') {
+    await seedAt(page, 'scrap_junkyard', 18, 16);
+    await shot(page, 'p2-pen-lane.png');
+    for (let i = 0; i < 5; i++) await tap(page, 'ArrowDown');
+    await shot(page, 'p2-pen-inside.png');
+    await saveProbe(page, 'pen inside (expect scrap_junkyard 18,21)');
+    await tap(page, 'ArrowLeft');
+    await tap(page, 'ArrowDown');
+    await tap(page, 'ArrowRight');
+    await page.waitForTimeout(400);
+    await shot(page, 'p2-pen-switch.png');
+    await tap(page, 'ArrowUp');
+    await tap(page, 'ArrowRight');
+    await tap(page, 'ArrowRight');
+    await tap(page, 'ArrowRight');
+    await page.waitForTimeout(300);
+    await shot(page, 'p2-pen-nook.png');
+    await saveProbe(page, 'pen nook (expect scrap_junkyard 20,21)');
+  } else if (SCENE === 'bike') {
+    await seedAt(page, 'route_2', 13, 17);
+    await page.keyboard.press('KeyC');
+    await page.waitForTimeout(350);
+    await page.keyboard.press('KeyC');
+    await page.waitForTimeout(350);
+    await shot(page, 'p2-bike-mounted.png');
+    await tap(page, 'ArrowUp');
+    await tap(page, 'ArrowUp');
+    await shot(page, 'p2-bike-hop-before.png');
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(40);
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(130);
+    await shot(page, 'p2-bike-hop-mid.png');
+    await page.waitForTimeout(800);
+    await shot(page, 'p2-bike-hop-after.png');
+    await saveProbe(page, 'bike hop (expect route_2 13,13)');
+  } else if (SCENE === 'falls') {
+    await seedAt(page, 'route_1', 24, 33);
+    await tap(page, 'ArrowUp');
+    await tap(page, 'ArrowUp');
+    await shot(page, 'p2-falls-before.png');
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(40);
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(160);
+    await shot(page, 'p2-falls-ride.png');
+    await page.waitForTimeout(800);
+    await shot(page, 'p2-falls-after.png');
+    await saveProbe(page, 'falls (expect route_1 24,29)');
+  } else if (SCENE === 'dive') {
+    await seedAt(page, 'boot_bay', 15, 6);
+    for (let i = 0; i < 5; i++) await tap(page, 'ArrowLeft');
+    await page.waitForTimeout(400);
+    await tap(page, 'ArrowLeft');
+    await tap(page, 'ArrowLeft');
+    for (let i = 0; i < 4; i++) await tap(page, 'ArrowUp');
+    await shot(page, 'p2-dive-spot.png');
+    await saveProbe(page, 'dive spot (expect boot_bay 8,9)');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(1500);
+    await shot(page, 'p2-underwater.png');
+    await saveProbe(page, 'underwater (expect boot_bay_deep 6,11)');
+    await tap(page, 'ArrowUp');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(1500);
+    await shot(page, 'p2-emerged.png');
+    await saveProbe(page, 'emerged (expect boot_bay 8,9)');
+  } else if (SCENE === 'depth') {
+    await seedAt(page, 'route_1', 20, 13);
+    await shot(page, 'p2-route-depth.png');
+    await seedAt(page, 'route_1', 18, 12);
+    await shot(page, 'p2-climb-bottom.png');
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(60);
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(220);
+    await shot(page, 'p2-climb-top.png');
+    await page.waitForTimeout(600);
+    await saveProbe(page, 'climb (expect route_1 18,10)');
+  } else {
+    console.error('unknown scene', SCENE);
+  }
+  await ctx.close();
+  console.log('DRIVE4 DONE', SCENE);
+})().catch(e => { console.error('DRIVE4 FAIL', SCENE, e); process.exit(1); });

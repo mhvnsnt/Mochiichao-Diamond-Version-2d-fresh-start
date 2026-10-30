@@ -1,0 +1,54 @@
+SAVE PRESENT (env profile): true
+SAVE INJECTED
+SAVE-SET: set cave_of_echoes 18 20
+LOAD CLICK: no-dialog
+IN WORLD: false
+SHOT p2-boulder-before.png
+PAGE TEXT: Cave of Echoes — B1F 21:00 night 1 in team 1000 CR Team Menu ▲ ◄ ► ▼ B A MochiiMind
+SHOT p2-boulder-after.png
+PAGE TEXT: Cave of Echoes — B1F 22:00 night 1 in team 1000 CR Team Menu ▲ ◄ ► ▼ B A MochiiMind
+SAVE-SET: set route_1 20 13
+LOAD CLICK: no-dialog
+IN WORLD: false
+SHOT p2-route-depth.png
+SAVE-SET: set route_1 18 12
+PAGEERROR: TypeError: Failed to fetch dynamically imported module: http://127.0.0.1:4399/assets/WebGLRenderer-FJmwQ6c1.js
+LOAD CLICK: no-dialog
+IN WORLD: false
+SHOT p2-climb-bottom.png
+SHOT p2-climb-top.png
+PAGE TEXT: Route 1.0 — Greenfield Path 12:00 day 1 in team 1000 CR Team Menu ▲ ◄ ► ▼ B A MochiiMind
+SAVE-SET: set scrap_junkyard 18 16
+LOAD CLICK: no-dialog
+IN WORLD: false
+SHOT p2-pen-lane.png
+SHOT p2-pen-inside.png
+SHOT p2-pen-switch.png
+PAGE TEXT: The Scrap Junkyard 00:00 night 1 in team 1000 CR Team Menu ▲ ◄ ► ▼ B A MochiiMind
+SHOT p2-pen-nook.png
+PAGE TEXT: The Scrap Junkyard 03:00 night 1 in team 1000 CR Team Menu ▲ ◄ ► ▼ B A MochiiMind
+SAVE-SET: set route_2 13 17
+LOAD CLICK: no-dialog
+IN WORLD: false
+SHOT p2-bike-mounted.png
+SHOT p2-bike-hop-before.png
+SHOT p2-bike-hop-mid.png
+SHOT p2-bike-hop-after.png
+PAGE TEXT: Route 2.0 — Harbour Road 00:00 night 1 in team 1000 CR Team Menu ▲ ◄ ► ▼ B A MochiiMind
+SAVE-SET: set route_1 24 33
+LOAD CLICK: no-dialog
+IN WORLD: false
+SHOT p2-falls-before.png
+SHOT p2-falls-ride.png
+SHOT p2-falls-after.png
+PAGE TEXT: Route 1.0 — Greenfield Path 20:00 dusk 1 in team 1000 CR Team Menu The water's edg ▲ ◄ ► ▼ B A MochiiMind
+SAVE-SET: set boot_bay 15 6
+LOAD CLICK: no-dialog
+IN WORLD: false
+SHOT p2-dive-spot.png
+PAGE TEXT: 
+SHOT p2-underwater.png
+PAGE TEXT: 
+SHOT p2-emerged.png
+PAGE TEXT: 
+DRIVE3 DONE

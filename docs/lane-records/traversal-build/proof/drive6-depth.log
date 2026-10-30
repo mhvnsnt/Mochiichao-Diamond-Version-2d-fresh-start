@@ -1,0 +1,14 @@
+BUILD IDENTITY: served assets/index-Cp_pQhCf.js | dist assets/index-Cp_pQhCf.js
+SAVE-SET: set route_1 20 13
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-route-depth.png
+SAVE-SET: set route_1 18 12
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-climb-bottom.png
+SHOT p2-climb-top.png
+SAVEPROBE climb (expect route_1 18,10) {"map":"route_1","pos":{"x":18,"y":10}}
+DRIVE4 DONE depth

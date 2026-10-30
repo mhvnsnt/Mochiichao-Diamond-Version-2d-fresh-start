@@ -1,0 +1,9 @@
+SAVE-SET: set route_1 24 33
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-falls-before.png
+SHOT p2-falls-ride.png
+SHOT p2-falls-after.png
+SAVEPROBE falls (expect route_1 24,29) {"map":"route_1","pos":{"x":24,"y":30}}
+DRIVE4 DONE falls

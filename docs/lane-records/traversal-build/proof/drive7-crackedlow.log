@@ -1,0 +1,8 @@
+BUILD IDENTITY: served assets/index-BkV62VyG.js | dist assets/index-BkV62VyG.js
+SAVE-SET: set route_2 13 25
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-cracked-low.png
+SAVEPROBE cracked low (expect route_2 14,38) {"map":"route_2","pos":{"x":14,"y":38}}
+DRIVE4 DONE crackedlow

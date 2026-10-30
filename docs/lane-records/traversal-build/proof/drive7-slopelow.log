@@ -1,0 +1,7 @@
+BUILD IDENTITY: served assets/index-BkV62VyG.js | dist assets/index-BkV62VyG.js
+SAVE-SET: set route_2 13 9
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SAVEPROBE slope low (expect route_2 13,9) {"map":"route_2","pos":{"x":13,"y":9}}
+DRIVE4 DONE slopelow

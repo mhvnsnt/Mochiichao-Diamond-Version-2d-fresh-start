@@ -1,0 +1,9 @@
+BUILD IDENTITY: served assets/index-BkV62VyG.js | dist assets/index-BkV62VyG.js
+SAVE-SET: set route_2 13 12
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-slope-before.png
+SHOT p2-slope-after.png
+SAVEPROBE slope full (expect route_2 13,8) {"map":"route_2","pos":{"x":13,"y":8}}
+DRIVE4 DONE slopefull

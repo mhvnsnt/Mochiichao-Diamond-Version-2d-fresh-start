@@ -1,0 +1,9 @@
+BUILD IDENTITY: served assets/index-BJftaqV1.js | dist assets/index-BJftaqV1.js
+SAVE-SET: set route_1 18 12
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+SHOT p2-climb-bottom.png
+SHOT p2-climb-mid.png
+SAVEPROBE climb (expect route_1 18,10) {"map":"route_1","pos":{"x":18,"y":10}}
+DRIVE4 DONE climbmid

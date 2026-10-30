@@ -1,0 +1,28 @@
+SAVE PRESENT: true
+SAVE-SET: set route_1 20 8
+LOAD CLICK: no-dialog
+IN WORLD: true
+PROBE: {"map":"route_1","pos":{"x":20,"y":8}}
+SHOT route-after
+SAVE-SET: set route_1 20 10
+LOAD CLICK: no-dialog
+IN WORLD: true
+PROBE: {"map":"route_1","pos":{"x":20,"y":10}}
+SHOT ledge-before
+SHOT ledge-hop
+LEDGE PROBE (expect route_1 20,12): {"map":"route_1","pos":{"x":20,"y":10}}
+SHOT ledge-after
+SAVE-SET: set cave_of_echoes 8 15
+LOAD CLICK: no-dialog
+IN WORLD: true
+PROBE: {"map":"cave_of_echoes","pos":{"x":8,"y":15}}
+SHOT ice-before
+ICE PROBE (expect cave_of_echoes 12,15): {"map":"cave_of_echoes","pos":{"x":8,"y":15}}
+SHOT ice-after
+BASE SAVE INJECTED
+SAVE-SET: set route_1 20 8
+LOAD CLICK: no-dialog
+IN WORLD: true
+PROBE: {"map":"route_1","pos":{"x":20,"y":8}}
+SHOT route-before
+DRIVE DONE

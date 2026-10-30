@@ -1,0 +1,12 @@
+SAVE-SET: set route_2 13 17
+LOAD BUTTON: found
+LOAD CLICK: no-dialog
+IN WORLD: true
+AFTER C1: Route 2.0 — Harbour Road 10:00 day 1 in team 1000 CR Team Menu ▲ ◄ ► ▼ B A MochiiMind
+AFTER C2: Route 2.0 — Harbour Road 11:00 day 1 in team 1000 CR Team Menu ▲ ◄ ► ▼ B A Game Autosaved MochiiMind
+SHOT p2-bike-mounted.png
+SHOT p2-bike-hop-before.png
+SHOT p2-bike-hop-mid.png
+SHOT p2-bike-hop-after.png
+SAVEPROBE bike hop (expect route_2 13,13) {"map":"route_2","pos":{"x":13,"y":14}}
+DRIVE4 DONE bike
