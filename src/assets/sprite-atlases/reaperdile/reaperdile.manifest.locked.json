@@ -155,5 +155,6 @@
   238,
   238,
   238
- ]
+ ],
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): the frame labelled battle_back (128,0) holds FRONT art (face, chest plate). The genuine back view already exists in this atlas at (320,0) (overworld_back_3). src/lib/spriteSheets.ts now uses (320,0) as the battle back cell. (The (0,0) overworld_back cell is a side profile, not a back.) This frame's role is left as-is pending a Sprite Art lane re-lock; do not regenerate defs without applying this correction."
 }

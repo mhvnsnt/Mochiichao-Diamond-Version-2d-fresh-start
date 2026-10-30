@@ -1,0 +1,68 @@
+{
+  "$schema": "./schemas/encounter-modes.schema.json",
+  "areaMix": {
+    "byMap": {},
+    "default": "both",
+    "note": "mix: 'grass' = classic tall-grass random encounters only; 'roamer' = visible roamers only; 'both' = grass stays AND roamers walk. Default 'both' wherever the map has an encounter pool and open ground (habitat supports); interior/built maps default 'grass' behaviour is moot (no pools). The classic grass roll itself is NEVER altered by this file - WorldEngine's tall-grass path is untouched."
+  },
+  "bindings": {
+    "companionCommand": {
+      "code": "KeyG",
+      "note": "Cycles the companion command follow -> wait -> free.",
+      "ownerSlot": false
+    },
+    "engage": {
+      "code": "KeyF",
+      "note": "Ranged engagement action on the nearest roamer in range (approach play in Ranger mode; a real move / regular attack in creature mode).",
+      "ownerSlot": false
+    },
+    "swapControl": {
+      "code": "KeyT",
+      "note": "OWNER SLOT: the exact swap button is the owner's to pick. This is the wired default; rebinding changes this value only.",
+      "ownerSlot": true
+    },
+    "distract": {
+      "code": "KeyH",
+      "note": "Creature mode only: the Ranger companion DISTRACTS the nearest roamer in range - draws its attention onto himself for a few beats (aggro + contact threat move to him), harm-free, at the cost of exposure (it may snap at HIM). Owner mechanic 2026-10-29 ~21:21 CDT (ranger-defense package).",
+      "ownerSlot": false
+    }
+  },
+  "engagement": {
+    "catchBaseChance": 0.3,
+    "note": "Chances are read inputs, tuned by bond band / habitat fit / temperament in creatureMode.ts - the numbers here are the base rates the resolver starts from.",
+    "rangeTiles": 3,
+    "recruitBaseChance": 0.18
+  },
+  "roamers": {
+    "despawnTiles": 14,
+    "maxPerMap": 3,
+    "spawnFrom": "the map's own encounter pool (first slots by weight), so roamers are the same population the grass holds - one ecology, two presentations",
+    "tickMs": 700
+  },
+  "source": "Creature Mode + Dual Encounters package (~/workspace/pmd-mode/, owner orders 2026-10-29 ~20:12-20:17 CDT). Area mix and bindings are data; the battle STYLE is not data-decided - it is resolved by the decided rule in src/lib/creatureMode.ts battleStyleFor() (DORO-DESIGNED under the owner's delegation, reversible by his word). Per-encounter records may carry context/stakes for implementation; their style values are set by that rule, never left TBD.",
+  "version": "1.0.0",
+  "rangerDefense": {
+    "note": "Ranger companion defence + health (ranger-defense package, owner ruling 2026-10-29 ~21:21 CDT). All numbers are DORO-DERIVED design parameters under the owner's 25% delegation - reversible by his word, not canon. Rules live in src/lib/rangerDefense.ts.",
+    "poolBase": 30,
+    "poolPerLeadLevel": 10,
+    "poolDerivation": "maxHp = poolBase + poolPerLeadLevel x lead creature level. Anchored to the dyad's own journey scale: createRoamer's wild scale is 20 + 2xlevel; a person who steps INTO hits sits above a wild of the band and below a trained partner.",
+    "capFraction": 0.5,
+    "capNote": "Per-hit damage cap as a fraction of max HP: one big attack takes a big chunk (the owner's words), never the whole bar; one-shots of the Ranger are story choices, not arithmetic accidents.",
+    "defendBaseByCommand": {
+      "follow": 0.25,
+      "free": 0.35,
+      "wait": 0.05
+    },
+    "defendPerBondBand": 0.05,
+    "maxDefendsPerBattle": 3,
+    "distractRangeTiles": 4,
+    "distractBeats": 3,
+    "exposureChanceByTemperament": {
+      "aggressive": 0.5,
+      "bold": 0.4,
+      "curious": 0.15,
+      "docile": 0.1,
+      "timid": 0.05
+    }
+  }
+}

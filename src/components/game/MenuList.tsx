@@ -1,4 +1,5 @@
 import React from 'react';
+import { playCue } from '../../lib/soundCues';
 
 /**
  * Vertical menu list, translated from the decomp start-menu structure
@@ -25,9 +26,9 @@ export function MenuList({ items, selected, onSelect, gapPx }: {
       {items.map((item, i) => (
         <button
           key={item.label}
-          onClick={item.action}
-          onMouseEnter={() => onSelect(i)}
-          onFocus={() => onSelect(i)}
+          onClick={() => { playCue('ui.confirm'); item.action(); }}
+          onMouseEnter={() => { if (i !== selected) playCue('ui.cursor'); onSelect(i); }}
+          onFocus={() => { if (i !== selected) playCue('ui.cursor'); onSelect(i); }}
           className={`game-button px-4 py-2.5 font-bold text-left flex items-center gap-2 ${
             i === selected ? 'ring-2 ring-yellow-300 brightness-125' : 'opacity-90'
           }`}

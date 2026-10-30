@@ -376,5 +376,6 @@
    }
   ],
   "notes": "Atlas PNG tiles spliced at exact manifest coords, cell 64. All other tiles byte-identical to base."
- }
+ },
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): the frame labelled battle_back (64,0) holds a three-quarter view with the face in profile. The genuine back view already exists in this atlas at (128,0) (overworld_back). src/lib/spriteSheets.ts now uses (128,0) as the battle back cell. This frame's role is left as-is pending a Sprite Art lane re-lock; do not regenerate defs without applying this correction."
 }

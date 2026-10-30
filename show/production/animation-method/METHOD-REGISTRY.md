@@ -191,6 +191,75 @@ a superseded asset under the current-version law.
   carries the written-vs-wired coverage table for the whole
   corpus.
 
+### Method reference — Rig-and-sheet standard (registered 2026-10-30)
+
+- **The reference:** `show/production/rigs/RIG-AND-SHEET-SPEC.md`
+  — the donor-measured standard for model sheets (§1, incl.
+  the two §1c height charts: principal and secondary casts are
+  separate charts), palette sheets (§2: base swatches as CMYK
+  percentages in the Dominant/Support/Accent/Ink discipline,
+  sanctioned 50%/75% tints, variants as delta blocks), puppet
+  construction (§3: root stack, four-piece masked eye system,
+  mouth as a frame-chart symbol, pose-frame limbs + torso_move,
+  view-code part naming, part-per-file linked libraries, the
+  locked SHARED hands library, overlap skirts), and the
+  compositing glue gate (§4). Measured from real production
+  files; per-source record in
+  `show/production/rigs/DONOR-PROVENANCE-2026-10-29.md`.
+  Landed via PR #145 (2026-10-30).
+- **Implemented in code:** BlairWitch (`mhvnsnt/BlairWitch`,
+  v0.3.0, PR #1) emits and validates this standard —
+  palette engine, sheet generator, rig scaffold, puppet
+  packages, and the palette-format / part-naming /
+  hands-library validator checks. Sheets and rigs produced
+  for any current method are produced with that tool, in
+  this format.
+- **Status:** registered as a CURRENT method reference. It
+  supports the Industry Method (whose sheet generation this
+  format governs); it supersedes no method and changes no
+  gate. The per-cast build-out the spec enables (human model
+  sheets, pilot-six §2 palette sheets, the height charts, the
+  shared hands library) is tracked in the spec's §6 gap list.
+- **Cast artifacts:** the build-out this reference pointed at
+  has landed (PR #35, 2026-10-30) and is registered CURRENT in
+  `show/production/rigs/README.md` and
+  `show/production/tooling/TOOLING-INDEX.md`: human model
+  sheets (`show/production/model-sheets/humans/`), §2 palette
+  files (`show/production/model-sheets/palettes/`), the two
+  §1c height charts, and the SHARED hands library v1
+  (`show/production/rigs/SHARED/hands/`). The owed pieces are
+  registered as owed in those registrations (¾ turnarounds
+  ×3, expression sets with gate H-2 NOT PASS, hands v2 poses,
+  Lustre palette deltas). This reference registers the
+  format's artifacts; it re-marks no method and changes no
+  gate.
+
+### Method reference — Harmony + settei addendum (registered 2026-10-30)
+
+- **The reference:** `show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md`
+  — the CURRENT extension of the rig-and-sheet standard,
+  landed via PR #34 (2026-10-30): the Harmony node-graph
+  construction profile (master peg, region composites, curve
+  deformers, cutter pairs; measured hero-vs-standard
+  budgets), angle-coded substitution charts (F/3Q/P/PQB;
+  mouths at the measured 44-48; hero hand charts 105/107),
+  the .plt palette discipline (LINKed single source; `rig`
+  alpha-0 and `Cutter` matte functional colours), the settei
+  five-section model-pack completeness standard, and the
+  design & cleanup rules (universal line weight,
+  body-under-clothes construction, mouth discipline) that
+  map onto defects already logged in this pipeline.
+- **Implemented in code:** BlairWitch v0.4.0
+  (`mhvnsnt/BlairWitch`, PR #2) — the `blairwitch.harmony`
+  scaffold + validators behind the `construction="harmony"`
+  rig/puppet profile, the settei model-pack
+  builder/validator, and the cleanup-rule sheet checks in
+  the puppet validator.
+- **Status:** registered as a CURRENT method reference
+  alongside the base rig-and-sheet standard. It extends that
+  standard for Harmony-profile construction and pack
+  completeness; it supersedes no method and changes no gate.
+
 ### Remainders-pass registrations — 2026-10-28 (documentation landing package)
 
 Applied from `method-registry-update.md` in the 2026-10-28
@@ -606,6 +675,53 @@ for yourself and the agents, so we never regress.*
   (superseding the "cannot run headless" blocker). Applied from
   the package's `method-registry-update.md`; that update doc is
   not landed as a file. No existing entry was re-marked.
+
+- **2026-10-30 — Rig-and-sheet standard registered as a CURRENT
+  method reference; no method re-marked.** The donor-measured
+  `show/production/rigs/RIG-AND-SHEET-SPEC.md` (PR #145) is the
+  governing format for model sheets, palette sheets and puppet
+  construction under the current methods, and it is wired into
+  code the same day: BlairWitch v0.3.0 (mhvnsnt/BlairWitch,
+  PR #1) implements the palette engine (§2 CMYK +
+  sanctioned tints), the sheet generator (§1 sections + §1c
+  height-chart entries), the §3 construction in its rig
+  scaffold and puppet packages (root stack, eye system, mouth
+  frame-chart, part naming, part files, SHARED hands,
+  open-movie constraint assignments), and the extended puppet
+  validator. Registry cross-links added in
+  `show/production/rigs/README.md` and
+  `show/production/tooling/TOOLING-INDEX.md`. The cast build-out
+  the spec enables (spec §6) is tracked separately; nothing in
+  this entry marks it done.
+
+- **2026-10-30 — Cast build-out registered CURRENT; no method
+  re-marked.** The per-cast build-out the rig-and-sheet
+  standard enables (spec §6) landed in PR #35: human model
+  sheets for Mochiko, Hex and Aeon, §2 palette files for the
+  pilot six + the three humans, the principal/secondary
+  height charts, and the SHARED hands library v1.
+  Registrations added in `show/production/rigs/README.md` and
+  `show/production/tooling/TOOLING-INDEX.md`, with the owed
+  pieces named in the open next to each artifact (¾
+  turnarounds ×3, expression sets — gate H-2 NOT PASS, hands
+  v2 poses, Lustre palette deltas). This closes the open
+  dependency named in the wiring entry above.
+
+- **2026-10-30 — Harmony + settei addendum registered as a
+  CURRENT method reference alongside the base standard; no
+  method re-marked.** The donor-hunt addendum
+  (`show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md`,
+  PR #34) extends the rig-and-sheet standard with the Harmony
+  construction profile, the settei five-section pack standard
+  and the design & cleanup rules, and it is wired into code
+  the same day: BlairWitch v0.4.0 (mhvnsnt/BlairWitch, PR #2)
+  implements the Harmony scaffold and validators, the
+  model-pack builder/validator, and the cleanup-rule sheet
+  checks. Registry cross-links added in
+  `show/production/rigs/README.md` and
+  `show/production/tooling/TOOLING-INDEX.md`. The cast
+  build-out (PR #35, registered by PR #37) is tracked
+  separately; nothing in this entry marks it done.
 
 ---
 

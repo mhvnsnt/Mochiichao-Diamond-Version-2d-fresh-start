@@ -139,6 +139,96 @@ tracked in the season grid.
    ids/keys stay stable, so wiring cannot break.) Neither lane
    may quietly keep a name or rule the other lane has
    superseded.
+11. **EXISTENTIAL CHARGE (Jamar, 2026-10-28):** places carry
+   charge of their own — blessed, haunted, cursed, lucky —
+   underneath everything that happens in them. Felt, never
+   itemised; presence first, identity only when earned (§5A).
+
+
+## 5A. EXISTENTIAL CHARGE & THE NUMINOUS (owner-ruled 2026-10-28; logged 2026-10-29)
+
+Places carry a quality of their own, at the level of existence,
+before any Ranger crosses them and after they leave: a place's
+**existential charge**. **Numinous** — numinosity — is how that
+charge *feels* from inside it: presence, awe, and dread in the
+ground itself; the old vocabulary's *genius loci*, a place's own
+spirit. Both words are **production-layer only**: no character
+says them, no sign bears them, no in-world text uses them.
+In-world, people say what people have always said — a place is
+**blessed**, or **haunted**, or **cursed**, or **lucky** — and
+that is all anyone says.
+
+- **The states (closed):** BLESSED (a presence that shelters) /
+  LUCKY (fortune leans in; no watcher implied) / HAUNTED (the
+  past pressing in — what happened there has not finished
+  happening) / CURSED (fortune leans away, and the lean feels
+  *meant*) / UNMARKED (the default; most ground). Strength runs
+  **faint / settled / deep / peak**.
+- **Base charge is canon:** set by the owner or by story, stored
+  in the place's own record, never rewritten by any system.
+  **Current charge is derived, never stored** — the base as
+  drifted by long-arc story events and accumulated deeds. Drift
+  deepens or softens strength only; it **never flips a state**
+  on player action alone. A flip is a story fact, and story
+  facts are the owner's.
+- **Felt, never itemised.** No meter, no tally, no label, no
+  readout of any kind. **The acceptance test is the owner's,
+  from firsthand play: a charged place succeeds when the
+  audience FEELS the magic coming out of the setting — and
+  never when a meter shows it.**
+- **Presence-first is its reveal grammar:** presence is created
+  first, in lighting, colour, and scenery; identity is revealed
+  only when it is earned and meant to be seen. Charge may
+  **foreshadow** — a shimmer, a silhouette crossing a sky, a
+  place that feels sacred or wrong — pointing at **existence,
+  never at access**: no spawn row, no marked location, no door.
+  The sealed one stays sealed (Goddgachuu's seal stands exactly
+  as landed); a hint is a sign, not a map pin.
+- **The Dark Forest is the most numinous place in the world** —
+  the only ground where the deepest dread and the strongest
+  luck in the game coexist (a dual read; its exact encoding is
+  an open item). Its charge is base charge: no drift — in the
+  Forest the player does not move what the place is. Its
+  blessings arrive bent (delayed, partial), at first
+  indistinguishable from a haunting, are never explained by
+  anyone, and never make the Forest safe. And charge never
+  explains the Forest: what stopped moving in there (§9,
+  item 1) is not this layer's business — no phenomenon answers,
+  hints at an answer to, or retires an arc question.
+- **Legendary sites** are the peak class: maximum charge
+  **bound to a one-time event** — a singular encounter, item,
+  or rite; the Spear Pillar / Bell Tower / Mt. Pyre pattern on
+  the Pokémon base. One time, ever; afterwards the charge
+  remains and the event never repeats. Never a spawn row,
+  never farmable. **The class ships with zero instances** — no
+  legendary site exists in canon until the owner rules one,
+  and the Dark Forest is *not* classified as one unless he
+  says so.
+- **Show-side use (this bible's lane):** charge is **casting
+  language**. A charged place is lit, sounded, and staged by
+  its state — a blessed place held warm by one source that
+  never quite accounts for itself; a haunted place lit with
+  one source too many; a lucky place where the timely arrival
+  is a beat the records scheduled, not a writer's convenience.
+  The Forest's seats are the landed lighting keys "Refusal"
+  and "No Key" (bible/LIGHTING-SYSTEM.md). The charge is
+  *staged*, never explained: the audience should leave a
+  blessed place unable to say why they felt held, and a
+  haunted one unable to say what they heard. The game runs
+  the same doctrine from its side of the coin
+  (GAME-BIBLE.md, Part I §1;
+  build rules in SEQUENCE-PLAN.md) — one world, two lanes;
+  §5 law 10
+  applies.
+- **Machinery:** PLACE-CHARGE.md + fates-placecharge-
+  fragment.json (the moral-choices package; its landing in
+  this repo is owed — workspace seat:
+  ~/workspace/mochiichao-show/moral-choices-system/).
+  Open items: that package's owner slots 41–48 (charge
+  assignments, drift caps and windows, story-event flips,
+  the world-memory seam, the fortune menu, phenomena seats,
+  legendary sites and the peak band's name) — referenced
+  here, never filled here.
 
 ## 6. THE EPISODE ENGINE
 Pokémon showcase × 6-beat garden formula (mystery-heart):

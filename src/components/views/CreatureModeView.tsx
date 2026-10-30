@@ -8,6 +8,8 @@ import { calcTypeMultiplier } from '../../lib/constants';
 import { createMochii, gainExp } from '../../lib/engine';
 import { GuardianAssignment, guardianLabel } from '../../lib/monster-tamer-systems';
 import { creatureCooldownMs } from '../../lib/creatureCooldowns';
+import { placedSeeds } from '../../lib/encounters';
+import { playCry } from '../../lib/cries';
 import { findNextStep } from '../../lib/creaturePathfinding';
 import { gardenBattleBonus } from '../../lib/mochiichao-systems';
 import { gardenFormPresentation, saChaoPresentation, MAINFRAME_GARDENS } from '../../lib/creatureGardenForm';
@@ -146,14 +148,25 @@ function makeWild(speciesId: string, level: number, temperament: Temperament, x:
   return { ...m, temperament, x, y, telegraph: false };
 }
 
+// Stub-kill S-6: species and levels come from the core encounter
+// tables (sector0 "placed" table in src/data/core/encounters.json,
+// read through src/lib/encounters.ts) — the same single source the
+// overworld grass rolls use. Positions and temperaments stay
+// authored here: they are placement, not spawn data.
+const ROAMER_PLACEMENT: { temperament: Temperament; x: number; y: number }[] = [
+  { temperament: 'skittish', x: 12, y: 11 },
+  { temperament: 'territorial', x: 20, y: 10 },
+  { temperament: 'pack', x: 8, y: 15 },
+  { temperament: 'pack', x: 9, y: 16 },
+  { temperament: 'curious', x: 18, y: 15 },
+];
+
 function initialWilds(): Wild[] {
-  const list = [
-    makeWild('001', 5, 'skittish', 12, 11),
-    makeWild('004', 6, 'territorial', 20, 10),
-    makeWild('007', 5, 'pack', 8, 15),
-    makeWild('007', 5, 'pack', 9, 16),
-    makeWild('010', 5, 'curious', 18, 15),
-  ].filter((w): w is Wild => w !== null);
+  const list = placedSeeds('sector0').map((slot, i) => {
+    const place = ROAMER_PLACEMENT[i];
+    if (!place) return null;
+    return makeWild(slot.speciesId, slot.minLevel, place.temperament, place.x, place.y);
+  }).filter((w): w is Wild => w !== null);
   return list;
 }
 
@@ -321,6 +334,9 @@ export default function CreatureModeView({ onBack }: { onBack: () => void }) {
     // (whose handler is re-registered on party/active, not garden) still
     // get the current Garden bonus.
     const freshBonus = gardenBattleBonus(useGameStore.getState().gardenRecords[active.id]?.garden || { dive: 0, glide: 0, sprint: 0, might: 0, endurance: 0 });
+    // Soundtrack lane: in creature mode you ARE the creature — its cry
+    // sounds when it strikes (the mode's grammar: cries, not words).
+    void playCry(active.speciesId);
     const { damage, text } = creatureDamage(active, chosen.speciesId, chosen.stats, moveId, freshBonus);
     setCooldowns(prev => ({ ...prev, [moveIndex]: Date.now() + creatureCooldownMs(moveId) }));
     setTargetId(chosen.id);
@@ -343,7 +359,8 @@ export default function CreatureModeView({ onBack }: { onBack: () => void }) {
         const nextHp = Math.max(0, chosen.hp - damage);
         if (nextHp === 0) {
           const copy = { ...active };
-          gainExp(copy, SPECIES_DB[chosen.speciesId]?.baseExpYield || 50);
+          // DOUBLE EXP cheat: same store multiplier BattleView reads.
+          gainExp(copy, (SPECIES_DB[chosen.speciesId]?.baseExpYield || 50) * useGameStore.getState().expMultiplier);
           updatePartyMember(activeIdx, copy);
           setLog(`${text} ${chosen.nickname} was defeated! ${copy.nickname} gained EXP${copy.level > active.level ? ` and reached level ${copy.level}!` : '.'}`);
         } else {
