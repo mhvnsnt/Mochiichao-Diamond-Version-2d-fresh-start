@@ -2000,3 +2000,40 @@ hands library) runs as its own build and had not landed a PR
 at this wiring's check. When it lands, its outputs get
 registered CURRENT in the rigs README / TOOLING-INDEX in a
 follow-up — this entry does not claim them.
+
+## 2026-10-30 — Donor hunt addendum: Harmony rig kit + settei/design-rules kit
+
+- The "missing donor" hunt (owner order 2026-10-30) located the
+  Rick & Morty Toon Boom files named as a gap in
+  DONOR-PROVENANCE-2026-10-29 §C.1: they were in the owner's own
+  holdings all along — release `tv-gigaleak-rickandmorty-v1` of
+  `cn-gigaleak-cartoon-vault`, asset
+  `rick-and-morty-toonboom-files.zip` (17,745,919 B), plus a
+  size-identical duplicate asset in `cn-gigaleak-bonus-non-cn`.
+  The earlier pass never enumerated release assets; the
+  cartoon-vault tree holds only the Smiling Friends zip, which is
+  how the files were missed.
+- Verified first-hand: five genuine Harmony Premium 21 character
+  templates (5,077 files; 3,182 .tvg drawings; the
+  scene.elementTable header confirms Harmony Premium 21.0.1).
+  Kit extracted into
+  show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md
+  (deformer/peg network census, substitution-chart conventions,
+  .plt palette discipline, hero-vs-standard build budgets).
+  Studio files themselves stay in local study only — specs land,
+  character files don't.
+- khsqgj.pdf identified: the Smiling Friends "Design & Cleanup
+  Rules" book (18 pp) — the addendum records its numbered
+  do/don't rulebook as a document type to adopt.
+- Digimon settei located on the public web (Settei Dreams index;
+  archive.org item digimon-adventure-2020-settei) — the addendum
+  records the settei pack's five-section completeness standard.
+  Lilo & Stitch: no sheet pack circulates; the production style
+  document of record is "Surfing the Sanders Style" (noted).
+  Monster Rancher: no production settei located anywhere
+  searched (named honestly; TMS 1999, physical-copy market only).
+- Provenance correction of record: the manifest's R&M line came
+  from the bonus-release pointer chain (PULL-IN-MAP "Bonus
+  non-CN" row + research INDEX pointer), not from a file in hand
+  at writing time; TOOLING-INDEX repeated it as held. The
+  material was real — the paperwork predated the pull.
