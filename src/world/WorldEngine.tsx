@@ -23,7 +23,7 @@ import { resolveTrainerRow, rowToMapMembers } from "../lib/trainer-teams-resolve
 import { planForOutcome, commitRecipientExp, commitNextLevel, expProgressInLevel, type PayoffPlan } from "../lib/battlePayoff";
 import { useBattlePayoffSequence, PayoffStatWindow } from "../components/game/BattlePayoffSequence";
 import { resolveWorldMove, buildWorldAttackPresentation } from "../lib/worldMoveBridge";
-import { worldBattleDamage } from "../lib/worldBattleCore";
+import { worldBattleHit } from "../lib/worldBattleCore";
 import BattleSceneBackdrop from "../components/game/BattleSceneBackdrop";
 import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackground";
 import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
@@ -2084,11 +2084,13 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     const attackLine = humanStrikeLog ?? `${battleMonName(enemy)} used ${chosenMoveDisplay}!`;
 
 
-    // Gap-fill S6: the enemy hit goes through the converged core
-    // (battle-math) instead of GameData.calcDamage. The human-strike
-    // branch above keeps its own rangerDefense math, untouched.
-    const enemyBattleResult = humanStrikeDmg != null ? null : worldBattleDamage(enemy, bs.player, { power: resolvedEnemyMove.power, type: resolvedEnemyMove.type, moveId: resolvedEnemyMove.moveId });
-    const dmg = humanStrikeDmg ?? enemyBattleResult!.damage;
+    // Gap-fill S6 step 2: the enemy hit goes through the converged
+    // core (battle-math) — one accuracy roll, then 2–5 damage rolls
+    // for a MULTI_HIT move. The human-strike branch above keeps its
+    // own rangerDefense math, untouched (a lunge is not a move, so
+    // it takes no accuracy or multi-hit roll).
+    const enemyBattleResult = humanStrikeDmg != null ? null : worldBattleHit(enemy, bs.player, { power: resolvedEnemyMove.power, type: resolvedEnemyMove.type, moveId: resolvedEnemyMove.moveId });
+    const dmg = humanStrikeDmg ?? enemyBattleResult!.totalDamage;
 
     // ── DEFEND — the classic-battle intercept (ranger-defense) ────
     // Only in creature mode is the Ranger standing beside you as a
@@ -2132,7 +2134,8 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // engine computes no type multiplier, so the plain SE_EFFECTIVE
     // class fires here; effectiveness voices live in BattleView,
     // whose resolver carries the multiplier).
-    if (dmg > 0) { playCue('battle.hit'); if (enemyBattleResult?.isCrit) newLog.push(`A critical hit!`); newLog.push(`${battleMonName(bs.player)} took ${dmg} damage!`); }
+    if (enemyBattleResult && !enemyBattleResult.hit) newLog.push(`But it missed!`);
+    if (dmg > 0) { playCue('battle.hit'); if (enemyBattleResult?.isCrit) newLog.push(`A critical hit!`); if (enemyBattleResult && enemyBattleResult.hits > 1) newLog.push(`Hit ${enemyBattleResult.hits} times!`); newLog.push(`${battleMonName(bs.player)} took ${dmg} damage!`); }
 
     // v5.1 HP sync: battle copy keeps hp and currentHp together.
     const updatedPlayer = { ...bs.player, currentHp: newHp, hp: newHp };
@@ -2363,14 +2366,17 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       const animMs = startBattleAnim("player", resolved);
 
       const enemyMon = bs.type === "wild" ? bs.wild : bs.trainerTeam[bs.trainerTeamIdx];
-      // Gap-fill S6: the player hit goes through the converged core
-      // (battle-math) instead of GameData.calcDamage.
-      const playerBattleResult = worldBattleDamage(bs.player, enemyMon, { power: resolved.power, type: resolved.type, moveId: resolved.moveId });
-      const dmg = playerBattleResult.damage;
+      // Gap-fill S6 step 2: the player hit goes through the converged
+      // core (battle-math) — one accuracy roll, then 2–5 damage
+      // rolls for a MULTI_HIT move. A miss deals nothing and still
+      // hands the turn over (the else branch below, unchanged).
+      const playerBattleResult = worldBattleHit(bs.player, enemyMon, { power: resolved.power, type: resolved.type, moveId: resolved.moveId });
+      const dmg = playerBattleResult.totalDamage;
       const newLog = [...bs.log, `${battleMonName(bs.player)} used ${resolved.display}!`];
 
       const newHp = Math.max(0, enemyMon.currentHp - dmg);
-      if (dmg > 0) { playCue('battle.hit'); if (playerBattleResult.isCrit) newLog.push(`A critical hit!`); newLog.push(`Dealt ${dmg} damage!`); }
+      if (!playerBattleResult.hit) newLog.push(`But it missed!`);
+      if (dmg > 0) { playCue('battle.hit'); if (playerBattleResult.isCrit) newLog.push(`A critical hit!`); if (playerBattleResult.hits > 1) newLog.push(`Hit ${playerBattleResult.hits} times!`); newLog.push(`Dealt ${dmg} damage!`); }
 
       if (newHp <= 0) {
         playCue('battle.faint');

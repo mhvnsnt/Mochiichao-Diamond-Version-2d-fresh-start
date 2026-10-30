@@ -6,6 +6,7 @@ import {
   normaliseBattleElement,
   toBattleMathBattler,
   worldBattleDamage,
+  worldBattleHit,
 } from "./worldBattleCore";
 
 // Flat battle mons, as WorldEngine builds them: atk/def/spd where
@@ -124,5 +125,71 @@ describe("worldBattleDamage", () => {
       { power: 40, type: "Water", moveId: "TACKLE" },
       { rng: ROLL_92, forceCrit: false });
     expect(r.typeMultiplier).toBe(1);
+  });
+});
+
+describe("worldBattleHit (S6 step 2: accuracy + multi-hit)", () => {
+  // BUG-type flat mon via the type fallback (no species row needed):
+  // elements ["BUG"], so Swarm Strike gets STAB.
+  const BUG_FLAT = { level: 5, atk: 10, def: 10, spd: 10, type: "Bug" };
+  const ZERO_STAGES = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 };
+
+  it("acc 80 misses on roll 91: no hit, no damage", () => {
+    const r = worldBattleHit(WATER_FLAT, GRASS_FLAT,
+      { power: 120, type: "Water", moveId: "HYDRO_SURGE" },
+      { rng: () => 0.9, forceCrit: false });
+    expect(r.hit).toBe(false);
+    expect(r.hits).toBe(0);
+    expect(r.totalDamage).toBe(0);
+    expect(r.damages).toEqual([]);
+    expect(r.accuracy).toBe(80);
+  });
+  it("acc 95 hits on roll 95 exactly: base 4 -> +2 = 6 -> STAB 9 -> roll 92% = 8", () => {
+    let calls = 0;
+    const seq = [0.94, 0.5];
+    const rng = () => seq[calls++] ?? 0.5;
+    const r = worldBattleHit(GRASS_FLAT, WATER_FLAT,
+      { power: 55, type: "Grass", moveId: "RAZOR_LEAF" },
+      { rng, forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.hits).toBe(1);
+    expect(r.totalDamage).toBe(8);
+    expect(r.damages).toEqual([8]);
+  });
+  it("evasion stage lowers the threshold: 95 -> floor(95*6/8) = 71, roll 73 misses", () => {
+    const evasive = { ...WATER_FLAT, stages: { ...ZERO_STAGES, eva: 1 } };
+    const r = worldBattleHit(GRASS_FLAT, evasive,
+      { power: 55, type: "Grass", moveId: "RAZOR_LEAF" },
+      { rng: () => 0.72, forceCrit: false });
+    expect(r.hit).toBe(false);
+    expect(r.hits).toBe(0);
+  });
+  it("multi-hit rolls 3 hits on count roll 50: 3 x (2 -> +2 = 4 -> STAB 6 -> roll 92% = 5) = 15", () => {
+    const r = worldBattleHit(BUG_FLAT, WATER_FLAT,
+      { power: 25, type: "Bug", moveId: "SWARM_STRIKE" },
+      { rng: () => 0.5, forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.isMultiHit).toBe(true);
+    expect(r.hits).toBe(3);
+    expect(r.damages).toEqual([5, 5, 5]);
+    expect(r.totalDamage).toBe(15);
+  });
+  it("multi-hit move can still miss: acc 95, roll 100 misses", () => {
+    const r = worldBattleHit(BUG_FLAT, WATER_FLAT,
+      { power: 25, type: "Bug", moveId: "SWARM_STRIKE" },
+      { rng: () => 0.99, forceCrit: false });
+    expect(r.hit).toBe(false);
+    expect(r.isMultiHit).toBe(true);
+    expect(r.hits).toBe(0);
+    expect(r.totalDamage).toBe(0);
+  });
+  it("GameData-island move keeps legacy always-hits: acc 100, roll 100 hits, STAB 7 -> roll 85% = 5", () => {
+    const r = worldBattleHit(WATER_FLAT, GRASS_FLAT,
+      { power: 40, type: "Water", moveId: "NO_SUCH_MOVE" },
+      { rng: () => 0.99, forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.hits).toBe(1);
+    expect(r.accuracy).toBe(100);
+    expect(r.totalDamage).toBe(5);
   });
 });
