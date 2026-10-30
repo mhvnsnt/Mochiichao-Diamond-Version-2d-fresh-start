@@ -76,8 +76,24 @@
  *   auto-switch flow. No tick runs on a faint branch itself (a
  *   foe that fainted to a move, or a player that fainted to a
  *   move, ends the round in its own transition, and a mon just
- *   sent out does not tick in the round it arrived). PP write-back
- *   and the evolution hook on the live path are still open.
+ *   sent out does not tick in the round it arrived).
+ * - DONE in step 6 (this step): PP write-back, on the same resolver
+ *   rule the unreachable BattleView path already uses (battleResolver
+ *   decrements the actor's PP by 1 per move use, and a move at 0 PP
+ *   fails instead of firing): the host spends 1 PP from the player's
+ *   live move, through worldSpendPp in this module, before the hit
+ *   resolves — so a miss still costs PP, a gated battler never
+ *   spends (the gate returns before the move branch), and an
+ *   unresolved move spends nothing. The spend is written to the
+ *   store copy FIRST, before the hit's faint branch runs, so the
+ *   payoff's EXP/level commits (which copy the store member) carry
+ *   the spent PP forward instead of silently restoring it — the
+ *   2026-10-30 architecture rule's payoff-bypass failure, guarded
+ *   by a test in worldBattleCore.test.ts. A healer restores PP to
+ *   full (gameStore healParty, via worldFullPp in this module), so
+ *   write-back does not introduce depletion with no restore — the
+ *   exact reason battleWiring.ts left the resolver's PP unwritten.
+ *   The evolution hook on the live path is still open.
  * - TYPE CHART, NOT WIRED HERE: calculateDamage takes its type
  *   multipliers from the caller, and this module passes NEUTRAL (1)
  *   for every defending element. That is a placeholder, not a canon
@@ -473,6 +489,83 @@ export function worldStatusTickLine(
   damage: number,
 ): string {
   return `${name} took ${damage} damage from ${status}!`;
+}
+
+export type WorldSpendPpResult = {
+  /** False when the battler carries no trackable PP (no moves array,
+   * no pp array, or the move is not in its moves): the host spends
+   * nothing and blocks nothing — legacy / flat shapes keep their
+   * old behaviour instead of gaining a invented PP count. */
+  tracked: boolean;
+  /** True only when the move is tracked and its PP is already 0. */
+  blocked: boolean;
+  /** Index into moves / pp, or -1 when untracked. */
+  moveIdx: number;
+  /**
+   * The new pp array after the spend, when tracked and not blocked;
+   * null otherwise (the host stores nothing on a blocked or
+   * untracked use). The input array is never mutated.
+   */
+  pp: number[] | null;
+  /** PP left for the move after the spend, or null when untracked. */
+  ppLeft: number | null;
+};
+
+/**
+ * Step 6: one PP spend, on the resolver's rule (battleResolver: a
+ * move at 0 PP fails instead of firing; otherwise the actor's PP
+ * for that move falls by 1). The move is found by its canonical
+ * moveId first, then by the caller's fallback key (the raw action
+ * key — party moves are moveIds, but a legacy display-name entry
+ * must still find its slot). The spend is pure: it returns the new
+ * array and the host writes it (battle copy + store copy) — this
+ * module never touches the store, so the spend cannot bypass the
+ * host's payoff / send-out refreshes by writing behind them.
+ * A foe is deliberately untracked here: wild / trainer-team battle
+ * shapes carry no pp array, wild foes are discarded at battle end,
+ * and trainer teams are rebuilt from map data each battle, so a
+ * foe PP write-back would have nowhere to persist.
+ */
+export function worldSpendPp(
+  mon: any,
+  moveId: string | null | undefined,
+  fallbackKey?: string | null,
+): WorldSpendPpResult {
+  const untracked: WorldSpendPpResult = {
+    tracked: false, blocked: false, moveIdx: -1, pp: null, ppLeft: null,
+  };
+  const moves = mon?.moves;
+  if (!Array.isArray(moves)) return untracked;
+  let idx = moveId ? moves.indexOf(moveId) : -1;
+  if (idx < 0 && fallbackKey && fallbackKey !== moveId) idx = moves.indexOf(fallbackKey);
+  if (idx < 0) return untracked;
+  const pp = mon?.pp;
+  if (!Array.isArray(pp) || pp[idx] == null) return untracked;
+  if (pp[idx] <= 0) {
+    return { tracked: true, blocked: true, moveIdx: idx, pp: null, ppLeft: 0 };
+  }
+  const next = [...pp];
+  next[idx] = pp[idx] - 1;
+  return { tracked: true, blocked: false, moveIdx: idx, pp: next, ppLeft: next[idx] };
+}
+
+/** The battle-log line for a move with no PP left, in the resolver's
+ * own wording ("has no PP left for X!" — battleResolver's PP-fail
+ * event text). */
+export function worldNoPpLine(name: string, moveDisplay: string): string {
+  return `${name} has no PP left for ${moveDisplay}!`;
+}
+
+/**
+ * Step 6, the restore half: full PP for a move list, exactly as
+ * createMochii / evolveInstance initialise it (MOVES_DB pp, or 10
+ * when the move has no MOVES_DB row — the same fallback, not a new
+ * number). gameStore healParty uses this, so a healer restores PP
+ * alongside HP and status; a Mend Patch (HP only) does not.
+ */
+export function worldFullPp(moves: string[] | null | undefined): number[] {
+  if (!Array.isArray(moves)) return [];
+  return moves.map((m) => (MOVES_DB as any)[m]?.pp ?? 10);
 }
 
 /** The battle-log line for a stopped battler, by checkCanAct reason.
