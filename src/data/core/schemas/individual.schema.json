@@ -2,6 +2,19 @@
   "$id": "mochiichao/individual/v1",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "properties": {
+    "findState": {
+      "description": "HGSS follower find slot (teardown-hgss T-H1, semantics from pret pokeheartgold follow_mon.c): a find the follower partner is holding for handover to the player. Empty by default; find tables and handover presentation land with the behaviour-profile seam, not with this schema slot.",
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "mood": {
+      "description": "HGSS follower mood (teardown-hgss T-H1, semantics from pret pokeheartgold follow_mon.c): short-term follower mood, -127..127. Never shown to the player as a number; resets when the party lead changes. Optional; absent means neutral/unset.",
+      "maximum": 127,
+      "minimum": -127,
+      "type": "integer"
+    },
     "deviations": {
       "items": {
         "properties": {
