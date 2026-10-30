@@ -86,6 +86,22 @@ The largest working toolset he owns. The show-relevant core:
 - `tools/avatar-pipeline/` — the Mochiichao avatar/show bundle
   pipeline (PR #309, merged).
 
+### BlairWitch — `mhvnsnt/BlairWitch` (rig / sheet / puppet creator)
+The working rig, sheet and puppet creator (Python package +
+`blairwitch` CLI): character spec in → model sheet (JSON + SVG),
+`.rig.json` scaffold (6 body plans, Blair symbol libraries, ROM
+battery), versioned puppet packages. As of v0.3.0 (PR #1)
+it **implements the donor-measured rig-and-sheet standard**
+(`show/production/rigs/RIG-AND-SHEET-SPEC.md`, this repo's
+PR #145) in code: the §2 CMYK palette engine with sanctioned
+50%/75% tints, the §1 sheet format with principal/secondary
+height charts, the §3 puppet construction (root stack,
+four-piece masked eyes, mouth frame-chart, view-code part
+naming, part library files, SHARED hands), the CC-BY open-movie
+constraints module, and validators for palette format, part
+naming and the hands-library reference. Canonical home is its
+own repo (no-fork law); show production calls it from there.
+
 ## Class B — Convention / spec documents (carried in as native specs)
 | Convention/spec | Source (his docs) | Carried in as |
 |---|---|---|
@@ -97,6 +113,7 @@ The largest working toolset he owns. The show-relevant core:
 | Scooby 6-beat episode formula | mystery-coast research | beat-sheet template (TEMPLATES.md) |
 | Model-pack completeness (8-sheet) + mouth QC | rig-mapping/shows/knd-model-pack.md | model-sheet template (TEMPLATES.md) |
 | Palette enforcement as a system | cape-jones `palette-enforce.py` + docs | PIPELINE.md finish stage |
+| Rig-and-sheet standard (model-sheet format §1, CMYK palette format §2, puppet construction §3, compositing glue §4) | donor-measured extraction 2026-10-29 (per-source record: `show/production/rigs/DONOR-PROVENANCE-2026-10-29.md`) | `show/production/rigs/RIG-AND-SHEET-SPEC.md` — **CURRENT standard** (PR #145); implemented in code by BlairWitch v0.3.0 (PR #1) |
 | Persona 5 UI principles (CEDEC 2017) | research report | `show/production/research/persona-5-ui-principles.md` |
 | Manifest/catalog formats | TRIPPEDD sources manifests; cape-jones example_manifest.json | `show/shared/` manifests (SHOW-HOME plan) |
 
@@ -116,6 +133,15 @@ unchanged boundary:
    production files for their film. **Decision: pointer for the
    files; the reusable system (folder discipline, rig layout) is
    already extracted into native specs** (research INDEX + rigs).
+   **Update (2026-10-30):** the five `pyconstraints` scripts
+   themselves were carried **verbatim under their CC-BY 3.0
+   licence** (attribution in place) into
+   `show/production/rigs/open-movie-kit/pyconstraints/` by
+   PR #145, and are now **wired into BlairWitch** as its
+   `blairwitch.constraints` module (registry + verbatim script
+   access + modern ports of the separable maths; rigs assign them
+   by name) — BlairWitch PR #1. The rest of the tree stays
+   pointer-only.
 2. **Rhubarb Lip Sync vendored in cape-jones** — third-party open-
    source *software* (not studio content): fine to use as a tool via
    its home path/license; not re-copied here.
