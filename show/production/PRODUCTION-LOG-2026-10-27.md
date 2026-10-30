@@ -2091,3 +2091,91 @@ TQ set, wave, palm-up offer); Lustre palette deltas for
 Mochii, Gabu, Kittember, Sproutle. Mouth sets stand at gate
 H-1 material PASS, still pending the owner's eye-check;
 voice casting remains AWAITING OWNER for all three humans.
+
+## 2026-10-30 — Harmony + settei addendum (PR #34) wired: registered CURRENT + implemented in BlairWitch v0.4.0
+
+PR #34 landed the donor-hunt kit
+(`show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md`
+— the Harmony rig kit measured from the production templates
+recovered in the owner's own releases, and the settei /
+design-rules kit). This entry records the wiring, per the
+land-and-wire standing order — a kit in a folder is not done
+until the systems that consume it point at it and the tool
+that produces to it implements it.
+
+**Registered as CURRENT alongside the base spec, in the places
+production work actually reads:**
+- `show/production/rigs/README.md` — the addendum bullet added
+  to the rig standard (Harmony profile, substitution charts,
+  .plt discipline, settei pack standard, cleanup rules) and
+  the Files list; the Implemented-in-code bullet now names
+  BlairWitch v0.4.0 (PR #2).
+- `show/production/tooling/TOOLING-INDEX.md` — the addendum
+  added as a Class B carried-in spec, marked CURRENT
+  extension of the rig-and-sheet standard; the BlairWitch
+  Class A entry extended to v0.4.0.
+- `show/production/animation-method/METHOD-REGISTRY.md` — the
+  addendum registered as a CURRENT method reference alongside
+  the base rig-and-sheet standard; change-log entry added;
+  no method re-marked.
+- `show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md`
+  — header now names its implementation (BlairWitch v0.4.0),
+  so a reader lands on the tool, not just the text.
+
+**Implemented in code — BlairWitch v0.4.0 (`mhvnsnt/BlairWitch`,
+PR #2, not merged at this entry's writing):**
+- Harmony construction profile (`blairwitch.harmony`):
+  element inventory in prefix_part_side naming at the
+  measured bands (standard humanoid 42 elements, hero 55),
+  node-graph scaffold — one master peg, paired multi-port
+  region groups, a composite per region (hero) or region
+  group (standard 2-3), per-element pegs + drawing reads
+  with the LINE/COLOR/OVERLAY/UNDERLAY art split, hero
+  curve-deformer chains with offset modules, cutter pairs
+  keyed on the palette's Cutter matte colour, turnaround
+  transformation switches, hero colour-override switches —
+  with the measured production census recorded as the tier
+  budget the scaffold is grown toward.
+- Substitution charts: head/eye/brow angle charts (F/3Q/P/PQB
+  family; eyes at 4 lid variants per angle), mouths as the
+  Blair 10 per angle (F/3Q/P) + expression mouths per angle,
+  floored at the measured 44 drawings (standard band 44-48);
+  hand charts sized by tier (14 standard; hero measured
+  105 L / 107 R); an -empty drawing reserved per element —
+  visibility by substitution, never by deleting.
+- Palette discipline: real .plt text (ToonBoom palette file
+  format), LINKed from a single source (never embedded),
+  utility palettes travelling with the template, and the
+  functional colours `rig` (alpha 0) and `Cutter` (pure
+  green) validated exactly.
+- Settei + cleanup validators: the five-section model-pack
+  completeness check (sections filled; CG section present
+  exactly when CG assists are used; per-character
+  completeness; creatures grouped by stage line at
+  consistent scale; props ordered by story importance;
+  environments with multiple angles + a character-in-space
+  scale diagram), and sheet/puppet checks for the universal
+  line-weight declaration, the graded line-quality class,
+  body-under-clothes construction on costumed humans, and
+  the mouth-discipline record.
+- Puppet packages built with construction="harmony" carry a
+  harmony/ folder (network, charts, palette record + .plt);
+  the validator runs the network/palette/chart checks and
+  the sheet checks alongside the standing rules.
+- Tests: 48/48 pass in the BlairWitch tree (31 pre-existing
+  + 17 new addendum-wiring tests, tamper cases included);
+  end-to-end CLI runs built and validated flash and harmony
+  puppet packages.
+
+**Open dependency (named, not faked):** the cast build-out
+(PR #35 — human model sheets, pilot-six §2 palette sheets,
+the two height charts, the SHARED hands library) merged to
+main (67ecf40e) while this wiring was in flight, and
+PR #37 has since registered its outputs CURRENT in these
+same registries — but they were built before the
+addendum's validators existed and have not been re-run
+through them (the §B cleanup declarations and the settei
+per-sheet record are BlairWitch sheet-format checks; the
+cast sheets are markdown/PNG production sheets). A follow-up
+pass re-checks them and records the result; this entry does
+not claim it.

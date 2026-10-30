@@ -1,5 +1,16 @@
 # ADDENDUM 2026-10-30 — Harmony rig kit + settei/design-rules kit
 ### Companion to RIG-AND-SHEET-SPEC.md and DONOR-PROVENANCE-2026-10-29.md
+### Implemented in code: BlairWitch v0.4.0 (`mhvnsnt/BlairWitch`, PR #2)
+
+The Harmony rig kit in this addendum is wired into BlairWitch as
+`blairwitch.harmony` — node-graph scaffold (master peg, region
+composites, curve deformers, cutters), angle-coded substitution
+charts, linked .plt palette discipline — behind the
+`construction="harmony"` rig/puppet profile. The settei
+five-section standard is its model-pack builder/validator, and
+the design & cleanup rules are sheet/puppet validator checks.
+Registered CURRENT alongside the base spec in this folder's
+README, the TOOLING-INDEX and the METHOD-REGISTRY.
 
 Lands the construction kit recovered by the 2026-10-30 donor hunt
 (owner order: hunt everywhere — repos and the open internet — and

@@ -234,6 +234,32 @@ a superseded asset under the current-version law.
   format's artifacts; it re-marks no method and changes no
   gate.
 
+### Method reference — Harmony + settei addendum (registered 2026-10-30)
+
+- **The reference:** `show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md`
+  — the CURRENT extension of the rig-and-sheet standard,
+  landed via PR #34 (2026-10-30): the Harmony node-graph
+  construction profile (master peg, region composites, curve
+  deformers, cutter pairs; measured hero-vs-standard
+  budgets), angle-coded substitution charts (F/3Q/P/PQB;
+  mouths at the measured 44-48; hero hand charts 105/107),
+  the .plt palette discipline (LINKed single source; `rig`
+  alpha-0 and `Cutter` matte functional colours), the settei
+  five-section model-pack completeness standard, and the
+  design & cleanup rules (universal line weight,
+  body-under-clothes construction, mouth discipline) that
+  map onto defects already logged in this pipeline.
+- **Implemented in code:** BlairWitch v0.4.0
+  (`mhvnsnt/BlairWitch`, PR #2) — the `blairwitch.harmony`
+  scaffold + validators behind the `construction="harmony"`
+  rig/puppet profile, the settei model-pack
+  builder/validator, and the cleanup-rule sheet checks in
+  the puppet validator.
+- **Status:** registered as a CURRENT method reference
+  alongside the base rig-and-sheet standard. It extends that
+  standard for Harmony-profile construction and pack
+  completeness; it supersedes no method and changes no gate.
+
 ### Remainders-pass registrations — 2026-10-28 (documentation landing package)
 
 Applied from `method-registry-update.md` in the 2026-10-28
@@ -680,6 +706,22 @@ for yourself and the agents, so we never regress.*
   turnarounds ×3, expression sets — gate H-2 NOT PASS, hands
   v2 poses, Lustre palette deltas). This closes the open
   dependency named in the wiring entry above.
+
+- **2026-10-30 — Harmony + settei addendum registered as a
+  CURRENT method reference alongside the base standard; no
+  method re-marked.** The donor-hunt addendum
+  (`show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md`,
+  PR #34) extends the rig-and-sheet standard with the Harmony
+  construction profile, the settei five-section pack standard
+  and the design & cleanup rules, and it is wired into code
+  the same day: BlairWitch v0.4.0 (mhvnsnt/BlairWitch, PR #2)
+  implements the Harmony scaffold and validators, the
+  model-pack builder/validator, and the cleanup-rule sheet
+  checks. Registry cross-links added in
+  `show/production/rigs/README.md` and
+  `show/production/tooling/TOOLING-INDEX.md`. The cast
+  build-out (PR #35, registered by PR #37) is tracked
+  separately; nothing in this entry marks it done.
 
 ---
 
