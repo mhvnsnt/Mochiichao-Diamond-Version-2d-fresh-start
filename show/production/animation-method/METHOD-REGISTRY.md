@@ -191,6 +191,36 @@ a superseded asset under the current-version law.
   carries the written-vs-wired coverage table for the whole
   corpus.
 
+### Method reference — Rig-and-sheet standard (registered 2026-10-30)
+
+- **The reference:** `show/production/rigs/RIG-AND-SHEET-SPEC.md`
+  — the donor-measured standard for model sheets (§1, incl.
+  the two §1c height charts: principal and secondary casts are
+  separate charts), palette sheets (§2: base swatches as CMYK
+  percentages in the Dominant/Support/Accent/Ink discipline,
+  sanctioned 50%/75% tints, variants as delta blocks), puppet
+  construction (§3: root stack, four-piece masked eye system,
+  mouth as a frame-chart symbol, pose-frame limbs + torso_move,
+  view-code part naming, part-per-file linked libraries, the
+  locked SHARED hands library, overlap skirts), and the
+  compositing glue gate (§4). Measured from real production
+  files; per-source record in
+  `show/production/rigs/DONOR-PROVENANCE-2026-10-29.md`.
+  Landed via PR #145 (2026-10-30).
+- **Implemented in code:** BlairWitch (`mhvnsnt/BlairWitch`,
+  v0.3.0, PR #1) emits and validates this standard —
+  palette engine, sheet generator, rig scaffold, puppet
+  packages, and the palette-format / part-naming /
+  hands-library validator checks. Sheets and rigs produced
+  for any current method are produced with that tool, in
+  this format.
+- **Status:** registered as a CURRENT method reference. It
+  supports the Industry Method (whose sheet generation this
+  format governs); it supersedes no method and changes no
+  gate. The per-cast build-out the spec enables (human model
+  sheets, pilot-six §2 palette sheets, the height charts, the
+  shared hands library) is tracked in the spec's §6 gap list.
+
 ### Remainders-pass registrations — 2026-10-28 (documentation landing package)
 
 Applied from `method-registry-update.md` in the 2026-10-28
@@ -606,6 +636,24 @@ for yourself and the agents, so we never regress.*
   (superseding the "cannot run headless" blocker). Applied from
   the package's `method-registry-update.md`; that update doc is
   not landed as a file. No existing entry was re-marked.
+
+- **2026-10-30 — Rig-and-sheet standard registered as a CURRENT
+  method reference; no method re-marked.** The donor-measured
+  `show/production/rigs/RIG-AND-SHEET-SPEC.md` (PR #145) is the
+  governing format for model sheets, palette sheets and puppet
+  construction under the current methods, and it is wired into
+  code the same day: BlairWitch v0.3.0 (mhvnsnt/BlairWitch,
+  PR #1) implements the palette engine (§2 CMYK +
+  sanctioned tints), the sheet generator (§1 sections + §1c
+  height-chart entries), the §3 construction in its rig
+  scaffold and puppet packages (root stack, eye system, mouth
+  frame-chart, part naming, part files, SHARED hands,
+  open-movie constraint assignments), and the extended puppet
+  validator. Registry cross-links added in
+  `show/production/rigs/README.md` and
+  `show/production/tooling/TOOLING-INDEX.md`. The cast build-out
+  the spec enables (spec §6) is tracked separately; nothing in
+  this entry marks it done.
 
 ---
 

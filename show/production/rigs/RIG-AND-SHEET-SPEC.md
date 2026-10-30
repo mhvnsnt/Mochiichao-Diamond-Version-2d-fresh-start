@@ -10,6 +10,17 @@ productions used, re-stated for our cast, in our naming, under our
 laws (no baked-in shadows; shadows at composite; likeness from repo
 canon art only).
 
+**Implementation (wired 2026-10-30).** This standard is
+implemented in code by **BlairWitch** (`mhvnsnt/BlairWitch`,
+v0.3.0, PR #1) — its palette engine emits and validates §2
+palette sheets, its sheet generator emits the §1 format with the
+§1c height-chart entries, its rig scaffold and puppet packages
+carry the §3 construction (root stack, eye system, mouth chart,
+part naming, part files, SHARED hands, constraint assignments),
+and its validator enforces the palette-format, part-naming and
+hands-library rules. Production work uses that tool rather than
+hand-formatting sheets or rigs.
+
 **How it sits with what exists.** This spec *extends*, never
 replaces: the rig standard in `README.md` (naming
 `MC[ep]ORIGINAL_PUPPET_[CHARACTER]_VERSION_[###]`, 24 FPS, Graphic

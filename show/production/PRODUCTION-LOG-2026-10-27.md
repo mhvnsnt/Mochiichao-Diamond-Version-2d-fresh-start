@@ -1926,3 +1926,77 @@ Google Flow / Veo 3.1 Lite, composite-first recipe, gate-recorded by the loop 20
 - V3-004 seg1: EP01-V3-004-flow-kittember-seg1.mp4 — gate PASS (loop record 2026-10-29): Kittember asleep on the gate post, eyes closed, tail flame burning in last frame; background persistent; no camera move.
 
 V3-004 seg2 retired under the reshot plan (beat already inside seg1); V3-001/002/003/004 now complete as shot coverage.
+
+
+## 2026-10-30 — Rig-and-sheet spec (PR #145) wired: registered CURRENT + implemented in BlairWitch
+
+PR #145 landed the donor-measured rig-and-sheet standard
+(`show/production/rigs/RIG-AND-SHEET-SPEC.md` — model-sheet
+format §1, palette format §2, puppet construction §3,
+compositing glue §4, open-movie folder discipline §5, per-cast
+gap list §6; provenance in `DONOR-PROVENANCE-2026-10-29.md`).
+This entry records the wiring, per the land-and-wire standing
+order — a spec in a folder is not done until the systems that
+consume it point at it and the tool that produces to it
+implements it.
+
+**Registered as the CURRENT standard, in the places production
+work actually reads:**
+- `show/production/rigs/README.md` — the standard bullet added
+  to the rig standard (sheet/palette/construction formats +
+  the two §1c height charts + SHARED hands + part naming), and
+  the Files list now names the spec, the provenance record and
+  the open-movie kit as current.
+- `show/production/tooling/TOOLING-INDEX.md` — BlairWitch added
+  as a Class A tool (canonical home `mhvnsnt/BlairWitch`); the
+  rig-and-sheet standard added as a Class B carried-in spec,
+  marked CURRENT; gray case 1 updated: the Big Buck Bunny
+  pyconstraints decision now records the verbatim CC-BY carry
+  (PR #145) and the BlairWitch wiring.
+- `show/production/animation-method/METHOD-REGISTRY.md` — the
+  standard registered as a CURRENT method reference (sheet
+  generation under the Industry Method follows this format);
+  change-log entry added; no method re-marked.
+- `show/production/rigs/RIG-AND-SHEET-SPEC.md` — header now
+  names its implementation (BlairWitch v0.3.0) so a reader
+  lands on the tool, not just the text.
+
+**Implemented in code — BlairWitch v0.3.0 (`mhvnsnt/BlairWitch`,
+PR #1, not merged at this log entry's writing):**
+- Palette engine (§2): CMYK-% base swatches
+  (Dominant/Support/Accent/Ink), pre-computed sanctioned
+  50%/75% tints, variant delta blocks, format validator;
+  `blairwitch palette-sheet`.
+- Sheet generator (§1): §1a sections in order, height-chart
+  entry against the two §1c charts, §2 palette sheet attached
+  to the sheet JSON/SVG, human §1b hands-set + costume
+  sections; `blairwitch height-chart`.
+- Puppet construction (§3): rig scaffold emits the root stack
+  (§3a), the four-piece masked eye system (§3b), the mouth
+  frame-chart — Blair 1–10 + expression mouths 11+, ≥25-frame
+  standard (§3c), pose-frame limbs + `torso_move` (§3d),
+  view-code part names `<view>-<part><L/R>-<###>` (FR/TQ/SD/BK),
+  part-per-file linked libraries and the locked SHARED/hands
+  reference (§3f), overlap skirts (§3g). Puppet packages carry
+  `parts/*.lib.json` and a `constraints/` folder; the validator
+  now checks palette format, part naming and the hands-library
+  reference alongside the standing no-baked-shadows + ROM rules.
+- Constraints (§5 kit): the five Big Buck Bunny pyconstraints
+  carried verbatim as BlairWitch package data (CC-BY 3.0,
+  Blender Foundation; blob SHAs match this repo's copies),
+  registered in `blairwitch.constraints` with modern ports of
+  the separable maths (volume preservation, foot roll,
+  rotation difference); rigs assign them by name to the parts
+  they govern.
+- Tests: 31/31 pass in the BlairWitch tree (12 pre-existing +
+  19 new spec-wiring tests); end-to-end CLI run built and
+  validated pilot puppets; a pip install confirms the verbatim
+  scripts ship as package data.
+
+**Open dependency (named, not faked):** the cast build-out the
+spec enables (§6: human model sheets for Mochiko/Hex/Aeon,
+pilot-six §2 palette sheets, the two height charts, the shared
+hands library) runs as its own build and had not landed a PR
+at this wiring's check. When it lands, its outputs get
+registered CURRENT in the rigs README / TOOLING-INDEX in a
+follow-up — this entry does not claim them.
