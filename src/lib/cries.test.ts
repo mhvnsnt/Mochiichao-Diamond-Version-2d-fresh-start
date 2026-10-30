@@ -1,12 +1,17 @@
 import { describe, it, expect } from "vitest";
 import { cryUrl, speciesWithCry } from "./cries";
 import speciesData from "../data/core/species.json";
-// The pilot-six parameter source of truth lives in the show teardown
-// package; the game consumes it verbatim, never forks it.
+// The pilot-six parameter source of truth lives in the show package
+// inside this repo (show/production/tooling/species-systems/); the game
+// consumes it verbatim, never forks it. The path is repo-relative so
+// the suite runs anywhere the repo is checked out: the old path reached
+// outside the repo to a sibling checkout, which does not exist on CI
+// runners — the read died with ENOENT at import time and failed
+// collection for the whole file (the ci-budgets red on every PR).
 import { readFileSync } from "node:fs";
 const pilotSix = JSON.parse(
   readFileSync(
-    new URL("../../../../mochiichao-show/teardowns/species-systems/tools/pilot_six_cries.json", import.meta.url),
+    new URL("../../show/production/tooling/species-systems/pilot_six_cries.json", import.meta.url),
     "utf8",
   ),
 );
