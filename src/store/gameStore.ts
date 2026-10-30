@@ -11,6 +11,7 @@ import type { KeepsakeFact } from '../lib/itemMeaning';
 import { GameSettings, DEFAULT_SETTINGS, loadStoredSettings, persistSettings } from '../lib/gameSettings';
 import { deriveRangerMaxHp, applyRangerDamage, applyRangerHeal, applyRangerFullHeal } from '../lib/rangerDefense';
 import { setAutosaveHold, getAutosaveHold } from '../lib/saveSystem';
+import type { WorldClockAnchor } from '../lib/worldClock';
 import { applyFontRoles } from '../lib/fonts';
 import { applySoundMode } from '../lib/audioRouting';
 
@@ -49,6 +50,17 @@ interface GameState {
   // Preserved from Chao Garden PR #225 (live main): Garden minutes.
   gardenMinutes: number;
   setGardenMinutes: (minutes: number) => void;
+
+  // World clock (gap-fill S1, CLOCK-FROM-POKEMON §3.2): the anchor
+  // is the ONLY stored clock state. Phase, weekday, season and
+  // day-of-year are derived from it by src/lib/worldClock.ts and
+  // are never stored. Null = not yet anchored (old saves, and
+  // fresh games before their first WorldEngine tick); the engine
+  // anchors a new game at day 0, 10:00 via newGameAnchor(). Old
+  // saves carry no field and load with null through loadState's
+  // spread, exactly like the ledger/living-world defaults above.
+  worldClock: WorldClockAnchor | null;
+  setWorldClock: (anchor: WorldClockAnchor) => void;
   // Creature Mode Pass 7 — Daycare steps: persisted tile steps taken
   // in Creature Mode while a Guardian is assigned (deposited).
   // FireRed daycare.c: steps accumulate for deposited creatures
@@ -241,6 +253,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   setGuardian: (guardian) => set({ guardian }),
   gardenMinutes: 0,
   setGardenMinutes: (minutes) => set({ gardenMinutes: minutes }),
+  worldClock: null,
+  setWorldClock: (anchor) => set({ worldClock: anchor }),
   daycareSteps: 0,
   setDaycareSteps: (steps) => set({ daycareSteps: steps }),
   daycarePartner: null,

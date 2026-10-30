@@ -6,7 +6,8 @@ import PixiWorldCanvas from "../components/game/PixiWorldCanvas";
 import type { NpcWalkState } from "../components/game/PixiWorldCanvas";
 import CreaturePortrait from "../components/game/CreaturePortrait";
 import { PauseMenu, WorldHud } from "../components/game/GameShell";
-import { getDayPhase, DAY_TINT, DAY_AMBIENT, WEATHER_CONFIG } from "./WorldConstants";
+import { DAY_TINT, DAY_AMBIENT, WEATHER_CONFIG } from "./WorldConstants";
+import { deriveWorldState, checkRollover, newGameAnchor } from "../lib/worldClock";
 import SaveMenu from "../components/SaveMenu";
 import { saveGame, getSaves } from "../lib/saveSystem";
 import { SPECIES_DB } from '../lib/species';
@@ -224,16 +225,52 @@ export function battleMonName(mon: any): string {
   return mon.name || mon.nickname || SPECIES_DB[mon.speciesId || mon.id]?.name || "Mochiichao";
 }
 
+/**
+ * Gap-fill S1 (CLOCK-FROM-POKEMON §3.4): the engine is the ONE
+ * driver of the world clock. The old hook kept its own simulated
+ * hour in useState (10, +1 per 15 s) and derived the phase from
+ * WorldConstants.getDayPhase — a second phase producer that no
+ * other system read. This hook reads the store's `worldClock`
+ * anchor and derives the state from src/lib/worldClock.ts on
+ * each tick, so canvas, HUD and every later consumer share one
+ * phase. Return shape stays { gameHour, phase, tint, ambient }
+ * compatible (phase is now the producer's gamePhase, which uses
+ * the same dawn/day/dusk/night vocabulary the canvas tint table
+ * already keys on), plus `state` for consumers moving over one
+ * by one. Rollover: this hook is the single fan-out site — when
+ * a read's dayIndex passes the anchor's lastSeenDayIndex it
+ * persists the advanced marker; the daily HANDLERS themselves
+ * land with their own steps, and this hook owns no daily logic.
+ * Rate is preserved exactly: 4 game-minutes per real second
+ * (1 game hour per 15 real seconds, the old hook's rate).
+ */
 export function useDayNight(tickMs = 1000) {
-  const [gameHour, setGameHour] = useState(10);
+  const worldClock = useGameStore(s => s.worldClock);
+  const setWorldClock = useGameStore(s => s.setWorldClock);
+  const [tick, setTick] = useState(0);
+  // Anchor an unanchored game (fresh game, or an old save with no
+  // anchor field) at day 0, 10:00 — the old hook's start hour.
   useEffect(() => {
-    const interval = setInterval(() => {
-      setGameHour(h => (h + 1) % 24);
-    }, tickMs * 15);
+    if (!worldClock) setWorldClock(newGameAnchor(Date.now()));
+  }, [worldClock, setWorldClock]);
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), tickMs);
     return () => clearInterval(interval);
   }, [tickMs]);
-  const phase = getDayPhase(gameHour);
-  return { gameHour, phase, tint: DAY_TINT[phase], ambient: DAY_AMBIENT[phase] };
+  // Before the anchor effect lands, derive transiently from a
+  // fresh day-0 10:00 anchor so the first paint is already 10:00.
+  const anchor = worldClock ?? newGameAnchor(Date.now());
+  const state = deriveWorldState(anchor, Date.now());
+  // Rollover fan-out site (once per tick, effect — never in render).
+  useEffect(() => {
+    if (!worldClock) return;
+    const current = deriveWorldState(worldClock, Date.now());
+    const { daysPassed, nextAnchor } = checkRollover(worldClock, current);
+    if (daysPassed > 0) setWorldClock(nextAnchor);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tick]);
+  const phase = state.gamePhase;
+  return { gameHour: state.hour, phase, tint: DAY_TINT[phase], ambient: DAY_AMBIENT[phase], state };
 }
 
 export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any, setBattleEnemy?: any }) {

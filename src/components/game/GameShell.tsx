@@ -7,7 +7,7 @@ import { UI_ART } from '../../lib/uiArt';
 import { MenuList, MenuHelpLine } from './MenuList';
 import { useMenuLayout } from '../../lib/menuLayoutLive';
 import { getActiveMenuConfig } from '../../lib/menuEditor';
-import { getDayNightMenuVariant, dayNightMenuVarStyle } from '../../lib/dayNightMenuVariants';
+import { getDayNightMenuVariant, getWorldMenuVariant, dayNightMenuVarStyle } from '../../lib/dayNightMenuVariants';
 import { playCue } from '../../lib/soundCues';
 
 /** In-game pause menu (X / Esc / Menu button). Real game buttons, no brackets. */
@@ -38,7 +38,13 @@ export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle
   // Panel background, labels, margins, fonts, and cursor glyphs
   // are untouched here — the pause panel's background is the
   // Y2K skin class, which the skins work (PR #151) owns.
-  const dnVariant = getDayNightMenuVariant();
+  // S1 TAIL: the pause menu reads the world clock when the save is
+  // anchored; unanchored saves fall back to the device-clock
+  // variant, exactly as before (the engine anchors on its first tick).
+  const worldClockAnchor = useGameStore(s => s.worldClock);
+  const dnVariant = worldClockAnchor
+    ? (getWorldMenuVariant(worldClockAnchor) ?? getDayNightMenuVariant())
+    : getDayNightMenuVariant();
 
   // Framed window OVER the world (overlay dims the world, the window is
   // centred, the world stays visible around it — not a blank
