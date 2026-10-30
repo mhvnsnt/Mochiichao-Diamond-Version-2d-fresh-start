@@ -23,7 +23,7 @@ import { resolveTrainerRow, rowToMapMembers } from "../lib/trainer-teams-resolve
 import { planForOutcome, commitRecipientExp, commitNextLevel, expProgressInLevel, type PayoffPlan } from "../lib/battlePayoff";
 import { useBattlePayoffSequence, PayoffStatWindow } from "../components/game/BattlePayoffSequence";
 import { resolveWorldMove, buildWorldAttackPresentation } from "../lib/worldMoveBridge";
-import { worldBattleHit, worldCanActGateLine, worldCheckCanAct } from "../lib/worldBattleCore";
+import { worldBattleHit, worldCanActGateLine, worldCheckCanAct, worldEndTurnTick, worldStatusTickLine } from "../lib/worldBattleCore";
 import BattleSceneBackdrop from "../components/game/BattleSceneBackdrop";
 import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackground";
 import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
@@ -2037,6 +2037,261 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     npc: { id: "prof_aeon", name: "Prof. Aeon" },
   });
 
+  // Gap-fill S6 step 5: the foe-faint and player-faint transitions,
+  // factored out of the inline branches below so the end-of-round
+  // tick can run them too (a tick that faints a battler must run
+  // the same payoff / send-out / blackout flow as a move that
+  // faints it — no second, divergent faint path). The bodies are
+  // the inline blocks verbatim, dedented; the branches below now
+  // call these instead of carrying the code inline.
+  const handlePlayerFaint = (bs: any, updatedPlayer: any, newLog: string[], freshTeam: any[]) => {
+    playCue('battle.faint');
+    newLog.push(`${battleMonName(bs.player)} fainted!`);
+    // v5.1 HP: a mon with hp 0 and no currentHp is fainted, not
+    // alive — the old check (currentHp ?? maxHp) would have
+    // treated it as alive at full HP.
+    const nextAlive = freshTeam.findIndex((m, i) => i > bs.playerTeamIdx && ((m.currentHp ?? m.hp) ?? m.maxHp) > 0);
+    if (nextAlive === -1) {
+      newLog.push("You have no more Mochiichao! You blacked out...");
+      setBattleState({ ...bs, player: updatedPlayer, log: newLog, phase: "over" });
+      // v5.1: banner blocks until Continue — no 2500ms timer.
+      // The cleanup below is identical to the old timer body,
+      // except the blackout heal now writes BOTH hp and
+      // currentHp (old code wrote currentHp only, so Team
+      // showed full HP while the next battle entered damaged).
+      pendingBattleEndRef.current = () => {
+        setBattleState(null);
+        // Audit-plan blackout rule (decomp-derived, NOT the old
+        // 30% heal): lose HALF the wallet, rounded down, floor
+        // 0 — no cap value was verified in the decomp data
+        // audited, so no cap is invented here. Return to the
+        // last heal point visited (home Sector 0 if none yet:
+        // Mom heals there). Do NOT heal the party on blackout:
+        // fainted/damaged members stay that way until a healer
+        // NPC or an item heals them. SOLO-PLAYABILITY WARNING,
+        // stated plainly: a player who blacks out with an all-
+        // fainted party must walk to a healer before battling
+        // again; that is the decomp rule, not a softlock fix.
+        // (Mars gave no blackout-heal concession percentage, so
+        // the 30% heal is removed, not kept as a concession.)
+        useGameStore.setState(s => ({ wallet: Math.max(0, Math.floor(s.wallet / 2)) }));
+        const ret = lastHealRef.current || { map: 'sector0', pos: { x: 15, y: 18 } };
+        setMapState(ret.map, ret.pos);
+        notify("You blacked out and were sent back...", "#ff5252");
+        // v5: goal after a loss too (see hexGoalDialog above).
+        // This dialogue states the goal once, then finishDialog
+        // returns to the overworld. It never re-gifts cubes.
+        if (bs.npcId === 'hex_battle_event' && !completedEvents.includes('v4_hex_goal')) {
+          setDialog(hexGoalDialog());
+          setScreen("dialog");
+        } else {
+          setScreen("overworld");
+        }
+      };
+    } else {
+      playCue('battle.switch');
+      newLog.push(`Go, ${battleMonName(freshTeam[nextAlive])}!`);
+      const switchHp = (freshTeam[nextAlive].currentHp ?? freshTeam[nextAlive].hp) ?? freshTeam[nextAlive].maxHp;
+      setBattleState({ ...bs, player: { ...freshTeam[nextAlive], name: battleMonName(freshTeam[nextAlive]), currentHp: switchHp, hp: switchHp }, playerTeamIdx: nextAlive, log: newLog, phase: "menu" });
+    }
+  };
+
+  const handleFoeFaint = (bs: any, enemyMon: any, newLog: string[], animMs: number) => {
+    playCue('battle.faint');
+    newLog.push(`${enemyMon.name} fainted!`);
+    if (bs.type === "wild") {
+      // Stub-kill S-7: battle-end drop read — a defeated wild
+      // transfers its carried item through the defeat channel,
+      // once, into the real inventory. Kept individuals keep
+      // theirs; fled battles transfer nothing (resolveBattleEndDrop).
+      const dropItem = resolveBattleEndDrop(bs.wild.heldItem ?? null, "defeat", bs.wild.speciesId);
+      if (dropItem) {
+        useGameStore.getState().addItem(dropItem);
+        newLog.push(`The wild ${enemyMon.name} dropped a ${DROP_ITEM_NAMES[dropItem] ?? dropItem}!`);
+      }
+      // Item meaning S-IM1: a won battle walked in Mom's boots
+      // is a keepsake fact; when the derived band rises, the
+      // rise SPEAKS in the log — the visible cue #180's
+      // declaration law requires of any keepsake effect.
+      {
+        const kst = useGameStore.getState();
+        if (kst.hasSprintBoots) {
+          const before = keepsakeBand(kst.keepsakeLog, "sprint_boots").band;
+          kst.appendKeepsakeFact({ itemId: "sprint_boots", kind: "battle-won-with" });
+          const after = keepsakeBand(useGameStore.getState().keepsakeLog, "sprint_boots");
+          if (after.band !== before) newLog.push(`The Sprint Boots feel different now. ${after.word}`);
+        }
+      }
+      // GAP-FILL S0 (G-8 dex-key fix): same keying as the catch
+      // write above — the wild battle mon carries speciesId
+      // (bs.wild.speciesId), while enemyMon.id is its instance id.
+      setDex(d => ({ ...d, [enemyMon.speciesId]: d[enemyMon.speciesId] === "caught" ? "caught" : "seen" }));
+      // Payoff (lib/battlePayoff.ts): the source EXP sequence
+      // replaces the old stub, which rolled a random XP number
+      // into a `xp` field on the member that NOTHING reads (the
+      // store tracks `experience`; gainExp was never called, so
+      // overworld battles never levelled anyone). The finishing
+      // member is the participant of record — this host runs
+      // single-active battles and the game has no held items,
+      // so there is no share split to model. The VICTORY banner
+      // still gates the exit afterwards, unchanged (v5.1). A
+      // member that cannot take a payoff (legacy flat battle
+      // shape) keeps the old instant path to the banner.
+      const plan = planForOutcome('foeFainted', playerTeam, { speciesId: bs.wild.speciesId, level: bs.wild.level || 5 }, { participants: [bs.playerTeamIdx], activeIndex: bs.playerTeamIdx, trainerBattle: false, endsBattle: true, expMultiplier: useGameStore.getState().expMultiplier });
+      // Sound composition (2026-10-29): the wild-win jingle
+      // (MUS_VICTORY_WILD slot) fires as the payoff sequence
+      // opens — one seat covers the sequence path and the
+      // no-recipients fallback below.
+      playVictoryJingle('wild');
+      if (plan.recipients.length > 0) {
+        setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "payoff" });
+        pendingPayoffRef.current = () => {
+          setBattleState((prev: any) => prev ? { ...prev, phase: "over" } : prev);
+          // v5.1: banner blocks until Continue — no 2000ms timer.
+          pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
+        };
+        setPayoffUi({ plan, moneyText: null, moneyAmount: 0 });
+      } else {
+        setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "over" });
+        // v5.1: banner blocks until Continue — no 2000ms timer.
+        pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
+      }
+    } else {
+      const newTeam = [...bs.trainerTeam];
+      newTeam[bs.trainerTeamIdx] = { ...enemyMon, currentHp: 0 };
+      const nextAlive = newTeam.findIndex((m, i) => i > bs.trainerTeamIdx && m.currentHp > 0);
+      const isFinalWin = nextAlive === -1;
+      // Payoff (lib/battlePayoff.ts): the source runs the EXP
+      // sequence PER FAINTED FOE, mid-battle too (Task_GetExp),
+      // so the beats play now and the send-out / victory flow
+      // below resumes when the sequence finishes. Before this,
+      // trainer faints granted no XP at all, and the final win
+      // credited bs.reward SILENTLY — no text anywhere. The
+      // money is now the sequence's closing beat on the final
+      // win ("You got {reward} Credits for winning!"); when no
+      // member can take a payoff (legacy flat shape), the old
+      // instant path runs unchanged, silent credit included.
+      const plan = planForOutcome('foeFainted', playerTeam, { speciesId: enemyMon.speciesId || enemyMon.id, level: enemyMon.level || 5 }, { participants: [bs.playerTeamIdx], activeIndex: bs.playerTeamIdx, trainerBattle: true, endsBattle: isFinalWin, expMultiplier: useGameStore.getState().expMultiplier });
+      const continueAfterPayoff = (moneyShown: boolean) => {
+      if (isFinalWin) {
+        // Sound composition (2026-10-29): trainer-win jingle
+        // (MUS_VICTORY_TRAINER slot; dojo wins share it) at the
+        // victory flow — both the sequence path and the direct
+        // fallback call arrive here exactly once.
+        playVictoryJingle('trainer');
+        newLog.push(`${bs.trainerName} was defeated!`);
+        if (bs.isDojo) { setBadges(b => [...b, bs.badge]); playCue('ritual.badge'); newLog.push(`You received the ${bs.badge}!`); }
+        if (!moneyShown) setCredits(c => c + bs.reward);
+        setDefeatedTrainers(dt => [...dt, bs.npcId]);
+        setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "over" });
+        // v5.1: banner blocks until Continue — no 2500ms timer.
+        // The cleanup below is identical to the old timer body.
+        pendingBattleEndRef.current = () => {
+          setBattleState(null);
+          // v4 step 7: after the Hex first battle (win), Aeon
+          // states the goal in dialogue, in order — dojos,
+          // Champion Mythar, Hackers/Syndicate — not in a menu
+          // header. The MochiDex + 5 Luigi Cubes were already
+          // given at the starter beat (see handleChoice); this
+          // dialogue names the goal, it does not re-gift.
+          // Win OR lose the flow continues: a loss blacks out
+          // and reaches the goal via its own branch (v5), so
+          // this win branch and the loss branch share the same
+          // goal dialogue; the route gate is unaffected either way.
+          if (bs.npcId === 'hex_battle_event' && !completedEvents.includes('v4_hex_goal')) {
+            // v5: same goal dialogue as the loss path (hexGoalDialog).
+            setDialog(hexGoalDialog());
+            setScreen("dialog");
+          } else {
+            setScreen("overworld");
+          }
+        };
+      } else {
+        playCue('battle.switch');
+        newLog.push(`${bs.trainerName} sends out ${newTeam[nextAlive].name}!`);
+        // Refresh the player's battle copy from the store: the
+        // payoff may have levelled the member, and the rest of
+        // this battle fights with the new stats/HP (in this host
+        // the store member's hp tracks battle hp — doEnemyTurn
+        // writes both back every turn).
+        const fresh: any = (useGameStore.getState().party as any)[bs.playerTeamIdx];
+        const refreshed = fresh ? { ...fresh, name: battleMonName(fresh), currentHp: fresh.hp, hp: fresh.hp } : bs.player;
+        const nextBs = { ...bs, player: refreshed, trainerTeam: newTeam, trainerTeamIdx: nextAlive, log: newLog, phase: "enemy_turn" };
+        setBattleState(nextBs);
+        // Landing composition: move-completion's handoff rule
+        // (wait max(1200, animMs) so long profiles are not cut
+        // off) applied to the payoff flow's no-recipients branch.
+        setTimeout(() => doEnemyTurn(nextBs), Math.max(1200, animMs));
+      }
+      };
+      if (plan.recipients.length > 0) {
+        setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "payoff" });
+        pendingPayoffRef.current = () => continueAfterPayoff(true);
+        setPayoffUi({ plan, moneyText: isFinalWin ? `You got ${bs.reward} Credits for winning!` : null, moneyAmount: isFinalWin ? bs.reward : 0 });
+      } else {
+        continueAfterPayoff(false);
+      }
+    }
+  };
+
+  // Gap-fill S6 step 5: end-of-round status ticks (battle-math
+  // endTurnStatusDamage, via worldEndTurnTick — the resolver's
+  // rule). Runs only on a round's return to the menu (the enemy
+  // turn's menu returns, below); never on a faint branch, and
+  // never for a mon just sent out. Order is the resolver's
+  // (player, then foe). If a tick faints a battler, that side's
+  // factored faint transition runs and the round's tick phase
+  // ends there — in the double-faint edge the first-fainted
+  // side's transition wins, because the battle state it sets
+  // (payoff / send-out / blackout) replaces the round's state.
+  // The foe copy carries currentHp only (the host's foe-HP
+  // convention — its hp field is the battle-start value and
+  // is never the live HP); the player copy keeps hp and
+  // currentHp together (v5.1 sync), and the store copy is
+  // written back, as the non-faint enemy path already did.
+  const runEndOfRoundTicks = (baseBs: any, foeMon: any, playerMon: any, freshTeam: any[], baseLog: string[]) => {
+    const log = [...baseLog];
+    const pTick = worldEndTurnTick(playerMon);
+    let tickedPlayer = playerMon;
+    if (pTick.damage > 0) {
+      const pHp = Math.max(0, (playerMon.currentHp ?? playerMon.hp) - pTick.damage);
+      log.push(worldStatusTickLine(battleMonName(playerMon), pTick.status, pTick.damage));
+      tickedPlayer = { ...playerMon, currentHp: pHp, hp: pHp, ...(pTick.toxicCounter != null ? { toxicCounter: pTick.toxicCounter } : {}) };
+      if (pHp <= 0) { handlePlayerFaint(baseBs, tickedPlayer, log, freshTeam); return; }
+    }
+    const fTick = worldEndTurnTick(foeMon);
+    let tickedFoe = foeMon;
+    if (fTick.damage > 0) {
+      const fHp = Math.max(0, (foeMon.currentHp ?? foeMon.hp) - fTick.damage);
+      log.push(worldStatusTickLine(battleMonName(foeMon), fTick.status, fTick.damage));
+      tickedFoe = { ...foeMon, currentHp: fHp, ...(fTick.toxicCounter != null ? { toxicCounter: fTick.toxicCounter } : {}) };
+      if (fHp <= 0) {
+        // Write the player's tick back FIRST: the foe-faint send-out
+        // refreshes the player's battle copy from the store, and
+        // without this write that refresh would silently undo the
+        // player's tick damage for the rest of the battle.
+        if (pTick.damage > 0) {
+          const preFaintTeam = [...freshTeam];
+          preFaintTeam[baseBs.playerTeamIdx] = { ...preFaintTeam[baseBs.playerTeamIdx], currentHp: tickedPlayer.currentHp, hp: tickedPlayer.hp, ...("status" in tickedPlayer ? { status: tickedPlayer.status } : {}) };
+          setPlayerTeam(preFaintTeam);
+        }
+        handleFoeFaint(baseBs, tickedFoe, log, 1200); return;
+      }
+    }
+    let nextBs: any = { ...baseBs, player: tickedPlayer, log, phase: "menu" };
+    if (baseBs.type === "wild") {
+      nextBs = { ...nextBs, wild: tickedFoe };
+    } else {
+      const team = [...baseBs.trainerTeam];
+      team[baseBs.trainerTeamIdx] = tickedFoe;
+      nextBs = { ...nextBs, trainerTeam: team };
+    }
+    setBattleState(nextBs);
+    const updatedTeam = [...freshTeam];
+    updatedTeam[baseBs.playerTeamIdx] = { ...updatedTeam[baseBs.playerTeamIdx], currentHp: tickedPlayer.currentHp, hp: tickedPlayer.hp, ...("status" in tickedPlayer ? { status: tickedPlayer.status } : {}) };
+    setPlayerTeam(updatedTeam);
+  };
+
   const doEnemyTurn = (bs: any) => {
     // Four-fixes lane (Fix 2): read the party FRESH from the store.
     // playerTeam is a render-time alias of the same array, but a
@@ -2068,7 +2323,10 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           gatedBs = { ...bs, trainerTeam: gatedTeam };
         }
       }
-      setBattleState({ ...gatedBs, log: gateLog, phase: "menu" });
+      // Gap-fill S6 step 5: a gated enemy turn still ends the round
+      // (the player already acted), so the tick phase runs here on
+      // the gated foe copy, not on the pre-gate one.
+      runEndOfRoundTicks(gatedBs, gatedBs.type === "wild" ? gatedBs.wild : gatedBs.trainerTeam[gatedBs.trainerTeamIdx], bs.player, freshTeam, gateLog);
       return;
     }
     // v5.2: an empty moves array is truthy, so the old fallback
@@ -2085,7 +2343,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // this branch is a guard, not an expected path.
     const resolvedEnemyMove = resolveBattleMove(chosenMove);
     if (!resolvedEnemyMove) {
-      setBattleState({ ...bs, log: [...bs.log, `${battleMonName(enemy)} used ${chosenMove}!`, `But it could not be resolved — no damage dealt.`], phase: "menu" });
+      runEndOfRoundTicks(bs, enemy, bs.player, freshTeam, [...bs.log, `${battleMonName(enemy)} used ${chosenMove}!`, `But it could not be resolved — no damage dealt.`]);
       return;
     }
     const chosenMoveDisplay = resolvedEnemyMove.display;
@@ -2145,10 +2403,10 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           `${playerName} took ${res.dealt} damage!`,
           ...(res.downedNow ? [`${playerName} is DOWN! He took the hit — now he needs healing.`] : []),
         ];
-        setBattleState({ ...bs, log: defendLog, phase: "menu" });
-        const updatedTeam = [...freshTeam];
-        updatedTeam[bs.playerTeamIdx] = { ...updatedTeam[bs.playerTeamIdx], currentHp: bs.player.currentHp, hp: bs.player.currentHp };
-        setPlayerTeam(updatedTeam);
+        // Gap-fill S6 step 5: a defended hit still ends the round,
+        // so the tick phase runs here too (the Ranger took the hit,
+        // the battlers' own statuses still tick).
+        runEndOfRoundTicks(bs, enemy, bs.player, freshTeam, defendLog);
         return;
       }
     }
@@ -2177,62 +2435,12 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     const updatedPlayer = { ...bs.player, currentHp: newHp, hp: newHp, ...(enemyStatusApplied ? { status: enemyStatusApplied } : {}) };
 
     if (newHp <= 0) {
-      playCue('battle.faint');
-      newLog.push(`${battleMonName(bs.player)} fainted!`);
-      // v5.1 HP: a mon with hp 0 and no currentHp is fainted, not
-      // alive — the old check (currentHp ?? maxHp) would have
-      // treated it as alive at full HP.
-      const nextAlive = freshTeam.findIndex((m, i) => i > bs.playerTeamIdx && ((m.currentHp ?? m.hp) ?? m.maxHp) > 0);
-      if (nextAlive === -1) {
-        newLog.push("You have no more Mochiichao! You blacked out...");
-        setBattleState({ ...bs, player: updatedPlayer, log: newLog, phase: "over" });
-        // v5.1: banner blocks until Continue — no 2500ms timer.
-        // The cleanup below is identical to the old timer body,
-        // except the blackout heal now writes BOTH hp and
-        // currentHp (old code wrote currentHp only, so Team
-        // showed full HP while the next battle entered damaged).
-        pendingBattleEndRef.current = () => {
-          setBattleState(null);
-          // Audit-plan blackout rule (decomp-derived, NOT the old
-          // 30% heal): lose HALF the wallet, rounded down, floor
-          // 0 — no cap value was verified in the decomp data
-          // audited, so no cap is invented here. Return to the
-          // last heal point visited (home Sector 0 if none yet:
-          // Mom heals there). Do NOT heal the party on blackout:
-          // fainted/damaged members stay that way until a healer
-          // NPC or an item heals them. SOLO-PLAYABILITY WARNING,
-          // stated plainly: a player who blacks out with an all-
-          // fainted party must walk to a healer before battling
-          // again; that is the decomp rule, not a softlock fix.
-          // (Mars gave no blackout-heal concession percentage, so
-          // the 30% heal is removed, not kept as a concession.)
-          useGameStore.setState(s => ({ wallet: Math.max(0, Math.floor(s.wallet / 2)) }));
-          const ret = lastHealRef.current || { map: 'sector0', pos: { x: 15, y: 18 } };
-          setMapState(ret.map, ret.pos);
-          notify("You blacked out and were sent back...", "#ff5252");
-          // v5: goal after a loss too (see hexGoalDialog above).
-          // This dialogue states the goal once, then finishDialog
-          // returns to the overworld. It never re-gifts cubes.
-          if (bs.npcId === 'hex_battle_event' && !completedEvents.includes('v4_hex_goal')) {
-            setDialog(hexGoalDialog());
-            setScreen("dialog");
-          } else {
-            setScreen("overworld");
-          }
-        };
-      } else {
-        playCue('battle.switch');
-        newLog.push(`Go, ${battleMonName(freshTeam[nextAlive])}!`);
-        const switchHp = (freshTeam[nextAlive].currentHp ?? freshTeam[nextAlive].hp) ?? freshTeam[nextAlive].maxHp;
-        setBattleState({ ...bs, player: { ...freshTeam[nextAlive], name: battleMonName(freshTeam[nextAlive]), currentHp: switchHp, hp: switchHp }, playerTeamIdx: nextAlive, log: newLog, phase: "menu" });
-      }
+      handlePlayerFaint(bs, updatedPlayer, newLog, freshTeam);
     } else {
-      setBattleState({ ...bs, player: updatedPlayer, log: newLog, phase: "menu" });
-      const updatedTeam = [...freshTeam];
-      // v5.1 HP sync: write BOTH fields, or Team (hp) and the
-      // next battle (currentHp) disagree — the v5 discrepancy.
-      updatedTeam[bs.playerTeamIdx] = { ...updatedTeam[bs.playerTeamIdx], currentHp: newHp, hp: newHp, ...(enemyStatusApplied ? { status: enemyStatusApplied } : {}) };
-      setPlayerTeam(updatedTeam);
+      // Gap-fill S6 step 5: end of round — the enemy turn's return
+      // to the menu ticks both still-standing battlers (or runs
+      // the factored faint transition if a tick faints one).
+      runEndOfRoundTicks(bs, enemy, updatedPlayer, freshTeam, newLog);
     }
   };
 
@@ -2450,141 +2658,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       if (playerStatusApplied) newLog.push(`${battleMonName(enemyMon)} was ${playerStatusApplied === "paralysis" ? "paralyzed" : playerStatusApplied === "burn" ? "burned" : "poisoned"}!`);
 
       if (newHp <= 0) {
-        playCue('battle.faint');
-        newLog.push(`${enemyMon.name} fainted!`);
-        if (bs.type === "wild") {
-          // Stub-kill S-7: battle-end drop read — a defeated wild
-          // transfers its carried item through the defeat channel,
-          // once, into the real inventory. Kept individuals keep
-          // theirs; fled battles transfer nothing (resolveBattleEndDrop).
-          const dropItem = resolveBattleEndDrop(bs.wild.heldItem ?? null, "defeat", bs.wild.speciesId);
-          if (dropItem) {
-            useGameStore.getState().addItem(dropItem);
-            newLog.push(`The wild ${enemyMon.name} dropped a ${DROP_ITEM_NAMES[dropItem] ?? dropItem}!`);
-          }
-          // Item meaning S-IM1: a won battle walked in Mom's boots
-          // is a keepsake fact; when the derived band rises, the
-          // rise SPEAKS in the log — the visible cue #180's
-          // declaration law requires of any keepsake effect.
-          {
-            const kst = useGameStore.getState();
-            if (kst.hasSprintBoots) {
-              const before = keepsakeBand(kst.keepsakeLog, "sprint_boots").band;
-              kst.appendKeepsakeFact({ itemId: "sprint_boots", kind: "battle-won-with" });
-              const after = keepsakeBand(useGameStore.getState().keepsakeLog, "sprint_boots");
-              if (after.band !== before) newLog.push(`The Sprint Boots feel different now. ${after.word}`);
-            }
-          }
-          // GAP-FILL S0 (G-8 dex-key fix): same keying as the catch
-          // write above — the wild battle mon carries speciesId
-          // (bs.wild.speciesId), while enemyMon.id is its instance id.
-          setDex(d => ({ ...d, [enemyMon.speciesId]: d[enemyMon.speciesId] === "caught" ? "caught" : "seen" }));
-          // Payoff (lib/battlePayoff.ts): the source EXP sequence
-          // replaces the old stub, which rolled a random XP number
-          // into a `xp` field on the member that NOTHING reads (the
-          // store tracks `experience`; gainExp was never called, so
-          // overworld battles never levelled anyone). The finishing
-          // member is the participant of record — this host runs
-          // single-active battles and the game has no held items,
-          // so there is no share split to model. The VICTORY banner
-          // still gates the exit afterwards, unchanged (v5.1). A
-          // member that cannot take a payoff (legacy flat battle
-          // shape) keeps the old instant path to the banner.
-          const plan = planForOutcome('foeFainted', playerTeam, { speciesId: bs.wild.speciesId, level: bs.wild.level || 5 }, { participants: [bs.playerTeamIdx], activeIndex: bs.playerTeamIdx, trainerBattle: false, endsBattle: true, expMultiplier: useGameStore.getState().expMultiplier });
-          // Sound composition (2026-10-29): the wild-win jingle
-          // (MUS_VICTORY_WILD slot) fires as the payoff sequence
-          // opens — one seat covers the sequence path and the
-          // no-recipients fallback below.
-          playVictoryJingle('wild');
-          if (plan.recipients.length > 0) {
-            setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "payoff" });
-            pendingPayoffRef.current = () => {
-              setBattleState((prev: any) => prev ? { ...prev, phase: "over" } : prev);
-              // v5.1: banner blocks until Continue — no 2000ms timer.
-              pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
-            };
-            setPayoffUi({ plan, moneyText: null, moneyAmount: 0 });
-          } else {
-            setBattleState({ ...bs, wild: { ...bs.wild, currentHp: 0 }, log: newLog, phase: "over" });
-            // v5.1: banner blocks until Continue — no 2000ms timer.
-            pendingBattleEndRef.current = () => { setScreen("overworld"); setBattleState(null); };
-          }
-        } else {
-          const newTeam = [...bs.trainerTeam];
-          newTeam[bs.trainerTeamIdx] = { ...enemyMon, currentHp: 0 };
-          const nextAlive = newTeam.findIndex((m, i) => i > bs.trainerTeamIdx && m.currentHp > 0);
-          const isFinalWin = nextAlive === -1;
-          // Payoff (lib/battlePayoff.ts): the source runs the EXP
-          // sequence PER FAINTED FOE, mid-battle too (Task_GetExp),
-          // so the beats play now and the send-out / victory flow
-          // below resumes when the sequence finishes. Before this,
-          // trainer faints granted no XP at all, and the final win
-          // credited bs.reward SILENTLY — no text anywhere. The
-          // money is now the sequence's closing beat on the final
-          // win ("You got {reward} Credits for winning!"); when no
-          // member can take a payoff (legacy flat shape), the old
-          // instant path runs unchanged, silent credit included.
-          const plan = planForOutcome('foeFainted', playerTeam, { speciesId: enemyMon.speciesId || enemyMon.id, level: enemyMon.level || 5 }, { participants: [bs.playerTeamIdx], activeIndex: bs.playerTeamIdx, trainerBattle: true, endsBattle: isFinalWin, expMultiplier: useGameStore.getState().expMultiplier });
-          const continueAfterPayoff = (moneyShown: boolean) => {
-          if (isFinalWin) {
-            // Sound composition (2026-10-29): trainer-win jingle
-            // (MUS_VICTORY_TRAINER slot; dojo wins share it) at the
-            // victory flow — both the sequence path and the direct
-            // fallback call arrive here exactly once.
-            playVictoryJingle('trainer');
-            newLog.push(`${bs.trainerName} was defeated!`);
-            if (bs.isDojo) { setBadges(b => [...b, bs.badge]); playCue('ritual.badge'); newLog.push(`You received the ${bs.badge}!`); }
-            if (!moneyShown) setCredits(c => c + bs.reward);
-            setDefeatedTrainers(dt => [...dt, bs.npcId]);
-            setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "over" });
-            // v5.1: banner blocks until Continue — no 2500ms timer.
-            // The cleanup below is identical to the old timer body.
-            pendingBattleEndRef.current = () => {
-              setBattleState(null);
-              // v4 step 7: after the Hex first battle (win), Aeon
-              // states the goal in dialogue, in order — dojos,
-              // Champion Mythar, Hackers/Syndicate — not in a menu
-              // header. The MochiDex + 5 Luigi Cubes were already
-              // given at the starter beat (see handleChoice); this
-              // dialogue names the goal, it does not re-gift.
-              // Win OR lose the flow continues: a loss blacks out
-              // and reaches the goal via its own branch (v5), so
-              // this win branch and the loss branch share the same
-              // goal dialogue; the route gate is unaffected either way.
-              if (bs.npcId === 'hex_battle_event' && !completedEvents.includes('v4_hex_goal')) {
-                // v5: same goal dialogue as the loss path (hexGoalDialog).
-                setDialog(hexGoalDialog());
-                setScreen("dialog");
-              } else {
-                setScreen("overworld");
-              }
-            };
-          } else {
-            playCue('battle.switch');
-            newLog.push(`${bs.trainerName} sends out ${newTeam[nextAlive].name}!`);
-            // Refresh the player's battle copy from the store: the
-            // payoff may have levelled the member, and the rest of
-            // this battle fights with the new stats/HP (in this host
-            // the store member's hp tracks battle hp — doEnemyTurn
-            // writes both back every turn).
-            const fresh: any = (useGameStore.getState().party as any)[bs.playerTeamIdx];
-            const refreshed = fresh ? { ...fresh, name: battleMonName(fresh), currentHp: fresh.hp, hp: fresh.hp } : bs.player;
-            const nextBs = { ...bs, player: refreshed, trainerTeam: newTeam, trainerTeamIdx: nextAlive, log: newLog, phase: "enemy_turn" };
-            setBattleState(nextBs);
-            // Landing composition: move-completion's handoff rule
-            // (wait max(1200, animMs) so long profiles are not cut
-            // off) applied to the payoff flow's no-recipients branch.
-            setTimeout(() => doEnemyTurn(nextBs), Math.max(1200, animMs));
-          }
-          };
-          if (plan.recipients.length > 0) {
-            setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "payoff" });
-            pendingPayoffRef.current = () => continueAfterPayoff(true);
-            setPayoffUi({ plan, moneyText: isFinalWin ? `You got ${bs.reward} Credits for winning!` : null, moneyAmount: isFinalWin ? bs.reward : 0 });
-          } else {
-            continueAfterPayoff(false);
-          }
-        }
+        handleFoeFaint(bs, enemyMon, newLog, animMs);
       } else {
         if (bs.type === "wild") {
           const statusedWild = { ...bs.wild, currentHp: newHp, ...(playerStatusApplied ? { status: playerStatusApplied } : {}) };

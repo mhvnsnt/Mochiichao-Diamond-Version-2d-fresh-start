@@ -60,15 +60,24 @@
  *   poison / paralysis), so in live play today the gate fires
  *   only on paralysis; the other branches are the rule carried
  *   forward, not a claim that sleep or freeze occurs in play.
- *   What is NOT yet live: the poison/burn end-turn tick
- *   (endTurnStatusDamage) — a poisoned or burned battler takes no
- *   tick damage yet. The tick is the next S6 sub-step, and it
- *   needs the foe-faint-at-end-of-round transition factored out
- *   of the player branch first (a tick that faints the foe must
- *   run the payoff / send-out flow, which today lives only
- *   inline in that branch) — so it is NOT half-wired here.
- *   PP write-back and the evolution hook on the live path are
- *   likewise still open.
+ * - DONE in step 5 (this step): the poison/burn end-turn tick, on
+ *   the same resolver rule the unreachable BattleView path already
+ *   uses (battleResolver's end-of-turn loop, battle-math
+ *   endTurnStatusDamage): at the end of a round — the enemy turn's
+ *   return to the menu, including a gated enemy turn, an
+ *   unresolved enemy move, and a Ranger-defended hit — each still-
+ *   standing battler with a ticking status (poison / burn / toxic)
+ *   takes its tick (poison and burn 1/8 max HP, min 1; toxic 1/16
+ *   x its counter, min 1, counter rising per the resolver) and the
+ *   host logs it. A tick that faints a battler runs that side's
+ *   real faint transition, factored out of the inline branches for
+ *   exactly this purpose: a fainted foe runs the payoff /
+ *   send-out / victory flow, a fainted player runs the blackout /
+ *   auto-switch flow. No tick runs on a faint branch itself (a
+ *   foe that fainted to a move, or a player that fainted to a
+ *   move, ends the round in its own transition, and a mon just
+ *   sent out does not tick in the round it arrived). PP write-back
+ *   and the evolution hook on the live path are still open.
  * - TYPE CHART, NOT WIRED HERE: calculateDamage takes its type
  *   multipliers from the caller, and this module passes NEUTRAL (1)
  *   for every defending element. That is a placeholder, not a canon
@@ -100,6 +109,7 @@ import {
   accuracyThreshold,
   calculateDamage,
   checkCanAct,
+  endTurnStatusDamage,
   rollAccuracy,
   rollMultiHitCount,
   rollSecondaryEffect,
@@ -415,6 +425,54 @@ export function worldCheckCanAct(
     reason: result.canAct ? null : (result as { reason: string }).reason,
     patch,
   };
+}
+
+export type WorldEndTurnTickResult = {
+  /** The tick damage (0 when the status does not tick). */
+  damage: number;
+  /** The status that ticked ("poison" / "burn" / "toxic"), or null. */
+  status: string | null;
+  /**
+   * The toxic counter after this tick (resolver rule: it rises by 1
+   * per ticking turn), or null when the status is not toxic. The
+   * host merges it onto the battler copy so the next tick grows.
+   */
+  toxicCounter: number | null;
+};
+
+/**
+ * Step 5: one battler's end-of-turn status tick, on battle-math's
+ * endTurnStatusDamage (the resolver's rule). Poison and burn tick
+ * 1/8 max HP (min 1); toxic ticks 1/16 x its counter (min 1). The
+ * flat / instance mon is adapted the same way as for damage, so a
+ * flat mon's maxHp and a full instance's maxHp both read correctly.
+ * Paralysis, sleep, freeze, and no status tick 0 — they are gated
+ * or pass at the start of the turn, not ticked at its end.
+ */
+export function worldEndTurnTick(mon: any): WorldEndTurnTickResult {
+  const input = toBattleMathBattler(mon);
+  if (mon?.toxicCounter != null) input.toxicCounter = mon.toxicCounter;
+  const damage = endTurnStatusDamage(input);
+  if (damage <= 0) return { damage: 0, status: null, toxicCounter: null };
+  return {
+    damage,
+    status: mon?.status ?? input.status,
+    toxicCounter:
+      input.status === "toxic"
+        ? Math.max(1, input.toxicCounter ?? 1) + 1
+        : null,
+  };
+}
+
+/** The battle-log line for a tick, in the resolver's own wording
+ * ("took N damage from poison!" — battleResolver's end-of-turn
+ * event text, status word as stored). */
+export function worldStatusTickLine(
+  name: string,
+  status: string | null,
+  damage: number,
+): string {
+  return `${name} took ${damage} damage from ${status}!`;
 }
 
 /** The battle-log line for a stopped battler, by checkCanAct reason.
