@@ -131,5 +131,120 @@
       "timeOfDay": null,
       "weather": null
     }
-  ]
+  ],
+  "worldAreas": [
+    {
+      "areaId": "route-1-grass",
+      "mapId": "route_1",
+      "method": "grass",
+      "rate": 0.15,
+      "slots": [
+        {
+          "speciesId": "038",
+          "minLevel": 3,
+          "maxLevel": 3,
+          "weight": 1
+        },
+        {
+          "speciesId": "001",
+          "minLevel": 3,
+          "maxLevel": 3,
+          "weight": 1
+        },
+        {
+          "speciesId": "010",
+          "minLevel": 4,
+          "maxLevel": 4,
+          "weight": 1
+        },
+        {
+          "speciesId": "019",
+          "minLevel": 4,
+          "maxLevel": 4,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "areaId": "binary-woods-grass",
+      "mapId": "binary_woods",
+      "method": "grass",
+      "rate": 0.22,
+      "slots": [
+        {
+          "speciesId": "010",
+          "minLevel": 10,
+          "maxLevel": 10,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "areaId": "cave-of-echoes-cave",
+      "mapId": "cave_of_echoes",
+      "method": "cave",
+      "rate": 0.25,
+      "slots": [
+        {
+          "speciesId": "004",
+          "minLevel": 15,
+          "maxLevel": 15,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "areaId": "scrap-junkyard-grass",
+      "mapId": "scrap_junkyard",
+      "method": "grass",
+      "rate": 0.22,
+      "slots": [
+        {
+          "speciesId": "005",
+          "minLevel": 20,
+          "maxLevel": 20,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "areaId": "sector0-placed",
+      "mapId": "sector0",
+      "method": "placed",
+      "rate": 1,
+      "slots": [
+        {
+          "speciesId": "001",
+          "minLevel": 5,
+          "maxLevel": 5,
+          "weight": 1
+        },
+        {
+          "speciesId": "004",
+          "minLevel": 6,
+          "maxLevel": 6,
+          "weight": 1
+        },
+        {
+          "speciesId": "007",
+          "minLevel": 5,
+          "maxLevel": 5,
+          "weight": 1
+        },
+        {
+          "speciesId": "007",
+          "minLevel": 5,
+          "maxLevel": 5,
+          "weight": 1
+        },
+        {
+          "speciesId": "010",
+          "minLevel": 5,
+          "maxLevel": 5,
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "_worldAreasNote": "Stub-kill S-6 (2026-10-29): the four live overworld tables MIGRATED VERBATIM from the inline zone arrays that used to sit in src/world/FullWorldMaps.ts (species and levels unchanged; fixed level -> minLevel=maxLevel; the old uniform pool pick -> equal weights; the zone rate carried on the table). sector0-placed carries the creature-mode roamer seeds that used to be hard-coded in CreatureModeView.initialWilds (species/levels verbatim; positions and temperaments stay authored in the view). src/lib/encounters.ts is the only reader; FullWorldMaps derives its per-map mirror from these tables at module load \u2014 one source, no dual truth."
 }
