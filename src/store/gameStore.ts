@@ -4,7 +4,11 @@ import { createMochii } from '../lib/engine';
 import type { GardenSaveRecord } from '../lib/garden-wiring';
 import type { DaycareEgg } from '../lib/creatureDaycare';
 import type { GuardianAssignment } from '../lib/monster-tamer-systems';
+import type { DeedEntry } from '../lib/honor';
+import { emptyLivingWorldState } from '../lib/livingWorld';
+import type { LivingWorldState } from '../lib/livingWorld';
 import { GameSettings, DEFAULT_SETTINGS, loadStoredSettings, persistSettings } from '../lib/gameSettings';
+import { deriveRangerMaxHp, applyRangerDamage, applyRangerHeal, applyRangerFullHeal } from '../lib/rangerDefense';
 import { setAutosaveHold, getAutosaveHold } from '../lib/saveSystem';
 import { applyFontRoles } from '../lib/fonts';
 import { applySoundMode } from '../lib/audioRouting';
@@ -60,9 +64,95 @@ interface GameState {
   daycareEgg: DaycareEgg | null;
   setDaycareEgg: (egg: DaycareEgg | null) => void;
 
+  // Honor (List 28, P0): the deed ledger is the ONLY stored honor
+  // state, and it is append-only — recordDeed (src/lib/honor.ts) is
+  // the one write helper, and nothing edits or removes entries.
+  // Morale, tallies, standing and wanted are derived at read time by
+  // src/lib/honor.ts and are never stored in the store or a save
+  // (guarded mechanically by honor.test.ts). SaveMenu serializes the
+  // whole store, so the ledger persists with saves like the Garden
+  // state above; old saves carry no ledger and load with the empty
+  // default through loadState's spread.
+  deedLedger: DeedEntry[];
+  appendDeed: (entry: DeedEntry) => void;
+
+  // Living world (world-encounter package, stub-kill S-2): the
+  // director's progress state — resolved event ids, stranger-arc
+  // stages, flags. The director itself (src/lib/livingWorld.ts) is
+  // pure; this field is its one stored home, beside the ledger it
+  // writes witnessed deeds into. Old saves carry no field and load
+  // with the empty default through loadState's spread.
+  livingWorld: LivingWorldState;
+  setLivingWorld: (state: LivingWorldState) => void;
+
+  // Field techniques (stub-kill S-3): acquisition flags in the
+  // tech.* namespace of the event-flag schema
+  // (src/data/core/schemas/event-flag.schema.json) — keyed
+  // "tech.<verb-slug>", e.g. "tech.illuminate". Held vs performed are
+  // separate facts: this record is HELD only; performance is checked
+  // against the live party by src/lib/fieldTechniques.ts. Every flag
+  // starts un-granted — grants are authored teach_technique effects
+  // and owner-gated verb fiction, never defaults.
+  techniqueFlags: Record<string, boolean>;
+  setTechniqueFlag: (flag: string, held: boolean) => void;
+
+  // Ranger companion health (ranger-defense package, owner ruling
+  // 2026-10-29 ~21:21 CDT): the Ranger companion has a real health
+  // pool — he can DEFEND the player-creature in creature mode, take
+  // a hit's real damage on it, go DOWN (never die), and be healed.
+  // rangerMaxHp 0 = uninitialised; ensureRangerHealth derives the
+  // pool from the lead creature's level band (lib/rangerDefense —
+  // DORO-DERIVED derivation, recorded there). Damage and healing
+  // flow ONLY through the actions below, never display-side. Like
+  // every state field here, SaveMenu serializes the whole store, so
+  // the pool persists with the save; old saves load it as 0 and the
+  // engine initialises it on the first creature-mode tick.
+  rangerHp: number;
+  rangerMaxHp: number;
+  ensureRangerHealth: (leadLevel: number) => void;
+  damageRanger: (amount: number) => { hp: number; dealt: number; downedNow: boolean };
+  healRangerBy: (amount: number) => void;
+  healRangerFull: () => void;
+
   // Overworld state
   currentMap: string;
   playerPos: { x: number, y: number };
+  // Built-in cheat codes (cheat-to-mechanic lane, 2026-10-29): the
+  // owner's honest-cheats rule — codes typed in Settings are part of
+  // the game, and their use is RECORDED, never hidden. cheatLog is
+  // the record: one entry per successful code application (code +
+  // wall-clock timestamp), serialized with the whole store by
+  // SaveMenu like every other field, so it persists with the save;
+  // old saves carry no log and load with the empty default through
+  // loadState's set-merge. infiniteMoney is the INFINITE MONEY
+  // toggle: while on, buyItem grants without deducting the wallet.
+  // Cheats NEVER write deedLedger (honor), bond state, or dex
+  // records except the codes that explicitly say so (MOCHII-ALL
+  // marks dex Seen, and says so on its face).
+  infiniteMoney: boolean;
+  cheatLog: { code: string; at: number }[];
+  setInfiniteMoney: (v: boolean) => void;
+  recordCheatUse: (code: string) => void;
+  addItem: (itemId: string, qty?: number) => void;
+
+  // Cheat expansion (Gen 7/8/9 catalogue, 2026-10-29): the modern
+  // cheat families that fit this game, as store flags the REAL
+  // systems read — never parallel state. guaranteedCatch is read by
+  // both catch sites (WorldEngine wild catch + BattleView
+  // handleCatch); noEncounters by the WorldEngine tall-grass roll;
+  // infiniteItems by useItem below (the mirror of infiniteMoney in
+  // buyItem); expMultiplier by both EXP award sites (BattleView
+  // victory + Creature Mode defeat). All default to the honest
+  // values (false / 1) and persist with the save like every field.
+  guaranteedCatch: boolean;
+  noEncounters: boolean;
+  infiniteItems: boolean;
+  expMultiplier: number;
+  setGuaranteedCatch: (v: boolean) => void;
+  setNoEncounters: (v: boolean) => void;
+  setInfiniteItems: (v: boolean) => void;
+  setExpMultiplier: (v: number) => void;
+
 
   // Sprint Boots (sequence build, 2026-10-28): the fiction already
   // grants them — Mom's dialogue in sector0 / sector0_house_1f says
@@ -141,8 +231,66 @@ export const useGameStore = create<GameState>((set, get) => ({
   setDaycareSteps: (steps) => set({ daycareSteps: steps }),
   daycarePartner: null,
   setDaycarePartner: (partner) => set({ daycarePartner: partner }),
+  infiniteMoney: false,
+  cheatLog: [],
+  guaranteedCatch: false,
+  noEncounters: false,
+  infiniteItems: false,
+  expMultiplier: 1,
+  setGuaranteedCatch: (v) => set({ guaranteedCatch: v }),
+  setNoEncounters: (v) => set({ noEncounters: v }),
+  setInfiniteItems: (v) => set({ infiniteItems: v }),
+  setExpMultiplier: (v) => set({ expMultiplier: v }),
+  setInfiniteMoney: (v) => set({ infiniteMoney: v }),
+  recordCheatUse: (code) => set(s => ({ cheated: true, cheatLog: [...s.cheatLog, { code, at: Date.now() }] })),
+  // Free inventory grant — ONE action, two caller families
+  // (composition unification, landing-composition 2026-10-29):
+  // stub-kill S-7's drops/pickups call addItem(itemId) for +1; the
+  // cheat registry calls addItem(itemId, 99) for its grant codes.
+  // The cheat lane's (itemId, qty) signature carries both; qty
+  // defaults to 1 so the S-7 call sites are unchanged.
+  addItem: (itemId, qty = 1) => set(s => ({ inventory: { ...s.inventory, [itemId]: (s.inventory[itemId] || 0) + qty } })),
   daycareEgg: null,
   setDaycareEgg: (egg) => set({ daycareEgg: egg }),
+  rangerHp: 0,
+  rangerMaxHp: 0,
+  ensureRangerHealth: (leadLevel) => {
+    const { rangerHp, rangerMaxHp } = get();
+    const derived = deriveRangerMaxHp(leadLevel);
+    if (rangerMaxHp <= 0) {
+      // First derivation: a fresh pool, full.
+      set({ rangerHp: derived, rangerMaxHp: derived });
+    } else if (derived > rangerMaxHp) {
+      // The journey outgrew the pool: the max rises and the
+      // difference is granted (level-up top-up of the delta only —
+      // wounds already taken stay taken).
+      set({ rangerHp: rangerHp + (derived - rangerMaxHp), rangerMaxHp: derived });
+    }
+  },
+  damageRanger: (amount) => {
+    const { rangerHp, rangerMaxHp } = get();
+    const out = applyRangerDamage({ hp: rangerHp, maxHp: rangerMaxHp }, amount);
+    set({ rangerHp: out.health.hp, rangerMaxHp: out.health.maxHp });
+    return { hp: out.health.hp, dealt: out.dealt, downedNow: out.downedNow };
+  },
+  healRangerBy: (amount) => {
+    const { rangerHp, rangerMaxHp } = get();
+    if (rangerMaxHp <= 0) return;
+    const out = applyRangerHeal({ hp: rangerHp, maxHp: rangerMaxHp }, amount);
+    set({ rangerHp: out.hp });
+  },
+  healRangerFull: () => {
+    const { rangerHp, rangerMaxHp } = get();
+    if (rangerMaxHp <= 0) return;
+    const out = applyRangerFullHeal({ hp: rangerHp, maxHp: rangerMaxHp });
+    set({ rangerHp: out.hp });
+  },
+  deedLedger: [],
+  appendDeed: (entry) => set(s => ({ deedLedger: [...s.deedLedger, entry] })),
+  livingWorld: emptyLivingWorldState(),
+  setLivingWorld: (state) => set({ livingWorld: state }),
+  techniqueFlags: {},
+  setTechniqueFlag: (flag, held) => set(s => ({ techniqueFlags: { ...s.techniqueFlags, [flag]: held } })),
   currentMap: 'sector0',
   playerPos: { x: 21, y: 14 },
   hasSprintBoots: false,
@@ -214,8 +362,14 @@ export const useGameStore = create<GameState>((set, get) => ({
     // v5.1 HP sync: heal writes BOTH hp and currentHp. Before
     // v5.1 it wrote hp only, so a healed party would still enter
     // its next battle at the old damaged currentHp.
+    // Ranger-defense extension (2026-10-29): a healer heals the
+    // household — the Ranger companion's pool is restored by the
+    // same beat (Mochi Center / Mom, every isHeal path calls this).
+    // His pool is only touched once it exists (maxHp > 0), so a
+    // pre-creature-mode heal never founds it early.
     set(state => ({
-      party: state.party.map(m => ({ ...m, hp: m.maxHp, currentHp: m.maxHp, status: null }))
+      party: state.party.map(m => ({ ...m, hp: m.maxHp, currentHp: m.maxHp, status: null })),
+      rangerHp: state.rangerMaxHp > 0 ? state.rangerMaxHp : state.rangerHp
     }));
   },
 
@@ -233,6 +387,14 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   buyItem: (itemId, cost) => {
     const state = get();
+    // INFINITE MONEY cheat (recorded in cheatLog when toggled):
+    // purchases grant the item without deducting the wallet.
+    if (state.infiniteMoney) {
+      set(s => ({
+        inventory: { ...s.inventory, [itemId]: (s.inventory[itemId] || 0) + 1 }
+      }));
+      return true;
+    }
     if (state.wallet >= cost) {
       set(s => ({
         wallet: s.wallet - cost,
@@ -246,6 +408,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   useItem: (itemId) => {
     const state = get();
     if (state.inventory[itemId] > 0) {
+      // INFINITE ITEMS cheat (recorded in cheatLog when toggled):
+      // the use succeeds but the count never decreases — the mirror
+      // of INFINITE MONEY's buyItem path above.
+      if (state.infiniteItems) return true;
       set(s => ({
         inventory: { ...s.inventory, [itemId]: s.inventory[itemId] - 1 }
       }));
