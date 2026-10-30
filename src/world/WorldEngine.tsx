@@ -2080,8 +2080,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     }
     const attackLine = humanStrikeLog ?? `${battleMonName(enemy)} used ${chosenMoveDisplay}!`;
 
-    setBattleAnim("enemy");
-    setTimeout(() => setBattleAnim(null), 500);
 
     const dmg = humanStrikeDmg ?? calcDamage(moveData, battleStats(enemy), battleStats(bs.player));
 
