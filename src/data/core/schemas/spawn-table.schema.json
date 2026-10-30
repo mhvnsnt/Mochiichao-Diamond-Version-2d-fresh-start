@@ -10,9 +10,11 @@
             "small-ground",
             "water",
             "perch",
-            "night",
             "canopy",
             "depths",
+            "waters-edge",
+            "underground",
+            "built",
             null
           ],
           "type": [
@@ -147,7 +149,7 @@
   "$id": "mochiichao/spawn-table.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "Native schema extending the canon seed shape of src/data/core/encounters.json ({mapId, method, minLevel, maxLevel, weight}, timeOfDay/weather present-but-null). Field naming follows the core data convention (camelCase). Unknowns are null and flagged in status, never invented (core README convention). A spawn FILE is either one area object (this schema) or a bundle: {bundle: <slug>, bundleNote?: string, areas: [<area objects>]} — the Garden complex and the tiered Dark Forest ship as bundles.",
+  "description": "Native schema extending the canon seed shape of src/data/core/encounters.json ({mapId, method, minLevel, maxLevel, weight}, timeOfDay/weather present-but-null). Field naming follows the core data convention (camelCase). Unknowns are null and flagged in status, never invented (core README convention). A spawn FILE is either one area object (this schema) or a bundle: {bundle: <slug>, bundleNote?: string, areas: [<area objects>]} — the Garden complex and the tiered Dark Forest ship as bundles. S2 Landing 2 (2026-10-30): habitatClass enum aligned to RECOGNITION-SPEC 1.1 — night removed (a time band, carried by timeOfDay, no live row used it); waters-edge, underground, built added.",
   "properties": {
     "areaId": {
       "description": "Canon map/area id, e.g. pond-route-01, dark-forest.",

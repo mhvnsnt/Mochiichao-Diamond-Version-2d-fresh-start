@@ -15,7 +15,11 @@
         { "speciesId": "kittember", "residency": "wild", "evidence": "src/data/core/encounters.json seed (meadow-route-01, grass, weight 10) — kept garden-edge population; the wild Forest population is a separate zone row and not a contradiction", "status": "canon: encounters.json seed" }
       ],
       "timeBands": null,
-      "status": "canon seed rows, ecology view. habitatClasses: small-ground is method-proven (grass); sky/perch are show-location classes from LIVING-WORLD population mapping for the Green/Gate skies and fences — show-side classes, not encounter claims."
+      "status": "canon seed rows, ecology view. habitatClasses: small-ground is method-proven (grass); sky/perch are show-location classes from LIVING-WORLD population mapping for the Green/Gate skies and fences — show-side classes, not encounter claims.",
+      "biomeId": "garden-complex",
+      "environment": { "weatherKey": "clear", "sceneId": null },
+      "authoredLife": true,
+      "neighbours": ["garden-pond"]
     },
     {
       "zoneId": "garden-pond",
@@ -29,7 +33,11 @@
         { "speciesId": "floatcalf", "residency": "wild", "evidence": "src/data/core/encounters.json seed (pond-route-01, surf only)", "status": "canon: encounters.json seed" }
       ],
       "timeBands": null,
-      "status": "canon seed rows, ecology view. water is method-proven (surf/fish) — the same rule #7 applies."
+      "status": "canon seed rows, ecology view. water is method-proven (surf/fish) — the same rule #7 applies.",
+      "biomeId": "garden-complex",
+      "environment": { "weatherKey": "clear", "sceneId": null },
+      "authoredLife": true,
+      "neighbours": ["garden-meadow"]
     },
     {
       "zoneId": "dark-forest-surface",
@@ -40,7 +48,11 @@
         { "speciesId": "kittember", "residency": "wild", "evidence": "SEASON-CANON-MAP: the Forest's canon contents include wild Kittember (prose, unnumbered)", "status": "canon-prose, numbers owed (mirrors dark-forest.spawn-tables.json surface row)" }
       ],
       "timeBands": null,
-      "status": "canon prose only. Show population for the Forest stays 0 at every tier (LIVING-WORLD P5) despite this game-side row — lanes share schema, not behaviour."
+      "status": "canon prose only. Show population for the Forest stays 0 at every tier (LIVING-WORLD P5) despite this game-side row — lanes share schema, not behaviour.",
+      "biomeId": "forest",
+      "environment": { "weatherKey": "mist", "sceneId": null },
+      "authoredLife": true,
+      "neighbours": ["dark-forest-depths", "cave-of-echoes-side"]
     },
     {
       "zoneId": "dark-forest-depths",
@@ -49,7 +61,11 @@
       "habitatClasses": ["depths"],
       "residents": [],
       "timeBands": null,
-      "status": "OPEN — canon does not stock the depths and does not answer what stopped moving there. Empty on purpose, mirroring the depths spawn table."
+      "status": "OPEN — canon does not stock the depths and does not answer what stopped moving there. Empty on purpose, mirroring the depths spawn table.",
+      "biomeId": "forest",
+      "environment": { "weatherKey": null, "sceneId": null },
+      "authoredLife": false,
+      "neighbours": ["dark-forest-surface"]
     },
     {
       "zoneId": "cave-of-echoes-side",
@@ -63,7 +79,11 @@
         { "speciesId": "pixilite", "residency": "wild", "evidence": "src/data/core/encounters.json seed (cave-route-01, cave, weight 15)", "status": "canon: encounters.json seed" }
       ],
       "timeBands": null,
-      "status": "canon seed rows, ecology view. showLocation null: no show counterpart established. habitatClass is small-ground as the least-claim class for a cave floor — flagged here as the weakest inference in this file; the cave class question is OPEN for the landing pass."
+      "status": "canon seed rows, ecology view. showLocation null: no show counterpart established. habitatClass is small-ground as the least-claim class for a cave floor — flagged here as the weakest inference in this file; the cave class question is OPEN for the landing pass.",
+      "biomeId": "cave-of-echoes",
+      "environment": { "weatherKey": null, "sceneId": null },
+      "authoredLife": true,
+      "neighbours": ["dark-forest-surface"]
     }
   ],
   "status": "Region 1 only, canon-proven rows only. Regions 2-5 are NOT instanced here: their contents are the side/design lane's active wave-1 work (Discovery prose per region) and instance at canon lock — format is region-ready, contents OPEN."
