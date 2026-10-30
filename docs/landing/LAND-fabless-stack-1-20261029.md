@@ -1,0 +1,61 @@
+# Landing fabless-stack-1 onto restored main
+
+Source branch tip: 0cb03192f. Own commits: 210b28528..0cb03192f (8).
+Main's history was rebuilt from an orphan restore, so the branch shares no merge base with main; its own commits were applied onto main three-way instead of a plain merge. Main's restored files are kept.
+
+## Decisions
+- docs/menu-editability-parity-audit-20261028.md: exists on main in another version; kept main's, branch version added as docs/menu-editability-parity-audit-20261028.from-fabless-stack-1.md
+- show/production/tooling/fabless-stack/FABLESS-STACK.md: added
+- show/production/tooling/fabless-stack/README.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-compiler-toolchain.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-framework-kernels.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-interconnect.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-llamacpp.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-oci-packaging.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-open-gpu-designs.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-petals.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-rocm.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-skypilot.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-spirv.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-tunnel.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-vllm.md: added
+- show/production/tooling/fabless-stack/TEARDOWN-webllm.md: added
+- show/production/tooling/fabless-stack/llamacpp/PHONE-ENGINE.md: added
+- show/production/tooling/fabless-stack/llamacpp/build-android.sh: added
+- show/production/tooling/fabless-stack/llamacpp/smoke-cpu.sh: added
+- show/production/tooling/fabless-stack/llamacpp/wielder-edge-seat.json: added
+- show/production/tooling/fabless-stack/serving/README.md: added
+- show/production/tooling/fabless-stack/skypilot/README.md: added
+- show/production/tooling/fabless-stack/skypilot/serve-vllm.yaml: added
+- show/production/tooling/fabless-stack/skypilot/train-lora.yaml: added
+- show/production/tooling/fabless-stack/smoke/SMOKE-RESULTS.md: added
+- show/production/tooling/fabless-stack/triton/vector_add_kernel.py: added
+- show/production/tooling/fabless-stack/tunnel/cloudflared/config.yml: added
+- show/production/tooling/fabless-stack/tunnel/frp/frpc.toml: added
+- show/production/tooling/fabless-stack/tunnel/frp/frps.toml: added
+- show/production/wielder/grok/CAPABILITY-MAP.md: already on main, identical
+- show/production/wielder/grok/PROFILE.md: already on main, identical
+- show/production/wielder/grok/TEARDOWN.md: already on main, identical
+- show/production/wielder/wielder/tests/test_xai_client.py: already on main, identical
+- show/production/wielder/wielder/xai_client.py: already on main, identical
+- docs/ui-art/menu-skins/README.md: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/bag.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/battle.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/dialogue.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/main-menu.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/party.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/pause.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/pc.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/save-slots.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/settings.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/shop.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/skins.json: branch edits merged cleanly into main's version
+- show/production/agent-commons/CLAIMS.md: conflicting edits; kept main's version, branch version added as show/production/agent-commons/CLAIMS.from-fabless-stack-1.md
+- show/production/agent-commons/TAG-TEAM.md: conflicting edits; kept main's version, branch version added as show/production/agent-commons/TAG-TEAM.from-fabless-stack-1.md
+- show/production/wielder/PROVENANCE.md: conflicting edits; kept main's version, branch version added as show/production/wielder/PROVENANCE.from-fabless-stack-1.md
+- show/production/wielder/wielder/brain.py: conflicting edits; kept main's version, branch version added as show/production/wielder/wielder/brain.from-fabless-stack-1.py
+- show/production/wielder/wielder/constitution.py: branch edits merged cleanly into main's version
+- src/components/IntroSequence.tsx: branch edits merged cleanly into main's version
+- src/lib/lockedV32Menu.ts: branch edits merged cleanly into main's version
+- src/lib/menuEditor.ts: branch edits merged cleanly into main's version
+- src/lib/menuSkins.ts: branch edits merged cleanly into main's version

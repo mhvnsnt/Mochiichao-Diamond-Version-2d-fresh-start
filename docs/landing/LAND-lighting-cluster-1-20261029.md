@@ -1,0 +1,44 @@
+# Landing lighting-cluster-1 onto restored main
+
+Source branch tip: a7cd06796. Own commits: 210b28528..a7cd06796 (3).
+Main's history was rebuilt from an orphan restore, so the branch shares no merge base with main; its own commits were applied onto main three-way instead of a plain merge. Main's restored files are kept.
+
+## Decisions
+- docs/menu-editability-parity-audit-20261028.md: exists on main in another version; kept main's, branch version added as docs/menu-editability-parity-audit-20261028.from-lighting-cluster-1.md
+- show/production/tooling/lighting-cluster/CLUSTER-MAP.md: added
+- show/production/tooling/lighting-cluster/GAFFER-TEARDOWN.md: added
+- show/production/tooling/lighting-cluster/MATERIALX-TEARDOWN.md: added
+- show/production/tooling/lighting-cluster/OMNIVERSE-TEARDOWN.md: added
+- show/production/tooling/lighting-cluster/OPENCOLORIO-TEARDOWN.md: added
+- show/production/tooling/lighting-cluster/OPENUSD-TEARDOWN.md: added
+- show/production/tooling/lighting-cluster/README.md: added
+- show/production/tooling/lighting-cluster/RTX-TECHNIQUES-NOTE.md: added
+- show/production/tooling/lighting-cluster/TEST-RECORD.md: added
+- show/production/tooling/lighting-cluster/materialx/check_lustre.py: added
+- show/production/tooling/lighting-cluster/materialx/lustre_sheen.mtlx: added
+- show/production/tooling/lighting-cluster/ocio/README.md: added
+- show/production/tooling/lighting-cluster/ocio/check_config.py: added
+- show/production/tooling/lighting-cluster/ocio/config.ocio: added
+- show/production/tooling/lighting-cluster/usd/gate_keys.usda: added
+- show/production/tooling/lighting-cluster/usd/gate_keys_overrides.usda: added
+- show/production/tooling/lighting-cluster/usd/validate_gate_keys.py: added
+- docs/ui-art/menu-skins/README.md: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/bag.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/battle.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/dialogue.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/main-menu.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/party.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/pause.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/pc.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/save-slots.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/settings.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/shop.y2k-skins.json: branch edits merged cleanly into main's version
+- docs/ui-art/menu-skins/skins.json: branch edits merged cleanly into main's version
+- show/production/agent-commons/CLAIMS.md: conflicting edits; kept main's version, branch version added as show/production/agent-commons/CLAIMS.from-lighting-cluster-1.md
+- show/production/agent-commons/TAG-TEAM.md: conflicting edits; kept main's version, branch version added as show/production/agent-commons/TAG-TEAM.from-lighting-cluster-1.md
+- show/production/tooling/TOOLING-INDEX.md: branch edits merged cleanly into main's version
+- show/production/tooling/TOOLS-MANIFEST.md: branch edits merged cleanly into main's version
+- src/components/IntroSequence.tsx: branch edits merged cleanly into main's version
+- src/lib/lockedV32Menu.ts: branch edits merged cleanly into main's version
+- src/lib/menuEditor.ts: branch edits merged cleanly into main's version
+- src/lib/menuSkins.ts: branch edits merged cleanly into main's version

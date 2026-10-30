@@ -1,0 +1,197 @@
+{
+  "_comment": "Pinned download manifest for grok-local deployments. Every value was read from the Hugging Face API (repo tree: file sizes + LFS sha256) on 2026-10-28 \u2014 see ../MODEL-MANIFEST.md for the full record with licences and revisions. pull_model.py downloads at the pinned revision and verifies every listed file: sha256 where given, byte size everywhere. A mismatch is a hard failure, never a warning. Variants ending in -abliterated-src are bf16 sources for the on-server AWQ quantization step (quantize_awq.py); their per-shard hashes are not published in this manifest because the source repos serve 13-14 shards whose individual LFS hashes were not all read in the verification pass \u2014 pull_model.py instead verifies shard count + total bytes and RECORDS the sha256 of every downloaded shard into DOWNLOADED-MANIFEST.json next to the weights, which becomes the provenance record for the quantized output.",
+  "variants": {
+    "fallback": {
+      "base_model": "Qwen/Qwen3-32B",
+      "files": {
+        "LICENSE": {
+          "size": 11544
+        },
+        "README.md": {
+          "size": 16885
+        },
+        "config.json": {
+          "size": 907
+        },
+        "generation_config.json": {
+          "size": 239
+        },
+        "merges.txt": {
+          "size": 1671853
+        },
+        "model-00001-of-00004.safetensors": {
+          "sha256": "ab7988215e3b087c884e0c14ce1994a64aac31dc9a37a4bcf29f5b45f3506e2e",
+          "size": 4966384688
+        },
+        "model-00002-of-00004.safetensors": {
+          "sha256": "46faff349f1dd18ffe76993edd3d9fd32941d042331dc590525409bbe3d37edf",
+          "size": 4998723112
+        },
+        "model-00003-of-00004.safetensors": {
+          "sha256": "6e9f763d8c31ad19f1cd67b0b599a38edffd76a4465a22ff5f7fcac46d820e63",
+          "size": 4949671152
+        },
+        "model-00004-of-00004.safetensors": {
+          "sha256": "87f180889fead12b00b1bdf4dca3a14e4510e1e200bf56e31898e120b993d8",
+          "size": 4410702792
+        },
+        "model.safetensors.index.json": {
+          "size": 131598
+        },
+        "tokenizer.json": {
+          "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+          "size": 11422654
+        },
+        "tokenizer_config.json": {
+          "size": 9732
+        },
+        "vocab.json": {
+          "size": 2776833
+        }
+      },
+      "fits": "RTX 4090 24 GB (tight: short context default, see launch.sh); does NOT fit one 16 GB T4",
+      "license": "Apache-2.0",
+      "quant": "AWQ 4-bit (Qwen official)",
+      "repo": "Qwen/Qwen3-32B-AWQ",
+      "repo_total_bytes": 19336904398,
+      "revision": "0499c3ac83fdef8810b907a23894ba91e95eddd8"
+    },
+    "fallback-abliterated-src": {
+      "base_model": "Qwen/Qwen3-32B",
+      "files": null,
+      "fits": "bf16 does NOT fit a 24 GB card \u2014 quantize on the server first (quantize_awq.py), then serve the AWQ output",
+      "gated": "auto \u2014 an HF account that has accepted the usage-warning gate once (and an HF_TOKEN from it) is required to download",
+      "license": "Apache-2.0",
+      "quant": "none (bf16 source for quantize_awq.py)",
+      "repo": "huihui-ai/Qwen3-32B-abliterated",
+      "repo_total_bytes": 65535751214,
+      "revision": "7a754614e9172cd416b4652342084bea8b5c98b0",
+      "safetensors_shards": 14
+    },
+    "free-seat": {
+      "_revision_note": "Revision not pinned for this repo; integrity rests on the per-shard sha256 pins below, which pull_model.py verifies after download at whatever revision 'main' resolves to. A hash mismatch fails the pull.",
+      "_total_note": "repo_total_bytes counts LFS-tracked bytes only (the 2 weight shards + tokenizer.json), matching how HF reports usedStorage for the other variants; the sum of ALL listed files is 9,992,683,140 B.",
+      "base_model": "Qwen/Qwen3-14B",
+      "files": {
+        "LICENSE": {
+          "size": 11544
+        },
+        "README.md": {
+          "size": 16885
+        },
+        "config.json": {
+          "size": 907
+        },
+        "generation_config.json": {
+          "size": 239
+        },
+        "merges.txt": {
+          "size": 1671853
+        },
+        "model-00001-of-00002.safetensors": {
+          "sha256": "668eb0f1356638310db286f4819b223c12e3916934123f1a81b2b2c0e148c6a2",
+          "size": 4988339832
+        },
+        "model-00002-of-00002.safetensors": {
+          "sha256": "c3c1625df80fe01211038bfa520629ebde6adf776556aa80cd49696d986d6657",
+          "size": 4988350408
+        },
+        "model.safetensors.index.json": {
+          "size": 82253
+        },
+        "tokenizer.json": {
+          "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+          "size": 11422654
+        },
+        "tokenizer_config.json": {
+          "size": 9732
+        },
+        "vocab.json": {
+          "size": 2776833
+        }
+      },
+      "fits": "ONE 16 GB T4 (the Kaggle free-seat model) and any 24 GB card",
+      "license": "Apache-2.0",
+      "quant": "AWQ 4-bit (Qwen official)",
+      "repo": "Qwen/Qwen3-14B-AWQ",
+      "repo_total_bytes": 9988112894,
+      "revision": null
+    },
+    "primary": {
+      "base_model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+      "files": {
+        "README.md": {
+          "size": 18250
+        },
+        "added_tokens.json": {
+          "size": 707
+        },
+        "chat_template.jinja": {
+          "size": 2630
+        },
+        "config.json": {
+          "size": 3458
+        },
+        "generation_config.json": {
+          "size": 213
+        },
+        "merges.txt": {
+          "size": 1671853
+        },
+        "model-00001-of-00004.safetensors": {
+          "sha256": "5e946d455a0d76145e40613dee4ebd6d60ed8826702fd6df640a8a7393161fcc",
+          "size": 5001707008
+        },
+        "model-00002-of-00004.safetensors": {
+          "sha256": "2b1100db676b992dd5489e9ce93484b2df68a473fda855e3276551afa1f334a8",
+          "size": 5001283696
+        },
+        "model-00003-of-00004.safetensors": {
+          "sha256": "812ad416d85fce8006841b87234335d9af610988f6c89bcc95fffc28e70137cc",
+          "size": 5001283912
+        },
+        "model-00004-of-00004.safetensors": {
+          "sha256": "44c6eff72b9293f0dc5b638eb1e1f930bed38dd91dd0974711ca8727000ff2ba",
+          "size": 3090232736
+        },
+        "model.safetensors.index.json": {
+          "size": 5412994
+        },
+        "recipe.yaml": {
+          "size": 1262
+        },
+        "special_tokens_map.json": {
+          "size": 613
+        },
+        "tokenizer.json": {
+          "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+          "size": 11422654
+        },
+        "tokenizer_config.json": {
+          "size": 5405
+        },
+        "vocab.json": {
+          "size": 2776833
+        }
+      },
+      "fits": "RTX 4090 24 GB (default serve target); does NOT fit one 16 GB T4",
+      "license": "Apache-2.0",
+      "quant": "AWQ 4-bit (compressed-tensors, W4A16 pack-quantized)",
+      "repo": "cyankiwi/Qwen3-30B-A3B-Instruct-2507-AWQ-4bit",
+      "repo_total_bytes": 18105930006,
+      "revision": "8d3f99eda08b18a8090de5289ff02e6dc51d47e2"
+    },
+    "primary-abliterated-src": {
+      "base_model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+      "files": null,
+      "fits": "bf16 does NOT fit a 24 GB card \u2014 quantize on the server first (quantize_awq.py), then serve the AWQ output",
+      "gated": false,
+      "license": "Apache-2.0",
+      "quant": "none (bf16 source for quantize_awq.py)",
+      "repo": "huihui-ai/Huihui-Qwen3-30B-A3B-Instruct-2507-abliterated",
+      "repo_total_bytes": 61078000382,
+      "revision": "e2f73ec7e99ee316beb8069ca90e4c3cbef8aa0f",
+      "safetensors_shards": 13
+    }
+  }
+}

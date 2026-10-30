@@ -1,0 +1,40 @@
+# SkyPilot task: LoRA/QLoRA fine-tune job (the fab running a training job).
+# Fabless Stack link 3. Training code itself lives with the programmes that
+# own it (grok-local training kit for the Wielder brain; the show pipeline's
+# DiffSynth kits for character LoRAs) — this template is the SEAT layer:
+# provision, mount inputs, run, save out, tear down.
+#
+# Save-out is not optional in our operating model: checkpoints land in
+# durable storage (repo/TeraBox per the staging law) before the seat dies,
+# so a cut-off session loses minutes, not the run.
+#
+# Launch:  sky launch train-lora.yaml -c lora-train
+# SkyPilot: Apache-2.0.
+
+name: lora-train
+
+resources:
+  accelerators: {T4: 1, L4: 1, A10: 1, RTX4090: 1}
+  use_spot: true            # training MUST be resumable; spot is fine
+  disk_size: 100            # GB of seat-local scratch (not staging)
+
+envs:
+  TRAIN_ENTRYPOINT: ""      # e.g. python train.py --config configs/brain.yaml
+  SAVE_OUT_CMD: ""          # e.g. the programme's checkpoint upload command
+
+file_mounts:
+  # Inputs arrive from durable staging, never from this repo's git tree
+  # (datasets/weights are staged per the manifest in each programme).
+  /data:
+    source: ~/fabless-inputs   # operator-local path or cloud bucket URI
+    mode: MOUNT
+
+setup: |
+  test -n "$TRAIN_ENTRYPOINT" || { echo "set TRAIN_ENTRYPOINT"; exit 1; }
+  pip install --quiet torch transformers peft trl accelerate datasets
+
+run: |
+  set -e
+  $TRAIN_ENTRYPOINT
+  # Always save out, even on failure paths handled by the caller:
+  test -n "$SAVE_OUT_CMD" && $SAVE_OUT_CMD || echo "WARNING: no SAVE_OUT_CMD set"

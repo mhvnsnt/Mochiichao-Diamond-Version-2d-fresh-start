@@ -1,0 +1,4 @@
+== Wielder seat tests (grok-local + xAI) ==
+Wed Oct 28 19:47:34 UTC 2026
+.................................                                        [100%]
+33 passed in 0.47s

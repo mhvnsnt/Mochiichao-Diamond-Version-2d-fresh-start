@@ -1,0 +1,25 @@
+{
+  "reference": "/home/hatch/workspace/ep01-finish/masters/EP01-V3-MASTER.mp4",
+  "distorted": "/home/hatch/workspace/shows-wave/work/gate-runs/master-lad28-ss660/encode-ladder28.mp4",
+  "encode": {
+    "profile": "ladder28",
+    "label": "CRF 28 ladder rung",
+    "file": "/home/hatch/workspace/shows-wave/work/gate-runs/master-lad28-ss660/encode-ladder28.mp4",
+    "bytes": 1282383
+  },
+  "model": "version=vmaf_v0.6.1",
+  "frames_measured": 721,
+  "window": {
+    "ss": 660.0,
+    "seconds": 30.0
+  },
+  "vmaf_mean": 92.528,
+  "vmaf_min_frame": 87.242,
+  "vmaf_p5_frame": 91.624,
+  "vmaf_harmonic_mean": 92.525,
+  "thresholds": {
+    "mean": 93.0,
+    "p5": 80.0
+  },
+  "verdict": "FAIL"
+}

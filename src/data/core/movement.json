@@ -1,0 +1,108 @@
+{
+  "battleStaging": {
+    "classes": [
+      "entrance",
+      "idle_living",
+      "approach_contact",
+      "ranged_stay",
+      "reaction_exit"
+    ],
+    "declaredIn": "per-performance staging in mochiichao/move-animscript/v1 files (body track performs the approach or it does not); read off the authored performance, never guessed from the move name",
+    "defaultRule": "un-authored moves: effect-object contact flag -> approach_contact, otherwise ranged_stay; status/self moves stage in place under ranged_stay with no travel tracks",
+    "stateContract": {
+      "INTRO": "entrance",
+      "LIVING_FIELD": "idle_living",
+      "RESOLUTION": [
+        "approach_contact",
+        "ranged_stay",
+        "reaction_exit"
+      ]
+    }
+  },
+  "follower": {
+    "leadSelection": "first_alive_non_egg_else_first_non_egg",
+    "mood": {
+      "drift": "one_step_toward_neutral_per_tick",
+      "range": [
+        -127,
+        127
+      ],
+      "startValue": 0,
+      "storage": "on the individual record (individual.schema.json machinery)"
+    },
+    "paramTable": {
+      "rowShape": "followerParam",
+      "rows": []
+    },
+    "permission": {
+      "exceptionList": [],
+      "mapModes": [
+        "allow",
+        "height_restrict",
+        "prevent"
+      ]
+    },
+    "saveState": [
+      "currentMapId",
+      "inhibitFlag",
+      "traversalState"
+    ],
+    "scriptVerbs": [
+      "pause_follower",
+      "resume_follower",
+      "follower_follow_route",
+      "place_follower_relative",
+      "wait_follower"
+    ],
+    "trail": {
+      "minBufferedSteps": 2,
+      "model": "command_buffer_replay",
+      "onWarp": "clear_buffer_and_replace_behind_ranger"
+    },
+    "traversalStates": {
+      "mountedOrVehicle": "recall_hidden_restore_on_foot",
+      "onFoot": "follow",
+      "waterTraversal": "recall_hidden_restore_on_foot"
+    }
+  },
+  "format": "mochiichao/movement-system/v1",
+  "status": "native movement config — mechanisms on the HGSS-first Pokemon template (docs/MOVEMENT-TEARDOWN.md, docs/MOCHII-MOVEMENT-SYSTEM.md); engine wiring GAP flagged in the spec §4; all species/area content stays in the canon tables this config reads",
+  "visibleEncounters": {
+    "areaProfiles": [],
+    "binding": {
+      "keyedBy": [
+        "areaId",
+        "method"
+      ],
+      "readsTables": "src/data/core/encounters/*.spawn-tables.json",
+      "unassignedBehaviour": "step_roll_fallback"
+    },
+    "dispositionAxes": {
+      "disposition": [
+        "docile",
+        "wary",
+        "bold",
+        "aggressive"
+      ],
+      "reaction": [
+        "flee",
+        "watch",
+        "approach",
+        "charge"
+      ]
+    },
+    "individualPool": {
+      "canonTablesEdited": false,
+      "identity": "a visible creature is a wild individual (pool #267) while spawned; the wild-memory/ecology overlays read and write that same record"
+    },
+    "lifecycle": [
+      "spawn",
+      "roam",
+      "aware",
+      "disposition",
+      "engage",
+      "disengage",
+      "despawn"
+    ]
+  }
+}

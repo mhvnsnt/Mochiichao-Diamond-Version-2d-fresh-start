@@ -1,0 +1,132 @@
+{
+ "character": "kittember",
+ "body_plan": "flame-tailed cat (canon individual is bipedal; species default quadruped)",
+ "material": "mammalian cat body + a LIVE FLAME at the tail tip (canon: the flame is the tail tip, never a floating orb, never fused into body art)",
+ "mass_class": "light, agile",
+ "volume_rule": "body near-rigid (mammals do not volume-squash); squash lives in legs/spine only; flame volume is free (it is fire)",
+ "rest_shape": "canon cutout stance; flame component = cutout x198-271, y81-195, core colour #FD8504",
+ "idle": {
+  "cycle": "breath + flame flicker",
+  "description": "chest/flank breathing +/-2% on a 24f loop; tail-base sway; flame flicker cycle ~8f (height +/-25%, tip licks side to side, never symmetrical two frames running); intermittent ear twitch / tail secondary every few loops",
+  "loop_frames": 24,
+  "fps": 24,
+  "breath_amp_pct": 2,
+  "flame_height_var_pct": 25,
+  "secondary_break": "ear twitch or tail-tip secondary every 3-5 loops"
+ },
+ "breathing_equivalent": "chest/flank breathing (real mammalian breath)",
+ "locomotion": {
+  "verb": "spine gather-extend walk/trot; run = extended stretch poses",
+  "cycle": "spine flexes gather/extend per stride; landing squash in legs/spine only; flame lags and streaks backward, then recovers (follow-through)",
+  "ground_contact": "feet; body pitch follows stride phase"
+ },
+ "anticipation": "pounce crouch-wiggle: hindquarters wiggle 6-8f before a leap; crouch before any jump",
+ "settle": "leg/spine absorb 4-6f; flame overshoots forward then settles back over 6-8f",
+ "secondary_chains": [
+  {
+   "part": "tail flame",
+   "behaviour": "own continuous track (see material track) - flicker, lag, state-driven size/rate/colour",
+   "lag_frames": "2-4 behind body"
+  },
+  {
+   "part": "tail (non-flame base)",
+   "behaviour": "follow-through chain lagging body 2-4f"
+  },
+  {
+   "part": "ears",
+   "behaviour": "intermittent twitch as secondary action"
+  }
+ ],
+ "signature_motions": [
+  {
+   "name": "startle-arch",
+   "trigger": "surprise",
+   "note": "back arches, flame flares, 3f in"
+  },
+  {
+   "name": "pounce wiggle",
+   "trigger": "pre-leap",
+   "note": "hindquarter wiggle anticipation"
+  },
+  {
+   "name": "content curl-up",
+   "trigger": "sleep",
+   "note": "curls, flame dimmed to ember pulse"
+  },
+  {
+   "name": "flame-lick groom",
+   "trigger": "idle break",
+   "note": "licks the flame-side paw"
+  }
+ ],
+ "emotion_map": {
+  "happy": "flame wavers, tail high, ears up",
+  "sad": "body droops (shoulders/head low), flame low and slow",
+  "angry": "flame tall/blazing, body arched-ready",
+  "scared": "flame sputters small, body low, ears flat"
+ },
+ "state_map": {
+  "exhausted": "flame weak/small, flicker slow (Charmander-canon meter)",
+  "wet": "flame sputtering + steam wisps",
+  "danger (flame near out)": "story-critical state, never decorative-off",
+  "sleep": "ember pulse only"
+ },
+ "forbidden_motions": [
+  "static flame in any frame",
+  "flame symmetrical or identical two frames running",
+  "rigid spine in locomotion",
+  "flame drawn as a separate floating orb detached from the tail tip"
+ ],
+ "substitution_set": [
+  "arch",
+  "crouch",
+  "stretch-run",
+  "curl-sleep",
+  "flinch"
+ ],
+ "flame_substitution_set": [
+  "ember",
+  "normal",
+  "tall",
+  "sputter",
+  "smear-streak"
+ ],
+ "smear_drawing": "leg smear on fastest run beat, 1-2f",
+ "sound_linked_motions": [
+  "cry = chest pulse + flame flare beat"
+ ],
+ "engine": {
+  "mode": "flame-cat",
+  "spring": {
+   "stiffness": 0.11,
+   "damping": 0.8,
+   "note": "flame tip chain: higher frequency than liquid"
+  },
+  "idle": {
+   "breath_frames": 24,
+   "breath_amp": 0.02,
+   "flame_flicker_frames": 8
+  },
+  "deform": {
+   "max_squash_h": 0.92,
+   "max_stretch_h": 1.1,
+   "volume_preserved": false,
+   "note": "small spine-class deformation only"
+  },
+  "flame": {
+   "component_bbox_cutout": [
+    198,
+    81,
+    272,
+    196
+   ],
+   "core_colour": "#FD8504",
+   "states": [
+    "ember",
+    "normal",
+    "tall",
+    "sputter"
+   ]
+  }
+ }
+}

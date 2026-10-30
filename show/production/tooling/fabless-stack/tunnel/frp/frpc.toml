@@ -1,0 +1,17 @@
+# frp client (frpc) template — runs on the SEAT (behind NAT, dials out).
+# Pair with frps.toml on the relay box. After connect, the seat's local
+# server is reachable at the relay's public address on remotePort, and
+# that address is what gets written into the rendezvous record.
+serverAddr = "relay.example.com"   # the relay box's public address
+serverPort = 7000
+
+[auth]
+method = "token"
+token = "REPLACE_WITH_A_LONG_RANDOM_TOKEN"   # must match frps.toml
+
+[[proxies]]
+name = "wielder-seat-http"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 8000        # vLLM :8000 or llama-server :8080 on the seat
+remotePort = 18000      # public port on the relay box

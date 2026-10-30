@@ -1,0 +1,29 @@
+{
+  "entries": [
+    {
+      "bytes": 37791,
+      "path": "src/data/core/species.json",
+      "sha256": "a48b0cc5656a0ef40c60c4097e9b4a0cbc2ff602096bd7ab50ce52ba703295fe"
+    },
+    {
+      "bytes": 16388,
+      "path": "src/data/core/moves.json",
+      "sha256": "e07182a6e83b18983119ef0c7401a19829912deac3537b0ce2943041d0545a55"
+    },
+    {
+      "bytes": 2892,
+      "path": "src/data/core/encounters.json",
+      "sha256": "f197226b735296d1b6395350f7cdd1c8516a608456830636b9c16ab613d97a62"
+    },
+    {
+      "bytes": 19941,
+      "path": "src/data/core/learnsets.json",
+      "sha256": "f70787f5c73fe450731e997429ed1b1c819e901f8a3c033aa64ef2c61fef81c8"
+    }
+  ],
+  "format": "mochiichao/content-pack/v1",
+  "generatedFrom": "main @ bfd91cc2754ce3dae68c40ca9029964996395f4c (2026-10-28)",
+  "note": "Worked example for content-pack-spec.md §5 — real paths, byte counts, and sha256 of four core entries, computed from main at the stated commit. A full manifest is a mechanical list+hash walk of the pack's entries.",
+  "packId": "core",
+  "stackPosition": 1
+}

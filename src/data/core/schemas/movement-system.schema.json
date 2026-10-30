@@ -1,0 +1,460 @@
+{
+  "$defs": {
+    "areaProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "areaId": {
+          "type": "string"
+        },
+        "disposition": {
+          "enum": [
+            "docile",
+            "wary",
+            "bold",
+            "aggressive"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "grass",
+            "surf",
+            "fish",
+            "cave",
+            "dive"
+          ],
+          "type": "string"
+        },
+        "reaction": {
+          "enum": [
+            "flee",
+            "watch",
+            "approach",
+            "charge"
+          ],
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "areaId",
+        "method",
+        "disposition",
+        "reaction",
+        "status"
+      ],
+      "type": "object"
+    },
+    "battleStaging": {
+      "additionalProperties": false,
+      "properties": {
+        "classes": {
+          "items": {
+            "enum": [
+              "entrance",
+              "idle_living",
+              "approach_contact",
+              "ranged_stay",
+              "reaction_exit"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "declaredIn": {
+          "type": "string"
+        },
+        "defaultRule": {
+          "type": "string"
+        },
+        "stateContract": {
+          "additionalProperties": false,
+          "properties": {
+            "INTRO": {
+              "type": "string"
+            },
+            "LIVING_FIELD": {
+              "type": "string"
+            },
+            "RESOLUTION": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "INTRO",
+            "LIVING_FIELD",
+            "RESOLUTION"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "classes",
+        "declaredIn",
+        "defaultRule",
+        "stateContract"
+      ],
+      "type": "object"
+    },
+    "follower": {
+      "additionalProperties": false,
+      "properties": {
+        "leadSelection": {
+          "description": "HGSS rule: the follower is the lead individual; re-evaluated on every party change.",
+          "enum": [
+            "first_alive_non_egg_else_first_non_egg"
+          ],
+          "type": "string"
+        },
+        "mood": {
+          "additionalProperties": false,
+          "properties": {
+            "drift": {
+              "type": "string"
+            },
+            "range": {
+              "items": {
+                "type": "integer"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            "startValue": {
+              "type": "integer"
+            },
+            "storage": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "range",
+            "startValue",
+            "drift",
+            "storage"
+          ],
+          "type": "object"
+        },
+        "paramTable": {
+          "additionalProperties": false,
+          "properties": {
+            "rowShape": {
+              "const": "followerParam"
+            },
+            "rows": {
+              "description": "Per-species follower parameters (tp_param.csv shape). Ships empty; rows are authored with the species data, sizeClass derived from the #161 size records.",
+              "items": {
+                "$ref": "#/$defs/followerParam"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "rowShape",
+            "rows"
+          ],
+          "type": "object"
+        },
+        "permission": {
+          "additionalProperties": false,
+          "properties": {
+            "exceptionList": {
+              "description": "Named species x place exceptions (HGSS Diglett/Bell Tower pattern). Ships empty; entries are canon rulings.",
+              "items": {
+                "$ref": "#/$defs/followerException"
+              },
+              "type": "array"
+            },
+            "mapModes": {
+              "description": "The follow mode every map header carries (HGSS MapHeader_GetFollowMode pattern).",
+              "items": {
+                "enum": [
+                  "allow",
+                  "height_restrict",
+                  "prevent"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "mapModes",
+            "exceptionList"
+          ],
+          "type": "object"
+        },
+        "saveState": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "scriptVerbs": {
+          "items": {
+            "enum": [
+              "pause_follower",
+              "resume_follower",
+              "follower_follow_route",
+              "place_follower_relative",
+              "wait_follower"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "trail": {
+          "additionalProperties": false,
+          "properties": {
+            "minBufferedSteps": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "model": {
+              "const": "command_buffer_replay"
+            },
+            "onWarp": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "model",
+            "minBufferedSteps",
+            "onWarp"
+          ],
+          "type": "object"
+        },
+        "traversalStates": {
+          "additionalProperties": false,
+          "properties": {
+            "mountedOrVehicle": {
+              "const": "recall_hidden_restore_on_foot"
+            },
+            "onFoot": {
+              "const": "follow"
+            },
+            "waterTraversal": {
+              "const": "recall_hidden_restore_on_foot"
+            }
+          },
+          "required": [
+            "onFoot",
+            "mountedOrVehicle",
+            "waterTraversal"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "leadSelection",
+        "trail",
+        "permission",
+        "traversalStates",
+        "mood",
+        "scriptVerbs",
+        "saveState",
+        "paramTable"
+      ],
+      "type": "object"
+    },
+    "followerException": {
+      "additionalProperties": false,
+      "properties": {
+        "effect": {
+          "enum": [
+            "prevent"
+          ],
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "scope": {
+          "description": "Map id, map group, or area the exception applies to.",
+          "type": "string"
+        },
+        "speciesId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "speciesId",
+        "scope",
+        "effect"
+      ],
+      "type": "object"
+    },
+    "followerParam": {
+      "additionalProperties": false,
+      "properties": {
+        "form": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hover": {
+          "type": "boolean"
+        },
+        "sizeClass": {
+          "type": "string"
+        },
+        "speciesId": {
+          "type": "string"
+        },
+        "tooTall": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "speciesId",
+        "sizeClass",
+        "tooTall",
+        "hover"
+      ],
+      "type": "object"
+    },
+    "visibleEncounters": {
+      "additionalProperties": false,
+      "properties": {
+        "areaProfiles": {
+          "description": "Behaviour bindings per (areaId, method). Ships empty; assignments are canon/world content.",
+          "items": {
+            "$ref": "#/$defs/areaProfile"
+          },
+          "type": "array"
+        },
+        "binding": {
+          "additionalProperties": false,
+          "properties": {
+            "keyedBy": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "readsTables": {
+              "type": "string"
+            },
+            "unassignedBehaviour": {
+              "const": "step_roll_fallback"
+            }
+          },
+          "required": [
+            "readsTables",
+            "keyedBy",
+            "unassignedBehaviour"
+          ],
+          "type": "object"
+        },
+        "dispositionAxes": {
+          "additionalProperties": false,
+          "properties": {
+            "disposition": {
+              "items": {
+                "enum": [
+                  "docile",
+                  "wary",
+                  "bold",
+                  "aggressive"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "reaction": {
+              "items": {
+                "enum": [
+                  "flee",
+                  "watch",
+                  "approach",
+                  "charge"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "disposition",
+            "reaction"
+          ],
+          "type": "object"
+        },
+        "individualPool": {
+          "additionalProperties": false,
+          "properties": {
+            "canonTablesEdited": {
+              "const": false
+            },
+            "identity": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "identity",
+            "canonTablesEdited"
+          ],
+          "type": "object"
+        },
+        "lifecycle": {
+          "items": {
+            "enum": [
+              "spawn",
+              "roam",
+              "aware",
+              "disposition",
+              "engage",
+              "disengage",
+              "despawn"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "binding",
+        "lifecycle",
+        "dispositionAxes",
+        "areaProfiles",
+        "individualPool"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Mechanisms only (docs/MOCHII-MOVEMENT-SYSTEM.md). Species/area content stays in the canon tables this config reads; bindings that would carry canon content ship empty and are filled by the canon lane.",
+  "properties": {
+    "battleStaging": {
+      "$ref": "#/$defs/battleStaging"
+    },
+    "follower": {
+      "$ref": "#/$defs/follower"
+    },
+    "format": {
+      "const": "mochiichao/movement-system/v1"
+    },
+    "status": {
+      "type": "string"
+    },
+    "visibleEncounters": {
+      "$ref": "#/$defs/visibleEncounters"
+    }
+  },
+  "required": [
+    "format",
+    "status",
+    "follower",
+    "visibleEncounters",
+    "battleStaging"
+  ],
+  "title": "Mochiichao movement system config — followers, visible encounters, battle staging",
+  "type": "object"
+}

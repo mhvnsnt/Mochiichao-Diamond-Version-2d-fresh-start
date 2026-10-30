@@ -1,0 +1,60 @@
+{
+  "creature": "gabu",
+  "roster_id": "148",
+  "roster_note": "Gen 2 choosable starter, confirmed 2026-10-25 per updated MEMORY (was unnumbered in the original bake brief).",
+  "source": "Locked 2D character sheet atlas (game path since PR #183). 3D bake PNGs deleted 2026-10-26 per Mars order - no 3D renders or T-pose assets in the game path.",
+  "game_rule": "2D character sheets, sprites, sprite sheets and GIFs only - no 3D renders, no T-pose assets.",
+  "cell_size": 64,
+  "sheet": {
+    "file": "src/assets/sprite-atlases/gabu/gabu_atlas_64_locked.png",
+    "width": 384,
+    "height": 256
+  },
+  "frames": [
+    {
+      "view": "front",
+      "atlas_cell": {
+        "x": 128,
+        "y": 0
+      },
+      "file": "src/assets/sprite-atlases/gabu/gabu_atlas_64_locked.png",
+      "x": 128,
+      "y": 0,
+      "width": 64,
+      "height": 64
+    },
+    {
+      "view": "back",
+      "atlas_cell": {
+        "x": 192,
+        "y": 0
+      },
+      "file": "src/assets/sprite-atlases/gabu/gabu_atlas_64_locked.png",
+      "x": 192,
+      "y": 0,
+      "width": 64,
+      "height": 64
+    },
+    {
+      "view": "side",
+      "atlas_cell": {
+        "x": 128,
+        "y": 64
+      },
+      "file": "src/assets/sprite-atlases/gabu/gabu_atlas_64_locked.png",
+      "x": 128,
+      "y": 64,
+      "width": 64,
+      "height": 64
+    }
+  ],
+  "views_done": [
+    "front",
+    "back",
+    "side"
+  ],
+  "views_missing": [
+    "side facing the other direction - mirror the side frame in game code until a second side is drawn"
+  ],
+  "notes": "Game art is the locked 2D atlas above (same cells spriteSheets.ts loads for 148). Former 3D bake PNGs (gabu_sheet.png, gabu_front_64.png, gabu_back_64.png, gabu_side_64.png) deleted 2026-10-26 per Mars order and no longer in the repo. Walk frames live in src/assets/walk-frames/gabu/; battle poses live in the locked 2D animation sets."
+}

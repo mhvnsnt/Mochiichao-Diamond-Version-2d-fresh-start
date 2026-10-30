@@ -1,0 +1,9 @@
+== training kit validation ==
+Wed Oct 28 19:42:09 UTC 2026
+........                                                                 [100%]
+8 passed in 0.04s
+training/train_primary_qlora.yaml parses OK; model: Qwen/Qwen3-30B-A3B-Instruct-2507 | quant bits: 4 | cutoff: 2048
+training/train_freeseat_14b.yaml parses OK; model: Qwen/Qwen3-14B | quant bits: 4 | cutoff: 1024
+dataset_info entries: ['grok_local_chat', 'grok_local_seeds', 'grok_local_tools']
+prepare_data.py py_compile OK
+24 training/grok_pattern_seeds.jsonl

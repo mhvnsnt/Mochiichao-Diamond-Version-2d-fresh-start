@@ -1,0 +1,302 @@
+{
+  "$id": "./frame-data.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One fighting-game move in the shared frame-data language (FIGHTING-SYSTEMS.md). All durations are integer frames at 60 fps. Fields marked x-bannon-extension are the wrestling extensions; everything else is the Capcom-published conventional vocabulary.",
+  "properties": {
+    "boxes": {
+      "description": "Box states over the move's timeline. Coordinates are in the home repo's box unit, origin at the character's floor anchor, x forward. Art never overrides boxes (FIGHTING-SYSTEMS.md §2).",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "fromFrame": {
+            "description": "First frame (0-based, from move start) this box state applies; applies until the next entry.",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "h": {
+            "type": "number"
+          },
+          "kind": {
+            "enum": [
+              "hit",
+              "hurt",
+              "throw",
+              "projectile",
+              "armor",
+              "invincible"
+            ],
+            "type": "string"
+          },
+          "w": {
+            "type": "number"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "fromFrame",
+          "kind"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "cancels": {
+      "additionalProperties": false,
+      "description": "Which phases may be interrupted into which follow-ups. The combo system is data (TEARDOWN-fighting-sega-capcom.md §2).",
+      "properties": {
+        "cancelFromPhase": {
+          "items": {
+            "enum": [
+              "startup",
+              "active",
+              "recovery"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "onBlock": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "onHit": {
+          "description": "Move ids cancellable into, on hit.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "onWhiff": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "conditions": {
+      "additionalProperties": false,
+      "description": "x-bannon-extension: sim-state predicates required for the move to be legal (FIGHTING-SYSTEMS.md §3).",
+      "properties": {
+        "attackerState": {
+          "items": {
+            "enum": [
+              "standing",
+              "crouching",
+              "airborne",
+              "down"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "opponentState": {
+          "items": {
+            "enum": [
+              "standing",
+              "crouching",
+              "airborne",
+              "down",
+              "clinchHeld"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "position": {
+          "items": {
+            "enum": [
+              "anywhere",
+              "nearRopes",
+              "onTurnbuckle",
+              "centerRing"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "grapple": {
+      "additionalProperties": false,
+      "description": "x-bannon-extension: present when the move is a throw/grapple (FIGHTING-SYSTEMS.md §3).",
+      "properties": {
+        "clinchPhases": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "frames": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "name": {
+                "enum": [
+                  "clinch",
+                  "lift",
+                  "hold",
+                  "drive",
+                  "fall",
+                  "release"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "frames"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "endsWithPin": {
+          "default": false,
+          "description": "On completion, control passes to the pinfall ruleset named in pinfallRulesetId.",
+          "type": "boolean"
+        },
+        "escapeWindow": {
+          "description": "Frames at clinch start during which the defender's throw-break input escapes.",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "pinfallRulesetId": {
+          "description": "Names a pinfall ruleset owned by the home repo (canon slot — values are not defined in this package).",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "id": {
+      "description": "Stable move id, snake_case. Never renumbered once shipped (replays and frame tables cite it).",
+      "type": "string"
+    },
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "bufferWindow": {
+          "default": 6,
+          "description": "Frames before legality during which the input is stored. House default 6.",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "motionWindow": {
+          "description": "For motion inputs: frames after motion completion during which the final input still counts. House default 12.",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "notation": {
+          "description": "Human-readable input, e.g. '236+P' or 'close: LP+LK'. The notation legend lives in FIGHTING-SYSTEMS.md §4's home-repo conventions.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "notation"
+      ],
+      "type": "object"
+    },
+    "name": {
+      "description": "Display name (Mochiichao/BANNON naming law applies: display names are canon, ids are plumbing).",
+      "type": "string"
+    },
+    "outcome": {
+      "additionalProperties": false,
+      "properties": {
+        "blockstun": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "damage": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "hitstop": {
+          "description": "Frames both characters freeze on contact.",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "hitstun": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "launch": {
+          "default": false,
+          "description": "On hit, the defender leaves the ground.",
+          "type": "boolean"
+        },
+        "onBlock": {
+          "description": "Frame advantage for the attacker when the move is blocked.",
+          "type": "integer"
+        },
+        "onHit": {
+          "description": "Frame advantage for the attacker when the move hits (positive: attacker acts first).",
+          "type": "integer"
+        },
+        "pushback": {
+          "description": "Horizontal push applied to the defender on contact, in box units.",
+          "type": "number"
+        }
+      },
+      "required": [
+        "damage",
+        "onHit",
+        "onBlock"
+      ],
+      "type": "object"
+    },
+    "phases": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "description": "Frames during which the move can hit.",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "recovery": {
+          "description": "Frames after active during which the character cannot act (unless cancelled).",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "startup": {
+          "description": "Frames before the move can first hit.",
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "startup",
+        "active",
+        "recovery"
+      ],
+      "type": "object"
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Provenance/status annotation, ignored by the sim. Example and template files must carry meta.status saying so.",
+      "properties": {
+        "status": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "input",
+    "phases",
+    "outcome"
+  ],
+  "title": "frame-data",
+  "type": "object"
+}

@@ -1,0 +1,77 @@
+# Fuel stack — distillation kit configuration.
+# Teacher and student are OPEN models only (Apache-2.0). No closed
+# model's outputs are training data anywhere in this kit — see
+# dataset_sources.json for the audited data chain.
+#
+# Two phases, matching TEARDOWN-distillation.md:
+#   A) teacher_generate.py — offline generations from the teacher seat
+#      (grok-local serving), then SFT-style learning (LLaMA-Factory,
+#      the programme's existing trainer) OR direct GKD dataset build.
+#   B) gkd_train.py — TRL GKD: on-policy distillation with the teacher
+#      in the loop (logit-level, generalised Jensen-Shannon loss).
+
+teacher:
+  # The grok-local primary seat model (Apache-2.0), served by vLLM.
+  id: Qwen/Qwen3-30B-A3B-Instruct-2507
+  licence: Apache-2.0
+  # Phase A talks to the seat over its OpenAI-compatible API.
+  base_url_env: TEACHER_BASE_URL        # e.g. http://127.0.0.1:8000/v1
+  served_name_env: TEACHER_MODEL        # the seat's served model name
+  # Phase B (GKD) needs teacher weights or a teacher server:
+  # - 24 GB seat: teacher AWQ served by vLLM on the same host, student
+  #   trains against it via TRL's teacher-server path, or run the
+  #   teacher bf16 on a second device.
+  # - Kaggle 2xT4: teacher Qwen/Qwen3-14B (Apache-2.0) on GPU 1,
+  #   student trains on GPU 0. The 30B teacher does NOT fit one T4.
+  kaggle_teacher_id: Qwen/Qwen3-14B
+
+student:
+  id: Qwen/Qwen3-4B-Instruct-2507       # Apache-2.0; fits every seat class
+  licence: Apache-2.0
+  # Alternatives named in the teardown: Qwen3-1.7B (phone-class
+  # student), OLMoE-1B-7B (Apache-2.0, sparse student).
+
+data:
+  sources_manifest: dataset_sources.json
+  prompts_jsonl: data/prompts.jsonl          # built by prepare_distill_data.py
+  generations_jsonl: data/generations.jsonl  # built by teacher_generate.py
+  train_jsonl: data/train.jsonl
+  eval_jsonl: data/eval.jsonl
+  max_prompts: 20000
+  max_prompt_tokens: 1024
+  eval_fraction: 0.02
+
+generation:            # Phase A sampling from the teacher
+  temperature: 0.7
+  top_p: 0.95
+  max_new_tokens: 1024
+  concurrency: 8
+
+gkd:                   # Phase B — TRL GKDTrainer knobs (trl.experimental.gkd)
+  lmbda: 0.5           # 0 = off-policy (pure SFT on teacher data), 1 = fully on-policy
+  beta: 0.5            # JSD interpolation: 0 = forward KL, 1 = reverse KL, 0.5 = JSD
+  temperature: 1.0
+  max_prompt_length: 1024
+  max_completion_length: 512
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 16
+  learning_rate: 1.0e-4
+  num_train_epochs: 1
+  bf16: true           # T4 seats: set false and fp16 true (Turing has no bf16 fast paths)
+  fp16: false
+
+peft:                  # student trains as a LoRA adapter (QLoRA on small seats)
+  use_peft: true
+  load_in_4bit: true   # bitsandbytes NF4 — set false on seats with room
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+output:
+  dir: runs/student-qwen3-4b-gkd
+  save_out_note: >
+    Adapters + scorecard land in the run dir; stage them per the
+    staging law (GitHub for the adapter if it fits, else TeraBox with
+    a manifest) and register the adapter in moe/ROUTER-SPEC.md's
+    specialist roster before any seat loads it.

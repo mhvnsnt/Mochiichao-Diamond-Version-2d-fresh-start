@@ -1,0 +1,70 @@
+{
+  "pack_format": "mochiichao-reference-pack/v1",
+  "character_id": "sproutle",
+  "display_name": "Sproutle",
+  "species_role": "Pilot cast",
+  "signature_move_display": "Leaf Blast",
+  "palette_notes": "Greens dominant (#60c0a0 / #80c0a0 families). Measured from the CLEANED canon cutout, 2026-10-28.",
+  "do_not_change": [
+    "Use ONLY the cleaned cutout (sproutle.png). The v1 file with the baked grey ground ellipse is marked NOT USABLE under the no-baked-shadows rule",
+    "No baked-in ground shadow in any reference or output"
+  ],
+  "voice_note": "Creatures speak in cries/sounds only - no word dialogue (canon rule).",
+  "views": {
+    "front": {
+      "file": "front.png",
+      "status": "CANON",
+      "source": "~/workspace/mochiichao-show/canon-cutouts/sproutle.png (canon cutout of record)",
+      "md5": "44068950bda8d0b427af1209565ab2e9"
+    },
+    "three_quarter": {
+      "file": "candidate-turnaround.png",
+      "panel": "left panel",
+      "status": "CANDIDATE",
+      "provenance": "generated from canon front via Sheet Assembly pattern, 2026-10-28, anchor-graded",
+      "md5": "5120df98d8302dfd487699b132ba3a9a",
+      "sha256": "3117bc6641c5d77f1170ec1b3e8b026f08f1636d1dd15f8ca0f6d421815a3002",
+      "bytes": 1077377,
+      "anchor_grade": "PASS all three panels. Anchor check (by eye, against pack.json do_not_change + the owner-confirmed design: mint body, cyan visor, olive helmet): mint-green body in every panel; olive helmet with stitched notch marks and side ear flaps in every panel; wide cyan visor in every panel (in profile in the side panel) with the large oval eyes visible through it in 3/4 and side; nostril dots and small smile in 3/4; three white claws on each visible hand and on the front-facing feet; the back shell reads correctly in all three views - dark rim at the sides in 3/4, a dark profile dome in side view, and a full round dark shell covering the back in the back view; seeded ONLY from the cleaned cutout (md5 44068950bda8d0b427af1209565ab2e9, verified before use - the baked-shadow v1 file was never used or opened); NO baked ground/contact shadow - clean solid white field. NOTES for owner: (1) back-view feet show no toe claws; (2) proportions run slightly more chibi (head larger) than the canon front; (3) the back shell is a plain round dome with no segmentation - the canon front shows only the shell rim, so there is no canon segmentation for it to contradict."
+    },
+    "side": {
+      "file": "candidate-turnaround.png",
+      "panel": "middle panel",
+      "status": "CANDIDATE",
+      "provenance": "generated from canon front via Sheet Assembly pattern, 2026-10-28, anchor-graded",
+      "md5": "5120df98d8302dfd487699b132ba3a9a",
+      "sha256": "3117bc6641c5d77f1170ec1b3e8b026f08f1636d1dd15f8ca0f6d421815a3002",
+      "bytes": 1077377,
+      "anchor_grade": "PASS all three panels. Anchor check (by eye, against pack.json do_not_change + the owner-confirmed design: mint body, cyan visor, olive helmet): mint-green body in every panel; olive helmet with stitched notch marks and side ear flaps in every panel; wide cyan visor in every panel (in profile in the side panel) with the large oval eyes visible through it in 3/4 and side; nostril dots and small smile in 3/4; three white claws on each visible hand and on the front-facing feet; the back shell reads correctly in all three views - dark rim at the sides in 3/4, a dark profile dome in side view, and a full round dark shell covering the back in the back view; seeded ONLY from the cleaned cutout (md5 44068950bda8d0b427af1209565ab2e9, verified before use - the baked-shadow v1 file was never used or opened); NO baked ground/contact shadow - clean solid white field. NOTES for owner: (1) back-view feet show no toe claws; (2) proportions run slightly more chibi (head larger) than the canon front; (3) the back shell is a plain round dome with no segmentation - the canon front shows only the shell rim, so there is no canon segmentation for it to contradict."
+    },
+    "back": {
+      "file": "candidate-turnaround.png",
+      "panel": "right panel",
+      "status": "CANDIDATE",
+      "provenance": "generated from canon front via Sheet Assembly pattern, 2026-10-28, anchor-graded",
+      "md5": "5120df98d8302dfd487699b132ba3a9a",
+      "sha256": "3117bc6641c5d77f1170ec1b3e8b026f08f1636d1dd15f8ca0f6d421815a3002",
+      "bytes": 1077377,
+      "anchor_grade": "PASS all three panels. Anchor check (by eye, against pack.json do_not_change + the owner-confirmed design: mint body, cyan visor, olive helmet): mint-green body in every panel; olive helmet with stitched notch marks and side ear flaps in every panel; wide cyan visor in every panel (in profile in the side panel) with the large oval eyes visible through it in 3/4 and side; nostril dots and small smile in 3/4; three white claws on each visible hand and on the front-facing feet; the back shell reads correctly in all three views - dark rim at the sides in 3/4, a dark profile dome in side view, and a full round dark shell covering the back in the back view; seeded ONLY from the cleaned cutout (md5 44068950bda8d0b427af1209565ab2e9, verified before use - the baked-shadow v1 file was never used or opened); NO baked ground/contact shadow - clean solid white field. NOTES for owner: (1) back-view feet show no toe claws; (2) proportions run slightly more chibi (head larger) than the canon front; (3) the back shell is a plain round dome with no segmentation - the canon front shows only the shell rim, so there is no canon segmentation for it to contradict."
+    },
+    "expressions": {
+      "file": "candidate-expressions.png",
+      "status": "CANDIDATE",
+      "provenance": "generated from canon front via Sheet Assembly pattern, 2026-10-28, anchor-graded",
+      "md5": "55dda91505c3085128d3a9f5492bf29c",
+      "sha256": "dccf2bc5363c5267f8b8ad4d825c4f4b7f44e48a2710606772ed5daa659070b8",
+      "bytes": 1498170,
+      "anchor_grade": "PASS all six panels (grid order: neutral, happy, worried, determined, surprised, sleepy). Every expression reads clearly through the eyes behind the visor plus the mouth: flat mouth (neutral), closed arc eyes + open smile + arms raised (happy), raised brows + frown (worried), angled brows + frown + raised fist (determined), wide eyes + small open mouth + arms out (surprised), closed eyes (sleepy). Anchors hold in every panel: olive helmet with notch marks and ear flaps, cyan visor (stays cyan even with eyes closed behind it), mint body, three white claws per hand/foot, shell rim at the sides, no baked shadow. NOTE for owner: the sleepy panel's mouth is a small downturn, so it reads tired/slightly grumpy as well as sleepy.",
+      "note": "Expression sheet (whole sheet is the view record): neutral, happy, worried, determined, surprised, sleepy."
+    }
+  },
+  "platform_mapping": {
+    "kling_elements": "front.png uploads as the Element frontal image; 3 supplementary angle slots stay EMPTY until the GAP views are produced (Kling accepts 2-4 images per Element)",
+    "higgsfield_elements": "front.png usable as an @Element reference in Seedance/Cinema Studio today; Soul ID training needs 20+ images - NOT possible from canon today (GAP)",
+    "seedance_references": "front.png counts as 1 of up to 30 image references",
+    "google_flow_ingredients": "front.png usable as 1 of up to 3 Ingredients reference images; also fits Flow Characters",
+    "wan_vace": "front.png is the VACE reference image for the locked workflow (parity/workflow-i2v-locked.json)",
+    "wan_lora": "Training sets exist for wispkin + dorowani only (lora/ in avatar-stack); mochii/gabu/kittember/sproutle = GAP"
+  },
+  "candidate_note": "CANDIDATE views added 2026-10-28 (Work Package C2b). CANDIDATE is not canon: the owner locks sheets only after seeing them. Front view remains the only CANON view."
+}

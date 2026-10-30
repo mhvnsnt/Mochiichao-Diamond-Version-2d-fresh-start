@@ -1,0 +1,45 @@
+### grok-local FREE-SEAT tune — QLoRA on Qwen3-14B (bf16 repo) for
+### one Kaggle T4 16 GB. The free-test notebook's sibling: same data
+### mix, same pattern, smaller body.
+###
+### T4 rules (SM75): fp16, never bf16 — hence fp16: true below and
+### a 1024 cutoff. Fits because the 4-bit base is ~8 GB and LoRA +
+### checkpointing keeps activations small; if the seat OOMs, the
+### TRAINING.md ladder applies (batch stays 1; raise
+### gradient_accumulation_steps, then drop lora_rank to 8).
+### PROVEN-ON-FIRST-RUN on a Kaggle session, like the free test.
+
+model_name_or_path: Qwen/Qwen3-14B
+quantization_bit: 4
+quantization_method: bitsandbytes
+trust_remote_code: false
+
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+lora_target: all
+
+dataset: grok_local_tools,grok_local_chat,grok_local_seeds
+dataset_dir: ./data
+template: qwen3
+cutoff_len: 1024
+packing: false
+overwrite_cache: true
+
+output_dir: ./out/grok-local-freeseat-qlora
+logging_steps: 10
+save_steps: 250
+overwrite_output_dir: true
+report_to: none
+
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 16
+gradient_checkpointing: true
+learning_rate: 1.0e-4
+num_train_epochs: 2.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
+fp16: true

@@ -1,0 +1,185 @@
+564:      <div className="w-screen h-screen bg-black flex flex-col items-center justify-center font-mono overflow-hidden relative select-none">
+565:        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_60%,_rgba(0,0,0,0.8)_100%)] z-10 pointer-events-none" />
+566:        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,150,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,150,0.05)_1px,transparent_1px)] bg-[size:40px_40px] animate-[gridscroll_8s_linear_infinite]" />
+568:        <div className="text-7xl animate-bounce mb-4 z-20">✨</div>
+572:        <div className="text-green-400 text-sm md:text-xl tracking-[0.4em] mb-12 z-20 font-bold">MAINFRAME REGION</div>
+580:      </div>
+595:      <div className="w-screen h-screen bg-slate-950 flex flex-col items-center justify-center font-mono text-white p-4">
+596:        <div className="max-w-2xl text-center">
+598:            <div className="animate-fade-in">
+599:              <div className="text-6xl mb-6 animate-bounce">🌐</div>
+608:            </div>
+611:            <div className="animate-fade-in">
+612:              <div className="text-5xl mb-4">📛</div>
+627:            </div>
+630:            <div className="animate-fade-in">
+633:              <div className="flex gap-6 justify-center flex-wrap">
+641:                    <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">{s.sprite}</div>
+642:                    <div style={{ color: s.color }} className="font-black text-lg tracking-wider mb-1">{s.name}</div>
+643:                    <div className="text-slate-400 text-xs mb-2">{s.type} Type</div>
+644:                    <div className="text-slate-500 text-[10px] leading-relaxed">{s.desc.substring(0, 60)}...</div>
+647:              </div>
+648:            </div>
+650:        </div>
+651:      </div>
+660:      <div className="w-screen h-screen bg-slate-950 flex font-mono text-white">
+662:        <div className="w-40 bg-black border-r-2 border-teal-500 flex flex-col py-6 items-stretch">
+663:          <div className="text-teal-500 text-[10px] tracking-[0.3em] px-4 pb-4 border-b border-slate-800 mb-2">MOCHIIMIND</div>
+672:          <div className="flex-1"/>
+679:        </div>
+682:        <div className="flex-1 p-8 overflow-y-auto">
+683:          <div className="flex justify-between items-end mb-8 border-b border-slate-800 pb-4">
+684:            <div>
+685:              <div className="text-teal-400 text-2xl font-black tracking-widest uppercase">{playerName}</div>
+686:              <div className="text-slate-500 text-xs mt-1">{mapData?.name}</div>
+687:            </div>
+688:            <div className="text-right">
+689:              <div className="text-yellow-400 text-lg">💰 {credits} CR</div>
+690:              <div className="text-slate-500 text-xs">🏅 {badges.length}/8 Badges</div>
+691:            </div>
+692:          </div>
+695:            <div className="animate-fade-in max-w-2xl">
+696:              <div className="text-slate-500 text-xs tracking-[0.2em] mb-4">ACTIVE TEAM ({playerTeam.length}/6)</div>
+702:                  <div key={i} className="bg-slate-900 border rounded-xl p-4 mb-3 flex items-center gap-6" style={{ borderColor: `${tc}44` }}>
+703:                    <div className="text-5xl" style={{ filter: `drop-shadow(0 0 10px ${tc})` }}>{m.sprite}</div>
+704:                    <div className="flex-1">
+705:                      <div className="flex justify-between items-baseline mb-1">
+708:                      </div>
+709:                      <div className="text-[10px] uppercase font-bold tracking-widest mb-3" style={{ color: tc }}>{m.type} TYPE</div>
+710:                      <div className="flex items-center gap-3 mb-2">
+712:                        <div className="flex-1 bg-slate-950 rounded-full h-2 overflow-hidden">
+713:                          <div className="h-full rounded-full transition-all" style={{ width: `${hpPct}%`, background: hpPct > 50 ? "#4caf50" : hpPct > 20 ? "#ff9800" : "#f44336" }} />
+714:                        </div>
+716:                      </div>
+717:                    </div>
+718:                  </div>
+721:            </div>
+725:            <div className="animate-fade-in">
+726:              <div className="text-slate-500 text-xs tracking-[0.2em] mb-4">MOCHIICHAO DEX — {Object.keys(dex).length} SET</div>
+727:              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+733:                    <div key={m.id} className="bg-slate-900 border rounded-lg p-3 text-center" style={{ borderColor: `${tc}44` }}>
+734:                      <div className="text-4xl mb-2" style={{ filter: `drop-shadow(0 0 8px ${tc})` }}>{m.sprite}</div>
+735:                      <div className="text-white text-sm font-bold tracking-wide">{m.name}</div>
+736:                      <div className="text-[10px] uppercase mt-1" style={{ color: tc }}>{m.type}</div>
+737:                    </div>
+740:              </div>
+741:            </div>
+745:            <div className="animate-fade-in max-w-xl">
+746:               <div className="text-slate-500 text-xs tracking-[0.2em] mb-4">ROOT PERMISSIONS ({badges.length}/8)</div>
+747:               {badges.length === 0 && <div className="text-slate-600 italic">No access badges authorized yet.</div>}
+749:                 <div key={i} className="bg-slate-900 border border-teal-500/30 rounded-lg p-4 mb-3 flex items-center justify-between">
+750:                    <div className="flex items-center gap-4">
+751:                      <div className="text-3xl filter drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">🏅</div>
+752:                      <div>
+753:                        <div className="text-teal-400 font-bold">{b}</div>
+754:                        <div className="text-slate-500 text-xs">AUTHORIZED</div>
+755:                      </div>
+756:                    </div>
+757:                    <div className="text-teal-500">✓</div>
+758:                 </div>
+760:            </div>
+764:            <div className="animate-fade-in text-center py-12">
+765:               <div className="text-6xl mb-6 animate-bounce">💾</div>
+772:            </div>
+774:        </div>
+775:      </div>
+792:      <div className="w-screen h-screen bg-slate-950 flex flex-col font-mono text-white relative">
+793:        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_rgba(0,0,0,0.8)_100%)] pointer-events-none z-10" />
+796:        <div className="bg-black border-b-2 border-teal-500 px-6 py-2 flex justify-between items-center z-20">
+801:        </div>
+804:        <div className="flex-1 relative overflow-hidden flex" style={{ perspective: "1000px" }}>
+805:           <div className="absolute inset-0 bg-slate-900" />
+807:           <div 
+818:           <div className="absolute top-[10%] right-[15%] flex flex-col items-center">
+819:              <div className="bg-black/80 backdrop-blur border rounded-lg p-3 w-56 mb-6" style={{ borderColor: typeColor }}>
+820:                 <div className="flex justify-between items-baseline mb-1">
+823:                 </div>
+824:                 <div className="text-[10px] tracking-widest uppercase mb-2" style={{ color: typeColor }}>{enemy.type || SPECIES_DB[enemy.speciesId || enemy.id]?.types[0]} TYPE</div>
+825:                 <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+826:                   <div className="h-full transition-all duration-500" style={{ width: `${enemyHpPct}%`, background: hpColor(enemyHpPct) }} />
+827:                 </div>
+828:              </div>
+829:              <div className="text-9xl drop-shadow-2xl animate-pulse flex items-center justify-center h-40 w-40" style={{ filter: `drop-shadow(0 0 30px ${typeColor})` }}>
+835:              </div>
+836:           </div>
+839:           <div className="absolute bottom-[20%] left-[10%] flex flex-col items-center z-10">
+840:              <div className="bg-black/80 backdrop-blur border-2 border-teal-400 rounded-lg p-3 w-56 mb-6">
+841:                 <div className="flex justify-between items-baseline mb-1">
+844:                 </div>
+845:                 <div className="flex justify-between items-center mb-1 text-xs">
+847:                 </div>
+848:                 <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+849:                   <div className="h-full transition-all duration-500" style={{ width: `${playerHpPct}%`, background: hpColor(playerHpPct) }} />
+850:                 </div>
+851:              </div>
+852:              <div className="text-8xl drop-shadow-2xl flex items-end justify-center h-48 w-48" style={{ filter: "drop-shadow(0 0 20px rgba(0,255,255,0.6))" }}>
+858:              </div>
+859:           </div>
+860:        </div>
+863:        <div className="h-48 bg-black border-t-4 border-teal-500 flex z-30 shrink-0">
+865:          <div className="flex-1 p-4 overflow-y-auto border-r-2 border-slate-800 flex flex-col justify-end text-sm text-slate-300 leading-relaxed">
+867:               <div key={i} className={`mb-1 ${i === arr.length -1 ? 'text-white font-bold opacity-100' : 'opacity-60'}`}>
+869:               </div>
+871:          </div>
+874:          <div className="w-[45%] lg:w-[30%] p-4 bg-slate-950">
+876:               <div className="flex flex-col h-full gap-2">
+877:                 <div className="grid grid-cols-2 gap-2 flex-1">
+891:                 </div>
+892:                 <div className="flex gap-2 h-10 mt-2 shrink-0">
+907:                 </div>
+908:               </div>
+910:               <div className="w-full h-full flex items-center justify-center text-teal-500 animate-pulse tracking-widest font-bold">
+912:               </div>
+914:          </div>
+915:        </div>
+916:      </div>
+967:    <div className="w-screen h-screen bg-[#050810] font-mono overflow-hidden relative selection:bg-teal-500/30 flex flex-col items-center">
+974:      <div style={{ width: VIEW_W * TILE_SIZE * viewportScale, height: VIEW_H * TILE_SIZE * viewportScale }} className="relative flex-shrink-0 my-auto">
+975:        <div 
+988:          <div style={{ position:"absolute", inset:0, background: tint, pointerEvents:"none", zIndex:20, transition:"background 3s ease" }} />
+993:          <div style={{ position:"absolute", inset:0, background: weatherCfg.fog, pointerEvents:"none", zIndex:21 }} />
+997:        <div style={{ position:"absolute", inset:0, backgroundImage:"repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,0.06) 1px,rgba(0,0,0,0.06) 2px)", pointerEvents:"none", zIndex:22 }} />
+998:        <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.65) 100%)", pointerEvents:"none", zIndex:23 }} />
+1001:        <div style={{ position:"absolute", top:6, left:6, background:"rgba(0,0,0,0.7)", color:"#fff", fontSize:12, padding:"4px 10px", borderRadius:4, border:"1px solid rgba(255,255,255,0.15)", zIndex:30 }}>
+1003:        </div>
+1004:        <div style={{ position:"absolute", top:6, right:6, background:"rgba(0,0,0,0.7)", color: phase==="night" ? "#6080ff" : phase==="dawn" ? "#ffaa44" : phase==="dusk" ? "#ff6633" : "#ffffcc", fontSize:12, padding:"4px 10px", borderRadius:4, border:"1px solid rgba(255,255,255,0.15)", zIndex:30 }}>
+1006:        </div>
+1009:        <div className="absolute bottom-4 left-6 z-40 bg-black/80 px-4 py-2 border border-teal-500/50 rounded flex gap-4 pointer-events-auto shadow-xl">
+1012:        </div>
+1013:      </div>
+1014:     </div>
+1017:        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl bg-black/90 backdrop-blur-sm border-2 border-teal-400 p-6 z-50 shadow-[0_0_30px_rgba(0,255,255,0.1)] rounded-lg cursor-pointer" onClick={advanceDialog}>
+1019:            <div className="text-teal-400 text-xs font-bold tracking-[0.2em] mb-2 uppercase">{dialog.npc.name}</div>
+1021:          <div className="text-white text-lg leading-relaxed min-h-[4rem]">
+1023:          </div>
+1025:             <div className="text-teal-500 text-xs text-right mt-4 tracking-widest animate-pulse">▼ CONTINUE</div>
+1028:             <div className="flex gap-4 mt-6 justify-end">
+1031:             </div>
+1033:        </div>
+1037:      <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black to-transparent p-4 flex justify-between z-50 text-white shadow-none pointer-events-none">
+1038:        <div className="flex gap-4 items-center">
+1039:          <div className="bg-black/80 px-4 py-2 border border-teal-500/50 rounded flex gap-2 items-center">
+1041:          </div>
+1042:        </div>
+1043:        <div className="flex gap-4 items-center bg-black/80 px-4 py-2 border border-teal-500/50 rounded pointer-events-auto shadow-xl">
+1046:        </div>
+1047:      </div>
+1050:      <div className="absolute bottom-8 left-6 z-40 flex flex-col gap-1 lg:hidden drop-shadow-[0_0_15px_rgba(0,255,255,0.2)] select-none" style={{ touchAction: 'none' }}>
+1051:         <div className="flex justify-center">
+1060:         </div>
+1061:         <div className="flex gap-1">
+1070:            <div className="w-14 h-14 bg-black/70 flex items-center justify-center backdrop-blur border border-teal-400/20">
+1071:               <div className="w-4 h-4 rounded-full bg-teal-400/30"></div>
+1072:            </div>
+1081:         </div>
+1082:         <div className="flex justify-center">
+1091:         </div>
+1092:      </div>
+1095:      <div className="absolute bottom-8 right-6 z-40 lg:hidden flex gap-4 items-end select-none" style={{ touchAction: 'none' }}>
+1097:         <div className="absolute -top-16 -left-8">
+1104:         </div>
+1131:      </div>
+1135:        <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black border-2 px-6 py-3 font-bold tracking-widest z-50 text-center animate-bounce shadow-2xl backdrop-blur-md rounded" style={{ borderColor: notification.color, color: notification.color }}>
+1137:        </div>
+1146:      <div className={`absolute inset-0 bg-black z-50 transition-opacity duration-300 pointer-events-none ${isTransitioning ? 'opacity-100' : 'opacity-0'}`} />
+1147:    </div>

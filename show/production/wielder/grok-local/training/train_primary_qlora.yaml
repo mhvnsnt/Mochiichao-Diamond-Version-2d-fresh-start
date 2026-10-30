@@ -1,0 +1,46 @@
+### grok-local PRIMARY tune — QLoRA on Qwen3-30B-A3B-Instruct-2507
+### (bf16 repo) for one 24 GB card (RTX 4090 class).
+###
+### Sizing (see ../TRAINING.md): the base is a 30.5B MoE with ~3B
+### active params. 4-bit NF4 base (~17 GB frozen) + LoRA on all
+### linear layers + gradient checkpointing fits 24 GB at 2048
+### context with a small micro-batch. If it OOMs on a given seat,
+### the fallback ladder in TRAINING.md applies (cutoff 1024 ->
+### lora_rank 8 -> gradient_accumulation up), in that order.
+### PROVEN-ON-FIRST-RUN: written to LLaMA-Factory's documented
+### config schema; first real run happens on the seat.
+
+model_name_or_path: Qwen/Qwen3-30B-A3B-Instruct-2507
+quantization_bit: 4
+quantization_method: bitsandbytes
+trust_remote_code: false
+
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 16
+lora_alpha: 32
+lora_dropout: 0.05
+lora_target: all
+
+dataset: grok_local_tools,grok_local_chat,grok_local_seeds
+dataset_dir: ./data
+template: qwen3
+cutoff_len: 2048
+packing: false
+overwrite_cache: true
+
+output_dir: ./out/grok-local-primary-qlora
+logging_steps: 10
+save_steps: 250
+overwrite_output_dir: true
+report_to: none
+
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 16
+gradient_checkpointing: true
+learning_rate: 1.0e-4
+num_train_epochs: 2.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
+bf16: true

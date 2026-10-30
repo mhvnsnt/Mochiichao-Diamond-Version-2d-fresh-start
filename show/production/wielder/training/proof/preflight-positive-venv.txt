@@ -1,0 +1,33 @@
+Failed to load CPU gemm_4bit_forward from kernels-community: No module named 'kernels'. Please make sure you already `pip install kernels` and the kernels >= 0.11.1
+DEP_OK ftfy
+DEP_OK torch
+DEP_OK torchvision
+DEP_OK accelerate
+DEP_OK transformers
+DEP_OK diffusers
+DEP_OK einops
+DEP_OK safetensors
+DEP_OK toml
+DEP_OK voluptuous
+DEP_OK huggingface_hub
+DEP_OK imagesize
+DEP_OK numpy
+DEP_OK rich
+DEP_OK sentencepiece
+DEP_OK cv2
+DEP_OK bitsandbytes
+DEP_OK lion_pytorch
+DEP_OK schedulefree
+DEP_OK pytorch_optimizer
+DEP_OK prodigyopt
+DEP_OK tensorboard
+DEP_OK PIL
+TRAINER_PIN_OK git HEAD cb70b96858477e716a2096292ab8aab433277f38
+TRAINER_FILE_OK LICENSE.md e8d3af270e7b15ccab908481e4a8b2da03b27cc7ada3c9826cf709df5eb49c9e
+TRAINER_FILE_OK requirements.txt 0417f71a8a7be1a18ac5427843376e8f22c666252ceb5d226a3b470adbbeea68
+TRAINER_FILE_OK sdxl_train_network.py ba8c8991a9d4b51f5343c503c1d8929fc52f506c53c615058f1e8665696a8c6e
+TRAINER_ENTRY_IMPORT_OK sdxl_train_network
+DATASET_CHAR dorowani images_with_captions=28
+DATASET_CHAR wispkin images_with_captions=26
+DATASET_VERIFIED 54
+PREFLIGHT_PASS

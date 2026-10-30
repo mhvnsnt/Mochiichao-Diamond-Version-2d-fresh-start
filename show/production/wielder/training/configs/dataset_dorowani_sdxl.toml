@@ -1,0 +1,19 @@
+# Wielder Train dataset config - dorowani (stills only)
+# Carried over unchanged from the verified dataset config used by the
+# failed 2026-10-28 run (its dataset verified 114 files, hash-checked).
+# The Kaggle runner rewrites image_dir to the staged dataset path.
+[general]
+shuffle_caption = true
+caption_extension = ".txt"
+keep_tokens = 1
+
+[[datasets]]
+resolution = 1024
+batch_size = 1
+enable_bucket = true
+min_bucket_reso = 512
+max_bucket_reso = 1024
+
+  [[datasets.subsets]]
+  image_dir = "/kaggle/working/data/dorowani/sdxl"
+  num_repeats = 4

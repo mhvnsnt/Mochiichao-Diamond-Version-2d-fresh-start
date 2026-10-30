@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<materialx version="1.39" colorspace="lin_rec709">
+  <!--
+    Mochiichao lustre look, expressed as MaterialX data.
+    Source rules: show/bible/LIGHTING-SYSTEM.md section 6 (LV-1..LV-6).
+    Anchor character: Dorowani (lustre line, deep-blue #3070b0 family,
+    COLOR-SYSTEM.md section 5). This file is a DATA home for the lustre
+    rules - the show's 2D composite reads the same numbers as overlay
+    parameters; a 3D/material renderer can consume the file directly.
+
+    Rule map (full text in MATERIALX-TEARDOWN.md):
+      LV-1  the look modulates sheen/value only; base_color here is the
+            locked sheet colour and nothing in this graph re-hues it.
+      LV-3  sheen_amount is the LV-3 dial: 1.0 full moving band under a
+            hard key (day), 0.35 single rim-sheen at night, 0.0 ABSENT
+            in the Dark Forest. The three instances below are those
+            three states, as data.
+      LV-4  edge_borrow lets the sheen EDGE mix toward ONE neighbouring
+            hue (violet, neighbour of Dorowani's blue). The quarantined
+            accent red #a03436 is not reachable from any input here.
+      LV-5  night instance keeps the sheen (silhouette + sheen read).
+      LV-6  a variant/colourway re-uses this graph with its own locked
+            base_color; the sheen behaviour travels with the key, not
+            the colourway.
+  -->
+  <nodegraph name="NG_lustre_look">
+    <input name="base_color" type="color3" value="0.188, 0.439, 0.69" colorspace="srgb_texture"
+           doc="Locked sheet base colour (LV-1). Default: Dorowani lustre deep blue #3070b0." />
+    <input name="sheen_color" type="color3" value="0.85, 0.92, 1.0" colorspace="srgb_texture"
+           doc="Sheen band colour - a value/temperature lift of the base family, never a new hue (LV-1/LV-3)." />
+    <input name="sheen_amount" type="float" value="1.0"
+           doc="The LV-3 dial: 1.0 day full band, 0.35 night rim-sheen, 0.0 Dark Forest absent." />
+    <input name="sheen_roughness" type="float" value="0.3"
+           doc="Band softness; scales with key hardness (LV-3)." />
+    <input name="edge_borrow" type="float" value="0.0"
+           doc="LV-4: how far the sheen EDGE may lean toward the one neighbouring hue. 0 = no borrow." />
+    <input name="neighbour_color" type="color3" value="0.44, 0.19, 0.69" colorspace="srgb_texture"
+           doc="LV-4 neighbour hue for the default base: violet, adjacent to Dorowani blue. Never the quarantined accent red #a03436, never another cast member's accent." />
+
+    <mix name="sheen_edge_mix" type="color3">
+      <input name="fg" type="color3" interfacename="neighbour_color" />
+      <input name="bg" type="color3" interfacename="sheen_color" />
+      <input name="mix" type="float" interfacename="edge_borrow" />
+    </mix>
+
+    <standard_surface name="surface" type="surfaceshader">
+      <input name="base" type="float" value="1.0" />
+      <input name="base_color" type="color3" interfacename="base_color" />
+      <input name="sheen" type="float" interfacename="sheen_amount" />
+      <input name="sheen_color" type="color3" nodename="sheen_edge_mix" />
+      <input name="sheen_roughness" type="float" interfacename="sheen_roughness" />
+    </standard_surface>
+
+    <output name="out" type="surfaceshader" nodename="surface" />
+  </nodegraph>
+
+  <!-- LV-3 state 1: hard key / full day - the full moving sheen band. -->
+  <NG_lustre_look name="lustre_day" type="surfaceshader">
+    <input name="sheen_amount" type="float" value="1.0" />
+    <input name="sheen_roughness" type="float" value="0.3" />
+    <input name="edge_borrow" type="float" value="0.15" />
+  </NG_lustre_look>
+  <surfacematerial name="M_lustre_day" type="material">
+    <input name="surfaceshader" type="surfaceshader" nodename="lustre_day" />
+  </surfacematerial>
+
+  <!-- LV-3 state 2 + LV-5: night - a single rim-sheen band; silhouette and sheen placement carry the read. -->
+  <NG_lustre_look name="lustre_night" type="surfaceshader">
+    <input name="sheen_amount" type="float" value="0.35" />
+    <input name="sheen_roughness" type="float" value="0.45" />
+    <input name="edge_borrow" type="float" value="0.1" />
+  </NG_lustre_look>
+  <surfacematerial name="M_lustre_night" type="material">
+    <input name="surfaceshader" type="surfaceshader" nodename="lustre_night" />
+  </surfacematerial>
+
+  <!-- LV-3 state 3: the Dark Forest - sheen is ABSENT (lustre law). Data says so; no renderer discretion. -->
+  <NG_lustre_look name="lustre_dark_forest" type="surfaceshader">
+    <input name="sheen_amount" type="float" value="0.0" />
+    <input name="sheen_roughness" type="float" value="0.5" />
+    <input name="edge_borrow" type="float" value="0.0" />
+  </NG_lustre_look>
+  <surfacematerial name="M_lustre_dark_forest" type="material">
+    <input name="surfaceshader" type="surfaceshader" nodename="lustre_dark_forest" />
+  </surfacematerial>
+</materialx>

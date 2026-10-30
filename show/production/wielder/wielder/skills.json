@@ -1,0 +1,1 @@
+{"_about":"WIELDER skill registry (wielder/skill_import.py). Each entry is guidance data imported from a SKILL.md file — never executable code. Imports pass the prompt-hygiene scrub (wielder.scrub), the rules-registry check (wielder.rules) and the self-authorization gate in skill_import.py. Empty by default.","skills":[]}

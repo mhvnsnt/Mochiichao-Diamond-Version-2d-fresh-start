@@ -1,0 +1,11 @@
+# Sprite pipeline requirements (runtime, not vendored packages)
+Pillow>=10.2.0
+numpy>=1.26.4
+# extract_atlas.py only (sheet -> cells stage):
+scipy>=1.11.0
+# remove_background.py only (BiRefNet commercial default, local ONNX, no paid API):
+rembg>=2.0.0
+onnxruntime>=1.17.0
+# NOTE: first run downloads the BiRefNet-general model under ~/.rembg/models/.
+# The model is NOT vendored in this repo. BRIA RMBG-2.0 is CC BY-NC and
+# is refused by remove_background.py; u2net/u2netp are Apache-2.0 fallbacks only.

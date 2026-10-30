@@ -1,0 +1,36 @@
+Agents-wave test run — 2026-10-28, this VM (wielder-parity venv: python 3.12, pydantic 2.14.1, pytest 9.2.0, mcp SDK 1.30.0 present but NOT used by the new core)
+Command: python -m pytest wielder/tests/test_mcp_wave.py -v
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.2.0, pluggy-1.7.0 -- /home/hatch/workspace/wielder-parity/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/hatch/workspace/agents-wave/stage/show/production/wielder
+plugins: anyio-4.15.1, langsmith-0.14.14
+collecting ... collected 25 items
+
+wielder/tests/test_mcp_wave.py::test_request_before_initialize_is_rejected PASSED [  4%]
+wielder/tests/test_mcp_wave.py::test_initialize_echoes_a_supported_client_version PASSED [  8%]
+wielder/tests/test_mcp_wave.py::test_initialize_with_unknown_version_answers_latest PASSED [ 12%]
+wielder/tests/test_mcp_wave.py::test_notifications_get_no_response PASSED [ 16%]
+wielder/tests/test_mcp_wave.py::test_ping_and_unknown_method PASSED      [ 20%]
+wielder/tests/test_mcp_wave.py::test_parse_error_and_batch_rejection PASSED [ 24%]
+wielder/tests/test_mcp_wave.py::test_tools_list_and_call PASSED          [ 28%]
+wielder/tests/test_mcp_wave.py::test_tools_call_unknown_tool_is_invalid_params PASSED [ 32%]
+wielder/tests/test_mcp_wave.py::test_tool_handler_exception_is_an_iserror_result_not_a_protocol_error PASSED [ 36%]
+wielder/tests/test_mcp_wave.py::test_resources_list_and_read PASSED      [ 40%]
+wielder/tests/test_mcp_wave.py::test_prompts_list_get_and_missing_argument PASSED [ 44%]
+wielder/tests/test_mcp_wave.py::test_client_session_loopback_round_trip PASSED [ 48%]
+wielder/tests/test_mcp_wave.py::test_wielder_server_exposes_every_registry_tool PASSED [ 52%]
+wielder/tests/test_mcp_wave.py::test_wielder_server_calls_real_tools PASSED [ 56%]
+wielder/tests/test_mcp_wave.py::test_wielder_server_resources_and_prompt PASSED [ 60%]
+wielder/tests/test_mcp_wave.py::test_wielder_server_over_stdio_subprocess PASSED [ 64%]
+wielder/tests/test_mcp_wave.py::test_every_native_tool_has_a_written_description PASSED [ 68%]
+wielder/tests/test_mcp_wave.py::test_four_dialects_carry_the_same_tools PASSED [ 72%]
+wielder/tests/test_mcp_wave.py::test_gemini_parameters_stay_inside_the_gemini_subset PASSED [ 76%]
+wielder/tests/test_mcp_wave.py::test_model_card_round_trip PASSED        [ 80%]
+wielder/tests/test_mcp_wave.py::test_model_card_refuses_no_licence PASSED [ 84%]
+wielder/tests/test_mcp_wave.py::test_verify_model_files_against_pinned_table PASSED [ 88%]
+wielder/tests/test_mcp_wave.py::test_verify_variant_reads_the_groklocal_manifest_shape PASSED [ 92%]
+wielder/tests/test_mcp_wave.py::test_hash_manifest_for_dir_records_real_hashes PASSED [ 96%]
+wielder/tests/test_mcp_wave.py::test_existing_mcp_client_config_still_loads PASSED [100%]
+
+============================== 25 passed in 4.69s ==============================

@@ -1,0 +1,25 @@
+# Sources read 2026-10-28 (America/Chicago date; crawls UTC 2026-10-28)
+- Adobe 12 principles index; Thomas & Johnston Illusion of Life excerpts via Amazon/B&N search index: whole-body acting, sad = droop shoulders/slump body/drop head/drag feet.
+- Wave Motion Cannon squash & stretch - verified live open http://wavemotioncannon.com/2017/04/25/animation-principles-squash-and-stretch/ - volume preserved, flour sack personality, without S&S characters = lifeless mannequins, rigid only for rock/robot.
+- Fred Seibert / Hanna-Barbera limited animation - verified live open https://fredseibert.com/post/71257648/limited-animationunlimited-imagination - 20-30k drawings full vs 2-3k limited, muzzles so only mouths animated, blinking to enhance illusion, reused backgrounds.
+- Cartoon Research anecdotes index: Barbera quote 5k drawings Tom&Jerry vs 2-3 per foot limited.
+- Animation Apprentice moving hold/breathing - verified live open https://animationapprentice.blogspot.com/2020/05/why-animated-characters-need-to-breathe.html - moving hold basis of TV animation, if stops completely animation dies, overshoot+settle, motion from core.
+- Toon Boom Harmony 25 deformers - verified live open https://docs.toonboom.com/help/harmony-25/premium/getting-started/deformation.html - deformers increase range without new poses, likens fluidity of traditional; Bone/Curve/Envelope/FreeForm; curve for hair/mouth/torso/rubber-hose; envelope for fluid shapes hair/cloaks. PAID reference standard only, not in BOM.
+- Toon Boom cut-out + substitution drawings docs index.
+- OpenToonz official - verified live open https://opentoonz.github.io/e/ - New BSD, free commercial/non-commercial, Ghibli-customised Toonz. Plastic tool mesh/skeleton from manual index: triangular mesh, skeleton vertices with position/angle bounds/rigidity.
+- Synfig official - verified live open https://www.synfig.org/ - GPLv3, vector tweening transform any shape into another, bones + Skeleton Distortion for bitmap, linked parameters/expressions for puppets.
+- Inochi2D NLnet - verified live open http://nlnet.nl/project/Inochi2D/ - BSD 2-clause, rigging via warping meshes, physics, dynamic masking.
+- Godot licence - index https://godotengine.org/license/ - MIT. SoftBody2D plugin MIT index via Godot forum/store: RigidBody+Joint+Skeleton2D deform texture, bouncy softbody.
+- Jiggle physics Godot/Verlet - index https://codernunk.com/tutorials/godot-jiggle-physics/ and Wayline spring-mass: Verlet integration, spring stiffness/damping/mass, secondary animation for hair/tails etc.
+- GAME FLOOR: Dragonfly Cave B/W - verified live open http://www.dragonflycave.com/unova/bw-changes/ - idle animations for ALL Pokemon played continuously during battles; ingenious part-based: frames for individual body parts + stretch/skew rules on parts; NOT single loop: couple different actions, secondary action breaks loop; status: sleep eyes close+slow, freeze stop, low HP slows, weight-based sendout thud/dust.
+- Bulbapedia Crystal/BW2 - verified live/index https://bulbapedia.bulbagarden.net/wiki/Pok%C3%A9mon_Black_and_White_Versions_2 - sprites fully animated move throughout battles, every Trainer animated more frames; Crystal first animated front sprites, Emerald reintroduced, Platinum back sprites.
+- Pokemon X/Y Nintendo World Report index: each Pokemon different animations while idle and after attack/damage; Rotoscopers: trees blow, water ripples, NPC idle stretch/yawn.
+- Pokecrystal wiki index: anim.asm + separate anim_idle.asm per species, frame/duration script.
+- Pokeoctober DeepWiki tileset anims index: AnimateWaterTile, AnimateFlowerTile, AnimateWaterPalette, flickering cave palette - engine cycles tiles continuously.
+- Charmander Bulbapedia index: tail flame indicates health/mood - bright strong, weak exhausted, wavering happy, blazing enraged.
+- Kanada / Animetudes - index http://animetudes.com/2021/07/21/yoshinori-kanada-and-the-nature-of-animation/ - liquid fire, motion through colour interplay, no clear lines.
+- Anime production vocab index: sakuga, smears (distorted elongated inbetween 1-2 frames), impact frames 1-3, FX fire/water/smoke Kanada style, bank shots/held cels.
+- Flour sack exercises index: personality/emotion without face via body language, squash/timing/overlap.
+- Animation Mentor character bible index via animapp.tw: personality, physical traits, library of movements, walk cycles, postures, character bible studied before posing.
+- OpenCV motion: PLOS Motion Tracker index https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0130293 - frame diff -> binary silhouette, proportion moving pixels = index of amount of movement; OpenCV Farneback optical flow index. OpenCV Apache 2.0 index.
+- Moving hold definitions index CG-Wire / Artemisia.

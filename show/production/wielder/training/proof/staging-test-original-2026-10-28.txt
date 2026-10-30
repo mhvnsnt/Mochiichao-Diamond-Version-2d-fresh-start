@@ -1,0 +1,7 @@
+== ORIGINAL (v1) kernel logic ==
+v1 PKG: /home/hatch/workspace/ep01-rebuild/wielder-training/scratch/staging-test-sim/working/wielder-training (exists: False)
+v1 first read of PKG: pip install -r /home/hatch/workspace/ep01-rebuild/wielder-training/scratch/staging-test-sim/working/wielder-training/requirements-wielder.txt
+v1 requirements install rc: 1
+v1 error: ERROR: Could not open requirements file: [Errno 2] No such file or directory: '/home/hatch/workspace/ep01-rebuild/wielder-training/scratch/staging-test-sim/working/wielder-training/requirements-wielder.txt'
+v1 base model in (empty) HF cache: None -> v1 would abort 'not in HF cache'
+ORIGINAL_TEST_FAILS_AS_EXPECTED

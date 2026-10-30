@@ -1,0 +1,403 @@
+@import "tailwindcss";
+
+/* Settings Font row — local Mars-requested fonts, shipped in this PR.
+ * Yagiza: yagiza.woff (5,100 bytes) + yagiza.ttf (19,544 bytes).
+ * 01 Digitall: 01-digitall.ttf (48,832 bytes).
+ * Licence gate removed by Mars (2026-10-25); no payment made, no paid
+ * licence bought. Behance Y2K Typeface has no @font-face here yet —
+ * its file has not arrived, so its row falls back (see fonts.ts).
+ * Batch C (2026-10-25, wiring batch C — Fonts): the 13 open Y2K
+ * Google Fonts + Press Start 2P below, all OFL, pulled from the
+ * public google/fonts repo (METADATA.pb licence OFL verified per
+ * font). Files renamed to clean names on import; upstream names
+ * are listed in src/lib/generated/fonts-y2k-ofl-PROVENANCE.md.
+ * The Google Fonts stylesheet in index.html is kept as fallback
+ * only; the local files below are what ships. DIAMOND VERSION
+ * subtitle font is PINNED (fonts.ts) and untouched here. */
+@font-face {
+  font-family: 'Yagiza';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/yagiza.woff') format('woff'),
+       url('./assets/fonts/yagiza.ttf') format('truetype');
+}
+@font-face {
+  font-family: '01 Digitall';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/01-digitall.ttf') format('truetype');
+}
+
+/* Batch C — open Y2K Google Fonts, OFL, local files. */
+@font-face {
+  font-family: 'Bungee';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/bungee-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Titan One';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/titan-one-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 300 700;
+  src: url('./assets/fonts/fredoka-variable.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Coiny';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/coiny-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Dangrek';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/dangrek-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Sniglet';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/sniglet-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Rubik Bubbles';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/rubik-bubbles-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 400 900;
+  src: url('./assets/fonts/orbitron-variable.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Audiowide';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/audiowide-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Michroma';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/michroma-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Turret Road';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/turret-road-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/rajdhani-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-weight: 100 900;
+  src: url('./assets/fonts/exo2-variable.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Press Start 2P';
+  font-style: normal;
+  font-weight: normal;
+  src: url('./assets/fonts/press-start-2p-regular.ttf') format('truetype');
+}
+
+@theme {
+  --animate-fade-in: fade-in 0.3s ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(2px);
+    }
+  }
+}
+
+/*
+ * Pass 1 game shell — full viewport, portrait-mobile first.
+ * The game is NOT a centered box: every top-level screen fills the dynamic
+ * viewport (100dvh), controls sit inside safe-area padding, and nothing
+ * is clipped by the bottom edge on a phone.
+ */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
+  background: #050810;
+}
+
+:root {
+  /* Batch B defaults — applyMenuCustom() in src/lib/menuCustom.ts
+   * overwrites these on startup and on Settings SAVE + BACK.
+   * Defaults match the pre-existing look (16px dialogue, 1.625
+   * leading, white text, 14px dialogue radius, 48px touch) so
+   * nothing changes visually until a player saves a choice. */
+  --menu-text-size: 16px;
+  --menu-line-height: 1.625;
+  --menu-text-color: #ffffff;
+  --menu-text-shadow: none;
+  --menu-dialogue-radius: 14px;
+  --menu-anim-speed: 1;
+  --menu-reduced-motion: running;
+  --menu-touch-size: 48px;
+  --menu-sprite-proportion: chibi;
+}
+
+body {
+  /* --game-font is set by src/lib/fonts.ts applyFont() from the
+   * Settings Font row. Default is the pre-existing stack (locked
+   * main-menu look) until Mars locks a new font. */
+  font-family: var(--game-font, "Trebuchet MS", "Segoe UI", system-ui, sans-serif);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-screen {
+  width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  position: relative;
+  background: #050810;
+  color: #fff;
+}
+
+.game-panel {
+  background: rgba(22, 35, 58, 0.92);
+  border: 2px solid rgba(34, 211, 238, 0.6);
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
+/*
+ * v4 StdWindow — the ONE frame everywhere. Same palette, radius and
+ * shadow as .game-panel (they are intentionally identical: one frame,
+ * not a different frame per screen). Selected windows get the gold
+ * accent (#fbbf24) instead of the teal border. Text is #f1f5f9,
+ * danger is #ef4444, font is the game font above — never mono.
+ */
+.std-window {
+  background: rgba(22, 35, 58, 0.92);
+  border: 2px solid rgba(34, 211, 238, 0.6);
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  color: #f1f5f9;
+}
+
+.std-window-selected {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.6), 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
+.game-panel-bottom {
+  background: #0a1222;
+  border-top: 3px solid rgba(120, 180, 255, 0.4);
+}
+
+.game-button {
+  background: linear-gradient(180deg, #1d3a5f, #12233d);
+  border: 2px solid rgba(140, 200, 255, 0.55);
+  border-radius: 12px;
+  color: #fff;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.05s ease, filter 0.1s ease;
+}
+.game-button:hover { filter: brightness(1.2); }
+.game-button:active { transform: translateY(2px); box-shadow: none; }
+.game-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.game-title {
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.6), 0 0 18px rgba(80, 180, 255, 0.5);
+}
+
+.game-banner {
+  background: rgba(10, 18, 34, 0.9);
+  border: 2px solid rgba(255, 220, 120, 0.6);
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+/*
+ * Batch 3 — Pause menu Y2K skin ONLY (wiring tracker: per-menu skins 1/8).
+ * Per-menu colour: Pause = cyan -> blue -> violet gradient, pink star accents.
+ * Scoped to .pause-y2k-panel, which only PauseMenu renders, so no other
+ * menu, the main menu, title, Settings, fonts, rotation, or saves change.
+ * The .game-panel / .game-button / .game-title rules above are NOT edited;
+ * these later, equal-or-higher-specificity rules win only inside this panel.
+ * If the UI Art lane later delivers a dedicated Pause panel asset, re-attach
+ * it in lib/uiArt.ts (pause_menu_panel) and delete this block.
+ */
+.pause-y2k-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 42%),
+    linear-gradient(135deg, #0e7490 0%, #2563eb 48%, #7c3aed 100%);
+  border: 3px solid #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.55), 0 0 32px rgba(34, 211, 238, 0.45), 0 12px 32px rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+
+/* Y2K heading: italic, white -> gold -> pink gradient, pink glow.
+ * Font family unchanged (game font) — fonts are out of scope this batch. */
+.pause-y2k-panel .game-title {
+  font-style: italic;
+  background: linear-gradient(180deg, #ffffff 15%, #fde68a 55%, #f472b6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.45)) drop-shadow(0 0 14px rgba(244, 114, 182, 0.55));
+}
+
+/* Y2K rows: glossy blue, white border, rounded 18px+. The gold selected
+ * ring (ring-yellow-300) comes from MenuList and is left untouched. */
+.pause-y2k-panel .game-button {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, #1d4ed8, #1e3a8a);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 18px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.45), 0 0 14px rgba(34, 211, 238, 0.35);
+}
+
+/* Y2K help line: dark glass, white border, cyan glow. */
+.pause-y2k-panel .game-panel {
+  background: rgba(8, 20, 45, 0.72);
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  border-radius: 16px;
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.35);
+}
+
+/*
+ * Bag menu Y2K skin ONLY (per-menu skins 2/8).
+ * Per-menu colour: Bag = green.
+ * Scoped to .bag-y2k, which only BagView renders, so no other menu,
+ * the main menu, title, Settings, fonts, rotation, or saves change.
+ * The .game-panel / .game-button / .game-title rules above are NOT edited;
+ * these later, equal-or-higher-specificity rules win only inside Bag.
+ * BagView's own bg-[#0b1526] utility is overridden here by this later
+ * stylesheet rule, same as the Pause pattern leaves its panel classes
+ * in place. Pocket order, inputs, and behaviour are unchanged.
+ * If the UI Art lane later delivers a dedicated Bag panel asset,
+ * re-attach it in lib/uiArt.ts (bag_menu_panel) and delete this block.
+ */
+.bag-y2k {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 42%),
+    linear-gradient(135deg, #064e3b 0%, #15803d 48%, #65a30d 100%);
+}
+
+/* Y2K heading: italic, white -> gold -> green gradient, green glow.
+ * Font family unchanged (game font) — fonts are out of scope this batch. */
+.bag-y2k .game-title {
+  font-style: italic;
+  background: linear-gradient(180deg, #ffffff 15%, #fef08a 55%, #86efac 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.45)) drop-shadow(0 0 14px rgba(74, 222, 128, 0.55));
+}
+
+/* Y2K buttons (Close, Use, Toss, Quit, Yes/No): glossy green,
+ * white border, rounded 18px+. */
+.bag-y2k .game-button {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, #16a34a, #14532d);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 18px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.45), 0 0 14px rgba(74, 222, 128, 0.35);
+}
+
+/* Y2K panels (item rows, detail panel, message, help line, toss
+ * confirm): glossy rounded panels, white border, green glow, dark
+ * glass so white text stays readable. The gold selected ring
+ * (ring-yellow-300) comes from BagView and is left untouched. */
+.bag-y2k .game-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 55%),
+    rgba(6, 30, 20, 0.78);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 18px;
+  box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.35), 0 0 20px rgba(74, 222, 128, 0.35), 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/*
+ * Shop menu Y2K skin ONLY (per-menu skins 3/8).
+ * Per-menu colour: Shop = yellow.
+ * Scoped to .shop-y2k, which only ShopView renders, so no other menu,
+ * the main menu, title, Settings, fonts, rotation, or saves change.
+ * The .game-panel / .game-button / .game-title rules above are NOT edited;
+ * these later, equal-or-higher-specificity rules win only inside Shop.
+ * ShopView's own bg-[#0b1526] utility is overridden here by this later
+ * stylesheet rule, same as the Bag pattern leaves its panel classes
+ * in place. Buy/Sell/Quit order, stock, prices, wording, item order,
+ * inputs, and behaviour are unchanged.
+ * If the UI Art lane later delivers a dedicated Shop panel asset,
+ * re-attach it in lib/uiArt.ts (shop_menu_panel) and delete this block.
+ */
+.shop-y2k {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 42%),
+    linear-gradient(135deg, #713f12 0%, #ca8a04 48%, #facc15 100%);
+}
+
+/* Y2K heading: italic, white -> gold -> yellow gradient, yellow glow.
+ * Font family unchanged (game font) — fonts are out of scope this batch. */
+.shop-y2k .game-title {
+  font-style: italic;
+  background: linear-gradient(180deg, #ffffff 15%, #fef08a 55%, #facc15 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.45)) drop-shadow(0 0 14px rgba(250, 204, 21, 0.55));
+}
+
+/* Y2K buttons (Buy, Sell, Quit, Back, Yes/No): glossy yellow,
+ * white border, rounded 18px+. */
+.shop-y2k .game-button {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, #eab308, #854d0e);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 18px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.45), 0 0 14px rgba(250, 204, 21, 0.35);
+}
+
+/* Y2K panels (wallet, item rows, detail panel, message, help line,
+ * confirm): glossy rounded dark-glass panels, white border, yellow
+ * glow, so white text stays readable. The gold selected ring
+ * (ring-yellow-300) comes from ShopView and is left untouched. */
+.shop-y2k .game-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 55%),
+    rgba(30, 22, 4, 0.78);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 18px;
+  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.35), 0 0 20px rgba(250, 204, 21, 0.35), 0 8px 24px rgba(0, 0, 0, 0.45);
+}

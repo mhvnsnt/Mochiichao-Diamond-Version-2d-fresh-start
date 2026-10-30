@@ -1,0 +1,58 @@
+{
+  "checkpointEveryTicks": 300,
+  "determinismRules": [
+    "no wall-clock or frame-delta reads inside a tick",
+    "no unordered iteration where order affects outcomes",
+    "no platform-dependent float math in outcome-affecting state (integer/fixed-point in sim; floats are rendering-side)",
+    "no unseeded randomness — named streams only"
+  ],
+  "format": "mochiichao/deterministic-sim/v1",
+  "rngStreams": [
+    {
+      "affectsOutcomes": true,
+      "id": "encounter"
+    },
+    {
+      "affectsOutcomes": true,
+      "id": "ecology"
+    },
+    {
+      "affectsOutcomes": true,
+      "id": "battle"
+    },
+    {
+      "affectsOutcomes": false,
+      "id": "cosmetic",
+      "note": "Cosmetic rolls draw here so they can never perturb gameplay streams."
+    }
+  ],
+  "stateHash": {
+    "algorithm": "sha256-over-canonical-json",
+    "note": "Hash the canonical serialization of outcome-affecting state only; rendering state is excluded by definition. Mismatch = consistency failure (sim-core-spec.md §6)."
+  },
+  "status": "SPEC — target contract for the engine (see sim-core-spec.md §7); values are the adopted defaults, not measurements of the current engine",
+  "surfaces": {
+    "battle": {
+      "authority": "local-deterministic",
+      "purpose": "battle staging and animscript synchronisation",
+      "tickHz": 30
+    },
+    "versus": {
+      "authority": "rollback-ggpo-pattern",
+      "purpose": "frame-data surfaces (Brutal Fist / BANNON); fighting grammar is frame-based at 60",
+      "tickHz": 60
+    },
+    "world": {
+      "authority": "local-deterministic",
+      "purpose": "overworld, followers, visible encounters, ecology/behaviour evaluation",
+      "tickHz": 30
+    }
+  },
+  "tickOrder": [
+    "inputs",
+    "movement",
+    "interactions-encounters",
+    "ecology-behaviour",
+    "timers-events"
+  ]
+}

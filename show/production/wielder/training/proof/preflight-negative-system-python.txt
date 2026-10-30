@@ -1,0 +1,50 @@
+DEP_MISSING ftfy: ModuleNotFoundError: No module named 'ftfy'
+DEP_MISSING torch: ModuleNotFoundError: No module named 'torch'
+DEP_MISSING accelerate: ModuleNotFoundError: No module named 'accelerate'
+DEP_MISSING transformers: ModuleNotFoundError: No module named 'transformers'
+DEP_MISSING diffusers: ModuleNotFoundError: No module named 'diffusers'
+DEP_MISSING einops: ModuleNotFoundError: No module named 'einops'
+DEP_MISSING safetensors: ModuleNotFoundError: No module named 'safetensors'
+DEP_MISSING toml: ModuleNotFoundError: No module named 'toml'
+DEP_MISSING voluptuous: ModuleNotFoundError: No module named 'voluptuous'
+DEP_MISSING huggingface_hub: ModuleNotFoundError: No module named 'huggingface_hub'
+DEP_MISSING imagesize: ModuleNotFoundError: No module named 'imagesize'
+DEP_OK numpy
+DEP_MISSING rich: ModuleNotFoundError: No module named 'rich'
+DEP_MISSING sentencepiece: ModuleNotFoundError: No module named 'sentencepiece'
+DEP_MISSING cv2: ModuleNotFoundError: No module named 'cv2'
+DEP_MISSING bitsandbytes: ModuleNotFoundError: No module named 'bitsandbytes'
+DEP_MISSING lion_pytorch: ModuleNotFoundError: No module named 'lion_pytorch'
+DEP_MISSING schedulefree: ModuleNotFoundError: No module named 'schedulefree'
+DEP_MISSING pytorch_optimizer: ModuleNotFoundError: No module named 'pytorch_optimizer'
+DEP_MISSING prodigyopt: ModuleNotFoundError: No module named 'prodigyopt'
+DEP_MISSING tensorboard: ModuleNotFoundError: No module named 'tensorboard'
+DEP_OK PIL
+TRAINER_PIN_OK git HEAD cb70b96858477e716a2096292ab8aab433277f38
+TRAINER_FILE_OK LICENSE.md e8d3af270e7b15ccab908481e4a8b2da03b27cc7ada3c9826cf709df5eb49c9e
+TRAINER_FILE_OK requirements.txt 0417f71a8a7be1a18ac5427843376e8f22c666252ceb5d226a3b470adbbeea68
+TRAINER_FILE_OK sdxl_train_network.py ba8c8991a9d4b51f5343c503c1d8929fc52f506c53c615058f1e8665696a8c6e
+DATASET_CHAR dorowani images_with_captions=28
+DATASET_CHAR wispkin images_with_captions=26
+DATASET_VERIFIED 54
+PREFLIGHT_FAIL
+PREFLIGHT_FAILURE dependency not importable: ftfy (No module named 'ftfy')
+PREFLIGHT_FAILURE dependency not importable: torch (No module named 'torch')
+PREFLIGHT_FAILURE dependency not importable: accelerate (No module named 'accelerate')
+PREFLIGHT_FAILURE dependency not importable: transformers (No module named 'transformers')
+PREFLIGHT_FAILURE dependency not importable: diffusers (No module named 'diffusers')
+PREFLIGHT_FAILURE dependency not importable: einops (No module named 'einops')
+PREFLIGHT_FAILURE dependency not importable: safetensors (No module named 'safetensors')
+PREFLIGHT_FAILURE dependency not importable: toml (No module named 'toml')
+PREFLIGHT_FAILURE dependency not importable: voluptuous (No module named 'voluptuous')
+PREFLIGHT_FAILURE dependency not importable: huggingface_hub (No module named 'huggingface_hub')
+PREFLIGHT_FAILURE dependency not importable: imagesize (No module named 'imagesize')
+PREFLIGHT_FAILURE dependency not importable: rich (No module named 'rich')
+PREFLIGHT_FAILURE dependency not importable: sentencepiece (No module named 'sentencepiece')
+PREFLIGHT_FAILURE dependency not importable: cv2 (No module named 'cv2')
+PREFLIGHT_FAILURE dependency not importable: bitsandbytes (No module named 'bitsandbytes')
+PREFLIGHT_FAILURE dependency not importable: lion_pytorch (No module named 'lion_pytorch')
+PREFLIGHT_FAILURE dependency not importable: schedulefree (No module named 'schedulefree')
+PREFLIGHT_FAILURE dependency not importable: pytorch_optimizer (No module named 'pytorch_optimizer')
+PREFLIGHT_FAILURE dependency not importable: prodigyopt (No module named 'prodigyopt')
+PREFLIGHT_FAILURE dependency not importable: tensorboard (No module named 'tensorboard')

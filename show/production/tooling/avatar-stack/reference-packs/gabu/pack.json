@@ -1,0 +1,70 @@
+{
+  "pack_format": "mochiichao-reference-pack/v1",
+  "character_id": "gabu",
+  "display_name": "Gabu",
+  "species_role": "Pilot cast",
+  "signature_move_display": "Tremor (owner-named original move; stats owner-TBD)",
+  "palette_notes": "Teal dominant (#60a0a0 family) with sandy yellow (#e0e080) accents. Measured from the canon cutout, 2026-10-28.",
+  "do_not_change": [
+    "Wide jaw (jaw-chomp is a canon rig action for this character)",
+    "No baked-in ground shadow in any reference or output"
+  ],
+  "voice_note": "Creatures speak in cries/sounds only - no word dialogue (canon rule).",
+  "views": {
+    "front": {
+      "file": "front.png",
+      "status": "CANON",
+      "source": "~/workspace/mochiichao-show/canon-cutouts/gabu.png (canon cutout of record)",
+      "md5": "bddcbfff8571ec8022083b9e87945259"
+    },
+    "three_quarter": {
+      "file": "candidate-turnaround.png",
+      "panel": "left panel",
+      "status": "CANDIDATE",
+      "provenance": "generated from canon front via Sheet Assembly pattern, 2026-10-28, anchor-graded",
+      "md5": "95e53d882ca9f85c54f01f9b6a5625f3",
+      "sha256": "c31899007a9fe80f8a6c1653595d8b294e777f48b31785dd1e42a7a3e087bf20",
+      "bytes": 1096090,
+      "anchor_grade": "PASS all three panels. Anchor check (by eye, against pack.json do_not_change): wide sandy-yellow jaw broad in the 3/4 and side panels (it juts forward in profile, as the wide jaw should); teal skin throughout (not blue, not green); orange-yellow eyes in 3/4 and side; dark teal spiked crest present in every panel (fan spikes plus the upright centre spike, edge-on in the back view); segmented pale sandy-yellow belly in 3/4 and side, correctly absent in back; tan-brown shell at the side in 3/4, large on the back in side view, and dominant and segmented in the back view; long arms with dark claws and dark spots; no baked ground/contact shadow, clean white field. NOTES for owner: (1) the 3/4 panel's head is turned near-profile, so only one eye shows - the 3/4 and side heads read similar, the bodies differ; (2) the crest spikes read larger and more numerous than the canon front's crest, and the side panel's arm spots are enlarged to two big circles - flagged for the owner's call."
+    },
+    "side": {
+      "file": "candidate-turnaround.png",
+      "panel": "middle panel",
+      "status": "CANDIDATE",
+      "provenance": "generated from canon front via Sheet Assembly pattern, 2026-10-28, anchor-graded",
+      "md5": "95e53d882ca9f85c54f01f9b6a5625f3",
+      "sha256": "c31899007a9fe80f8a6c1653595d8b294e777f48b31785dd1e42a7a3e087bf20",
+      "bytes": 1096090,
+      "anchor_grade": "PASS all three panels. Anchor check (by eye, against pack.json do_not_change): wide sandy-yellow jaw broad in the 3/4 and side panels (it juts forward in profile, as the wide jaw should); teal skin throughout (not blue, not green); orange-yellow eyes in 3/4 and side; dark teal spiked crest present in every panel (fan spikes plus the upright centre spike, edge-on in the back view); segmented pale sandy-yellow belly in 3/4 and side, correctly absent in back; tan-brown shell at the side in 3/4, large on the back in side view, and dominant and segmented in the back view; long arms with dark claws and dark spots; no baked ground/contact shadow, clean white field. NOTES for owner: (1) the 3/4 panel's head is turned near-profile, so only one eye shows - the 3/4 and side heads read similar, the bodies differ; (2) the crest spikes read larger and more numerous than the canon front's crest, and the side panel's arm spots are enlarged to two big circles - flagged for the owner's call."
+    },
+    "back": {
+      "file": "candidate-turnaround.png",
+      "panel": "right panel",
+      "status": "CANDIDATE",
+      "provenance": "generated from canon front via Sheet Assembly pattern, 2026-10-28, anchor-graded",
+      "md5": "95e53d882ca9f85c54f01f9b6a5625f3",
+      "sha256": "c31899007a9fe80f8a6c1653595d8b294e777f48b31785dd1e42a7a3e087bf20",
+      "bytes": 1096090,
+      "anchor_grade": "PASS all three panels. Anchor check (by eye, against pack.json do_not_change): wide sandy-yellow jaw broad in the 3/4 and side panels (it juts forward in profile, as the wide jaw should); teal skin throughout (not blue, not green); orange-yellow eyes in 3/4 and side; dark teal spiked crest present in every panel (fan spikes plus the upright centre spike, edge-on in the back view); segmented pale sandy-yellow belly in 3/4 and side, correctly absent in back; tan-brown shell at the side in 3/4, large on the back in side view, and dominant and segmented in the back view; long arms with dark claws and dark spots; no baked ground/contact shadow, clean white field. NOTES for owner: (1) the 3/4 panel's head is turned near-profile, so only one eye shows - the 3/4 and side heads read similar, the bodies differ; (2) the crest spikes read larger and more numerous than the canon front's crest, and the side panel's arm spots are enlarged to two big circles - flagged for the owner's call."
+    },
+    "expressions": {
+      "file": "candidate-expressions.png",
+      "status": "CANDIDATE",
+      "provenance": "generated from canon front via Sheet Assembly pattern, 2026-10-28, anchor-graded",
+      "md5": "0a827c9c1adbeae2e843ccc097bc8c57",
+      "sha256": "d69a7855baff76f762d511f60dc988d61e707ffad889b09138e783703ae1beae",
+      "bytes": 1605636,
+      "anchor_grade": "PASS all six panels: neutral, happy, worried, determined, surprised, sleepy. Anchors hold in every panel: wide sandy-yellow jaw broad throughout (happy shows it in a big open laugh), teal skin, dark spiked crest, segmented pale sandy-yellow belly, tan shell edge behind the arms, arm/leg spots and claws, no baked shadow. NOTES for owner: (1) the 'surprised' panel's eyes lose the orange iris - they read as wide white eyes with tiny dark pupils (stylised surprise read); (2) the generator added short eyebrow lines in the worried, determined and sleepy panels - the canon front has no eyebrow lines; (3) the centre head spike reads as a twisted fin-like spike in front view - all flagged for the owner's call.",
+      "note": "Expression sheet (whole sheet is the view record). Six expressions: neutral, happy, worried, determined, surprised, sleepy. No N1-specific poses are named for this character."
+    }
+  },
+  "platform_mapping": {
+    "kling_elements": "front.png uploads as the Element frontal image; 3 supplementary angle slots stay EMPTY until the GAP views are produced (Kling accepts 2-4 images per Element)",
+    "higgsfield_elements": "front.png usable as an @Element reference in Seedance/Cinema Studio today; Soul ID training needs 20+ images - NOT possible from canon today (GAP)",
+    "seedance_references": "front.png counts as 1 of up to 30 image references",
+    "google_flow_ingredients": "front.png usable as 1 of up to 3 Ingredients reference images; also fits Flow Characters",
+    "wan_vace": "front.png is the VACE reference image for the locked workflow (parity/workflow-i2v-locked.json)",
+    "wan_lora": "Training sets exist for wispkin + dorowani only (lora/ in avatar-stack); mochii/gabu/kittember/sproutle = GAP"
+  },
+  "candidate_note": "CANDIDATE views added 2026-10-28 (Work Package C2a). CANDIDATE is not canon: the owner locks sheets only after seeing them. Front view remains the only CANON view."
+}

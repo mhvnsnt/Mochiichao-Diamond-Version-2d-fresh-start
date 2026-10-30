@@ -1,0 +1,14 @@
+# frp server (frps) template — runs on any small public-IP box WE control.
+# frp: Apache-2.0 (fatedier/frp). This is the fully-open rendezvous option:
+# no third-party network, no third-party terms; the relay box is ours.
+bindPort = 7000
+
+[auth]
+method = "token"
+token = "REPLACE_WITH_A_LONG_RANDOM_TOKEN"   # same value in frpc.toml; never commit the real one
+
+[webServer]
+addr = "127.0.0.1"        # dashboard stays local to the relay box
+port = 7500
+user = "admin"
+password = "REPLACE_ME"

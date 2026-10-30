@@ -1,0 +1,21 @@
+== deploy dry-run validation ==
+Wed Oct 28 19:38:59 UTC 2026
+deploy.sh: bash -n OK
+launch.sh: bash -n OK
+py_compile: OK
+model_hashes.json: parses OK
+docker-compose.yml: pyyaml missing in venv (checked on system python separately)
+total 56
+drwxrws--- 1 root nogroup  264 Oct 28 19:38 .
+drwxrws--- 1 root nogroup   34 Oct 28 19:38 ..
+-rw-rw---- 1 root nogroup  773 Oct 28 19:38 Dockerfile
+drwxrws--- 1 root nogroup  160 Oct 28 19:38 __pycache__
+-rwxrwx--- 1 root nogroup 4588 Oct 28 19:38 deploy.sh
+-rw-rw---- 1 root nogroup 1431 Oct 28 19:38 docker-compose.yml
+-rwxrwx--- 1 root nogroup 2847 Oct 28 19:36 launch.sh
+-rw-rw---- 1 root nogroup 7730 Oct 28 19:35 model_hashes.json
+-rw-rw---- 1 root nogroup 6996 Oct 28 19:35 pull_model.py
+-rw-rw---- 1 root nogroup 6305 Oct 28 19:38 quantize_awq.py
+-rw-rw---- 1 root nogroup  955 Oct 28 19:36 serve.env.example
+-rw-rw---- 1 root nogroup 5853 Oct 28 19:36 smoke_test.py
+docker-compose.yml: YAML parses OK (system python3 + pyyaml)

@@ -1,0 +1,27 @@
+[
+ {
+  "cut_id": "V3-078",
+  "scene": "S5",
+  "scene_name": "EP01-V3-S5",
+  "scene_title": "Locked Scene 5 \u2014 Garden Gate, Night",
+  "order_index": 78,
+  "characters": [
+   "Wispkin"
+  ],
+  "background_plate": "/home/hatch/workspace/ep01-finish/assets/plates/gate-night.mp4",
+  "background_note": "Living plate (.mp4) per spec background path. Note: storyboard-draft-1 spec path is evidence of storyboard use, not registry currency; see registry fields.",
+  "duration_s": 10,
+  "duration_source": "spec (~/workspace/ep01-finish/specs/V3-078.json)",
+  "beat": "Locked cut 23 (Action Beat B): Wispkin floats UP for the first time, smoke swirling, and rings the gate bell with its tail of smoke.",
+  "source_script": "~/workspace/ep01-script-v3/EP01-SHOOTING-SCRIPT-v3.md \u2014 locked scene block 'S5' heading line 1011 (per-cut roster line in same block)",
+  "source_spec": "~/workspace/ep01-finish/specs/V3-078.json",
+  "registry_current_plate": null,
+  "registry_note": "No entry in PLATES-REGISTRY.md for this plate (registry covers Gate v2-living, Pond day/dusk v1-living, Green day v1-living, Forest v1 still only); ep01-finish INVENTORY.md flags Gate NIGHT grade as a GAP. No registry-current plate recorded.",
+  "prior_production": null,
+  "reference_test_clip": {
+   "file": "~/workspace/flow-tests/flow-wispkin-darkwave.mp4",
+   "md5": "9b035543622593c0746fe226590f7505",
+   "note": "Owner-graded GOOD test clip (folder: flow-tests) for Wispkin (road attribution unsettled \u2014 folder-labelled 'flow'; records check pending, per owner 2026-10-28) \u2014 evidence backing the proof-cut character choice; not a production clip for this cut."
+  }
+ }
+]

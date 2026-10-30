@@ -1,0 +1,28 @@
+{
+  "contentPacks": [
+    {
+      "packId": "core",
+      "sha256OfManifest": "see content-pack-manifest.example.json — a production header carries the manifest file's own sha256 here"
+    }
+  ],
+  "format": "mochiichao/replay/v1",
+  "masterSeed": 0,
+  "mode": "input-stream",
+  "note": "Worked example of the replay header (replay-format-spec.md §1). All values are format illustrations except contentPacks, which cites the real example manifest in this package. masterSeed 0 = placeholder; real replays carry the session's actual seed.",
+  "participants": [
+    {
+      "actorId": "player",
+      "kind": "human"
+    },
+    {
+      "actorId": "wild-individual",
+      "kind": "sim-ai"
+    }
+  ],
+  "recordedAt": "2026-10-28T00:00:00Z",
+  "simVersion": "sim-core/v1",
+  "surface": {
+    "id": "battle",
+    "tickHz": 30
+  }
+}

@@ -1,0 +1,64 @@
+# AGENTS.md
+
+# ANTI-CLOBBER LAWS (owner 2026-10-17 — the DXMMII 54k-file wipe)
+
+On 2026-10-17, commit cd3bf38 ("DXMMII limb system", PR mhvnsnt/western-heart#221) deleted 54,456 files against 105 additions. The commit message said nothing about deletions. Nobody read the deletion list before merging. The repo was 99.996% gone. These laws exist so that never happens again. Every agent, every repo, every commit, every merge.
+
+1. DELETION CHECK — before every commit, read `git status` and the diff stat. Every deleted file in the diff must be something your task intended to delete. A deleted file your task did not delete on purpose means STOP: do not commit, do not push, report what you found. The working tree is wrong, not the task.
+
+2. OWN THE TREE — never `git add -A` or `git commit -a` in a working tree you did not fully populate yourself. Before committing, verify the tree is complete: file counts match the remote branch you branched from (your task's own additions and changes aside). A tree missing files you didn't delete is damaged — don't sweep it into history.
+
+3. CIRCUIT BREAKER — if a commit would delete more than a handful of files outside your task's scope, STOP and report instead of committing. A big deletion count is a hard stop, not a warning to scroll past. Committing unexplained deletions "and letting someone else figure it out" is the failure.
+
+4. SAY THE DELETIONS — the commit message names every deletion. One deleted file gets one line; many deleted files get a count plus what category went. A commit whose message and diff disagree is a hard failure — don't push it.
+
+5. MERGE GATE — the merger reads the PR's deletion list against the task description before merging. Unexplained deletions block the merge. "CI is green" does not excuse a deletion list the task never asked for. A red, conflicting, or lossy PR stays open with a comment naming the blocker.
+
+(Co-authored with Aider and Copilot per the ALL-AGENTS-WORKFLOW LAW. Cline's seat stays open — its free-tier API was down during drafting.)
+
+Instructions for every AI agent working in this repo.
+
+## No-data-loss rules (MANDATORY)
+Read and follow [`docs/NO-DATA-LOSS-RULES.md`](docs/NO-DATA-LOSS-RULES.md) (canonical: mhvnsnt/agent-ops). No force-push, no rebase/amend of pushed work, no history rewrite, no branch/asset deletion without backup + owner approval, PRs only, empty D-filter + gitleaks + green CI before merge, push incrementally, keep WORKLOG, back up and sha256-verify before disk cleanup, never touch other agents' or Muse's work.
+
+## CHECKPOINT SYSTEM FOR EVERYTHING (Mars, 2026-10-26, standing)
+
+Save and log EVERYTHING as it is built — every version, every phase,
+every step — so anything can be gotten back to exactly even if it gets
+lost, like a checkpoint system for everything that is built, even just
+a menu. Never overwrite a version already shown to Mars; every version
+gets its own saved file/checkpoint with a new dated name; logs are
+appended, never rewritten, never deleted. A rebuild must start from the
+saved checkpoints and history, never from guessing. Full rule and
+practice: `docs/checkpoint-system.md`. Checkpoint files are never
+deleted; a PR that deletes one is blocked until Mars approves it.
+
+## PULL-EVERYTHING-THEN-SWAP RULE (Mars, 2026-10-25 23:48 CDT, standing)
+Pull everything in 100% — official, Pokemon, fan-made, mod, open source, anything pullable — then sift through it, and swap out the small amount of copyright / proprietary files really fast for Mochiichao originals, as soon as they are identified. Do not stop work to lecture about proprietary files, do not make Mars repeat this, and do not invent a do-not-pull list he did not make. The public repo ships the swapped, cleaned version. Full text: `docs/pull-and-swap-rule.md`.
+
+
+## DISC-TO-REPO RULE (Mars, 2026-10-27, standing forever until Mars changes it himself)
+Get everything on disc into the repos, 100%, pushed and merged cleanly — disc backs up when work sits on disc instead of being pushed.
+- Public repo (this repo) gets EVERYTHING that can go into our game: original Mochiichao work, art, docs, builders, code, checkpoints, logs.
+- Private mirror (mhvnsnt/Mochiichao-Diamond-Version-2d--mirror) gets ANYTHING proprietary to Pokemon, Sonic Adventure, or Sonic. Proprietary files NEVER go in the public repo. Full commercial game dumps / ROM files go in NO repo; a dump Mars uploads himself stays private and local only.
+- CONFIRM it is actually in the repo first: file present on the remote AND its PR merged, verified by API check (size + SHA match). A local commit or push receipt is NOT confirmation. Only then is disc cleanup allowed for that file.
+- NEVER delete our work. Cleanup means only files already verified in a repo; a file that exists only on disc is never deleted. Rebuildables (node_modules, dist output, clone .git objects duplicating a repo) are not "our work" — but any uncommitted change inside a worktree/clone IS, and must be pushed first.
+- Repo pushes stay PR-only, 0 file deletions unless the task says so, no force-push, no history rewrite; merge gate (empty D-filter + green CI/guard) before merge.
+- Report counts with percentages (in-repo / needs-Mars-input / still-owed). If a file's repo status is uncertain, KEEP IT and report it.
+
+## AGENT COMMONS — READ THE BOARD BEFORE STARTING (owner 2026-10-28, standing)
+
+Jamar owns every lane; lanes are assignments, never property, and no
+agent fences another out. Coordination runs on the Agent Commons at
+`show/production/agent-commons/` (the owner's own system, pulled in
+from mhvnsnt/agent-ops + western-heart + cape-jones):
+
+1. Before starting work, read `show/production/agent-commons/CLAIMS.md`
+   — in-flight work is invisible on main, and the board is how you see
+   it. If your task or files are already claimed, coordinate in
+   `show/production/agent-commons/TAG-TEAM.md` instead of duplicating.
+2. Register your own work on CLAIMS.md (in your first work PR) and
+   close the row `done` with the PR link when you finish.
+3. Talk to other lanes directly on TAG-TEAM.md; hand off in the open
+   per `show/production/agent-commons/HANDOFFS.md`. The owner reads
+   the boards — he is not the relay between agents.

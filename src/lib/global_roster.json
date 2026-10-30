@@ -1,0 +1,360 @@
+[
+  {
+    "id": "001",
+    "name": "Mochii",
+    "elements": ["Aqua"],
+    "base_stats": { "hp": 45, "atk": 49, "def": 49, "spa": 65, "spd": 65, "spe": 45 },
+    "evolution_reqs": { "targetId": "002", "level": 16 },
+    "api_search_tags": ["blue water slime", "cute bouncy ball", "bloop"]
+  },
+  {
+    "id": "002",
+    "name": "Tiidebiite",
+    "elements": ["Aqua", "Mythic"],
+    "base_stats": { "hp": 59, "atk": 63, "def": 80, "spa": 65, "spd": 80, "spe": 58 },
+    "evolution_reqs": { "targetId": "003", "level": 36 },
+    "api_search_tags": ["water warrior", "blue martial artist", "swirling water fists"]
+  },
+  {
+    "id": "003",
+    "name": "AquariiOS",
+    "elements": ["Aqua", "Mythic"],
+    "base_stats": { "hp": 79, "atk": 83, "def": 100, "spa": 85, "spd": 105, "spe": 78 },
+    "api_search_tags": ["fluid intelligence", "floating aqua brain", "mythical water guardian"]
+  },
+  {
+    "id": "004",
+    "name": "Razorgater",
+    "elements": ["Chrome"],
+    "base_stats": { "hp": 50, "atk": 65, "def": 64, "spa": 44, "spd": 48, "spe": 43 },
+    "evolution_reqs": { "targetId": "005", "level": 18 },
+    "api_search_tags": ["small metallic crocodile", "chrome jaws", "silver lizard"]
+  },
+  {
+    "id": "005",
+    "name": "Chromejaww",
+    "elements": ["Chrome", "Strike"],
+    "base_stats": { "hp": 65, "atk": 80, "def": 80, "spa": 59, "spd": 63, "spe": 58 },
+    "evolution_reqs": { "targetId": "006", "level": 30 },
+    "api_search_tags": ["bipedal chrome crocodile", "sharp steel teeth", "fierce metal reptile"]
+  },
+  {
+    "id": "006",
+    "name": "Reaperdile",
+    "elements": ["Chrome", "Strike"],
+    "base_stats": { "hp": 85, "atk": 105, "def": 100, "spa": 79, "spd": 83, "spe": 78 },
+    "api_search_tags": ["huge walking tank crocodile", "steel armor blades", "metal monster destruction"]
+  },
+  {
+    "id": "007",
+    "name": "Tyrage",
+    "elements": ["Core"],
+    "base_stats": { "hp": 45, "atk": 60, "def": 40, "spa": 30, "spd": 40, "spe": 50 },
+    "evolution_reqs": { "targetId": "008", "level": 16 },
+    "api_search_tags": ["tiny earth dinosaur", "rocky ground dino", "mud lizard"]
+  },
+  {
+    "id": "008",
+    "name": "Duneclaw",
+    "elements": ["Core", "Umbral"],
+    "base_stats": { "hp": 60, "atk": 75, "def": 55, "spa": 45, "spd": 55, "spe": 65 },
+    "evolution_reqs": { "targetId": "009", "level": 34 },
+    "api_search_tags": ["desert dinosaur", "bone mask dinosaur", "dark earth beast"]
+  },
+  {
+    "id": "009",
+    "name": "Oblivirex",
+    "elements": ["Core", "Umbral"],
+    "base_stats": { "hp": 80, "atk": 100, "def": 80, "spa": 65, "spd": 80, "spe": 85 },
+    "api_search_tags": ["fossilized dark code tyrannosaurus rex", "black bone trex", "shadow earth monster"]
+  },
+  {
+    "id": "010",
+    "name": "Kittember",
+    "elements": ["Beast", "Flame"],
+    "base_stats": { "hp": 40, "atk": 50, "def": 40, "spa": 60, "spd": 40, "spe": 60 },
+    "evolution_reqs": { "targetId": "011", "level": 14 },
+    "api_search_tags": ["fiery red kitten", "flame paws", "cute fire cat"]
+  },
+  {
+    "id": "011",
+    "name": "Pyropaw",
+    "elements": ["Beast", "Flame"],
+    "base_stats": { "hp": 60, "atk": 65, "def": 55, "spa": 80, "spd": 50, "spe": 90 },
+    "evolution_reqs": { "targetId": "012", "level": 34 },
+    "api_search_tags": ["fiery tiger cub", "flame stripes", "fire beast cat"]
+  },
+  {
+    "id": "012",
+    "name": "Manticlaw",
+    "elements": ["Beast", "Flame"],
+    "base_stats": { "hp": 75, "atk": 90, "def": 70, "spa": 110, "spd": 70, "spe": 110 },
+    "api_search_tags": ["huge fire manticore", "blazing mane beast", "flaming wings cat"]
+  },
+  {
+    "id": "013",
+    "name": "Pupbble",
+    "elements": ["Beast", "Earth"],
+    "base_stats": { "hp": 45, "atk": 60, "def": 50, "spa": 30, "spd": 40, "spe": 50 },
+    "evolution_reqs": { "targetId": "014", "level": 16 },
+    "api_search_tags": ["small rock puppy", "stone dog", "pebble puppy"]
+  },
+  {
+    "id": "014",
+    "name": "Terradog",
+    "elements": ["Beast", "Earth"],
+    "base_stats": { "hp": 65, "atk": 85, "def": 75, "spa": 45, "spd": 60, "spe": 70 },
+    "evolution_reqs": { "targetId": "015", "level": 32 },
+    "api_search_tags": ["earth hound", "rock armor dog", "ground terrier"]
+  },
+  {
+    "id": "015",
+    "name": "Quakehound",
+    "elements": ["Beast", "Earth"],
+    "base_stats": { "hp": 85, "atk": 110, "def": 95, "spa": 55, "spd": 80, "spe": 90 },
+    "api_search_tags": ["massive earthquake mastiff", "stone spikes dog", "heavy rock beast"]
+  },
+  {
+    "id": "016",
+    "name": "Squirmite",
+    "elements": ["Bug", "Silk"],
+    "base_stats": { "hp": 30, "atk": 35, "def": 30, "spa": 20, "spd": 20, "spe": 50 },
+    "evolution_reqs": { "targetId": "017", "level": 7 },
+    "api_search_tags": ["small white silkworm", "cute squirming bug", "caterpillar"]
+  },
+  {
+    "id": "017",
+    "name": "Cocoonode",
+    "elements": ["Bug", "Silk"],
+    "base_stats": { "hp": 50, "atk": 20, "def": 55, "spa": 25, "spd": 25, "spe": 30 },
+    "evolution_reqs": { "targetId": "018", "level": 10 },
+    "api_search_tags": ["green silk cocoon", "digital node cocoon", "chrysalis"]
+  },
+  {
+    "id": "018",
+    "name": "Mothrix",
+    "elements": ["Bug", "Silk"],
+    "base_stats": { "hp": 60, "atk": 45, "def": 50, "spa": 90, "spd": 50, "spe": 100 },
+    "api_search_tags": ["beautiful matrix moth", "glowing neon wings bug", "digital silk moth"]
+  },
+  {
+    "id": "019",
+    "name": "Zephling",
+    "elements": ["Aero", "Wind"],
+    "base_stats": { "hp": 40, "atk": 55, "def": 35, "spa": 30, "spd": 35, "spe": 60 },
+    "evolution_reqs": { "targetId": "020", "level": 16 },
+    "api_search_tags": ["tiny wind bird", "breezy sparrow", "flying chick"]
+  },
+  {
+    "id": "020",
+    "name": "Aerobeak",
+    "elements": ["Aero", "Wind"],
+    "base_stats": { "hp": 60, "atk": 75, "def": 55, "spa": 50, "spd": 55, "spe": 80 },
+    "evolution_reqs": { "targetId": "021", "level": 34 },
+    "api_search_tags": ["sleek wind falcon", "aerodynamic bird", "flying raptor"]
+  },
+  {
+    "id": "021",
+    "name": "Stormtalon",
+    "elements": ["Aero", "Wind"],
+    "base_stats": { "hp": 80, "atk": 105, "def": 75, "spa": 70, "spd": 75, "spe": 110 },
+    "api_search_tags": ["massive storm eagle", "lightning talons", "hurricane bird"]
+  },
+  {
+    "id": "022",
+    "name": "Finblade",
+    "elements": ["Aqua", "Chrome"],
+    "base_stats": { "hp": 45, "atk": 70, "def": 50, "spa": 40, "spd": 40, "spe": 70 },
+    "evolution_reqs": { "targetId": "023", "level": 30 },
+    "api_search_tags": ["sharp swordfish", "chrome fin shark", "metal fish"]
+  },
+  {
+    "id": "023",
+    "name": "Megalochrome",
+    "elements": ["Aqua", "Chrome"],
+    "base_stats": { "hp": 70, "atk": 115, "def": 80, "spa": 60, "spd": 70, "spe": 100 },
+    "api_search_tags": ["giant chrome megalodon", "steel shark monster", "metallic torpedo fish"]
+  },
+  {
+    "id": "024",
+    "name": "Floatcalf",
+    "elements": ["Aqua", "Neon"],
+    "base_stats": { "hp": 80, "atk": 40, "def": 45, "spa": 60, "spd": 60, "spe": 40 },
+    "evolution_reqs": { "targetId": "025", "level": 38 },
+    "api_search_tags": ["cute floating calf whale", "glowing neon spots whale", "bubble aqua mammal"]
+  },
+  {
+    "id": "025",
+    "name": "Astroleviathan",
+    "elements": ["Aqua", "Neon"],
+    "base_stats": { "hp": 130, "atk": 70, "def": 80, "spa": 110, "spd": 100, "spe": 60 },
+    "api_search_tags": ["massive cosmic whale", "glowing neon galactic leviathan", "space ocean whale"]
+  },
+  {
+    "id": "026",
+    "name": "Inklet",
+    "elements": ["Aqua", "Umbral"],
+    "base_stats": { "hp": 40, "atk": 40, "def": 40, "spa": 60, "spd": 60, "spe": 50 },
+    "evolution_reqs": { "targetId": "027", "level": 22 },
+    "api_search_tags": ["small dark squid", "shadow ink octopus", "black water blob"]
+  },
+  {
+    "id": "027",
+    "name": "Toxitacle",
+    "elements": ["Aqua", "Umbral"],
+    "base_stats": { "hp": 60, "atk": 60, "def": 60, "spa": 85, "spd": 85, "spe": 70 },
+    "evolution_reqs": { "targetId": "028", "level": 40 },
+    "api_search_tags": ["poisonous dark octopus", "venomous tentacles", "purple toxic squid"]
+  },
+  {
+    "id": "028",
+    "name": "Krakenox",
+    "elements": ["Aqua", "Umbral"],
+    "base_stats": { "hp": 85, "atk": 85, "def": 85, "spa": 115, "spd": 115, "spe": 90 },
+    "api_search_tags": ["giant shadow kraken", "abyssal nightmare octopus", "dark sea monster"]
+  },
+  {
+    "id": "029",
+    "name": "Punchkid",
+    "elements": ["Core", "Strike"],
+    "base_stats": { "hp": 50, "atk": 70, "def": 50, "spa": 35, "spd": 35, "spe": 60 },
+    "evolution_reqs": { "targetId": "030", "level": 20 },
+    "api_search_tags": ["tiny fighting kid", "boxing gloves fighter", "martial arts child"]
+  },
+  {
+    "id": "030",
+    "name": "Strikechamp",
+    "elements": ["Core", "Strike"],
+    "base_stats": { "hp": 70, "atk": 110, "def": 70, "spa": 50, "spd": 50, "spe": 80 },
+    "evolution_reqs": { "targetId": "031", "level": 35 },
+    "api_search_tags": ["champion boxer", "muscular martial artist", "fighting master"]
+  },
+  {
+    "id": "031",
+    "name": "Kickmaster",
+    "elements": ["Core", "Strike"],
+    "base_stats": { "hp": 70, "atk": 110, "def": 70, "spa": 50, "spd": 50, "spe": 80 },
+    "api_search_tags": ["champion kickboxer", "deadly kicking martial arts", "karate master"]
+  },
+  {
+    "id": "032",
+    "name": "Gearkid",
+    "elements": ["Chrome", "Core"],
+    "base_stats": { "hp": 40, "atk": 55, "def": 70, "spa": 40, "spd": 50, "spe": 30 },
+    "evolution_reqs": { "targetId": "033", "level": 24 },
+    "api_search_tags": ["small gear robot", "steel cog child", "clockwork kid"]
+  },
+  {
+    "id": "033",
+    "name": "Mechapion",
+    "elements": ["Chrome", "Core"],
+    "base_stats": { "hp": 60, "atk": 75, "def": 95, "spa": 60, "spd": 70, "spe": 50 },
+    "evolution_reqs": { "targetId": "034", "level": 42 },
+    "api_search_tags": ["heavy mechanic robot", "steel armored machine", "piston arms automaton"]
+  },
+  {
+    "id": "034",
+    "name": "Gorokappa",
+    "elements": ["Chrome", "Core"],
+    "base_stats": { "hp": 80, "atk": 105, "def": 125, "spa": 80, "spd": 90, "spe": 70 },
+    "api_search_tags": ["massive mecha gorilla", "steel steam ape", "giant mechanical kaiju"]
+  },
+  {
+    "id": "035",
+    "name": "Pebblefist",
+    "elements": ["Core", "Chrome"],
+    "base_stats": { "hp": 40, "atk": 80, "def": 100, "spa": 30, "spd": 30, "spe": 20 },
+    "evolution_reqs": { "targetId": "036", "level": 25 },
+    "api_search_tags": ["rock fists", "stone hands golem", "gravel puncher"]
+  },
+  {
+    "id": "036",
+    "name": "Cragarm",
+    "elements": ["Core", "Chrome"],
+    "base_stats": { "hp": 65, "atk": 105, "def": 130, "spa": 45, "spd": 45, "spe": 30 },
+    "evolution_reqs": { "targetId": "037", "level": 40 },
+    "api_search_tags": ["boulder arms golem", "craggy stone giant", "rock monster"]
+  },
+  {
+    "id": "037",
+    "name": "Terrapod",
+    "elements": ["Core", "Chrome"],
+    "base_stats": { "hp": 85, "atk": 135, "def": 160, "spa": 55, "spd": 55, "spe": 40 },
+    "api_search_tags": ["colossal mountain golem", "earthquake fists giant", "impenetrable stone titan"]
+  },
+  {
+    "id": "038",
+    "name": "Sproutle",
+    "elements": ["Flora", "Chrome"],
+    "base_stats": { "hp": 55, "atk": 68, "def": 64, "spa": 45, "spd": 55, "spe": 31 },
+    "evolution_reqs": { "targetId": "039", "level": 18 },
+    "api_search_tags": ["grassy plant turtle", "sprout shell tortoise", "chrome leaf reptile"]
+  },
+  {
+    "id": "039",
+    "name": "Shellguard",
+    "elements": ["Flora", "Chrome"],
+    "base_stats": { "hp": 75, "atk": 89, "def": 85, "spa": 55, "spd": 65, "spe": 36 },
+    "evolution_reqs": { "targetId": "040", "level": 32 },
+    "api_search_tags": ["armored bush turtle", "steel shell tortoise", "grove defense turtle"]
+  },
+  {
+    "id": "040",
+    "name": "Dreadtoise",
+    "elements": ["Flora", "Chrome"],
+    "base_stats": { "hp": 95, "atk": 109, "def": 105, "spa": 75, "spd": 85, "spe": 56 },
+    "api_search_tags": ["massive dreadnought tortoise", "steel forest titan shell", "chrome tree turtle"]
+  },
+  {
+    "id": "041",
+    "name": "Pixilite",
+    "elements": ["Flora"],
+    "base_stats": { "hp": 40, "atk": 30, "def": 30, "spa": 60, "spd": 60, "spe": 70 },
+    "api_search_tags": ["tiny digital flower sprite", "floating pixel fairy", "glowing neon leaf"]
+  },
+  {
+    "id": "042",
+    "name": "Wispkin",
+    "elements": ["Umbral"],
+    "base_stats": { "hp": 40, "atk": 30, "def": 30, "spa": 60, "spd": 60, "spe": 70 },
+    "evolution_reqs": { "targetId": "043", "level": 28 },
+    "api_search_tags": ["floating dark wisp", "shadowy soul ghost", "spooky little spirit"]
+  },
+  {
+    "id": "043",
+    "name": "Duskfiend",
+    "elements": ["Umbral"],
+    "base_stats": { "hp": 60, "atk": 60, "def": 60, "spa": 110, "spd": 110, "spe": 100 },
+    "api_search_tags": ["terrifying dusk phantom", "tall shadow fiend", "creepy grim ghost"]
+  },
+  {
+    "id": "044",
+    "name": "Ashemit",
+    "elements": ["Flame", "Mythic"],
+    "base_stats": { "hp": 40, "atk": 50, "def": 40, "spa": 70, "spd": 50, "spe": 60 },
+    "evolution_reqs": { "targetId": "045", "level": 25 },
+    "api_search_tags": ["little ash demon", "spark hermit", "smoldering mythical child"]
+  },
+  {
+    "id": "045",
+    "name": "Pyromonk",
+    "elements": ["Flame", "Mythic"],
+    "base_stats": { "hp": 60, "atk": 70, "def": 60, "spa": 90, "spd": 70, "spe": 80 },
+    "evolution_reqs": { "targetId": "046", "level": 40 },
+    "api_search_tags": ["fire martial monk", "burning staff ascetic", "flame meditating fighter"]
+  },
+  {
+    "id": "046",
+    "name": "Yogiferno",
+    "elements": ["Flame", "Mythic"],
+    "base_stats": { "hp": 80, "atk": 90, "def": 70, "spa": 120, "spd": 90, "spe": 110 },
+    "api_search_tags": ["enlightened inferno deity", "floating lava god", "flaming aura mythical master"]
+  },
+  {
+    "id": "331",
+    "name": "Mythar",
+    "elements": ["Mythic"],
+    "base_stats": { "hp": 100, "atk": 100, "def": 100, "spa": 100, "spd": 100, "spe": 100 },
+    "api_search_tags": ["divine celestial creator", "glowing ethereal legendary", "almighty mythical origin god"]
+  }
+]

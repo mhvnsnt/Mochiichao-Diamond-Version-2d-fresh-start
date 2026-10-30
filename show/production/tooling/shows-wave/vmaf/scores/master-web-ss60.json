@@ -1,0 +1,25 @@
+{
+  "reference": "/home/hatch/workspace/ep01-finish/masters/EP01-V3-MASTER.mp4",
+  "distorted": "/home/hatch/workspace/shows-wave/work/gate-runs/master-web-ss60/encode-web.mp4",
+  "encode": {
+    "profile": "web",
+    "label": "CRF 21 web profile",
+    "file": "/home/hatch/workspace/shows-wave/work/gate-runs/master-web-ss60/encode-web.mp4",
+    "bytes": 6801372
+  },
+  "model": "version=vmaf_v0.6.1",
+  "frames_measured": 2161,
+  "window": {
+    "ss": 60.0,
+    "seconds": 90.0
+  },
+  "vmaf_mean": 96.738,
+  "vmaf_min_frame": 95.722,
+  "vmaf_p5_frame": 96.108,
+  "vmaf_harmonic_mean": 96.735,
+  "thresholds": {
+    "mean": 93.0,
+    "p5": 80.0
+  },
+  "verdict": "PASS"
+}
