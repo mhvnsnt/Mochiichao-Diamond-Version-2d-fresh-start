@@ -103,11 +103,6 @@ export const SECTOR_0: any = {
     // the sand/dock strip on the existing NPC step; talking to it is
     // a cry, as creatures speak in cries.
     { id:"dock_mochii", creatureId:"001", x:12, y:17, sprite:"", name:"Mochii", facing:"down", movement:"wander", wanderRadius:2, dialog:["Mochi! Mochii~!", "(The harbor Mochii watches the water. It seems to live here.)"] },
-    // Item meaning S-IM1: the Harbor Bell relic object (unique,
-    // hand-placed — src/lib/itemMeaning.ts RELIC_NPCS). Its grant
-    // resolves in WorldEngine interact/finishDialog; once claimed
-    // it shows its empty lines. Never in shop stock or drop tables.
-    { id:"relic_harbor_bell", x:24, y:18, sprite:"🔔", name:"Something in the Sand", facing:"down", dialog:["Something green with salt is half-buried by the dock steps…"] },
   ],
   signs: [
     // v5: Sector 0 had sign TILES (tile 10) but an empty signs array,
@@ -180,13 +175,7 @@ export const AEON_LAB: any = {
     { id:"starter_kittember", creatureId:"010", x:8, y:6, sprite:"😼", name:"Kittember Ball", facing:"down", dialog:["Kittember! (A fast and fiery feline)","Are you sure you want to choose Kittember?", ""], isChoice: true, eventId: "pick_starter_010" },
     { id:"starter_sproutle", creatureId:"038", x:10, y:6, sprite:"🐢", name:"Sproutle Ball", facing:"down", dialog:["Sproutle! (A grassy plant turtle)","Are you sure you want to choose Sproutle?", ""], isChoice: true, eventId: "pick_starter_038" },
     { id:"dorowani_display", x:3, y:10, sprite:"", creatureId:"147", name:"Dorowani", facing:"down", dialog:["Dorowani! A Gen 2 starter.","Dorowani arrives later in the journey."] },
-    { id:"gabu_display", x:9, y:10, sprite:"", creatureId:"148", name:"Gabu", facing:"down", dialog:["Gabu! A Gen 2 starter.","Gabu arrives later in the journey."] },
-    // Item meaning S-IM1: the appraisal service's first seat. Its
-    // dialogue is COMPUTED at interact time from the player's bag
-    // (src/lib/itemMeaning.ts appraisalTerminalLines) and the
-    // identification is applied in WorldEngine.finishDialog — the
-    // static lines here are only a fallback.
-    { id:"appraisal_terminal", x:6, y:10, sprite:"🔭", name:"Research Terminal", facing:"down", dialog:["LAB RESEARCH TERMINAL","Bring me anything you can't name. Fossils, finds, things that hum — the Lab will tell you what they are."] }
+    { id:"gabu_display", x:9, y:10, sprite:"", creatureId:"148", name:"Gabu", facing:"down", dialog:["Gabu! A Gen 2 starter.","Gabu arrives later in the journey."] }
   ],
   signs: [],
   exits: [],
@@ -518,10 +507,6 @@ export const CAVE_OF_ECHOES: any = {
     // entrance, clear of the STAIRS_UP tile at (5,2). No battle.
     { id:"cave_guide", x:4, y:2, sprite:"🕯️", name:"Cave Guide", facing:"down", dialog:["The cave echoes what you bring into it. Bring a steady team, and it echoes back steady."] },
     { id:"trainer_caverunner_pike", x:19, y:10, sprite:"🏃", name:"Cave Runner Pike", facing:"down", dialog:["I run these tunnels every day."], battle:{ team:[{id:"013",name:"Pupbble",hp:45,maxHp:45,atk:60,def:50,spd:50,moves:["Tackle","Swift Movement"],type:"Earth",level:16},{id:"036",name:"Cragarm",hp:65,maxHp:65,atk:105,def:130,spd:30,moves:["Tackle","Swift Movement"],type:"Steel",level:17}], reward:380, badge:null } },
-    // Item meaning S-IM1: the Singing Stone relic object (unique,
-    // hand-placed in the cave's deep chamber — RELIC_NPCS). Grant
-    // resolves in WorldEngine; never in shop stock or drop tables.
-    { id:"relic_echo_shard", x:14, y:16, sprite:"🪨", name:"Singing Stone", facing:"down", dialog:["Something at the back of the chamber is humming…"] },
   ],
   exits: [
     { x:5, y:0, to:"binary_woods", enterAt:{x:27, y:38}, dir:"up" },
@@ -625,10 +610,7 @@ export const SCRAP_JUNKYARD: any = {
     });
   })(),
   npcs: [
-    { id:"junk_boss", x:16, y:9, sprite:"🏭", name:"Junk Warlord Krix", dialog:["Think you can survive the Junkyard?"], battle:{ team:[{id:"005",name:"Chromejaww",hp:75,maxHp:75,atk:72,def:80,spd:48,moves:["Chrome Claw"],type:"Steel",level:24}], reward:750, badge:null } },
-    // Item meaning S-IM1: the Ticking Junk relic object (unique,
-    // hand-placed on the junkyard's central aisle — RELIC_NPCS).
-    { id:"relic_scrap_core", x:20, y:18, sprite:"⚙️", name:"Ticking Junk", facing:"down", dialog:["Buried in the scrap: something warm, ticking…"] }
+    { id:"junk_boss", x:16, y:9, sprite:"🏭", name:"Junk Warlord Krix", dialog:["Think you can survive the Junkyard?"], battle:{ team:[{id:"005",name:"Chromejaww",hp:75,maxHp:75,atk:72,def:80,spd:48,moves:["Chrome Claw"],type:"Steel",level:24}], reward:750, badge:null } }
   ],
   exits: [
     ...buildVertExits(33, 15, 25, "neon_city", 1, "right")

@@ -2,7 +2,7 @@
   "$id": "mochiichao/ecology-table.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Per-region ecology file (#29) — the species x habitat x area x time join",
-  "description": "Ecology is the join from which game encounters (#7) and show ambient population (LIVING-WORLD P2) both derive. This format carries NO numbers: weights live in spawn tables, rates nowhere until canon sets them. A resident row requires a canon source in evidence. Display names follow the display sweep (Region 1 displays as Iridescence); production names stay in production docs (two-lane law). S2 Landing 3 (2026-10-30): zone records gain biomeId, environment, authoredLife, neighbours; habitatClasses enum aligned with the spawn schema by Landing 2.",
+  "description": "Ecology is the join from which game encounters (#7) and show ambient population (LIVING-WORLD P2) both derive. This format carries NO numbers: weights live in spawn tables, rates nowhere until canon sets them. A resident row requires a canon source in evidence. Display names follow the display sweep (Region 1 displays as Iridescence); production names stay in production docs (two-lane law).",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -19,8 +19,8 @@
           "showLocation": { "type": ["string", "null"], "description": "Show-side location (LIVING-WORLD). Null if no show counterpart is established." },
           "habitatClasses": {
             "type": "array",
-            "items": { "enum": ["sky", "small-ground", "water", "perch", "canopy", "depths", "waters-edge", "underground", "built"] },
-            "description": "The spawn schema's enum plus the Forest extensions, aligned by S2 Landing 2 (night removed — a time band, not a class; waters-edge/underground/built added)."
+            "items": { "enum": ["sky", "small-ground", "water", "perch", "night", "canopy", "depths"] },
+            "description": "The spawn schema's enum (sky/small-ground/water/perch/night) plus two additive extensions the Forest forces: canopy (surface, inhabited) and depths. Landing note: the spawn schema enum gains the same two values — additive, flagged in STAGING.md."
           },
           "residents": {
             "type": "array",
@@ -47,13 +47,9 @@
             },
             "description": "Presence marks (speciesIds) ONLY where a canon source speaks in time terms (show P6 time truth). Null = canon silent."
           },
-          "status": { "type": "string", "description": "Zone provenance; the Dark Forest depths zone is 'OPEN — canon does not stock the depths' with residents []." },
-          "biomeId": { "type": ["string", "null"], "description": "Join to biomes.json. Null only where no biome grouping is authored yet." },
-          "environment": { "type": "object", "additionalProperties": false, "properties": { "weatherKey": { "type": ["string", "null"], "description": "WEATHER_CONFIG key (live weather) or null where no weather is authored (interiors/withheld zones)." }, "sceneId": { "type": ["string", "null"], "description": "Sound-bed scene id; null until S15's environment swap authors it (sceneMap per-map table stays fallback)." } }, "required": ["weatherKey", "sceneId"], "description": "Defaults readers share (RECOGNITION-SPEC 2.1)." },
-          "authoredLife": { "type": "boolean", "description": "Derived from residents/status: true where the zone carries authored life (B6 tending legality reads this)." },
-          "neighbours": { "type": "array", "items": { "type": "string" }, "description": "Neighbouring zoneIds, derived from routes/region1-route-graph.json edges (zone-to-zone only)." }
+          "status": { "type": "string", "description": "Zone provenance; the Dark Forest depths zone is 'OPEN — canon does not stock the depths' with residents []." }
         },
-        "required": ["zoneId", "areaId", "showLocation", "habitatClasses", "residents", "timeBands", "status", "biomeId", "environment", "authoredLife", "neighbours"]
+        "required": ["zoneId", "areaId", "showLocation", "habitatClasses", "residents", "timeBands", "status"]
       }
     },
     "status": { "type": "string" }

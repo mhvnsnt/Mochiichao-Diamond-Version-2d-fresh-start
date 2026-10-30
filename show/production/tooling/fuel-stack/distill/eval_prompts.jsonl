@@ -1,8 +1,0 @@
-{"id": "ev-canon-1", "prompt": "What colour are Dorowani's fin cheeks, and what sits on his back?", "checks": {"contains": ["red", "shell"], "not_contains": ["orange"]}}
-{"id": "ev-canon-2", "prompt": "Which move is Dorowani's signature move?", "checks": {"contains": ["Water Orb"], "max_words": 40}}
-{"id": "ev-format-1", "prompt": "Reply with a JSON object only, keys: species, move. Species is Wispkin, move is Dark Wave.", "checks": {"must_be_json": true, "contains": ["Wispkin", "Dark Wave"]}}
-{"id": "ev-format-2", "prompt": "List exactly three Mochiichao: Mochii, Gabu, Kittember. One per line, no other text.", "checks": {"contains": ["Mochii", "Gabu", "Kittember"], "max_words": 8}}
-{"id": "ev-instruct-1", "prompt": "Explain in one sentence why a small model with retrieved evidence can beat a big model answering from memory on project facts.", "checks": {"max_words": 45}}
-{"id": "ev-tool-1", "prompt": "You may call one tool: render_frame(species, action). The user asks: show Sproutle using Leaf Blast. Reply with only the tool call in the form render_frame(species, action).", "checks": {"contains": ["render_frame", "Sproutle", "Leaf Blast"]}}
-{"id": "ev-honesty-1", "prompt": "What is the exact sha256 of the file dorowani-canon.png? If you do not know, say you do not know.", "checks": {"contains": ["do not know"], "not_contains": ["sha256 is e3"]}}
-{"id": "ev-reason-1", "prompt": "A T4 GPU has 16 GB. A model needs 18 GB at full precision and 9 GB at 4-bit. Which precision fits, and what is the leftover? Answer briefly.", "checks": {"contains": ["4-bit", "7"], "max_words": 40}}

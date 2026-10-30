@@ -1,6 +1,6 @@
 {
  "bundle": "garden-complex",
- "bundleNote": "Worked instance for teardown #7. Every slot below is a canon seed row from src/data/core/encounters.json (via Sideline A's gap-fill extraction), weights and level ranges unchanged; only the container is new. timeOfDay/weather stay null \u2014 canon has not split these tables by time or weather and no split is invented here. habitatClass is filled ONLY where the encounter method itself proves the class (pond surf/fish -> water); meadow habitat classes are owed to the LIVING-WORLD P2 binding build. The third canon seed map, cave-route-01 (punchkid/gearkid/pebblefist/pixilite), is NOT part of the Garden complex and is deliberately not re-homed here. S2 Landing 1 (2026-10-30): meadow grass slots bound to small-ground except zephling, which stays null with its narrowed reason; pond surf/fish slots verified water (unchanged).",
+ "bundleNote": "Worked instance for teardown #7. Every slot below is a canon seed row from src/data/core/encounters.json (via Sideline A's gap-fill extraction), weights and level ranges unchanged; only the container is new. timeOfDay/weather stay null \u2014 canon has not split these tables by time or weather and no split is invented here. habitatClass is filled ONLY where the encounter method itself proves the class (pond surf/fish -> water); meadow habitat classes are owed to the LIVING-WORLD P2 binding build. The third canon seed map, cave-route-01 (punchkid/gearkid/pebblefist/pixilite), is NOT part of the Garden complex and is deliberately not re-homed here.",
  "areas": [
   {
    "areaId": "meadow-route-01",
@@ -11,31 +11,31 @@
      "method": "grass",
      "slots": [
       {
-       "habitatClass": "small-ground",
+       "habitatClass": null,
        "maxLevel": 4,
        "minLevel": 2,
        "speciesId": "sproutle",
-       "status": "canon: encounters.json seed | habitatClass small-ground (S2 Landing 1): grass x garden-meadow [small-ground, sky, perch], ground resident of a ground-primary zone",
+       "status": "canon: encounters.json seed",
        "timeOfDay": null,
        "weather": null,
        "weight": 30
       },
       {
-       "habitatClass": "small-ground",
+       "habitatClass": null,
        "maxLevel": 4,
        "minLevel": 2,
        "speciesId": "pupbble",
-       "status": "canon: encounters.json seed | habitatClass small-ground (S2 Landing 1): grass x garden-meadow [small-ground, sky, perch], ground resident of a ground-primary zone",
+       "status": "canon: encounters.json seed",
        "timeOfDay": null,
        "weather": null,
        "weight": 25
       },
       {
-       "habitatClass": "small-ground",
+       "habitatClass": null,
        "maxLevel": 3,
        "minLevel": 2,
        "speciesId": "squirmite",
-       "status": "canon: encounters.json seed | habitatClass small-ground (S2 Landing 1): grass x garden-meadow [small-ground, sky, perch], ground resident of a ground-primary zone",
+       "status": "canon: encounters.json seed",
        "timeOfDay": null,
        "weather": null,
        "weight": 20
@@ -45,17 +45,17 @@
        "maxLevel": 4,
        "minLevel": 2,
        "speciesId": "zephling",
-       "status": "canon: encounters.json seed | habitatClass owed (S2 Landing 1, narrowed reason): grass proves presence, not class; the zone sky class is show-side today, not a game-table class",
+       "status": "canon: encounters.json seed",
        "timeOfDay": null,
        "weather": null,
        "weight": 15
       },
       {
-       "habitatClass": "small-ground",
+       "habitatClass": null,
        "maxLevel": 5,
        "minLevel": 3,
        "speciesId": "kittember",
-       "status": "canon: encounters.json seed | habitatClass small-ground (S2 Landing 1): grass x garden-meadow [small-ground, sky, perch], ground resident of a ground-primary zone",
+       "status": "canon: encounters.json seed",
        "timeOfDay": null,
        "weather": null,
        "weight": 10

@@ -8,6 +8,8 @@ import { creatureWalkFrameUrl } from '../../lib/creatureWalkFrames';
 import { tileAnimeFrame, tileAnimeSignature } from '../../lib/tileAnime';
 import { useGameStore } from '../../store/gameStore';
 import { getStyleProfile } from '../../lib/styleProfiles';
+import World3DCanvas from './World3DCanvas';
+import { getWorld3DArea } from '../../lib/world3d/areaData';
 
 /**
  * PixiJS world renderer (Phase 2, world canvas only).
@@ -135,31 +137,13 @@ const ENV_URLS = [
   'path_a.png', 'path_b.png', 'path_c.png', 'sand_a.png', 'sand_b.png', 'water.png',
   'shallow.png', 'shore.png', 'cliff.png', 'cliff_b.png', 'cliff_c.png', 'rock.png',
   'rock_water.png', 'waterfall.png', 'tree_base.png', 'canopy_a.png',
-  'canopy_b.png', 'dock.png', 'dock_b.png',
+  'canopy_b.png', 'dock.png', 'dock_b.png', 'dock_c.png', 'dock_d.png',
   'cave_floor.png', 'cave_floor_b.png', 'cave_strata.png', 'city_road.png',
-  'industrial.png', 'lava.png',
+  'industrial.png',
   ...[1, 2, 3, 4, 5, 6].map(i => `crest_${i}.png`),
   ...[1, 2, 3, 4, 5, 6].map(i => `shoref_${i}.png`),
   ...[1, 2, 3].map(i => `flower_${i}.png`),
 ].map(ENV);
-// PROFILE PARAMETER profile.material.grassGrade = 0xFFB79B (a Pixi
-// multiply tint: R 1.00, G 0.72, B 0.61), applied ONLY to kit grass
-// bases. Why it exists: the DS field pipeline presents its textures
-// through 3D material diffuse + scene lighting, so the games' grass
-// reads far deeper than the stored palette (measured at the byte
-// level in EXTRACTION-MANIFEST.md: the grass family's dominant
-// stored colours are (82,255,148) / (156,255,156)). A flat 2D
-// renderer has no material stage, so the grade lives here at the
-// seam — the kit PNGs stay byte-true to the extraction. The factor
-// is anchored to the BW2 lane's owner-reviewed Phase-A palette
-// register (its grass dominant measures (86,150,66)); graded, the
-// kit's dominant lands at (82,184,90), the same register.
-// (Restored at landing-train time, 2026-10-30: the composed canvas
-// predated the env lane's 2026-10-30 correction of record; this
-// constant, the 2x2-cluster grass hashing, the log-half dock crops
-// and the lava case were merged back onto the composed canvas
-// without disturbing the generation-switcher bindings.)
-const GRASS_GRADE_TINT = 0xffb79b;
 const envHash = (x: number, y: number): number => {
   let h = (x * 73856093) ^ (y * 19349663);
   h = (h ^ (h >> 13)) >>> 0;
@@ -174,17 +158,13 @@ function envGroundFor(
   switch (t) {
     case 0: { // grass — a SET of four authored textures, hash-weighted.
       // One-texture grass is exactly the stamp this lane exists to
-      // remove. Weights (revised 2026-10-30 after the kit's index-0
-      // flatten fix): ngrass — the family's workhorse, the only one
-      // with real surface speckle — carries the field at 50%;
-      // lgreen is near-flat light green, an accent at 30%; hage
-      // (worn patches) and lgreenp (mound-shaded, quilts at density)
-      // sit at 10% each. Mirrored compositions ring — kit notes.
-      // Variant choice hashes on 2x2-tile clusters, not per tile:
-      // per-tile alternation of a saturated and a pale texture reads
-      // as a checkerboard; the source's patches are multi-tile areas.
-      const g = envHash(x >> 1, y >> 1) % 10;
-      return { base: ENV(g <= 4 ? 'grass_b.png' : g <= 7 ? 'grass_c.png' : g === 8 ? 'grass_d.png' : 'grass_a.png') };
+      // remove. Weights measured against captures: lgreen (flat base
+      // + tufts) carries the field; ngrass speckles break it up;
+      // hage reads as worn patches; lgreenp is mound-shaded (light
+      // centre, darker rim) and quilts at high density, so it sits
+      // at 10% as undulation. Mirrored compositions ring — kit notes.
+      const g = h % 10;
+      return { base: ENV(g <= 5 ? 'grass_c.png' : g <= 7 ? 'grass_b.png' : g === 8 ? 'grass_d.png' : 'grass_a.png') };
     }
     case 1: // tree base: trunk + grass ring (conttree_b crop)
       return { base: ENV('tree_base.png') };
@@ -225,13 +205,13 @@ function envGroundFor(
       return { base: ENV('waterfall.png') };
     case 21: { // flowers — grass + flower01 sway cycle overlay (ported)
       return {
-        base: ENV('grass_b.png'),
+        base: ENV('grass_a.png'),
         overlay: ENV(`flower_${tileAnimeFrame('flower01', ticks, h % 72) + 1}.png`),
       };
     }
-    case 22: { // dock — the bridge texture's log half, two crops in
-      // rotation (its rung-ladder half is a different piece entirely)
-      return { base: ENV(h % 2 === 0 ? 'dock.png' : 'dock_b.png') };
+    case 22: { // dock — the bridge piece's four quadrants in rotation
+      const d = h % 4;
+      return { base: ENV(d === 0 ? 'dock.png' : d === 1 ? 'dock_b.png' : d === 2 ? 'dock_c.png' : 'dock_d.png') };
     }
     case 8: // cave ground on exteriors (cave mouths, the Dark Forest's
       // cave tiles) — interiors bind the same family per-map below
@@ -240,8 +220,6 @@ function envGroundFor(
       return { base: ENV('city_road.png') };
     case 12: // industrial ground (the junkyard) — Underground floor set
       return { base: ENV('industrial.png') };
-    case 25: // lava — Platinum's magma texture (Diamond's sets carry none)
-      return { base: ENV('lava.png') };
     default:
       return null;
   }
@@ -331,11 +309,10 @@ export interface NpcWalkState {
   step: number;
 }
 
-export default function PixiWorldCanvas({
-  mapData, playerPos, playerDir, playerSpeciesId, defeatedIds, phase, animWalk,
-  playerKind = 'human', playerGender = 'boy', wilds = [], npcStates, playerAuraColor = null, playerWalkFrameUrl = null,
-  animTick = 0, follower = null, mapId,
-}: {
+/** Props shared by the layered 2D canvas and the 3D world canvas
+ *  (the Gen 5 top presentation). One prop contract, two
+ *  presentations of the same world state. */
+export interface WorldCanvasProps {
   mapData: any;
   /** BW2 lane: the map's registry id, for per-map texture sets and
    *  window apertures (BW2_MAP_TILES / BW2_WINDOWS). Callers that
@@ -378,7 +355,13 @@ export default function PixiWorldCanvas({
       buffer replay, computed in WorldEngine). Null = no follower
       (no party yet, or Creature Mode, which passes nothing). */
   follower?: { speciesId: string; x: number; y: number; dir: string; moving: boolean } | null;
-}) {
+}
+
+function PixiWorldCanvas2D({
+  mapData, playerPos, playerDir, playerSpeciesId, defeatedIds, phase, animWalk,
+  playerKind = 'human', playerGender = 'boy', wilds = [], npcStates, playerAuraColor = null, playerWalkFrameUrl = null,
+  animTick = 0, follower = null, mapId,
+}: WorldCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<Application | null>(null);
   const worldRef = useRef<Container | null>(null);
@@ -554,18 +537,7 @@ export default function PixiWorldCanvas({
           const relief = !(mapData as any)?.interior && (t === 9 || t === 17 || t === 19 || t === 20)
             ? styleProfile.world.reliefHeightScale
             : 1;
-          const baseSp = placeTileSprite(`g:${x}:${y}:${bw2url}`, bw2url, px, py, tile, tile * relief);
-          // Grass material grade (profile.material.grassGrade — see
-          // the constant's note): kit grass bases only, never the
-          // BW2 lane's own textures or any other family. Case 6 is
-          // included: when the kit's tallgrass_b covers a tile it is
-          // the same grass family and must sit in the same register
-          // (ungraded it popped neon against the BW2 lane's darker
-          // tall grass on the Route 2 capture, 2026-10-30).
-          // (Landing-train merge: applied to the switcher-relief
-          // draw above; relief tiles are 9/17/19/20, never grass,
-          // so the two transforms never interact.)
-          if (baseSp && env && (t === 0 || t === 21 || t === 6)) baseSp.tint = GRASS_GRADE_TINT;
+          placeTileSprite(`g:${x}:${y}:${bw2url}`, bw2url, px, py, tile, tile * relief);
           // Ported-cycle overlay (sea_on crests on water, flower01
           // sway on flower tiles) — a second sprite above the base,
           // keyed by URL so each cycle frame caches separately.
@@ -1055,15 +1027,6 @@ export default function PixiWorldCanvas({
     drawables.forEach(d => d.build(world));
 
     // Day/night tint overlay (screen space, one persistent Graphics).
-    // OWNER RULE 2026-10-29 ~19:39 CDT (CLOCK §7): the global tint
-    // applies OUTDOORS ONLY. Inside buildings there is no
-    // whole-interior tint — daylight enters through windows via
-    // the light-ray lane, which reads sun facts from the world
-    // clock, not this overlay. The map's own `interior` flag is
-    // the regime data; windowless interiors therefore also skip
-    // the tint rather than getting a wash. The overlay Graphics
-    // is still created (so a map change back outdoors reuses it),
-    // but it is cleared and left empty for interior maps.
     const tint = DAY_TINT[phase] || DAY_TINT.day;
     let overlay = overlayRef.current;
     if (!overlay) {
@@ -1099,4 +1062,23 @@ export default function PixiWorldCanvas({
   }, []);
 
   return <div ref={hostRef} className="absolute inset-0 overflow-hidden" style={{ touchAction: 'none' }} />;
+}
+
+/**
+ * World canvas — the presentation switch. The Gen 5 (top) style
+ * profile's world renderMode is 'model3d': for a map with authored
+ * 3D data (src/lib/world3d/areaData.ts) the world is drawn as the
+ * held 3D models with 2D sprite actors (World3DCanvas). Every
+ * other profile — and every map without authored 3D data, under
+ * every profile — draws the layered 2D presentation above,
+ * unchanged. Same props, same game state, same logic either way;
+ * only the presentation of the world differs, which is the
+ * switcher's one axis (owner order, 2026-10-30).
+ */
+export default function PixiWorldCanvas(props: WorldCanvasProps) {
+  const visualStyle = useGameStore(s => s.settings.visualStyle);
+  const profile = getStyleProfile(visualStyle);
+  const area = profile.world.renderMode === 'model3d' ? getWorld3DArea(props.mapId) : undefined;
+  if (area) return <World3DCanvas {...props} area={area} />;
+  return <PixiWorldCanvas2D {...props} />;
 }

@@ -1,0 +1,11 @@
+*** /dev/null
+--- /dev/null
+***************
+*** 2133
+-         mapData={mapData}
+--- 2346,2350 -----
++         mapData={
++           controlMode === "creature"
++             ? { ...mapData, npcs: [...(mapData.npcs || []), { id: "__ranger_companion", name: playerName, x: companionPos?.x ?? playerPos.x, y: companionPos?.y ?? playerPos.y }] }
++             : mapData
++         }

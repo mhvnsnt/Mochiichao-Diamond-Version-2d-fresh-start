@@ -37,6 +37,18 @@ export interface StyleProfile {
   /** 0 = master 2.5D read; 4 = fully flat top-down read. */
   flatnessStep: 0 | 1 | 2 | 3 | 4;
   world: {
+    /** How the world itself is drawn. 'model3d' = the held 3D model
+     *  world (real polygon land/building models, 2D sprite actors,
+     *  grid movement, angled camera — the HGSS/BW2 recipe), used by
+     *  the top profile only, for areas that carry authored 3D data
+     *  (src/lib/world3d/areaData.ts); areas without authored data
+     *  keep the layered draw under every profile. 'layered' = the
+     *  existing layered tile presentation. This is the same single
+     *  flatness axis extended to its ordered top (owner order,
+     *  2026-10-30: the 3D world wired as the top of this switcher,
+     *  the 2D presentations kept as the steps down). It changes no
+     *  colour, lighting, or quality value anywhere. */
+    renderMode: 'model3d' | 'layered';
     /** Whether canopy/roof overlays join the actor depth sort or are
      *  folded into the ground pass beneath every actor. */
     foregroundLayer: ForegroundLayer;
@@ -88,6 +100,7 @@ export const STYLE_PROFILES: Record<VisualStyleId, StyleProfile> = {
     presentation: 'Full layered 2.5D master presentation',
     flatnessStep: 0,
     world: {
+      renderMode: 'model3d',
       foregroundLayer: 'depth-sorted',
       canopy: { widthTiles: 1.5, heightTiles: 1.375, depthLeadTiles: 0.4 },
       roof: { heightTiles: 1.5, depthLeadTiles: 0.4 },
@@ -102,6 +115,7 @@ export const STYLE_PROFILES: Record<VisualStyleId, StyleProfile> = {
     presentation: 'One step flatter: raised foreground remains, with less projection',
     flatnessStep: 1,
     world: {
+      renderMode: 'layered',
       foregroundLayer: 'depth-sorted',
       canopy: { widthTiles: 1.4, heightTiles: 1.24, depthLeadTiles: 0.3 },
       roof: { heightTiles: 1.32, depthLeadTiles: 0.3 },
@@ -116,6 +130,7 @@ export const STYLE_PROFILES: Record<VisualStyleId, StyleProfile> = {
     presentation: 'Low overhead layer: foreground still covers, but barely rises from the tile',
     flatnessStep: 2,
     world: {
+      renderMode: 'layered',
       foregroundLayer: 'depth-sorted',
       canopy: { widthTiles: 1.28, heightTiles: 1.12, depthLeadTiles: 0.18 },
       roof: { heightTiles: 1.18, depthLeadTiles: 0.18 },
@@ -130,6 +145,7 @@ export const STYLE_PROFILES: Record<VisualStyleId, StyleProfile> = {
     presentation: 'Tile-layer presentation: canopy and roof sit in the ground plane',
     flatnessStep: 3,
     world: {
+      renderMode: 'layered',
       foregroundLayer: 'ground',
       canopy: { widthTiles: 1.12, heightTiles: 1.03, depthLeadTiles: 0 },
       roof: { heightTiles: 1.04, depthLeadTiles: 0 },
@@ -144,6 +160,7 @@ export const STYLE_PROFILES: Record<VisualStyleId, StyleProfile> = {
     presentation: 'Fully flat top-down tile presentation',
     flatnessStep: 4,
     world: {
+      renderMode: 'layered',
       foregroundLayer: 'ground',
       canopy: { widthTiles: 1, heightTiles: 1, depthLeadTiles: 0 },
       roof: { heightTiles: 1, depthLeadTiles: 0 },
