@@ -113,7 +113,7 @@ own repo (no-fork law); show production calls it from there.
 | Scooby 6-beat episode formula | mystery-coast research | beat-sheet template (TEMPLATES.md) |
 | Model-pack completeness (8-sheet) + mouth QC | rig-mapping/shows/knd-model-pack.md | model-sheet template (TEMPLATES.md) |
 | Palette enforcement as a system | cape-jones `palette-enforce.py` + docs | PIPELINE.md finish stage |
-| Rig-and-sheet standard (model-sheet format §1, CMYK palette format §2, puppet construction §3, compositing glue §4) | donor-measured extraction 2026-10-29 (per-source record: `show/production/rigs/DONOR-PROVENANCE-2026-10-29.md`) | `show/production/rigs/RIG-AND-SHEET-SPEC.md` — **CURRENT standard** (PR #145); implemented in code by BlairWitch v0.3.0 (PR #1) |; cast build-out landed as CURRENT artifacts (PR #35) — registered in `show/production/rigs/README.md` and the cast-artifacts section below
+| Rig-and-sheet standard (model-sheet format §1, CMYK palette format §2, puppet construction §3, compositing glue §4) | donor-measured extraction 2026-10-29 (per-source record: `show/production/rigs/DONOR-PROVENANCE-2026-10-29.md`) | `show/production/rigs/RIG-AND-SHEET-SPEC.md` — **CURRENT standard** (PR #145); implemented in code by BlairWitch v0.3.0 (PR #1); cast build-out landed as CURRENT artifacts (PR #35) — registered in `show/production/rigs/README.md` and the cast-artifacts section below |
 | Persona 5 UI principles (CEDEC 2017) | research report | `show/production/research/persona-5-ui-principles.md` |
 | Manifest/catalog formats | TRIPPEDD sources manifests; cape-jones example_manifest.json | `show/shared/` manifests (SHOW-HOME plan) |
 
