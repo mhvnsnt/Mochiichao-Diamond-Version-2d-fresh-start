@@ -23,7 +23,7 @@ import { resolveTrainerRow, rowToMapMembers } from "../lib/trainer-teams-resolve
 import { planForOutcome, commitRecipientExp, commitNextLevel, expProgressInLevel, type PayoffPlan } from "../lib/battlePayoff";
 import { useBattlePayoffSequence, PayoffStatWindow } from "../components/game/BattlePayoffSequence";
 import { resolveWorldMove, buildWorldAttackPresentation } from "../lib/worldMoveBridge";
-import { worldBattleHit, worldCanActGateLine, worldCheckCanAct, worldEndTurnTick, worldStatusTickLine } from "../lib/worldBattleCore";
+import { worldBattleHit, worldCanActGateLine, worldCheckCanAct, worldEndTurnTick, worldNoPpLine, worldSpendPp, worldStatusTickLine } from "../lib/worldBattleCore";
 import BattleSceneBackdrop from "../components/game/BattleSceneBackdrop";
 import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackground";
 import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
@@ -2630,6 +2630,39 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       if (!resolved) {
         setBattleState({ ...bs, log: [...bs.log, `${battleMonName(bs.player)} used ${action.move}!`, `But it could not be resolved — no damage dealt.`] });
         return;
+      }
+      // Gap-fill S6 step 6: PP write-back, player side — on the
+      // resolver's rule (worldSpendPp, in src/lib/worldBattleCore):
+      // 1 PP for the used move, spent BEFORE the hit resolves, so
+      // a miss still costs PP (the resolver decrements before its
+      // accuracy roll) and a gated battler never spends (the gate
+      // above returns before this branch). A move at 0 PP fails
+      // with the resolver's line and stays in the menu, like an
+      // unresolved move — the player picks another move instead
+      // of losing the turn to a move that never fired. The spend
+      // is written to the STORE copy first (below), before the
+      // hit's faint branch runs, so the payoff's EXP/level commits
+      // — which copy the store member — carry the spent PP forward
+      // instead of silently restoring it; the battle copy is spent
+      // too, so the rest of this battle reads the same PP. A
+      // foe spends nothing: wild / trainer-team battle shapes
+      // carry no pp array (worldSpendPp is untracked for them).
+      // No PP readout is added to the move buttons here: battle
+      // presentation / menus belong to the combat-menus lane (the
+      // 2026-10-30 ~12:04 seam — this lane owns battle core math),
+      // and the blocked-move log line is this step's surface, the
+      // same log-only surface steps 3–5 used for status.
+      const ppSpend = worldSpendPp(bs.player, resolved.moveId, action.move);
+      if (ppSpend.blocked) {
+        setBattleState({ ...bs, log: [...bs.log, worldNoPpLine(battleMonName(bs.player), resolved.display)] });
+        return;
+      }
+      if (ppSpend.tracked && ppSpend.pp) {
+        bs.player = { ...bs.player, pp: ppSpend.pp };
+        const freshSpendTeam: any[] = (useGameStore.getState().party as any) || playerTeam;
+        const spentTeam = [...freshSpendTeam];
+        spentTeam[bs.playerTeamIdx] = { ...spentTeam[bs.playerTeamIdx], pp: ppSpend.pp };
+        setPlayerTeam(spentTeam);
       }
       const animMs = startBattleAnim("player", resolved);
 

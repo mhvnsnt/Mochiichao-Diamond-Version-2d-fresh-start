@@ -10,8 +10,15 @@ import {
   worldCanActGateLine,
   worldCheckCanAct,
   worldEndTurnTick,
+  worldFullPp,
+  worldNoPpLine,
+  worldSpendPp,
   worldStatusTickLine,
 } from "./worldBattleCore";
+import { commitNextLevel, commitRecipientExp } from "./battlePayoff";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Flat battle mons, as WorldEngine builds them: atk/def/spd where
 // spd means SPEED. Species 001 = WATER, 038 = GRASS (species.ts).
@@ -337,5 +344,76 @@ describe("worldEndTurnTick", () => {
   it("the tick log line matches the resolver's wording", () => {
     expect(worldStatusTickLine("Sproutle", "poison", 10)).toBe("Sproutle took 10 damage from poison!");
     expect(worldStatusTickLine("Sproutle", "burn", 2)).toBe("Sproutle took 2 damage from burn!");
+  });
+});
+
+describe("worldSpendPp (S6 step 6: PP write-back, resolver rule)", () => {
+  // Party move lists are moveIds; TACKLE's MOVES_DB pp is 35.
+  const PLAYER = { moves: ["TACKLE", "RAZOR_LEAF"], pp: [35, 25] };
+  it("spends 1 PP for the used move only, without mutating the input", () => {
+    const r = worldSpendPp(PLAYER, "TACKLE");
+    expect(r).toEqual({ tracked: true, blocked: false, moveIdx: 0, pp: [34, 25], ppLeft: 34 });
+    expect(PLAYER.pp).toEqual([35, 25]);
+  });
+  it("finds the slot by the fallback key when the canonical id is absent", () => {
+    const r = worldSpendPp({ moves: ["Tackle", "Leaf Blast"], pp: [35, 25] }, "TACKLE", "Tackle");
+    expect(r.moveIdx).toBe(0);
+    expect(r.pp).toEqual([34, 25]);
+  });
+  it("a move at 0 PP is blocked with the resolver's line, and spends nothing", () => {
+    const r = worldSpendPp({ moves: ["TACKLE"], pp: [0] }, "TACKLE");
+    expect(r.tracked).toBe(true);
+    expect(r.blocked).toBe(true);
+    expect(r.pp).toBeNull();
+    expect(r.ppLeft).toBe(0);
+    expect(worldNoPpLine("Sproutle", "Tackle")).toBe("Sproutle has no PP left for Tackle!");
+  });
+  it("untracked shapes spend and block nothing: no pp array, no moves, unknown move", () => {
+    expect(worldSpendPp({ moves: ["Tackle"] }, "TACKLE").tracked).toBe(false);
+    expect(worldSpendPp({ pp: [35] }, "TACKLE").tracked).toBe(false);
+    expect(worldSpendPp(PLAYER, "EMBER_TOSS").tracked).toBe(false);
+    // A flat foe shape (no pp array) is untracked, not invented.
+    expect(worldSpendPp(WATER_FLAT, "TACKLE").tracked).toBe(false);
+  });
+  it("worldFullPp restores MOVES_DB pp (TACKLE 35, RAZOR_LEAF 25) and falls back to 10", () => {
+    expect(worldFullPp(["TACKLE", "RAZOR_LEAF"])).toEqual([35, 25]);
+    expect(worldFullPp(["NO_SUCH_MOVE"])).toEqual([10]);
+    expect(worldFullPp([])).toEqual([]);
+  });
+  it("payoff-beat guard: a spent PP survives the payoff's EXP + level commits", () => {
+    // The host writes the spend to the store copy BEFORE the faint
+    // branch, and the payoff commits copy that store member (the
+    // WorldEngine payoffCommitExp / payoffCommitLevel pattern:
+    // spread the member, commit, write it back). If the spend were
+    // written only to the battle copy, this sequence would restore
+    // the old PP — that is the bypass this test exists to catch.
+    const spend = worldSpendPp({ moves: ["TACKLE", "RAZOR_LEAF"], pp: [35, 25] }, "TACKLE");
+    expect(spend.pp).toEqual([34, 25]);
+    const storeMember: any = {
+      ...WATER_INSTANCE,
+      id: "guard",
+      nickname: "Mochii",
+      speciesId: "001",
+      experience: 125,
+      hp: 20,
+      maxHp: 20,
+      moves: ["TACKLE", "RAZOR_LEAF"],
+      pp: spend.pp,
+    };
+    const committed = { ...storeMember, stats: { ...storeMember.stats } };
+    commitRecipientExp(committed, 200);
+    expect(committed.experience).toBe(325);
+    const step = commitNextLevel(committed);
+    expect(step).not.toBeNull();
+    expect(committed.level).toBe(6);
+    expect(committed.pp).toEqual([34, 25]);
+  });
+  it("host + store source lock: the spend call and the healer restore are present", () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const engine = readFileSync(join(here, "../world/WorldEngine.tsx"), "utf8");
+    expect(engine).toContain("worldSpendPp(bs.player, resolved.moveId, action.move)");
+    expect(engine).toContain("worldNoPpLine(battleMonName(bs.player), resolved.display)");
+    const store = readFileSync(join(here, "../store/gameStore.ts"), "utf8");
+    expect(store).toContain("pp: worldFullPp(m.moves)");
   });
 });

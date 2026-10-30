@@ -14,6 +14,7 @@ import { setAutosaveHold, getAutosaveHold } from '../lib/saveSystem';
 import type { WorldClockAnchor } from '../lib/worldClock';
 import { applyFontRoles } from '../lib/fonts';
 import { applySoundMode } from '../lib/audioRouting';
+import { worldFullPp } from '../lib/worldBattleCore';
 
 interface GameState {
   playerName: string;
@@ -403,8 +404,14 @@ export const useGameStore = create<GameState>((set, get) => ({
     // same beat (Mochi Center / Mom, every isHeal path calls this).
     // His pool is only touched once it exists (maxHp > 0), so a
     // pre-creature-mode heal never founds it early.
+    // Gap-fill S6 step 6: a healer restores PP to full too (the
+    // restore half of PP write-back — without it, spent PP would
+    // deplete with no recovery, the reason battleWiring left the
+    // resolver's PP unwritten). A member with no moves keeps an
+    // empty pp array; a member whose pp was never tracked gains
+    // its full list, the same initialisation createMochii uses.
     set(state => ({
-      party: state.party.map(m => ({ ...m, hp: m.maxHp, currentHp: m.maxHp, status: null })),
+      party: state.party.map(m => ({ ...m, hp: m.maxHp, currentHp: m.maxHp, status: null, pp: worldFullPp(m.moves) })),
       rangerHp: state.rangerMaxHp > 0 ? state.rangerMaxHp : state.rangerHp
     }));
   },
