@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { TYPE_COLORS, calcDamage, makeBattleMon, GAME_DATA as IMPORTED_GAME_DATA } from "./GameData";
+import { TYPE_COLORS, makeBattleMon, GAME_DATA as IMPORTED_GAME_DATA } from "./GameData";
 import { FULL_WORLD } from "./FullWorldMaps";
 import { useGameStore } from "../store/gameStore";
 import PixiWorldCanvas from "../components/game/PixiWorldCanvas";
@@ -23,6 +23,7 @@ import { resolveTrainerRow, rowToMapMembers } from "../lib/trainer-teams-resolve
 import { planForOutcome, commitRecipientExp, commitNextLevel, expProgressInLevel, type PayoffPlan } from "../lib/battlePayoff";
 import { useBattlePayoffSequence, PayoffStatWindow } from "../components/game/BattlePayoffSequence";
 import { resolveWorldMove, buildWorldAttackPresentation } from "../lib/worldMoveBridge";
+import { worldBattleDamage } from "../lib/worldBattleCore";
 import BattleSceneBackdrop from "../components/game/BattleSceneBackdrop";
 import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackground";
 import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
@@ -207,7 +208,10 @@ export function resolveBattleMove(moveKey: string): { power: number; type: strin
   if (!r) return null;
   return { power: r.power, type: r.type, display: r.display, moveId: r.moveId, animProfile: r.profile };
 }
-/** Flat atk/def for calcDamage: MochiiInstance carries stats.*, not flat atk/def. */
+/** Flat atk/def helper, retained for callers that still need the flat
+ * shape: MochiiInstance carries stats.*, not flat atk/def. (Gap-fill
+ * S6: the live damage path no longer uses this — it goes through
+ * src/lib/worldBattleCore.ts into battle-math.) */
 export function battleStats(mon: any): any {
   return { ...mon, atk: mon.atk ?? mon.stats?.atk ?? 50, def: mon.def ?? mon.stats?.def ?? 50 };
 }
@@ -2059,7 +2063,6 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       setBattleState({ ...bs, log: [...bs.log, `${battleMonName(enemy)} used ${chosenMove}!`, `But it could not be resolved — no damage dealt.`], phase: "menu" });
       return;
     }
-    const moveData = { power: resolvedEnemyMove.power, type: resolvedEnemyMove.type };
     const chosenMoveDisplay = resolvedEnemyMove.display;
 
     startBattleAnim("enemy", resolvedEnemyMove);
@@ -2081,7 +2084,11 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     const attackLine = humanStrikeLog ?? `${battleMonName(enemy)} used ${chosenMoveDisplay}!`;
 
 
-    const dmg = humanStrikeDmg ?? calcDamage(moveData, battleStats(enemy), battleStats(bs.player));
+    // Gap-fill S6: the enemy hit goes through the converged core
+    // (battle-math) instead of GameData.calcDamage. The human-strike
+    // branch above keeps its own rangerDefense math, untouched.
+    const enemyBattleResult = humanStrikeDmg != null ? null : worldBattleDamage(enemy, bs.player, { power: resolvedEnemyMove.power, type: resolvedEnemyMove.type, moveId: resolvedEnemyMove.moveId });
+    const dmg = humanStrikeDmg ?? enemyBattleResult!.damage;
 
     // ── DEFEND — the classic-battle intercept (ranger-defense) ────
     // Only in creature mode is the Ranger standing beside you as a
@@ -2125,7 +2132,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // engine computes no type multiplier, so the plain SE_EFFECTIVE
     // class fires here; effectiveness voices live in BattleView,
     // whose resolver carries the multiplier).
-    if (dmg > 0) { playCue('battle.hit'); newLog.push(`${battleMonName(bs.player)} took ${dmg} damage!`); }
+    if (dmg > 0) { playCue('battle.hit'); if (enemyBattleResult?.isCrit) newLog.push(`A critical hit!`); newLog.push(`${battleMonName(bs.player)} took ${dmg} damage!`); }
 
     // v5.1 HP sync: battle copy keeps hp and currentHp together.
     const updatedPlayer = { ...bs.player, currentHp: newHp, hp: newHp };
@@ -2353,16 +2360,17 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         setBattleState({ ...bs, log: [...bs.log, `${battleMonName(bs.player)} used ${action.move}!`, `But it could not be resolved — no damage dealt.`] });
         return;
       }
-      const moveData = { power: resolved.power, type: resolved.type };
-
       const animMs = startBattleAnim("player", resolved);
 
       const enemyMon = bs.type === "wild" ? bs.wild : bs.trainerTeam[bs.trainerTeamIdx];
-      const dmg = calcDamage(moveData, battleStats(bs.player), battleStats(enemyMon));
+      // Gap-fill S6: the player hit goes through the converged core
+      // (battle-math) instead of GameData.calcDamage.
+      const playerBattleResult = worldBattleDamage(bs.player, enemyMon, { power: resolved.power, type: resolved.type, moveId: resolved.moveId });
+      const dmg = playerBattleResult.damage;
       const newLog = [...bs.log, `${battleMonName(bs.player)} used ${resolved.display}!`];
 
       const newHp = Math.max(0, enemyMon.currentHp - dmg);
-      if (dmg > 0) { playCue('battle.hit'); newLog.push(`Dealt ${dmg} damage!`); }
+      if (dmg > 0) { playCue('battle.hit'); if (playerBattleResult.isCrit) newLog.push(`A critical hit!`); newLog.push(`Dealt ${dmg} damage!`); }
 
       if (newHp <= 0) {
         playCue('battle.faint');
