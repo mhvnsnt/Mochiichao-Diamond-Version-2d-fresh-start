@@ -80,7 +80,8 @@ import { tableFor, rollEncounterStep } from "../lib/encounters";
 import { evaluateTileGate, performedText } from "../lib/fieldTechniques";
 import { rollWildHeldItem, resolveBattleEndDrop, DROP_ITEM_NAMES } from "../lib/drops";
 import { greetingFor, isGreeter } from "../lib/greetings";
-import { deriveMorale } from "../lib/honor";
+import { RELIC_NPCS, APPRAISAL_TERMINAL_NPC_ID, appraisalTerminalLines, appraiseCarried, recordFor, canGrantUnique, encounterRateFactor, keepsakeBand } from "../lib/itemMeaning";
+import { deriveMorale, recordDeed } from "../lib/honor";
 import { playCue } from "../lib/soundCues";
 // Sequence build (2026-10-28): the engine now CONSUMES the movement
 // config (docs/MOCHII-MOVEMENT-SYSTEM.md; the file landed with PR #66
@@ -1192,7 +1193,16 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // the read sits at the S-6 roll site, as the expansion's landing
     // record prescribes for this tree.
     if (tile === 6 && hasStarter && !eventTriggered && !useGameStore.getState().noEncounters) {
-      const table = tableFor(currentMap, "grass") ?? tableFor(currentMap, "cave");
+      const baseTable = tableFor(currentMap, "grass") ?? tableFor(currentMap, "cave");
+      // Item meaning S-IM1: an identified, carried relic can bend
+      // this roll (the Echo Shard's one mechanical effect) — the
+      // factor reads the real inventory at the step, and the table
+      // itself is never edited.
+      const st = useGameStore.getState();
+      const factor = encounterRateFactor(st.inventory, st.identifiedItems);
+      const table = baseTable && factor !== 1 && baseTable.rate != null
+        ? { ...baseTable, rate: baseTable.rate * factor }
+        : baseTable;
       if (table) {
         const pick = rollEncounterStep(table, Math.random);
         if (pick) {
@@ -1684,6 +1694,37 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
 
     let npcHere = npcAt(nx, ny);
     if (npcHere) {
+      // Item meaning S-IM1: placed relic objects, the lab's
+      // appraisal terminal, and the Harbor Bell's return. Dialogue
+      // is computed from live state (claimed? carrying? still
+      // unidentified?) and the effects resolve in finishDialog —
+      // the same pattern as Mom's Sprint Boots grant below.
+      const relicObj = RELIC_NPCS[npcHere.id];
+      if (relicObj) {
+        const evId = recordFor(relicObj.itemId)?.meaning?.placement?.eventId;
+        const claimed = !!evId && completedEvents.includes(evId);
+        setDialog({ lines: claimed ? relicObj.emptyLines : relicObj.findLines, npc: npcHere });
+        setScreen("dialog");
+        return;
+      }
+      if (npcHere.id === APPRAISAL_TERMINAL_NPC_ID) {
+        const st = useGameStore.getState();
+        setDialog({ lines: appraisalTerminalLines(st.inventory, st.identifiedItems), npc: npcHere });
+        setScreen("dialog");
+        return;
+      }
+      if (npcHere.id === "bh_net_mender"
+        && (useGameStore.getState().inventory["harbor_bell"] ?? 0) > 0
+        && !completedEvents.includes("relic_bell_returned")) {
+        setDialog({ lines: [
+          "Mending nets is just knots, all the way down. Like most honest—",
+          "Wait. That knot on the rim — I'd know my own knots in the dark. That's my bell, Ranger. She went off the dock in the big storm.",
+          "You dug her out of the sand? …Thank you. She belongs back at the harbor mouth, where she can be heard.",
+          "(You returned the Harbor Bell.)",
+        ], npc: npcHere });
+        setScreen("dialog");
+        return;
+      }
       if (npcHere.eventId && npcHere.eventId.startsWith("pick_starter_") && hasStarter) {
         setDialog({ lines: ["You already have a partner!"], npc: npcHere });
         setScreen("dialog");
@@ -1817,7 +1858,54 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     if ((dialog.npc?.id === 'mom' || dialog.npc?.id === 'mom_house') && !dialog.isEvent && !useGameStore.getState().hasSprintBoots) {
       useGameStore.getState().setHasSprintBoots(true);
       playCue('item.get');
+      // Item meaning S-IM1: the gift is also a keepsake FACT —
+      // the boots' depth derives from this log at read, never
+      // from a stored number (src/lib/itemMeaning.ts keepsakeBand).
+      useGameStore.getState().appendKeepsakeFact({ itemId: 'sprint_boots', kind: 'received' });
       notify("Received the Sprint Boots! Hold B to run.", "#ffd700");
+    }
+    // Item meaning S-IM1: a placed unique enters the bag once,
+    // through this one channel; the find is written as a completed
+    // event so the world object goes quiet afterwards. One-of-one
+    // is enforced at the grant (canGrantUnique), not by the map.
+    const relicDef = dialog.npc?.id ? RELIC_NPCS[dialog.npc.id] : undefined;
+    if (relicDef && !dialog.isEvent) {
+      const st = useGameStore.getState();
+      const evId = recordFor(relicDef.itemId)?.meaning?.placement?.eventId;
+      if (evId && !st.completedEvents.includes(evId) && canGrantUnique(st.inventory, relicDef.itemId)) {
+        st.addItem(relicDef.itemId);
+        st.completeEvent(evId);
+      }
+    }
+    // Item meaning S-IM1: the appraisal service — finishing a talk
+    // with the lab terminal names everything carried that needed
+    // naming. Facts only: the ids join identifiedItems; what each
+    // item IS stays in its record.
+    if (dialog.npc?.id === APPRAISAL_TERMINAL_NPC_ID && !dialog.isEvent) {
+      const st = useGameStore.getState();
+      for (const id of appraiseCarried(st.inventory, st.identifiedItems)) {
+        st.identifyItem(id);
+        notify(`Identified: ${recordFor(id)?.displayName ?? id}!`, "#ffd700");
+      }
+    }
+    // Item meaning S-IM1: the bell comes home. The return removes
+    // the unique from the bag and writes a WITNESSED deed into the
+    // real ledger (deed row: return-lost-item) — prices and
+    // greetings downstream read it like any other deed.
+    if (dialog.npc?.id === 'bh_net_mender' && !dialog.isEvent) {
+      const st = useGameStore.getState();
+      if ((st.inventory['harbor_bell'] ?? 0) > 0 && !st.completedEvents.includes('relic_bell_returned')) {
+        st.useItem('harbor_bell');
+        st.completeEvent('relic_bell_returned');
+        recordDeed(st, {
+          deed: 'return-lost-item',
+          subject: { individualId: 'bh_net_mender', itemId: 'harbor_bell' },
+          areaId: 'sector0',
+          beat: lwBeatRef.current,
+          witnessedBy: ['bh_net_mender'],
+        });
+        notify("Returned the Harbor Bell to the Net Mender.", "#ffd700");
+      }
     }
     if (dialog.isEvent && dialog.eventId) {
       setCompletedEvents(ce => [...ce, dialog.eventId]);
@@ -2247,6 +2335,19 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           if (dropItem) {
             useGameStore.getState().addItem(dropItem);
             newLog.push(`The wild ${enemyMon.name} dropped a ${DROP_ITEM_NAMES[dropItem] ?? dropItem}!`);
+          }
+          // Item meaning S-IM1: a won battle walked in Mom's boots
+          // is a keepsake fact; when the derived band rises, the
+          // rise SPEAKS in the log — the visible cue #180's
+          // declaration law requires of any keepsake effect.
+          {
+            const kst = useGameStore.getState();
+            if (kst.hasSprintBoots) {
+              const before = keepsakeBand(kst.keepsakeLog, "sprint_boots").band;
+              kst.appendKeepsakeFact({ itemId: "sprint_boots", kind: "battle-won-with" });
+              const after = keepsakeBand(useGameStore.getState().keepsakeLog, "sprint_boots");
+              if (after.band !== before) newLog.push(`The Sprint Boots feel different now. ${after.word}`);
+            }
           }
           setDex(d => ({ ...d, [enemyMon.id]: d[enemyMon.id] === "caught" ? "caught" : "seen" }));
           // Payoff (lib/battlePayoff.ts): the source EXP sequence

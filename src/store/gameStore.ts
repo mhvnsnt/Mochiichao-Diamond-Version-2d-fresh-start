@@ -7,6 +7,7 @@ import type { GuardianAssignment } from '../lib/monster-tamer-systems';
 import type { DeedEntry } from '../lib/honor';
 import { emptyLivingWorldState } from '../lib/livingWorld';
 import type { LivingWorldState } from '../lib/livingWorld';
+import type { KeepsakeFact } from '../lib/itemMeaning';
 import { GameSettings, DEFAULT_SETTINGS, loadStoredSettings, persistSettings } from '../lib/gameSettings';
 import { deriveRangerMaxHp, applyRangerDamage, applyRangerHeal, applyRangerFullHeal } from '../lib/rangerDefense';
 import { setAutosaveHold, getAutosaveHold } from '../lib/saveSystem';
@@ -113,6 +114,19 @@ interface GameState {
   damageRanger: (amount: number) => { hp: number; dealt: number; downedNow: boolean };
   healRangerBy: (amount: number) => void;
   healRangerFull: () => void;
+  // Item meaning (item-meaning lane S-IM1): FACTS ONLY, the same
+  // derived-reads discipline as the deed ledger. identifiedItems
+  // lists item ids the appraisal service has named for this
+  // Ranger — what an item IS lives in its record
+  // (src/lib/itemMeaning.ts), never here. keepsakeLog is
+  // append-only: a keepsake's depth is derived from it at read
+  // (keepsakeBand), never stored as a number. Old saves carry
+  // neither field and load with the empty defaults through
+  // loadState's spread.
+  identifiedItems: string[];
+  identifyItem: (itemId: string) => void;
+  keepsakeLog: KeepsakeFact[];
+  appendKeepsakeFact: (fact: Omit<KeepsakeFact, 'seq'>) => void;
 
   // Overworld state
   currentMap: string;
@@ -291,6 +305,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   setLivingWorld: (state) => set({ livingWorld: state }),
   techniqueFlags: {},
   setTechniqueFlag: (flag, held) => set(s => ({ techniqueFlags: { ...s.techniqueFlags, [flag]: held } })),
+  identifiedItems: [],
+  identifyItem: (itemId) => set(s => ({
+    identifiedItems: s.identifiedItems.includes(itemId) ? s.identifiedItems : [...s.identifiedItems, itemId]
+  })),
+  keepsakeLog: [],
+  appendKeepsakeFact: (fact) => set(s => ({
+    keepsakeLog: [...s.keepsakeLog, { ...fact, seq: s.keepsakeLog.length + 1 }]
+  })),
   currentMap: 'sector0',
   playerPos: { x: 21, y: 14 },
   hasSprintBoots: false,

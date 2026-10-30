@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { DATA_CARD_ID } from '../../lib/monster-tamer-systems';
+import { displayFor, recordFor, isIdentified, keepsakeDesc } from '../../lib/itemMeaning';
 import { ITEM_ICONS } from '../../lib/uiArt';
 import { MenuHelpLine } from '../game/MenuList';
 import { useMenuLayout } from '../../lib/menuLayoutLive';
@@ -40,6 +41,15 @@ function ItemIcon({ id }: { id: string }) {
 export default function BagView({ onBack }: { onBack: () => void }) {
   const inventory = useGameStore(s => s.inventory);
   const useItem = useGameStore(s => s.useItem);
+  // Item meaning S-IM1: the bag reads the item REGISTRY
+  // (src/lib/itemMeaning.ts) — an unidentified find shows its
+  // unknown face, an identified one shows its true description
+  // with provenance folded in, and Mom's Sprint Boots appear as
+  // the key-item keepsake they always were (display row; the
+  // boots live in the hasSprintBoots flag, not the inventory).
+  const identifiedItems = useGameStore(s => s.identifiedItems);
+  const keepsakeLog = useGameStore(s => s.keepsakeLog);
+  const hasSprintBoots = useGameStore(s => s.hasSprintBoots);
   const party = useGameStore(s => s.party);
   const updatePartyMember = useGameStore(s => s.updatePartyMember);
   // Ranger companion health (ranger-defense package): the Ranger is
@@ -82,8 +92,28 @@ export default function BagView({ onBack }: { onBack: () => void }) {
 
   const entries = Object.entries(inventory)
     .filter(([, count]) => count > 0)
-    .map(([id, count]) => ({ id, count, ...(ITEM_DETAILS[id] || { name: id, desc: 'An item from your bag.', pocket: 'Other' }) }))
-    .sort((a, b) => a.pocket.localeCompare(b.pocket) || a.name.localeCompare(b.name));
+    .map(([id, count]) => {
+      const disp = displayFor(id, identifiedItems);
+      const base = ITEM_DETAILS[id] || { name: id, desc: 'An item from your bag.', pocket: 'Other' };
+      return {
+        id, count,
+        name: disp?.name ?? base.name,
+        desc: disp?.desc ?? base.desc,
+        pocket: disp?.pocket ?? base.pocket,
+        identified: isIdentified(id, identifiedItems),
+        unique: !!recordFor(id)?.meaning?.unique,
+        virtual: false,
+      };
+    });
+  if (hasSprintBoots) {
+    const boots = recordFor('sprint_boots');
+    if (boots) entries.push({
+      id: 'sprint_boots', count: 1, name: boots.displayName,
+      desc: keepsakeDesc(boots, keepsakeLog), pocket: boots.pocket,
+      identified: true, unique: false, virtual: true,
+    });
+  }
+  entries.sort((a, b) => a.pocket.localeCompare(b.pocket) || a.name.localeCompare(b.name));
   const current = entries[Math.min(selected, Math.max(0, entries.length - 1))];
   const pockets = [...new Set(entries.map(e => e.pocket))];
 
@@ -201,6 +231,19 @@ export default function BagView({ onBack }: { onBack: () => void }) {
               <div className="flex flex-wrap gap-2 mt-3">
                 <button
                   onClick={() => {
+                    // Item meaning S-IM1 guards: a keepsake row is
+                    // for looking at, not using up; an unidentified
+                    // find can't be used — you don't know what it
+                    // is yet, and the bag says where to learn.
+                    if (current.virtual) {
+                      const boots = recordFor('sprint_boots');
+                      if (boots) setMessage(keepsakeDesc(boots, keepsakeLog));
+                      return;
+                    }
+                    if (!current.identified) {
+                      setMessage("You can't tell what it is yet. Prof. Aeon's Lab in Boot Harbor could say.");
+                      return;
+                    }
                     // v5.2: Mend Patch actually restores 50 HP (its
                     // existing description) to the first party member
                     // that is damaged but not fainted, clamped to
@@ -240,7 +283,18 @@ export default function BagView({ onBack }: { onBack: () => void }) {
                   Use
                 </button>
                 <button className="game-button px-3 py-2 text-sm min-h-[48px] opacity-60" disabled>Give</button>
-                <button onClick={() => { playCue('ui.confirm'); setConfirmToss(true); }} className="game-button px-3 py-2 text-sm min-h-[48px]">Toss</button>
+                <button onClick={() => {
+                  playCue('ui.confirm');
+                  // Item meaning S-IM1: key-item discipline —
+                  // uniques, keepsakes, and unidentified finds are
+                  // not tossable. A question is not rubbish, and a
+                  // one-of-one is not either.
+                  if (current.virtual || current.unique || !current.identified) {
+                    setMessage("That one's not something you throw away.");
+                    return;
+                  }
+                  setConfirmToss(true);
+                }} className="game-button px-3 py-2 text-sm min-h-[48px]">Toss</button>
                 <button onClick={() => { playCue('ui.cancel'); onBack(); }} className="game-button px-3 py-2 text-sm min-h-[48px]">Quit</button>
               </div>
               <p className="text-xs text-slate-400 mt-2">Mend Patch restores 50 HP to a party member you choose.</p>

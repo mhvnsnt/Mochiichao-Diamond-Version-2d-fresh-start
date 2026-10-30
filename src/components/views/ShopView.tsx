@@ -8,6 +8,7 @@ import { useMenuLayout, cssAlignment } from '../../lib/menuLayoutLive';
 import { sellPrice } from '../../lib/playableWiring';
 import { shopBuyPrice } from '../../lib/shopPricing';
 import { applyMusic } from '../../lib/musicPlacement';
+import { recordFor, displayFor, isIdentified } from '../../lib/itemMeaning';
 
 /**
  * Shop, v2 structure (shop.c, structure/rules only, no Pokemon code,
@@ -86,9 +87,26 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
     setCanDown(el.scrollTop + el.clientHeight < el.scrollHeight - 1);
   };
 
-  const sellable = SHOP_ITEMS
-    .map(item => ({ ...item, count: inventory[item.id] || 0, sellPrice: sellPrice(item.cost, 1) }))
-    .filter(item => item.count > 0);
+  // Item meaning S-IM1: the sell list also reads the item
+  // REGISTRY — an identified item with a registry sell price (the
+  // Scrap Core is the first) can be sold even though the Kiosk
+  // never stocks it. Unidentified finds cannot be sold: a
+  // question is not currency.
+  const identifiedItems = useGameStore(s => s.identifiedItems);
+  const registrySellable = Object.entries(inventory)
+    .filter(([id, count]) => count > 0 && !SHOP_ITEMS.some(i => i.id === id))
+    .flatMap(([id, count]) => {
+      const rec = recordFor(id);
+      if (!rec || rec.price.sell == null || !isIdentified(id, identifiedItems)) return [];
+      const disp = displayFor(id, identifiedItems);
+      return [{ id, name: disp?.name ?? rec.displayName, cost: rec.price.buy ?? 0, desc: disp?.desc ?? rec.desc, count, sellPrice: rec.price.sell }];
+    });
+  const sellable = [
+    ...SHOP_ITEMS
+      .map(item => ({ ...item, count: inventory[item.id] || 0, sellPrice: sellPrice(item.cost, 1) }))
+      .filter(item => item.count > 0),
+    ...registrySellable,
+  ];
   const buySelected = SHOP_ITEMS[Math.min(selected, SHOP_ITEMS.length - 1)];
   const sellSelected = sellable[Math.min(selected, Math.max(0, sellable.length - 1))];
 
