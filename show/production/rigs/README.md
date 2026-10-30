@@ -69,11 +69,28 @@ rules:
   **SHARED/hands** library, overlap skirts), and the compositing
   glue gate (§4). Where this README's v1 summary and the spec
   differ in detail, the spec governs.
+- **Harmony + settei addendum (CURRENT extension):**
+  `HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md` in this folder —
+  the donor-hunt kit landed via PR #34 (2026-10-30) and wired
+  the same day. It extends this standard with: the Harmony
+  node-graph construction profile (master peg, region
+  composites, curve deformers, cutter pairs, the measured
+  hero-vs-standard budgets), angle-coded substitution charts
+  (F/3Q/P/PQB heads/eyes, 44-48-drawing mouths, hero hand
+  charts of 105/107), the .plt palette discipline (LINKed
+  single source, `rig`/`Cutter` functional colours), the
+  settei five-section model-pack completeness standard, and
+  the design & cleanup rules (universal line weight,
+  body-under-clothes construction, mouth discipline). Where
+  the base spec and the addendum differ in detail, the
+  addendum governs for Harmony-profile work.
 - **Implemented in code:** BlairWitch (`mhvnsnt/BlairWitch`, the
   owner's rig/sheet/puppet creator — canonical home there, per
   the no-fork law) emits and validates this standard: palette
   engine, sheet generator, rig scaffold, puppet packages and the
-  extended validator (PR #1). New sheets, palettes and
+  extended validator (PR #1); v0.4.0 (PR #2) adds the Harmony
+  construction profile, the settei model-pack standard, and
+  the cleanup-rule checks from the addendum. New sheets, palettes and
   puppets are produced with that tool, not hand-formatted.
 - **Cast artifacts (CURRENT, registered 2026-10-30):** the
   build-out the spec's §6 gap list called for has landed
@@ -87,6 +104,12 @@ rules:
   (model-sheet format, palette format, puppet construction,
   compositing glue), measured from real production files; see the
   standard bullet above.
+- `HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md` — **the CURRENT
+  extension of the standard** (Harmony rig kit + settei /
+  design-rules kit), measured from the production templates
+  recovered by the 2026-10-30 donor hunt; see the addendum
+  bullet above. Implemented in code by BlairWitch v0.4.0
+  (PR #2).
 - `DONOR-PROVENANCE-2026-10-29.md` — per-source provenance for the
   spec: repo/release/file, verified sizes and sha256, licence
   buckets, located-not-fetched items, named gaps.

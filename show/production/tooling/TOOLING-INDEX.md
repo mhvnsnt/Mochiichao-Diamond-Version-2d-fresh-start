@@ -99,7 +99,12 @@ height charts, the §3 puppet construction (root stack,
 four-piece masked eyes, mouth frame-chart, view-code part
 naming, part library files, SHARED hands), the CC-BY open-movie
 constraints module, and validators for palette format, part
-naming and the hands-library reference. Canonical home is its
+naming and the hands-library reference. As of v0.4.0 (PR #2)
+it also implements the Harmony + settei addendum (this repo's
+PR #34): the Harmony construction profile (node scaffold,
+substitution charts, linked .plt palettes), the settei
+five-section model-pack standard, and the design & cleanup
+rule checks. Canonical home is its
 own repo (no-fork law); show production calls it from there.
 
 ## Class B — Convention / spec documents (carried in as native specs)
@@ -114,6 +119,7 @@ own repo (no-fork law); show production calls it from there.
 | Model-pack completeness (8-sheet) + mouth QC | rig-mapping/shows/knd-model-pack.md | model-sheet template (TEMPLATES.md) |
 | Palette enforcement as a system | cape-jones `palette-enforce.py` + docs | PIPELINE.md finish stage |
 | Rig-and-sheet standard (model-sheet format §1, CMYK palette format §2, puppet construction §3, compositing glue §4) | donor-measured extraction 2026-10-29 (per-source record: `show/production/rigs/DONOR-PROVENANCE-2026-10-29.md`) | `show/production/rigs/RIG-AND-SHEET-SPEC.md` — **CURRENT standard** (PR #145); implemented in code by BlairWitch v0.3.0 (PR #1); cast build-out landed as CURRENT artifacts (PR #35) — registered in `show/production/rigs/README.md` and the cast-artifacts section below |
+| Harmony + settei addendum (Harmony node-graph construction, angle-coded substitution charts, .plt palette discipline; settei five-section pack standard; design & cleanup rules) | donor hunt 2026-10-30 — Harmony measurements from the production templates in the owner's own releases; settei standard from a published design-works book; cleanup rules from the recovered rulebook (record: `show/production/rigs/HARMONY-AND-SETTEI-ADDENDUM-2026-10-30.md`) | same file — **CURRENT extension of the rig-and-sheet standard** (PR #34); implemented in code by BlairWitch v0.4.0 (PR #2) |
 | Persona 5 UI principles (CEDEC 2017) | research report | `show/production/research/persona-5-ui-principles.md` |
 | Manifest/catalog formats | TRIPPEDD sources manifests; cape-jones example_manifest.json | `show/shared/` manifests (SHOW-HOME plan) |
 
