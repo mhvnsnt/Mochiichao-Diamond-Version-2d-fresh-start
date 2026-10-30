@@ -193,3 +193,74 @@ describe("worldBattleHit (S6 step 2: accuracy + multi-hit)", () => {
     expect(r.totalDamage).toBe(5);
   });
 });
+
+describe("worldBattleHit (S6 step 3: secondary status infliction)", () => {
+  // Flat attackers via the type fallback (no species row needed):
+  // FIRE / POISON / ELECTRIC elements, so each move below gets STAB.
+  const FIRE_FLAT = { level: 5, atk: 10, def: 10, spd: 10, type: "Fire" };
+  const POISON_FLAT = { level: 5, atk: 10, def: 10, spd: 10, type: "Poison" };
+  const ELECTRIC_FLAT = { level: 5, atk: 10, def: 10, spd: 10, type: "Electric" };
+  // Sequence rng: [accuracy roll, damage roll, status roll]. Damage
+  // math for the 40-power cases: (4*40*10)/10 = 160 -> /50 = 3 ->
+  // +2 = 5 -> STAB 7 -> roll 92% = 6 (same shape as the step-2
+  // Leaf Blast note, where 55 power gives base 4 -> 8).
+  const seqRng = (seq: number[]) => {
+    let i = 0;
+    return () => seq[i++] ?? 0.5;
+  };
+
+  it("EMBER_TOSS burn applies on status roll 5 (< 10): damage 6, status burn", () => {
+    const r = worldBattleHit(FIRE_FLAT, GRASS_FLAT,
+      { power: 40, type: "Fire", moveId: "EMBER_TOSS" },
+      { rng: seqRng([0.5, 0.5, 0.05]), forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.damages).toEqual([6]);
+    expect(r.statusApplied).toBe("burn");
+  });
+  it("EMBER_TOSS burn fails on status roll 50 (not < 10): damage 6, no status", () => {
+    const r = worldBattleHit(FIRE_FLAT, GRASS_FLAT,
+      { power: 40, type: "Fire", moveId: "EMBER_TOSS" },
+      { rng: seqRng([0.5, 0.5, 0.5]), forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.damages).toEqual([6]);
+    expect(r.statusApplied).toBeNull();
+  });
+  it("an already-statused defender keeps its status: would-apply roll ignored", () => {
+    const r = worldBattleHit(FIRE_FLAT, { ...GRASS_FLAT, status: "poison" },
+      { power: 40, type: "Fire", moveId: "EMBER_TOSS" },
+      { rng: seqRng([0.5, 0.5, 0.05]), forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.damages).toEqual([6]);
+    expect(r.statusApplied).toBeNull();
+  });
+  it("a miss rolls no status: INFERNO_WAVE acc 85, roll 100 misses, status null", () => {
+    const r = worldBattleHit(FIRE_FLAT, GRASS_FLAT,
+      { power: 110, type: "Fire", moveId: "INFERNO_WAVE" },
+      { rng: () => 0.99, forceCrit: false });
+    expect(r.hit).toBe(false);
+    expect(r.hits).toBe(0);
+    expect(r.statusApplied).toBeNull();
+  });
+  it("POISON_JAB poisons on roll 15 (< 20): base 6 -> +2 = 8 -> STAB 12 -> roll 92% = 11", () => {
+    const r = worldBattleHit(POISON_FLAT, GRASS_FLAT,
+      { power: 80, type: "Poison", moveId: "POISON_JAB" },
+      { rng: seqRng([0.5, 0.5, 0.15]), forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.damages).toEqual([11]);
+    expect(r.statusApplied).toBe("poison");
+  });
+  it("SPARK_SHOT paralyzes on roll 5 (< 10): damage 6, status paralysis", () => {
+    const r = worldBattleHit(ELECTRIC_FLAT, GRASS_FLAT,
+      { power: 40, type: "Electric", moveId: "SPARK_SHOT" },
+      { rng: seqRng([0.5, 0.5, 0.05]), forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.damages).toEqual([6]);
+    expect(r.statusApplied).toBe("paralysis");
+  });
+  it("a burned Physical attacker halves in the core: TACKLE base 3 -> halved 1 -> +2 = 3 -> STAB 4 -> roll 92% = 3", () => {
+    const r = worldBattleDamage({ ...WATER_FLAT, status: "burn" }, GRASS_FLAT,
+      { power: 40, type: "Water", moveId: "TACKLE" },
+      { rng: ROLL_92, forceCrit: false });
+    expect(r.damage).toBe(3);
+  });
+});
