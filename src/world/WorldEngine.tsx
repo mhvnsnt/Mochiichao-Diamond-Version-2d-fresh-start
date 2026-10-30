@@ -2137,8 +2137,19 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     if (enemyBattleResult && !enemyBattleResult.hit) newLog.push(`But it missed!`);
     if (dmg > 0) { playCue('battle.hit'); if (enemyBattleResult?.isCrit) newLog.push(`A critical hit!`); if (enemyBattleResult && enemyBattleResult.hits > 1) newLog.push(`Hit ${enemyBattleResult.hits} times!`); newLog.push(`${battleMonName(bs.player)} took ${dmg} damage!`); }
 
+    // Gap-fill S6 step 3: secondary status on the player. The defend
+    // intercept above already returned, so an intercepted hit never
+    // inflicts a status here; a fainting hit never stores one either
+    // (newHp 0 -> null), and the hostile-human lunge has no
+    // worldBattleHit result, so it inflicts nothing. The status
+    // rides the battle copy AND the store copy below, so it survives
+    // a voluntary switch and persists after the battle until a
+    // healer clears it (gameStore healParty already clears status).
+    const enemyStatusApplied = enemyBattleResult?.statusApplied && newHp > 0 ? enemyBattleResult.statusApplied : null;
+    if (enemyStatusApplied) newLog.push(`${battleMonName(bs.player)} was ${enemyStatusApplied === "paralysis" ? "paralyzed" : enemyStatusApplied === "burn" ? "burned" : "poisoned"}!`);
+
     // v5.1 HP sync: battle copy keeps hp and currentHp together.
-    const updatedPlayer = { ...bs.player, currentHp: newHp, hp: newHp };
+    const updatedPlayer = { ...bs.player, currentHp: newHp, hp: newHp, ...(enemyStatusApplied ? { status: enemyStatusApplied } : {}) };
 
     if (newHp <= 0) {
       playCue('battle.faint');
@@ -2195,7 +2206,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       const updatedTeam = [...freshTeam];
       // v5.1 HP sync: write BOTH fields, or Team (hp) and the
       // next battle (currentHp) disagree — the v5 discrepancy.
-      updatedTeam[bs.playerTeamIdx] = { ...updatedTeam[bs.playerTeamIdx], currentHp: newHp, hp: newHp };
+      updatedTeam[bs.playerTeamIdx] = { ...updatedTeam[bs.playerTeamIdx], currentHp: newHp, hp: newHp, ...(enemyStatusApplied ? { status: enemyStatusApplied } : {}) };
       setPlayerTeam(updatedTeam);
     }
   };
@@ -2378,6 +2389,17 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       if (!playerBattleResult.hit) newLog.push(`But it missed!`);
       if (dmg > 0) { playCue('battle.hit'); if (playerBattleResult.isCrit) newLog.push(`A critical hit!`); if (playerBattleResult.hits > 1) newLog.push(`Hit ${playerBattleResult.hits} times!`); newLog.push(`Dealt ${dmg} damage!`); }
 
+      // Gap-fill S6 step 3: secondary status on the foe. Only on a
+      // standing foe (a fainting hit drops the status — the faint
+      // branches below never see it, so no status is ever stored on
+      // a fainted mon). The statused foe copy in the non-faint
+      // branch below is the one the enemy turn receives, so the
+      // status is live for the foe's next hit (a burn halves its
+      // Physical damage through battle-math) — the core already
+      // reads attacker status, so no second wiring is needed.
+      const playerStatusApplied = playerBattleResult.statusApplied && newHp > 0 ? playerBattleResult.statusApplied : null;
+      if (playerStatusApplied) newLog.push(`${battleMonName(enemyMon)} was ${playerStatusApplied === "paralysis" ? "paralyzed" : playerStatusApplied === "burn" ? "burned" : "poisoned"}!`);
+
       if (newHp <= 0) {
         playCue('battle.faint');
         newLog.push(`${enemyMon.name} fainted!`);
@@ -2516,11 +2538,12 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         }
       } else {
         if (bs.type === "wild") {
-          setBattleState({ ...bs, wild: { ...bs.wild, currentHp: newHp }, log: newLog, phase: "enemy_turn" });
-          setTimeout(() => doEnemyTurn({ ...bs, wild: { ...bs.wild, currentHp: newHp }, log: newLog }), Math.max(1200, animMs));
+          const statusedWild = { ...bs.wild, currentHp: newHp, ...(playerStatusApplied ? { status: playerStatusApplied } : {}) };
+          setBattleState({ ...bs, wild: statusedWild, log: newLog, phase: "enemy_turn" });
+          setTimeout(() => doEnemyTurn({ ...bs, wild: statusedWild, log: newLog }), Math.max(1200, animMs));
         } else {
           const newTeam = [...bs.trainerTeam];
-          newTeam[bs.trainerTeamIdx] = { ...enemyMon, currentHp: newHp };
+          newTeam[bs.trainerTeamIdx] = { ...enemyMon, currentHp: newHp, ...(playerStatusApplied ? { status: playerStatusApplied } : {}) };
           setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "enemy_turn" });
           setTimeout(() => doEnemyTurn({ ...bs, trainerTeam: newTeam, log: newLog }), Math.max(1200, animMs));
         }

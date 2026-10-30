@@ -18,7 +18,7 @@
  *   STAB (x1.5 when the move's element is one of the attacker's
  *   species elements), burn halving for Physical, and the 85–100
  *   damage roll.
- * - DONE in step 2 (this step): accuracy and multi-hit go through
+ * - DONE in step 2: accuracy and multi-hit go through
  *   battle-math too — one accuracy roll per move (stage-adjusted
  *   threshold from the attacker's acc stage and the defender's eva
  *   stage; a move's MOVES_DB accuracy, or 100 for a GameData-island
@@ -27,9 +27,29 @@
  *   moves flagged MULTI_HIT, with one damage roll per hit. A miss
  *   deals nothing and the host logs it; the host's turn flow is
  *   otherwise unchanged (a miss still hands the turn over).
- *   Status end-turn damage, PP write-back, and the evolution hook
- *   on the live path are SEPARATE S6 sub-steps and are NOT claimed
- *   here.
+ * - DONE in step 3 (this step): secondary status infliction, on the
+ *   same resolver rule the unreachable BattleView path already uses
+ *   (battleResolver applyEffectEvents, secondary = true): after the
+ *   damage rolls, on a hit, a MOVES_DB move whose effect is BURN /
+ *   POISON / PARALYSIS rolls its MOVES_DB effectChance once
+ *   (battle-math rollSecondaryEffect); on success the result
+ *   carries statusApplied ("burn" / "poison" / "paralysis") and the
+ *   host writes it onto the target — but only when the target is
+ *   still standing (the host gates on post-damage HP > 0) and only
+ *   when the target has no status already (an existing status is
+ *   never overwritten). A miss rolls nothing. What infliction does
+ *   mechanically TODAY: burn halves the victim's Physical damage
+ *   on its next turns, because worldBattleDamage already routes
+ *   attacker status through battle-math's burn rule — so a burn
+ *   landed here matters from the very next hit. Paralysis and
+ *   poison are stored, logged, and cleared by a healer (gameStore
+ *   healParty already clears status), but their turn effects are
+ *   NOT yet live: the paralysis can-act gate (checkCanAct) and the
+ *   poison/burn end-turn tick (endTurnStatusDamage) are SEPARATE
+ *   S6 sub-steps and are NOT claimed here — a poisoned foe takes
+ *   no tick damage yet, and a paralyzed foe is never stopped from
+ *   acting yet. PP write-back and the evolution hook on the live
+ *   path are likewise still open.
  * - TYPE CHART, NOT WIRED HERE: calculateDamage takes its type
  *   multipliers from the caller, and this module passes NEUTRAL (1)
  *   for every defending element. That is a placeholder, not a canon
@@ -62,6 +82,7 @@ import {
   calculateDamage,
   rollAccuracy,
   rollMultiHitCount,
+  rollSecondaryEffect,
   type BattlerInput,
   type DamageResult,
   type MoveCategory,
@@ -220,12 +241,35 @@ export type WorldBattleHitResult = {
   accuracy: number;
   /** Per-hit battle-math results, in hit order. */
   results: DamageResult[];
+  /**
+   * Step 3: the status the secondary roll inflicted ("burn" /
+   * "poison" / "paralysis"), or null. The host applies it only when
+   * the target is still standing (post-damage HP > 0); the core
+   * itself never overwrites an existing status (see worldBattleHit).
+   */
+  statusApplied: string | null;
+};
+
+/**
+ * Step 3: MOVES_DB secondary-status effect -> the battle-math status
+ * string the host stores on the target. Only the three damaging-move
+ * secondaries exist on main (BURN / POISON / PARALYSIS, all with a
+ * power > 0); every other effect maps to null and rolls nothing.
+ * The strings match battle-math ("paralysis", not "paralyzed") and
+ * battleResolver's status vocabulary exactly.
+ */
+const STATUS_EFFECTS: Record<string, string> = {
+  BURN: "burn",
+  POISON: "poison",
+  PARALYSIS: "paralysis",
 };
 
 /**
  * The converged hit roll for one WorldEngine battle move: one
  * accuracy roll, then (on a hit) one damage roll per hit — 1 hit
- * normally, 2–5 for a MOVES_DB move flagged MULTI_HIT. Accuracy is
+ * normally, 2–5 for a MOVES_DB move flagged MULTI_HIT — then (step 3)
+ * one secondary-status roll for BURN / POISON / PARALYSIS moves.
+ * Accuracy is
  * stage-adjusted (attacker's acc stage vs defender's eva stage) via
  * battle-math; the accuracy value is the move's MOVES_DB acc, or 100
  * for a GameData-island move (no row, so no accuracy to miss on —
@@ -269,6 +313,7 @@ export function worldBattleHit(
       isMultiHit,
       accuracy,
       results: [],
+      statusApplied: null,
     };
   }
   const count = isMultiHit ? rollMultiHitCount(rng) : 1;
@@ -277,6 +322,20 @@ export function worldBattleHit(
     results.push(worldBattleDamage(attacker, defender, move, opts));
   }
   const damages = results.map((r) => r.damage);
+  // Step 3: one secondary-status roll, after the damage rolls (the
+  // resolver's order), and only for a damaging move. A target that
+  // already carries a status keeps it — no overwrite, no re-roll.
+  // The host still gates on the target standing (HP > 0 after the
+  // damage is subtracted); the core cannot know that HP yet, so a
+  // statusApplied on a fainting hit is returned and then dropped
+  // by the host, never stored on a fainted mon.
+  let statusApplied: string | null = null;
+  const statusName = move.power > 0 ? STATUS_EFFECTS[db?.effect as string] : undefined;
+  if (statusName && !defenderInput.status) {
+    statusApplied = rollSecondaryEffect(db?.effectChance ?? 0, rng)
+      ? statusName
+      : null;
+  }
   return {
     hit: true,
     hits: count,
@@ -286,5 +345,6 @@ export function worldBattleHit(
     isMultiHit,
     accuracy,
     results,
+    statusApplied,
   };
 }
