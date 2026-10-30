@@ -1,0 +1,28 @@
+domClick slot -> SLOT 1
+IN WORLD: true
+SHOT flip-1 (GEN5 3D)
+PAUSED: true
+domClick quit -> Quit to Title
+MAIN MENU: true | ►CONTINUE Player: JAMAR · Caught: 0 · Team: 0 · CR: 1000 Map: sector0 · Saved: 10/30/2026, 3:45:43 PM NEW GAME SETTINGS 
+domClick settings-panel -> SETTINGS
+SETTINGS VISIBLE: true
+cycle -1 -> clicked
+persisted visualStyle = GEN5
+domClick settings-back -> SAVE + BACK TO MAIN MENU
+domClick continue -> NOT FOUND
+domClick slot -> SLOT 1
+IN WORLD: true
+SHOT flip-2-gen4-2d.png
+PAUSED: true
+domClick quit -> Quit to Title
+MAIN MENU: true | ►CONTINUE Player: JAMAR · Caught: 0 · Team: 0 · CR: 1000 Map: sector0 · Saved: 10/30/2026, 3:45:43 PM NEW GAME SETTINGS 
+domClick settings-panel -> SETTINGS
+SETTINGS VISIBLE: true
+cycle 1 -> clicked
+persisted visualStyle = GEN5
+domClick settings-back -> BACK TO TITLE (B)
+domClick continue -> NOT FOUND
+domClick slot -> SLOT 1
+IN WORLD: true
+SHOT flip-3-gen5-3d.png
+FLIP DONE

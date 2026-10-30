@@ -1,0 +1,30 @@
+click slot -> SLOT 1
+IN WORLD: true
+SHOT flip-1 (GEN5 3D)
+click hud-menu -> Menu
+click quit -> Quit to Title
+MAIN MENU: false | MAINFRAME GARDENS Close No partner yet. Garden records start once you have a Mochiichao. MochiiMind
+click settings-panel -> NOT FOUND
+SETTINGS VISIBLE: false
+cycle -1 -> no-label
+row shows: null | persisted visualStyle = GEN5
+click settings-back -> NOT FOUND
+BACK AT MENU: false
+click continue -> NOT FOUND
+click slot -> NOT FOUND
+IN WORLD: false
+SHOT flip-2 (GEN4 2D)
+click hud-menu -> NOT FOUND
+click quit -> NOT FOUND
+MAIN MENU: false | MAINFRAME GARDENS Close No partner yet. Garden records start once you have a Mochiichao. MochiiMind
+click settings-panel -> NOT FOUND
+SETTINGS VISIBLE: false
+cycle 1 -> no-label
+row shows: null | persisted visualStyle = GEN5
+click settings-back -> NOT FOUND
+BACK AT MENU: false
+click continue -> NOT FOUND
+click slot -> NOT FOUND
+IN WORLD: false
+SHOT flip-3 (GEN5 3D again)
+FLIP DONE

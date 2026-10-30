@@ -1,0 +1,65 @@
+127.0.0.1 - - [30/Oct/2026 15:26:46] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:26:52] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:26:52] "GET /assets/index-Bll-aFpU.js HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:26:52] "GET /assets/index-CjynPROs.css HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:26:54] "GET /assets/m-heavensent-studios-logo-b2ZtfZzQ.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:26:54] "GET /assets/yagiza-D6d9Cl_X.woff HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:26:54] "GET /audio/mochiichao-boot-ui-art-option-b-rising-arpeggio.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:26:57] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:26:58] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:26:59] "GET /assets/index-Bll-aFpU.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:26:59] "GET /assets/index-CjynPROs.css HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:00] "GET /assets/m-heavensent-studios-logo-b2ZtfZzQ.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:02] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:06] "GET /assets/mochiichao-main-logo-BVWmfoDA.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:07] "GET /audio/mochiichao-boot-M3-mochii-chirp.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:07] "GET /audio/mochiichao-title-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:08] "GET /assets/mochii-walk-cutout-6A6R1SJz.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:08] "GET /assets/mochiichao-main-logo-v32-orbitfix-20261026-BJtZN4AJ.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:09] "GET /assets/aeon-atlas-core100-2026-10-26-CNtM9i7v.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:09] "GET /assets/01-digitall-DzaQozxN.ttf HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:18] "GET /assets/player-a-atlas-64x64-CDvwNbT0.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:18] "GET /assets/player-boy-atlas-v5-2026-10-29-BgHUjO2z.png HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:21] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 40588)
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/socketserver.py", line 692, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.12/http/server.py", line 1311, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+  File "/usr/lib/python3.12/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.12/socketserver.py", line 761, in __init__
+    self.handle()
+  File "/usr/lib/python3.12/http/server.py", line 436, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.12/http/server.py", line 424, in handle_one_request
+    method()
+  File "/usr/lib/python3.12/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+  File "/usr/lib/python3.12/http/server.py", line 878, in copyfile
+    shutil.copyfileobj(source, outputfile)
+  File "/usr/lib/python3.12/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
+127.0.0.1 - - [30/Oct/2026 15:27:45] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:45] "GET /assets/index-CjynPROs.css HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:45] "GET /assets/index-Bll-aFpU.js HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:46] "GET /assets/m-heavensent-studios-logo-b2ZtfZzQ.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:46] "GET /assets/yagiza-D6d9Cl_X.woff HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:46] "GET /audio/mochiichao-boot-ui-art-option-b-rising-arpeggio.wav HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:49] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:53] "GET /assets/mochiichao-main-logo-BVWmfoDA.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:53] "GET /audio/mochiichao-boot-M3-mochii-chirp.wav HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:53] "GET /audio/mochiichao-title-v3.wav HTTP/1.1" 200 -
+127.0.0.1 - - [30/Oct/2026 15:27:54] "GET /assets/mochiichao-main-logo-v32-orbitfix-20261026-BJtZN4AJ.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:54] "GET /assets/mochii-walk-cutout-6A6R1SJz.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:56] "GET /assets/01-digitall-DzaQozxN.ttf HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:27:56] "GET /assets/aeon-atlas-core100-2026-10-26-CNtM9i7v.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:28:04] "GET /assets/player-a-atlas-64x64-CDvwNbT0.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:28:04] "GET /assets/player-boy-atlas-v5-2026-10-29-BgHUjO2z.png HTTP/1.1" 304 -
+127.0.0.1 - - [30/Oct/2026 15:28:07] "GET /audio/mochiichao-intro-v3.wav HTTP/1.1" 200 -

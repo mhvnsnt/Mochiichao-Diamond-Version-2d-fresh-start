@@ -1,0 +1,22 @@
+click slot -> SLOT 1
+IN WORLD: true
+SHOT flip-1 (GEN5 3D)
+click menu -> Menu
+MENU STATE: Sector 0 — Boot Harbor 11:00 day No partner yet Goal: Visit Prof. Aeon's Lab (walk into the north building) 1000 CR Team Menu ✦ ♥ ★ ✦ PAUSED ► Team · Shop · Bag · PC Storage · Dex · Mainframe Gardens · Ring Capture · Arena Mode · Creature Mode · Cheat Console · Save Game · Load / Save Files · Quit to Title · Back to Game View and manage your team. ▲ ◄ ► ▼ B A MochiiMind
+click settings-item -> NOT FOUND
+SETTINGS VISIBLE: false
+SETTINGS STATE: Sector 0 — Boot Harbor 12:00 day No partner yet Goal: Visit Prof. Aeon's Lab (walk into the north building) 1000 CR Team Menu ✦ ♥ ★ ✦ PAUSED ► Team · Shop · Bag · PC Storage · Dex · Mainframe Gardens · Ring Capture · Arena Mode · Creature Mode · Cheat Console · Save Game · Load / Save Files · Quit to Title · Back to Game View and manage your team. ▲ ◄ ► ▼ B A MochiiMind
+cycle -1 -> no-label
+persisted visualStyle = GEN5
+BACK IN WORLD: true
+SHOT flip-2 (GEN4 2D)
+click menu -> Menu
+MENU STATE: Sector 0 — Boot Harbor 13:00 day No partner yet Goal: Visit Prof. Aeon's Lab (walk into the north building) 1000 CR Team Menu ✦ ♥ ★ ✦ PAUSED ► Team · Shop · Bag · PC Storage · Dex · Mainframe Gardens · Ring Capture · Arena Mode · Creature Mode · Cheat Console · Save Game · Load / Save Files · Quit to Title · Back to Game View and manage your team. ▲ ◄ ► ▼ B A MochiiMind
+click settings-item -> NOT FOUND
+SETTINGS VISIBLE: false
+SETTINGS STATE: Sector 0 — Boot Harbor 13:00 day No partner yet Goal: Visit Prof. Aeon's Lab (walk into the north building) 1000 CR Team Menu ✦ ♥ ★ ✦ PAUSED ► Team · Shop · Bag · PC Storage · Dex · Mainframe Gardens · Ring Capture · Arena Mode · Creature Mode · Cheat Console · Save Game · Load / Save Files · Quit to Title · Back to Game View and manage your team. ▲ ◄ ► ▼ B A MochiiMind
+cycle 1 -> no-label
+persisted visualStyle = GEN5
+BACK IN WORLD: true
+SHOT flip-3 (GEN5 3D again)
+FLIP DONE

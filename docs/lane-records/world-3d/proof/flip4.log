@@ -1,0 +1,30 @@
+domClick slot -> SLOT 1
+IN WORLD: true
+SHOT flip-1 (GEN5 3D)
+domClick quit -> Quit to Title
+domClick settings-panel -> SETTINGS
+SETTINGS VISIBLE: true
+row before: GEN 5 · BW2 FONT SETTINGS Yagiza / Pokemon Base (Default) / 
+row after ArrowLeft : GEN 1 FONT SETTINGS Yagiza / Pokemon Base (Default) / Pokemo
+domClick save-back -> SAVE + BACK TO MAIN MENU
+persisted visualStyle = GEN1
+domClick continue -> NOT FOUND
+domClick slot -> SLOT 1
+IN WORLD: true
+SHOT flip-2-gen4-2d.png
+domClick quit -> Quit to Title
+domClick settings-panel -> SETTINGS
+SETTINGS VISIBLE: true
+row before: GEN 1 FONT SETTINGS Yagiza / Pokemon Base (Default) / Pokemo
+row after ArrowRight : GEN 5 · BW2 FONT SETTINGS Yagiza / Pokemon Base (Default) / 
+domClick save-back -> SAVE + BACK TO MAIN MENU
+persisted visualStyle = GEN5
+domClick continue -> NOT FOUND
+domClick slot -> SLOT 1
+IN WORLD: true
+FAILED: TimeoutError: page.screenshot: Timeout 90000ms exceeded.
+Call log:
+  - taking page screenshot
+  - waiting for fonts to load...
+  - fonts loaded
+
