@@ -1,0 +1,352 @@
+{
+ "character": "sproutle",
+ "slots": {
+  "dominant": {
+   "hex": "#7fd6b3",
+   "rgb": [
+    127,
+    214,
+    179
+   ],
+   "cmyk_pct": [
+    41,
+    0,
+    16,
+    16
+   ],
+   "sampled_coverage_pct": 26.28,
+   "tints": {
+    "50%": {
+     "hex": "#bfead9",
+     "rgb": [
+      191,
+      234,
+      217
+     ],
+     "cmyk_pct": [
+      19,
+      0,
+      7,
+      8
+     ]
+    },
+    "75%": {
+     "hex": "#dff5ec",
+     "rgb": [
+      223,
+      245,
+      236
+     ],
+     "cmyk_pct": [
+      9,
+      0,
+      4,
+      4
+     ]
+    }
+   }
+  },
+  "support": {
+   "hex": "#409c88",
+   "rgb": [
+    64,
+    156,
+    136
+   ],
+   "cmyk_pct": [
+    59,
+    0,
+    13,
+    39
+   ],
+   "sampled_coverage_pct": 11.09,
+   "tints": {
+    "50%": {
+     "hex": "#a0cec4",
+     "rgb": [
+      160,
+      206,
+      196
+     ],
+     "cmyk_pct": [
+      22,
+      0,
+      5,
+      19
+     ]
+    },
+    "75%": {
+     "hex": "#cfe6e1",
+     "rgb": [
+      207,
+      230,
+      225
+     ],
+     "cmyk_pct": [
+      10,
+      0,
+      2,
+      10
+     ]
+    }
+   }
+  },
+  "accent": {
+   "hex": "#26e2d7",
+   "rgb": [
+    38,
+    226,
+    215
+   ],
+   "cmyk_pct": [
+    83,
+    0,
+    5,
+    11
+   ],
+   "sampled_coverage_pct": 8.69
+  },
+  "ink": {
+   "hex": "#0c170c",
+   "rgb": [
+    12,
+    23,
+    12
+   ],
+   "cmyk_pct": [
+    49,
+    0,
+    48,
+    91
+   ],
+   "sampled_coverage_pct": 6.96
+  }
+ },
+ "all_clusters": [
+  {
+   "hex": "#7fd6b3",
+   "rgb": [
+    127,
+    214,
+    179
+   ],
+   "cmyk_pct": [
+    41,
+    0,
+    16,
+    16
+   ],
+   "coverage_pct": 26.28,
+   "saturation": 0.407
+  },
+  {
+   "hex": "#409c88",
+   "rgb": [
+    64,
+    156,
+    136
+   ],
+   "cmyk_pct": [
+    59,
+    0,
+    13,
+    39
+   ],
+   "coverage_pct": 11.09,
+   "saturation": 0.592
+  },
+  {
+   "hex": "#5d6e40",
+   "rgb": [
+    93,
+    110,
+    64
+   ],
+   "cmyk_pct": [
+    16,
+    0,
+    42,
+    57
+   ],
+   "coverage_pct": 10.32,
+   "saturation": 0.415
+  },
+  {
+   "hex": "#26e2d7",
+   "rgb": [
+    38,
+    226,
+    215
+   ],
+   "cmyk_pct": [
+    83,
+    0,
+    5,
+    11
+   ],
+   "coverage_pct": 8.69,
+   "saturation": 0.83
+  },
+  {
+   "hex": "#0c170c",
+   "rgb": [
+    12,
+    23,
+    12
+   ],
+   "cmyk_pct": [
+    49,
+    0,
+    48,
+    91
+   ],
+   "coverage_pct": 6.96,
+   "saturation": 0.493
+  },
+  {
+   "hex": "#91dabb",
+   "rgb": [
+    145,
+    218,
+    187
+   ],
+   "cmyk_pct": [
+    33,
+    0,
+    14,
+    15
+   ],
+   "coverage_pct": 5.86,
+   "saturation": 0.335
+  },
+  {
+   "hex": "#2f4933",
+   "rgb": [
+    47,
+    73,
+    51
+   ],
+   "cmyk_pct": [
+    36,
+    0,
+    30,
+    71
+   ],
+   "coverage_pct": 5.57,
+   "saturation": 0.359
+  },
+  {
+   "hex": "#b8ece9",
+   "rgb": [
+    184,
+    236,
+    233
+   ],
+   "cmyk_pct": [
+    22,
+    0,
+    1,
+    7
+   ],
+   "coverage_pct": 4.39,
+   "saturation": 0.222
+  },
+  {
+   "hex": "#6cc2a8",
+   "rgb": [
+    108,
+    194,
+    168
+   ],
+   "cmyk_pct": [
+    44,
+    0,
+    13,
+    24
+   ],
+   "coverage_pct": 4.27,
+   "saturation": 0.444
+  },
+  {
+   "hex": "#1bb7b1",
+   "rgb": [
+    27,
+    183,
+    177
+   ],
+   "cmyk_pct": [
+    85,
+    0,
+    3,
+    28
+   ],
+   "coverage_pct": 3.77,
+   "saturation": 0.852
+  },
+  {
+   "hex": "#55af98",
+   "rgb": [
+    85,
+    175,
+    152
+   ],
+   "cmyk_pct": [
+    51,
+    0,
+    13,
+    31
+   ],
+   "coverage_pct": 3.71,
+   "saturation": 0.515
+  },
+  {
+   "hex": "#61efea",
+   "rgb": [
+    97,
+    239,
+    234
+   ],
+   "cmyk_pct": [
+    59,
+    0,
+    2,
+    6
+   ],
+   "coverage_pct": 3.35,
+   "saturation": 0.593
+  },
+  {
+   "hex": "#7f8a5b",
+   "rgb": [
+    127,
+    138,
+    91
+   ],
+   "cmyk_pct": [
+    8,
+    0,
+    34,
+    46
+   ],
+   "coverage_pct": 3.2,
+   "saturation": 0.338
+  },
+  {
+   "hex": "#127b7c",
+   "rgb": [
+    18,
+    123,
+    124
+   ],
+   "cmyk_pct": [
+    85,
+    1,
+    0,
+    51
+   ],
+   "coverage_pct": 2.53,
+   "saturation": 0.853
+  }
+ ],
+ "sampled_from": "show/production/canon-cutouts/sproutle.png (canon cutout, sampled 2026-10-30)"
+}

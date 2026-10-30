@@ -47,6 +47,88 @@ the owner's writing; it is never rewritten here — sequences are
 built FROM it. Canon gaps the files themselves flag (e.g. dojo
 leader NAME GAPs) stay flagged; they are the owner's calls.
 
+## Existential charge & the numinous — what a place IS (doctrine; owner-ruled 2026-10-28, logged 2026-10-29)
+
+**THE GAME BIBLE NOW EXISTS:** `GAME-BIBLE.md` (repo
+root), created on the owner's order (2026-10-29) precisely
+because there was none. Its Part I opens with this same
+doctrine — existential charge & the numinous — stated as
+the book's first law, and its Part II stacks the Show
+Bible whole (same coin; SHOW-BIBLE §5 law 10, the two-lane
+consistency law: one ruling, both lanes, same terms; the
+show-side charge entry is SHOW-BIBLE §5A). This tracker
+section is the build-rule summary the sequence work runs
+on; the bible is the doctrine's home.
+
+Every area a sequence builds is graded on what the place
+*is*, underneath what it contains: its **existential
+charge** (production term; **numinous** / numinosity = how
+the charge *feels*; *genius loci* = a place's own spirit).
+In-world language is plain only — blessed / haunted /
+cursed / lucky — and the production words appear in no UI
+string, sign, or Mochiioteca entry.
+
+- **States × strength:** BLESSED / LUCKY / HAUNTED / CURSED
+  / UNMARKED × faint / settled / deep / peak. **Base
+  charge is canon data** in the place's own record (#7
+  area records): set by the owner or by story, never
+  rewritten by any system. **Current charge is a
+  read-time derivation** — base drifted by story events
+  and accumulated in-place deeds, capped: drift deepens
+  or softens strength, **never flips a state**, and never
+  founds a settled or deep charge on unmarked ground. A
+  sequence never assigns a base charge the owner has not
+  ruled — unruled places build UNMARKED (owner slots
+  41–42 of the machinery package).
+- **Felt, never itemised — the build rule.** No meter,
+  tally, UI label, or readout of any charge, ever. Charge
+  effects are **fortune + presence only**: leans inside
+  the already-derived effective encounter table (never a
+  new row, rate, or species), finds and coincidence
+  texture, phenomena (never creatures, encounters, or
+  capture targets) — never damage, never a blocked path,
+  never a battle or capture resolution. Effects are
+  seeded (place + world beat + derivation version),
+  reproducible, never pure RNG. **Acceptance is the
+  owner's test, applied at the sequence smoke: the player
+  FEELS the magic coming out of the setting. A charge
+  that reads correctly in the data and is not felt in the
+  hands fails the sequence.**
+- **Presence-first + foreshadowing.** Presence is created
+  first — lighting, colour, scenery; a place's charge
+  read is recorded when its area is graded and built.
+  Identity is revealed only when earned. Charged
+  presentation may hint at **existence** (a shimmer, a
+  silhouette crossing a sky) — never at **access**: no
+  spawn row, no marked location, no door. Goddgachuu's
+  seal stands exactly as landed (PR #96); foreshadowing
+  is presentation, not obtainability.
+- **The Forest.** The most numinous ground in the world:
+  a dual read (deepest dread + the game's highest luck)
+  at peak. Base charge ONLY — no drift; deeds there feed
+  the DREAD tallies, never charge. Blessings arrive
+  through the DREAD §0a mediation: bent, unexplained,
+  never making it safe. **The depths spawn table stays
+  EMPTY (0 rows), and charge never touches it.** Charge
+  never explains what stopped moving.
+- **Legendary sites (the peak class).** Maximum charge
+  bound to a **one-time event** — an event, never a
+  spawn-table entry; spent sites keep their charge and
+  never re-arm. **Zero instances exist** (owner slot 48);
+  the Dark Forest is charge-extreme, NOT a legendary
+  site, unless the owner rules otherwise.
+- **Machinery + open items.** PLACE-CHARGE.md +
+  `fates-placecharge-fragment.json` (moral-choices
+  package — **not yet landed in this repo**; workspace
+  seat `~/workspace/mochiichao-show/moral-choices-
+  system/`; landing owed). Owner slots 41–48 —
+  assignments (41–42), drift caps/windows (43),
+  story-event flips/foundings (44), the world-memory
+  seam (45), the fortune menu + Forest luck ceiling
+  (46), phenomena seats (47), legendary sites + the peak
+  band's name (48) — are referenced, never filled by a
+  build lane.
+
 ---
 
 ## §0 — Phase 0 audit: what actually runs (2026-10-28, verified)

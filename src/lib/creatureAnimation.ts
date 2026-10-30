@@ -126,6 +126,10 @@ export const SPECIES_FOLDER: Record<string, string> = {
   "046": "yogiferno",
   "147": "dorowani",
   "148": "gabu",
+  // Back-sprite fix (2026-10-29): Gabu's canonical dex id is 150
+  // (species.json / species.ts); without this entry a mon carrying
+  // '150' resolved to no animation folder at all.
+  "150": "gabu",
   "331": "mythar",
 };
 

@@ -23,6 +23,7 @@
 import { describe, expect, it } from "vitest";
 import { MOVES_DB } from "./moves";
 import { MOCHIICHAO_MOVES_NEW } from "./generated/mochiichao_moves_catalogue";
+import { MOCHIICHAO_FULLPOOL_MOVES } from "./generated/fullpool_moves_catalogue";
 import { SPECIES_DB } from "./species";
 import type { Move } from "./types";
 
@@ -33,7 +34,8 @@ const BATCH2_COUNT = 84;
 describe("moves batch 2 live", () => {
   it("merges the full catalogue: 38 + 84 = 122 entries, none lost", () => {
     expect(Object.keys(CATALOGUE)).toHaveLength(BATCH2_COUNT);
-    expect(Object.keys(MOVES_DB)).toHaveLength(BASE_COUNT + BATCH2_COUNT);
+    // batch 3 (full move pool) has since merged on top: total grows by its size
+    expect(Object.keys(MOVES_DB)).toHaveLength(BASE_COUNT + BATCH2_COUNT + Object.keys(MOCHIICHAO_FULLPOOL_MOVES).length);
     for (const [key, entry] of Object.entries(CATALOGUE)) {
       expect(MOVES_DB[key]).toEqual(entry);
     }
@@ -56,7 +58,10 @@ describe("moves batch 2 live", () => {
       expect(m.effectChance).toBeGreaterThanOrEqual(0);
       expect(m.effectChance).toBeLessThanOrEqual(100);
       expect(typeof m.desc).toBe("string");
-      expect(typeof m.anim).toBe("string");
+      // Stub-kill S-5: Move.anim is retired — a move's animation is
+      // DERIVED from the profile registry by stable id
+      // (src/lib/moveAnimation.ts), never stored on the move. The
+      // derivation lock lives in deadMoveData.test.ts.
     }
   });
 

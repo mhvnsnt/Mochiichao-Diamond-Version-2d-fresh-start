@@ -90,16 +90,38 @@ export type SfxName =
   | 'cancel'
   | 'error'
   | 'door'
+  | 'exit'
   | 'step'
+  | 'bump'
   | 'heal'
   | 'catch'
   | 'catch_fail'
   | 'badge'
   | 'item'
+  | 'use_item'
+  | 'register'
   | 'save'
   | 'levelup'
+  | 'exp'
   | 'evolve'
-  | 'faint';
+  | 'faint'
+  | 'blip'
+  | 'sting'
+  | 'win_open'
+  | 'win_close'
+  | 'throw'
+  | 'shake'
+  | 'wobble'
+  | 'click'
+  | 'bounce'
+  | 'flee'
+  | 'pc_on'
+  | 'pc_off'
+  | 'pc_login'
+  | 'hit'
+  | 'hit_super'
+  | 'hit_weak'
+  | 'switch';
 
 export interface AudioSettings {
   master: number; // 0..1
@@ -236,27 +258,181 @@ export const BATTLE_TRACKS: Record<BattleKind, keyof typeof SYNTH_PATTERNS> = {
 };
 
 // ------------------------------------------------------------------
-// SFX: short synth blips, all original. Frequencies/durations only;
-// no sampled sound from any game is used.
+// SFX: short synth cues, all original renditions. Frequencies and
+// durations only; no sampled sound from any game is used.
+//
+// MEASURED VOICES (2026-10-29, sound-wiring lane): most voices below
+// are rendered to parameters measured from the Pokemon decomp sound
+// data we hold — Gen 3 SE MIDI files (pokeemerald
+// sound/songs/midi/se_*.mid: exact pitches in Hz, note durations in
+// ms at the file's tempo, velocities -> the gain column) and Gen 2
+// SFX assembly (pokecrystal audio/sfx.asm: GB frequency-register
+// values converted with Hz = 131072 / (2048 - reg), duty cycles,
+// volumes). The measured spec for every voice is recorded in
+// ~/workspace/sound-wiring/GRAMMAR.md. The parameters and the system
+// come over exactly; the recordings do not — these are our own
+// oscillator/noise renditions of the measured spec. Voices whose
+// source data does not survive in readable form (Gen 4 DECIDE /
+// cancel class) are marked CONSTRUCTED: built from the measured
+// pitch families and direction laws of their class, never claimed
+// as copies. Pre-existing house voices (step / item / catch / badge
+// / levelup / evolve / faint) are kept and marked HOUSE.
+//
+// Tuple: [freqHz, durSec, wave, gainMul?]. freqHz 0 = a rest
+// (silence for durSec). wave 'noise' = band-passed noise burst
+// centred on freqHz (the Gen 3 noise-voice class: door / exit /
+// window / click / flee are noise-voice sounds in the source data,
+// where the "pitch" is the noise rate). gainMul multiplies the
+// base SFX volume and carries the source velocities.
 // ------------------------------------------------------------------
 
-const SFX_DEFS: Record<SfxName, ReadonlyArray<readonly [number, number, OscillatorType]>> = {
-  select: [[660, 0.06, 'square']],
-  confirm: [[523, 0.07, 'square'], [784, 0.1, 'square']],
-  cancel: [[392, 0.08, 'square'], [262, 0.12, 'square']],
-  error: [[196, 0.15, 'sawtooth'], [165, 0.2, 'sawtooth']],
-  door: [[440, 0.05, 'triangle'], [554, 0.08, 'triangle']],
+export type SfxWave = OscillatorType | 'noise';
+export type SfxNote = readonly [number, number, SfxWave, (number | undefined)?];
+
+const SFX_DEFS: Record<SfxName, ReadonlyArray<SfxNote>> = {
+  // MEASURED — Gen 3 SE_SELECT (square, two envelope variants):
+  // A#6 tick, then G7 gated in 25 ms pulses, velocities 68/127.
+  select: [[1864.7, 0.025, 'square', 0.54], [3136, 0.025, 'square', 1], [3136, 0.025, 'square', 0.54], [3136, 0.025, 'square', 1], [3136, 0.05, 'square', 0.54]],
+  // CONSTRUCTED — the DECIDE class (Gen 4 splits it from SELECT in
+  // sndseq.h; its DS sequence data is not readable here). Built from
+  // SE_PIN's measured pitches (G6 -> G7 octave rise), compressed.
+  confirm: [[1568, 0.06, 'square', 1], [3136, 0.09, 'square', 0.9]],
+  // CONSTRUCTED — no cancel class survives in the Gen 2/3 data and
+  // Gen 4 names none; built on SE_BOO's measured direction law
+  // (falling = back/no) at cursor register.
+  cancel: [[523.3, 0.05, 'square', 0.9], [392, 0.05, 'square', 0.9], [261.6, 0.09, 'square', 0.9]],
+  // MEASURED — Gen 3 SE_BOO ("general bad", square): C4 -> C3
+  // octave drop, quiet tail after a gap.
+  error: [[261.6, 0.075, 'square', 1], [130.8, 0.075, 'square', 0.88], [0, 0.075, 'square', 0], [130.8, 0.075, 'square', 0.19]],
+  // MEASURED — Gen 3 SE_DOOR (noise voice): low rate, gap, higher
+  // rate held.
+  door: [[293.7, 0.068, 'noise', 1], [0, 0.068, 'noise', 0], [370, 0.273, 'noise', 1]],
+  // MEASURED — Gen 3 SE_EXIT / stairs (noise voice): a three-note
+  // rate arp (A3/C4/E5 rates) played three times, fading.
+  exit: [[220, 0.042, 'noise', 0.54], [261.6, 0.042, 'noise', 1], [659.3, 0.042, 'noise', 0.54], [0, 0.125, 'noise', 0], [220, 0.042, 'noise', 0.54], [261.6, 0.042, 'noise', 0.79], [659.3, 0.042, 'noise', 0.54], [0, 0.125, 'noise', 0], [220, 0.042, 'noise', 0.25], [261.6, 0.042, 'noise', 0.41]],
+  // HOUSE — soft low step tick (source step class is terrain
+  // samples; no readable spec). Kept from the original table.
   step: [[120, 0.03, 'sine']],
-  heal: [[523, 0.1, 'sine'], [659, 0.1, 'sine'], [784, 0.15, 'sine']],
+  // MEASURED — Gen 3 SE_WALL_HIT (square): one low G2 thud.
+  bump: [[98, 0.205, 'square', 1]],
+  // MEASURED — Gen 2 SFX_FULL_HEAL (square, duty cycle 2 = 50%):
+  // 256.0 Hz (reg 1536) in a 4/4/15 length-unit pattern with an
+  // upward pitch sweep in the source; units rendered at ~22 ms
+  // (unit-to-ms runs through the GB engine tempo multiply — see
+  // GRAMMAR.md; pitches, duty and pattern are exact, the sweep is
+  // carried by the final note's length, our tone() has no glide).
+  heal: [[256, 0.088, 'square', 1], [256, 0.088, 'square', 1], [256, 0.33, 'square', 1]],
+  // HOUSE — capture-success jingle (short ritual voice; the click
+  // that locks the catch is the separate measured 'click' voice).
   catch: [[784, 0.08, 'square'], [988, 0.08, 'square'], [1175, 0.16, 'square']],
-  catch_fail: [[784, 0.08, 'square'], [587, 0.16, 'square']],
+  // MEASURED — Gen 3 SE_FAILURE (square): gated low C3 buzz.
+  catch_fail: [[130.8, 0.031, 'square', 1], [130.8, 0.031, 'square', 0.16], [130.8, 0.188, 'square', 1], [130.8, 0.094, 'square', 0.16]],
+  // HOUSE — badge ritual voice, kept; not wired by the sound lane
+  // (threshold jingles belong to the moment grammar's owners).
   badge: [[523, 0.12, 'square'], [659, 0.12, 'square'], [784, 0.12, 'square'], [1047, 0.3, 'square']],
+  // HOUSE — item-get short voice, kept (Gen 3 field pickup plays a
+  // jingle-class ME, not a short SE; this is the proportionate
+  // short form for toast-level grants).
   item: [[880, 0.07, 'square'], [1109, 0.1, 'square']],
-  save: [[659, 0.08, 'sine'], [784, 0.08, 'sine'], [1047, 0.15, 'sine']],
+  // MEASURED — Gen 3 SE_USE_ITEM (square): C4 pulsed twice, then
+  // held.
+  use_item: [[261.6, 0.038, 'square', 0.88], [0, 0.038, 'square', 0], [261.6, 0.038, 'square', 0.88], [0, 0.038, 'square', 0], [261.6, 0.284, 'square', 0.88]],
+  // MEASURED — Gen 3 SE_SHOP / register (square + layered square):
+  // low clunk, mid tick, long bright F6 ring.
+  register: [[311.1, 0.02, 'square', 1], [0, 0.02, 'square', 0], [415.3, 0.059, 'square', 0.79], [1396.9, 0.313, 'square', 0.57]],
+  // MEASURED — Gen 3 SE_SAVE (square ch2 + sampled-square layer,
+  // rendered single-voice at the exact pitches/times): rising arp
+  // E4 B3 E4 B4, then C6, then C7 held.
+  save: [[329.6, 0.05, 'square', 0.79], [246.9, 0.05, 'square', 0.79], [329.6, 0.05, 'square', 0.79], [493.9, 0.05, 'square', 0.79], [1046.5, 0.1, 'square', 0.79], [2093, 0.4, 'square', 0.79]],
+  // HOUSE — battle-domain voices; owned by the battle/payoff
+  // lanes, untouched and unwired by the sound lane.
+  // Update (sound-exceptions lane, 2026-10-29): 'levelup' is now
+  // wired in the base via the registry (ritual.levelup, bound to
+  // the level-up moment) under the owner's exceptions-closure
+  // order — the fanfare no longer waits for the payoff package.
   levelup: [[523, 0.08, 'square'], [659, 0.08, 'square'], [784, 0.08, 'square'], [1047, 0.2, 'square']],
+  // MEASURED — Gen 3 SE_EXP (sound-full-coverage DECISIONS.md,
+  // from pokeemerald se_exp.mid): ONE held tone, F4 349.2 Hz,
+  // sustained 1.625 s while the EXP gauge fills. Rendered as a
+  // single held square note at modest gain (SE_EXP_MAX is the
+  // capped variant in the source; the base renders the plain
+  // held tone for the whole award beat).
+  exp: [[349.2, 1.625, 'square', 0.32]],
   evolve: [[392, 0.1, 'triangle'], [523, 0.1, 'triangle'], [659, 0.1, 'triangle'], [784, 0.25, 'triangle']],
-  faint: [[440, 0.15, 'sawtooth'], [330, 0.15, 'sawtooth'], [220, 0.3, 'sawtooth']],
+  // MEASURED — Gen 3 SE_FAINT (sound-full-coverage lane, 2026-10-29;
+  // replaces the earlier house faint): layered square channels
+  // (C5 over C4 with a G#5 shimmer) rendered single-voice at the
+  // measured pitches/times, gains from velocities.
+  faint: [[523.3, 0.25, 'square', 0.79], [261.6, 0.5, 'square', 0.72]],
+  // MEASURED — Gen 3 SE_EFFECTIVE (battle_script_commands.c fires
+  // the effectiveness trio on every damaging hit): C4 lead with a
+  // D#4 sustain layer, rendered single-voice (measured 2026-10-29,
+  // se_effective.mid via the sound lane's measure_midi.py).
+  hit: [[261.6, 0.083, 'square', 1], [311.1, 1.0, 'square', 0.79]],
+  // MEASURED — Gen 3 SE_SUPER_EFFECTIVE: C5/C4 pulses alternating
+  // with G4, velocities decaying 127 -> 12 over 1.42 s (measured).
+  hit_super: [[523.3, 0.083, 'square', 1], [261.6, 0.083, 'square', 1], [523.3, 0.083, 'square', 1], [392, 0.167, 'square', 0.69], [261.6, 0.083, 'square', 0.5], [392, 0.167, 'square', 0.5], [261.6, 0.083, 'square', 0.35], [392, 0.167, 'square', 0.35], [261.6, 0.083, 'square', 0.22], [392, 0.167, 'square', 0.22], [261.6, 0.083, 'square', 0.09], [392, 0.167, 'square', 0.09]],
+  // MEASURED — Gen 3 SE_NOT_EFFECTIVE: a low noise-rate thud under
+  // a dull G3 -> A#3 square (measured; total 0.25 s).
+  hit_weak: [[116.5, 0.083, 'noise', 1], [233.1, 0.167, 'square', 0.79]],
+  // MEASURED — Gen 3 SE_SWITCH (send-out/switch tick): three fast
+  // ticks, D#4 then G#5 twice, last one softer (measured).
+  switch: [[311.1, 0.033, 'square', 1], [830.6, 0.033, 'square', 1], [830.6, 0.017, 'square', 0.69]],
+  // MEASURED — Gen 2 SFX_READ_TEXT primary pitch (square, duty 2):
+  // reg 1984 = 2048.0 Hz, source volume 9/15. The source sound is a
+  // page/text flourish alternating 2048.0 / 2730.7 Hz; the per-
+  // character tick uses its primary pitch (class name from Gen 4:
+  // SEQ_SE_DP_TALK2, the dialogue-talk class).
+  blip: [[2048, 0.03, 'square', 0.6]],
+  // MEASURED — Gen 3 SE_PIN ("general good, commonly for '!'",
+  // square): G6 -> G7 octave rise with decaying gates. This is the
+  // encounter sting: the sound of the "!" itself.
+  sting: [[1568, 0.075, 'square', 1], [3136, 0.075, 'square', 0.88], [3136, 0.075, 'square', 0.19], [3136, 0.075, 'square', 0.54], [3136, 0.075, 'square', 0.19]],
+  // MEASURED — Gen 3 SE_WIN_OPEN (noise voice): low rate tick up
+  // to a held higher rate.
+  win_open: [[311.1, 0.034, 'noise', 1], [784, 0.171, 'noise', 1]],
+  // CONSTRUCTED — window close: SE_WIN_OPEN's shape reversed
+  // (Gen 4 names OPEN2/CLOSE2 as a pair; close data not readable).
+  win_close: [[784, 0.05, 'noise', 0.8], [311.1, 0.09, 'noise', 0.8]],
+  // MEASURED pitches — Gen 3 SE_BALL_THROW is a sampled snare in
+  // the source (DirectSound); rendered as square at its measured
+  // pitch track (A3 -> C4). Substitution disclosed in GRAMMAR.md.
+  throw: [[220, 0.1, 'square', 0.9], [261.6, 0.3, 'square', 0.9]],
+  // MEASURED — Gen 3 SE_BALL (ball shake, square): low F3 rock,
+  // short D4 settle.
+  shake: [[174.6, 0.078, 'square', 1], [293.7, 0.02, 'square', 1]],
+  // MEASURED — Gen 2 SFX_BALL_WOBBLE (square, duty 2): reg 1024 =
+  // 128.0 Hz, length units 4/8 (rendered ~28 ms/unit), source
+  // pitch-sweeps down then up around the note (our tone() has no
+  // glide; the two-step pattern is exact, the bend is not).
+  wobble: [[128, 0.112, 'square', 1], [128, 0.224, 'square', 0.93]],
+  // MEASURED — Gen 3 SE_CLICK (noise voice): two tiny rate ticks,
+  // a breath, one bright tick — the catch-lock click.
+  click: [[415.3, 0.017, 'noise', 1], [523.3, 0.017, 'noise', 0.54], [0, 0.05, 'noise', 0], [830.6, 0.05, 'noise', 1]],
+  // MEASURED — Gen 3 SE_BALL_BOUNCE_1: F5 layered square/sample,
+  // rendered single square at the measured pitch.
+  bounce: [[698.5, 0.2, 'square', 0.88]],
+  // MEASURED — Gen 3 SE_FLEE (noise voice): alternating high/low
+  // noise rates, velocity decaying to nothing — running away as a
+  // fading warble.
+  flee: [[830.6, 0.05, 'noise', 0.94], [370, 0.033, 'noise', 0.88], [830.6, 0.05, 'noise', 0.88], [370, 0.033, 'noise', 0.76], [830.6, 0.05, 'noise', 0.57], [370, 0.033, 'noise', 0.63], [830.6, 0.05, 'noise', 0.44], [370, 0.033, 'noise', 0.5], [830.6, 0.05, 'noise', 0.31], [370, 0.033, 'noise', 0.38], [830.6, 0.05, 'noise', 0.19], [370, 0.05, 'noise', 0.22]],
+  // MEASURED — Gen 3 SE_PC_ON (square): a long C7 power beep, a
+  // gap, then a quick C-major data chatter.
+  pc_on: [[2093, 0.208, 'square', 0.88], [0, 0.208, 'square', 0], [1046.5, 0.069, 'square', 0.63], [523.3, 0.069, 'square', 0.63], [784, 0.069, 'square', 0.63], [523.3, 0.069, 'square', 0.63], [1046.5, 0.069, 'square', 0.63], [523.3, 0.069, 'square', 0.63], [2093, 0.069, 'square', 0.79], [523.3, 0.069, 'square', 0.63]],
+  // MEASURED — Gen 3 SE_PC_OFF (square): C4 -> C3 -> C2 octave
+  // steps down, last one fading.
+  pc_off: [[261.6, 0.083, 'square', 0.88], [130.8, 0.083, 'square', 0.88], [65.4, 0.083, 'square', 0.88], [65.4, 0.083, 'square', 0.19]],
+  // MEASURED — Gen 3 SE_PC_LOGIN (square): C5 gated pulses.
+  pc_login: [[523.3, 0.139, 'square', 0.88], [523.3, 0.069, 'square', 0.22], [523.3, 0.139, 'square', 0.88], [523.3, 0.069, 'square', 0.19]],
 };
+
+/** Every SFX voice name that resolves — used by the cue tests. */
+export const SFX_VOICE_NAMES = Object.keys(SFX_DEFS) as SfxName[];
+
+/** The measured/house note spec for one voice (demo + tests). */
+export function sfxVoiceSpec(name: SfxName): ReadonlyArray<SfxNote> {
+  return SFX_DEFS[name];
+}
 
 // ------------------------------------------------------------------
 // Manager
@@ -535,10 +711,51 @@ export class MochiAudio {
     }
     const def = SFX_DEFS[name];
     let at = 0;
-    for (const [freq, dur, type] of def) {
-      window.setTimeout(() => this.tone(freq, dur, type, this.sfxBus, 0.25), at * 1000);
+    for (const [freq, dur, type, gainMul] of def) {
+      if (freq > 0) {
+        const vol = 0.25 * (gainMul ?? 1);
+        if (type === 'noise') {
+          window.setTimeout(() => this.noiseBurst(freq, dur, this.sfxBus, vol), at * 1000);
+        } else {
+          window.setTimeout(() => this.tone(freq, dur, type, this.sfxBus, vol), at * 1000);
+        }
+      }
       at += dur;
     }
+  }
+
+  private noiseBuffer: AudioBuffer | null = null;
+
+  /**
+   * Band-passed white-noise burst centred on `freq` — the render
+   * for the source data's noise-voice class (door / exit / click /
+   * flee), where the note pitch is the noise rate. Same percussive
+   * envelope as tone().
+   */
+  private noiseBurst(freq: number, durSec: number, dest: GainNode | null, volume: number): void {
+    if (!this.ctx || !dest) return;
+    const ctx = this.ctx;
+    if (!this.noiseBuffer) {
+      const len = Math.max(1, Math.floor(ctx.sampleRate * 0.5));
+      this.noiseBuffer = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = this.noiseBuffer.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseBuffer;
+    src.loop = true;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = freq;
+    bp.Q.value = 1.1;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(volume, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + Math.max(0.03, durSec));
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(dest);
+    src.start();
+    src.stop(ctx.currentTime + Math.max(0.03, durSec) + 0.02);
   }
 
   private playSfxSequence(pattern: Pattern, type: OscillatorType, beatSec: number): void {
@@ -588,14 +805,15 @@ export const audio = new MochiAudio();
 //    Battle end (win, loss, flee): audio.endBattle(); on win also
 //    audio.playVictoryJingle(). BattleView (mod layer) should call
 //    the same three functions if it ever hosts a battle instead.
-// 4. UI events: menu move -> playSfx('select'), confirm ->
-//    playSfx('confirm'), cancel -> playSfx('cancel'), door warp ->
-//    playSfx('door'), overworld step -> playSfx('step') (throttled
-//    internally), MochiiPlex heal -> playSfx('heal'), successful
-//    catch -> playSfx('catch'), failed catch -> playSfx('catch_fail'),
-//    badge earned -> playSfx('badge'), item pickup -> playSfx('item'),
-//    save -> playSfx('save'), level up -> playSfx('levelup'),
-//    evolution -> playSfx('evolve'), creature faint -> playSfx('faint').
+// 4. UI events: DONE (2026-10-29, sound-wiring lane) — surfaces no
+//    longer call playSfx directly; they call playCue(id) from
+//    src/lib/soundCues.ts, the stable cue registry that resolves to
+//    the voices above (menu move -> 'select', confirm -> 'confirm',
+//    cancel -> 'cancel', door -> 'door', step -> 'step', heal ->
+//    'heal', catch -> 'click' + 'catch', and the rest of the audited
+//    surface list in soundCues.ts). 'levelup' / 'evolve' / 'faint' /
+//    'badge' stay unwired here on purpose: threshold and battle
+//    jingles belong to the battle/payoff lanes.
 // 5. Boot (after init, optional): for each scene main has actually
 //    downloaded, audio.registerFile(scene, '/audio/<name>.ogg').
 //    Do NOT register a file that was not downloaded, and do NOT

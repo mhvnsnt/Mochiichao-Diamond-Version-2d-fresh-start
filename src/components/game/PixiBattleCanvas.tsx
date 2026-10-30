@@ -7,8 +7,12 @@ import type { AttackSetChoice } from '../../lib/creatureAnimation';
 import { sheetCellTextureXY, fullImageTexture } from './pixiSheet';
 import { buildHitTimeline, sampleHitPose } from '../../lib/battleTreatments';
 import { aimForCanvasAttack, pixiSideToCombatSide, tableOffsetFor, type OriginAngleTable } from '../../lib/combatAiming';
+import { resolveBattleScene, sceneGeometry, SCENE_W, SCENE_H, type ResolvedBattleScene, type SceneShape } from '../../lib/battleBackground';
 import { OPPONENT_VECTORS as OPPONENT_DIRECTION_VECTORS } from '../../lib/opponentDirection';
 import originAngleTable from '../../lib/generated/combatOriginAngleTable.json';
+import type { MoveAnimationProfile } from '../../lib/moveAnimation';
+import { useGameStore } from '../../store/gameStore';
+import { battleBaseY, getStyleProfile } from '../../lib/styleProfiles';
 
 /**
  * PixiJS battle arena, simplified Arena spec (mod layer on the existing
@@ -37,6 +41,11 @@ export interface BattleAttack {
   // Absent (old callers) = 0 / false = light, non-crit hit.
   damageFraction?: number;
   isCrit?: boolean;
+  // Move-animation wiring (2026-10-29): the per-move animation profile
+  // (moveAnimation.ts registry, keyed by stable move id). When present it
+  // drives delivery (blitz/beam/spread/field/drain/multi-hit beats) over
+  // the category-only presentation. Absent = legacy category behaviour.
+  animProfile?: MoveAnimationProfile | null;
 }
 
 function hex(color: string): number {
@@ -57,14 +66,22 @@ function fallbackSprite(g: Graphics, cx: number, cy: number, size: number, color
 }
 
 export default function PixiBattleCanvas({
-  playerSpeciesId, enemySpeciesId, attack, onImpact, onDone,
+  playerSpeciesId, enemySpeciesId, attack, onImpact, onDone, scene,
 }: {
   playerSpeciesId: string | undefined | null;
   enemySpeciesId: string | undefined | null;
   attack: BattleAttack | null;
   onImpact: () => void;
   onDone: () => void;
+  // Battle background resolved by the caller from the encounter
+  // context (lib/battleBackground). Absent = the resolver's route
+  // fallback at day, which reports fallback: true on its result.
+  scene?: ResolvedBattleScene;
 }) {
+  // Visual generation switcher: subscribing re-stages the battle
+  // live when the setting changes (drawBase reads the same value).
+  const visualStyle = useGameStore(s => s.settings.visualStyle);
+  void visualStyle;
   const hostRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<Application | null>(null);
   const stateRef = useRef<{ player: Container; enemy: Container; arena: Container } | null>(null);
@@ -74,6 +91,8 @@ export default function PixiBattleCanvas({
   // the newer frame.
   const drawSeqRef = useRef(0);
   const attackRef = useRef(attack);
+  const sceneRef = useRef<ResolvedBattleScene | undefined>(scene);
+  sceneRef.current = scene;
   const callbacksRef = useRef({ onImpact, onDone });
   callbacksRef.current = { onImpact, onDone };
   attackRef.current = attack;
@@ -89,10 +108,33 @@ export default function PixiBattleCanvas({
     arena.removeChildren();
     const g = new Graphics();
     arena.addChild(g);
-    // Arena floor: layered bands, drawn — no emoji, no image asset.
-    g.rect(0, vh * 0.55, vw, vh * 0.45).fill(0x1a2a1a);
-    g.ellipse(vw * 0.78, vh * 0.42, vw * 0.22, vh * 0.06).fill({ color: 0x000000, alpha: 0.35 });
-    g.ellipse(vw * 0.22, vh * 0.78, vw * 0.24, vh * 0.07).fill({ color: 0x000000, alpha: 0.35 });
+    // Battle background: the resolved HGSS-grammar scene (far field,
+    // motif band, ground, battler platforms, clock tint) drawn from
+    // lib/battleBackground geometry — the same data the DOM battle
+    // surface renders. Replaces the old context-free flat green band
+    // + two black ellipses that every battle used to share.
+    const resolvedScene = sceneRef.current ?? resolveBattleScene({});
+    // Visual generation switcher: scene platform staging + battler
+    // ground lines resolve through the registry (Gen 5 = the exact
+    // master geometry). Sprite art, sizes, colours and attack
+    // timelines are not profile-driven.
+    const styleProfile = getStyleProfile(useGameStore.getState().settings.visualStyle);
+    const geo = sceneGeometry(resolvedScene, undefined, styleProfile.battle);
+    const sx = vw / SCENE_W;
+    const sy = vh / SCENE_H;
+    const drawShape = (s: SceneShape) => {
+      const fill = { color: hex(s.fill), alpha: 1 };
+      if (s.kind === 'rect') g.rect((s.x ?? 0) * sx, (s.y ?? 0) * sy, (s.w ?? 0) * sx, (s.h ?? 0) * sy).fill(fill);
+      else if (s.kind === 'circle') g.circle((s.cx ?? 0) * sx, (s.cy ?? 0) * sy, (s.r ?? 0) * sx).fill(fill);
+      else if (s.kind === 'ellipse') g.ellipse((s.cx ?? 0) * sx, (s.cy ?? 0) * sy, (s.rx ?? 0) * sx, (s.ry ?? 0) * sy).fill(fill);
+      else if (s.kind === 'polygon' && s.points) { g.poly(s.points.map(([x, y]) => [x * sx, y * sy]).flat()).fill(fill); }
+    };
+    geo.shapes.forEach(drawShape);
+    drawShape(geo.platforms.enemyShade);
+    drawShape(geo.platforms.enemy);
+    drawShape(geo.platforms.playerShade);
+    drawShape(geo.platforms.player);
+    if (geo.tint) g.rect(0, 0, vw, vh).fill({ color: hex(geo.tint.color), alpha: geo.tint.alpha });
 
     const place = (side: 'player' | 'enemy') => {
       const isPlayer = side === 'player';
@@ -100,7 +142,7 @@ export default function PixiBattleCanvas({
       const def = getSheetDef(speciesId);
       const size = Math.min(vw, vh) * (isPlayer ? 0.42 : 0.36);
       const cx = isPlayer ? vw * 0.22 : vw * 0.78;
-      const cy = isPlayer ? vh * 0.78 : vh * 0.42;
+      const cy = vh * battleBaseY(isPlayer ? 'player' : 'enemy', styleProfile);
       const cont = isPlayer ? st.player : st.enemy;
       cont.removeChildren();
       cont.position.set(cx, cy);
@@ -211,7 +253,7 @@ export default function PixiBattleCanvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => { drawBase(); }, [playerSpeciesId, enemySpeciesId]);
+  useEffect(() => { drawBase(); }, [playerSpeciesId, enemySpeciesId, scene?.sceneId, scene?.phaseUsed, visualStyle]);
 
   // Attack timeline driver — TREATMENTS-DRIVEN (WIRING.md §3).
   // Phases: windup 250 (treatments) -> travel 450 (existing lunge /
@@ -272,6 +314,10 @@ export default function PixiBattleCanvas({
       damageFraction: attack.damageFraction ?? 0,
       isCrit: !!attack.isCrit, direction, seed: attack.nonce,
     });
+    // Move-animation profile (2026-10-29): delivery grammar for THIS move.
+    // Null (old callers) keeps the legacy category-only presentation.
+    const prof = attack.animProfile ?? null;
+    const delivery = prof?.delivery ?? null;
     // PHASE 3 attack art. Frame textures are preloaded here (not per RAF
     // frame) so swaps during the loop stay synchronous; a failed load
     // leaves the schedule null and the timeline plays transform-only, so
@@ -409,9 +455,25 @@ export default function PixiBattleCanvas({
     // branch (lungeEnd back to base) both no-ops, with no branch line
     // changed; onImpact/onDone timing is untouched. Projectile moves are
     // unaffected (their branch never uses lungeEnd).
-    if (pixiAttack?.motion === 'stay') { lungeEnd.x = baseA.x; lungeEnd.y = baseA.y; }
+    if (pixiAttack?.motion === 'stay' && delivery !== 'blitz_afterimage') { lungeEnd.x = baseA.x; lungeEnd.y = baseA.y; }
     let flashG: Graphics | null = null;
     let particleGs: Graphics[] = [];
+    // Move-animation travel/impact FX state (profile-driven).
+    let travelDots: Graphics[] = [];
+    let beamG: Graphics | null = null;
+    let ghostGs: Graphics[] = [];
+    let ringG: Graphics | null = null;
+    let wallG: Graphics | null = null;
+    let drainGs: Graphics[] = [];
+    let beatGs: { g: Graphics; at: number }[] = [];
+    let spawnedBeats = 0;
+    const clearTravelFx = () => {
+      travelDots.forEach((g) => { st.arena.removeChild(g); g.destroy(); });
+      travelDots = [];
+      ghostGs.forEach((g) => { st.arena.removeChild(g); g.destroy(); });
+      ghostGs = [];
+      if (beamG) { st.arena.removeChild(beamG); beamG.destroy(); beamG = null; }
+    };
     const spawnContactFx = () => {
       // Flash overlay: colour from the timeline (red on crit), alpha
       // sampled per frame from pose.flash (100 ms fade in the module).
@@ -430,11 +492,37 @@ export default function PixiBattleCanvas({
         st.arena.addChild(g);
         return g;
       });
+      // Profile impact FX: field moves crack a ground ring open at the
+      // target's feet; drain moves open the return stream (ridden in step).
+      if (delivery === 'field_impact' && !ringG) {
+        ringG = new Graphics();
+        ringG.ellipse(0, 0, Math.min(vw, vh) * 0.16, Math.min(vw, vh) * 0.045)
+          .stroke({ width: 4, color, alpha: 0.9 });
+        ringG.position.set(baseT.x, baseT.y + 4);
+        st.arena.addChild(ringG);
+      }
+      if (delivery === 'drain_link' && drainGs.length === 0) {
+        for (let i = 0; i < 5; i++) {
+          const g = new Graphics();
+          g.circle(0, 0, 5).fill(color);
+          g.position.set(baseT.x, baseT.y - vh * 0.12);
+          st.arena.addChild(g);
+          drainGs.push(g);
+        }
+      }
     };
     const clearContactFx = () => {
+      clearTravelFx();
       if (flashG) { target.removeChild(flashG); flashG.destroy(); flashG = null; }
       particleGs.forEach((g) => { st.arena.removeChild(g); g.destroy(); });
       particleGs = [];
+      if (ringG) { st.arena.removeChild(ringG); ringG.destroy(); ringG = null; }
+      if (wallG) { st.arena.removeChild(wallG); wallG.destroy(); wallG = null; }
+      drainGs.forEach((g) => { st.arena.removeChild(g); g.destroy(); });
+      drainGs = [];
+      beatGs.forEach((b) => { b.g.parent?.removeChild(b.g); b.g.destroy(); });
+      beatGs = [];
+      spawnedBeats = 0;
     };
     const resetAll = () => {
       clearContactFx();
@@ -468,11 +556,46 @@ export default function PixiBattleCanvas({
         }
       }
       if (attack.category === 'Status') {
-        // No approach: glow on target, impact at 500ms, done at 900ms.
+        // No approach: glow on the move's subject, impact at 500ms, done
+        // at 900ms. Move-animation wiring: self_aura / protect_wall moves
+        // act on the USER, so the pulse belongs on the attacker — the old
+        // code pulsed the defender for every Status move, buffs included.
+        const subject = (delivery === 'self_aura' || delivery === 'protect_wall') ? attacker : target;
         const pulse = 1 + 0.08 * Math.sin((t / 500) * Math.PI);
-        target.scale.set(pulse, pulse);
+        subject.scale.set(pulse, pulse);
+        // Profile FX for Status deliveries (travelDots/ringG/wallG are
+        // cleared by clearContactFx on the effect cleanup path):
+        if (delivery === 'status_cloud' || delivery === 'status_gaze') {
+          const n = delivery === 'status_cloud' ? 5 : 3;
+          if (travelDots.length !== n) {
+            clearTravelFx();
+            for (let i = 0; i < n; i++) {
+              const g = new Graphics();
+              if (delivery === 'status_cloud') g.circle(0, 0, 9 + i * 2).fill({ color, alpha: 0.55 });
+              else g.circle(0, 0, 10 + i * 3).stroke({ width: 2, color, alpha: 0.8 });
+              st.arena.addChild(g);
+              travelDots.push(g);
+            }
+          }
+          const sp = Math.min(1, t / 500);
+          travelDots.forEach((g, i) => {
+            const pi = Math.max(0, Math.min(1, sp - i * 0.08));
+            g.position.set(baseA.x + (baseT.x - baseA.x) * pi, (baseA.y - vh * 0.12) + ((baseT.y - vh * 0.12) - (baseA.y - vh * 0.12)) * pi);
+          });
+        } else if (delivery === 'self_aura' && !ringG) {
+          ringG = new Graphics();
+          ringG.circle(0, -vh * 0.12, Math.min(vw, vh) * 0.13).stroke({ width: 3, color, alpha: 0.8 });
+          ringG.position.set(baseA.x, baseA.y);
+          st.arena.addChild(ringG);
+        } else if (delivery === 'protect_wall' && !wallG) {
+          wallG = new Graphics();
+          wallG.rect(-6, -vh * 0.3, 12, vh * 0.34).fill({ color, alpha: 0.75 });
+          wallG.position.set(baseA.x + (attack.attacker === 'player' ? 62 : -62), baseA.y);
+          st.arena.addChild(wallG);
+        }
+        if (ringG && delivery === 'self_aura') ringG.scale.set(pulse, pulse);
         if (t >= 500 && !impactFired) { impactFired = true; callbacksRef.current.onImpact(); }
-        if (t >= 900) { target.scale.set(1, 1); callbacksRef.current.onDone(); return; }
+        if (t >= 900) { subject.scale.set(1, 1); clearTravelFx(); if (ringG) { st.arena.removeChild(ringG); ringG.destroy(); ringG = null; } if (wallG) { st.arena.removeChild(wallG); wallG.destroy(); wallG = null; } callbacksRef.current.onDone(); return; }
         raf = requestAnimationFrame(step);
         return;
       }
@@ -489,17 +612,65 @@ export default function PixiBattleCanvas({
         const ease = 1 - Math.pow(1 - p, 2);
         attacker.scale.set(sampleHitPose(250, timeline).cameraZoom,
           sampleHitPose(250, timeline).cameraZoom);
-        if (attack.category === 'Special') {
-          const proj = st.arena.children.find(c => (c as unknown as { __proj?: boolean }).__proj) as Graphics | undefined;
-          let dot = proj;
-          if (!dot) {
-            dot = new Graphics();
-            (dot as unknown as { __proj: boolean }).__proj = true;
-            dot.circle(0, 0, 12).fill(color);
-            st.arena.addChild(dot);
+        // Move-animation delivery grammar: projectile/beam/spread moves
+        // travel as FX (any category — a thrown bone is Physical in data
+        // and a projectile on screen); blitz moves lunge FAST with
+        // afterimages; field/drain moves hold the attacker in place.
+        const fxTravel = delivery
+          ? (delivery === 'projectile' || delivery === 'beam' || delivery === 'spread')
+          : attack.category === 'Special';
+        if (fxTravel) {
+          const ox = aim.origin.x, oy = aim.origin.y - 40;
+          const hx = ox + (baseT.x - ox) * p, hy = oy + (baseT.y - 40 - oy) * p;
+          if (delivery === 'beam') {
+            if (!beamG) { beamG = new Graphics(); st.arena.addChild(beamG); }
+            beamG.clear();
+            beamG.moveTo(ox, oy).lineTo(hx, hy).stroke({ width: 13, color, alpha: 0.85 });
+            beamG.moveTo(ox, oy).lineTo(hx, hy).stroke({ width: 5, color: 0xffffff, alpha: 0.95 });
+          } else {
+            const shape = prof?.projectileShape ?? 'orb';
+            const n = delivery === 'spread' ? 5 : shape === 'burst_fan' ? 3 : shape === 'glob' ? 2 : 1;
+            if (travelDots.length !== n) {
+              clearTravelFx();
+              for (let i = 0; i < n; i++) {
+                const g = new Graphics();
+                if (shape === 'prop') g.rect(-11, -7, 22, 14).fill(color);
+                else g.circle(0, 0, shape === 'pellet' ? 16 : 12).fill(color);
+                st.arena.addChild(g);
+                travelDots.push(g);
+              }
+            }
+            const dx = baseT.x - ox, dy = (baseT.y - 40) - oy;
+            const len = Math.hypot(dx, dy) || 1;
+            const px = -dy / len, py = dx / len;
+            travelDots.forEach((g, i) => {
+              const pi = Math.max(0, Math.min(1, p - i * 0.04));
+              const fan = (i - (n - 1) / 2) * 20 * Math.sin(pi * Math.PI);
+              g.position.set(ox + dx * pi + px * fan, oy + dy * pi + py * fan);
+              if (shape === 'prop') g.rotation = pi * Math.PI * 4;
+            });
           }
-          dot.position.set(aim.origin.x + (baseT.x - aim.origin.x) * p,
-            aim.origin.y - 40 + (baseT.y - 40 - (aim.origin.y - 40)) * p);
+        } else if (delivery === 'drain_link' || delivery === 'field_impact') {
+          // Attacker holds position; the profile's impact FX carries it.
+        } else if (delivery === 'blitz_afterimage') {
+          // Swift Movement's grammar: the crossing completes in the first
+          // 45% of the travel phase, trailing speed-streak afterimages —
+          // a different cadence from Tackle's full-phase heavy lunge.
+          const bp = Math.min(1, p / 0.45);
+          const bease = 1 - Math.pow(1 - bp, 3);
+          attacker.position.set(baseA.x + (lungeEnd.x - baseA.x) * bease,
+            baseA.y + (lungeEnd.y - baseA.y) * bease);
+          const ghostAt = [0.3, 0.55, 0.8];
+          ghostAt.forEach((f, i) => {
+            if (bp >= f && !ghostGs[i]) {
+              const g = new Graphics();
+              g.ellipse(0, -vh * 0.1, Math.min(vw, vh) * 0.09, Math.min(vw, vh) * 0.11)
+                .fill({ color, alpha: 0.3 - i * 0.07 });
+              g.position.set(baseA.x + (lungeEnd.x - baseA.x) * f, baseA.y + (lungeEnd.y - baseA.y) * f);
+              st.arena.addChild(g);
+              ghostGs[i] = g;
+            }
+          });
         } else {
           attacker.position.set(baseA.x + (lungeEnd.x - baseA.x) * ease,
             baseA.y + (lungeEnd.y - baseA.y) * ease);
@@ -525,6 +696,34 @@ export default function PixiBattleCanvas({
           baseT.y - vh * 0.12 + Math.sin(p.angleRad) * p.speedPxPerSec * elapsedSec);
         g.alpha = 1 - s / p.lifeMs;
       });
+      // Profile impact riders: the field ring expands, the drain stream
+      // runs target -> attacker, multi-hit beats flash on their cadence.
+      if (ringG) {
+        const rp = Math.min(1, s / 500);
+        ringG.scale.set(1 + rp * 1.6, 1 + rp * 0.7);
+        ringG.alpha = 1 - rp * 0.8;
+      }
+      if (drainGs.length > 0) {
+        drainGs.forEach((g, i) => {
+          const dp = Math.max(0, Math.min(1, (s - i * 60) / 330));
+          g.position.set(baseT.x + (baseA.x - baseT.x) * dp,
+            (baseT.y - vh * 0.12) + ((baseA.y - vh * 0.12) - (baseT.y - vh * 0.12)) * dp);
+          g.alpha = dp >= 1 ? 0 : 1;
+        });
+      }
+      const beatsN = prof?.impact.beats ?? 0;
+      if (beatsN > 1 && s < 390) {
+        const spacing = 390 / beatsN;
+        const idx = Math.floor(s / spacing);
+        if (idx > spawnedBeats && idx < beatsN) {
+          spawnedBeats = idx;
+          const g = new Graphics();
+          g.circle(0, -vh * 0.12, Math.min(vw, vh) * 0.1).fill({ color: 0xffffff, alpha: 0.9 });
+          target.addChild(g);
+          beatGs.push({ g, at: s });
+        }
+      }
+      beatGs.forEach((b) => { b.g.alpha = Math.max(0, 0.9 - (s - b.at) / 140); });
       // Sampled shake replaces the old random shake; frozen hold means
       // nothing else advances here except flash/particles (above).
       app.stage.position.set(pose.shakeX, pose.shakeY);

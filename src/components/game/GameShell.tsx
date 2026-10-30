@@ -7,7 +7,8 @@ import { UI_ART } from '../../lib/uiArt';
 import { MenuList, MenuHelpLine } from './MenuList';
 import { useMenuLayout } from '../../lib/menuLayoutLive';
 import { getActiveMenuConfig } from '../../lib/menuEditor';
-import { getDayNightMenuVariant, dayNightMenuVarStyle } from '../../lib/dayNightMenuVariants';
+import { getDayNightMenuVariant, getWorldMenuVariant, dayNightMenuVarStyle } from '../../lib/dayNightMenuVariants';
+import { playCue } from '../../lib/soundCues';
 
 /** In-game pause menu (X / Esc / Menu button). Real game buttons, no brackets. */
 export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle, onNavigate }: {
@@ -20,6 +21,13 @@ export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle
 }) {
   const gameState = useGameStore(s => s);
   const saveSlot = useGameStore(s => s.saveSlot);
+  // Sound cues (2026-10-29): the pause window speaks the measured
+  // window-open voice on mount and its close voice on unmount —
+  // one site covers every way the menu is opened or left.
+  React.useEffect(() => {
+    playCue('menu.open');
+    return () => { playCue('menu.close'); };
+  }, []);
   const [saved, setSaved] = React.useState(false);
   const [selected, setSelected] = React.useState(0);
   // Day/night variants wiring (spec, stacked on PR #153): the
@@ -30,7 +38,13 @@ export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle
   // Panel background, labels, margins, fonts, and cursor glyphs
   // are untouched here — the pause panel's background is the
   // Y2K skin class, which the skins work (PR #151) owns.
-  const dnVariant = getDayNightMenuVariant();
+  // S1 TAIL: the pause menu reads the world clock when the save is
+  // anchored; unanchored saves fall back to the device-clock
+  // variant, exactly as before (the engine anchors on its first tick).
+  const worldClockAnchor = useGameStore(s => s.worldClock);
+  const dnVariant = worldClockAnchor
+    ? (getWorldMenuVariant(worldClockAnchor) ?? getDayNightMenuVariant())
+    : getDayNightMenuVariant();
 
   // Framed window OVER the world (overlay dims the world, the window is
   // centred, the world stays visible around it — not a blank
@@ -81,6 +95,9 @@ export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle
         // Explicit manual save releases a START OVER autosave hold.
         gameState.setAutosaveHeldForSlot(null);
         saveGame(saveSlot, 'manual', `PAUSE SAVE - ${gameState.currentMap}`, gameState);
+        // The save jingle lands a beat after MenuList's confirm
+        // tick (press, then jingle — the source's ordering).
+        setTimeout(() => playCue('ui.save'), 160);
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
       },
@@ -123,32 +140,24 @@ export function WorldHud({ mapName, timeLabel, goalLabel, onMenu, onRoster }: { 
   const party = useGameStore(s => s.party);
   return (
     <div
-      className="absolute top-0 left-0 right-0 z-40 flex flex-col sm:flex-row items-start justify-between gap-2 p-3 pointer-events-none"
+      className="absolute top-0 left-0 right-0 z-40 flex items-start justify-between gap-2 p-3 pointer-events-none"
       style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
     >
-      {/* Four-fixes lane (gap fix): at phone widths this bar used to
-          flood off the right edge — measured at 390px: the info
-          panel held its content width and the CR + Team + Menu
-          cluster alone needs ~303px (the game-panel/game-button
-          chrome is wide), so Menu slid off screen. On phones the
-          bar now stacks: info panel full-width on its own row
-          (goal text wraps inside it), the cluster on the next row,
-          right-aligned. sm+ keeps the single-row layout. */}
-      <div className="game-panel px-3 py-2 pointer-events-auto min-w-0 w-full sm:w-auto sm:max-w-[46vw]">
-        <div className="font-bold text-white text-sm leading-tight truncate">{mapName}</div>
+      <div className="game-panel px-3 py-2 pointer-events-auto">
+        <div className="font-bold text-white text-sm leading-tight">{mapName}</div>
         {timeLabel && <div className="text-[11px] text-slate-300">{timeLabel}</div>}
         <div className="text-[11px] text-slate-300">{party.length === 0 ? 'No partner yet' : `${party.length} in team`}</div>
-        {goalLabel && <div className="text-[11px] text-yellow-300 font-bold break-words">{goalLabel}</div>}
+        {goalLabel && <div className="text-[11px] text-yellow-300 font-bold">{goalLabel}</div>}
       </div>
-      <div className="flex gap-1.5 sm:gap-2 pointer-events-auto items-start shrink-0 self-end sm:self-start">
+      <div className="flex gap-2 pointer-events-auto items-start">
         <div className="game-panel px-3 py-2 hidden sm:flex items-center gap-2">
           {party.slice(0, 3).map(m => (
             <div key={m.id}><CreaturePortrait speciesId={m.speciesId} view="front" size={28} /></div>
           ))}
         </div>
-        <div className="game-panel px-2 sm:px-3 py-2 font-bold text-yellow-300 text-[13px] sm:text-sm whitespace-nowrap">{wallet} CR</div>
-        <button onClick={onRoster} className="game-button px-2 sm:px-3 py-2 text-[13px] sm:text-sm">Team</button>
-        <button onClick={onMenu} className="game-button px-2 sm:px-3 py-2 text-[13px] sm:text-sm">Menu</button>
+        <div className="game-panel px-3 py-2 font-bold text-yellow-300 text-sm">{wallet} CR</div>
+        <button onClick={onRoster} className="game-button px-3 py-2 text-sm">Team</button>
+        <button onClick={onMenu} className="game-button px-3 py-2 text-sm">Menu</button>
       </div>
     </div>
   );

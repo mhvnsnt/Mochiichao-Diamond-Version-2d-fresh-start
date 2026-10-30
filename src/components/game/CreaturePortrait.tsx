@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getSheetDef, sheetCellStyle, fallbackColorFor, creatureDisplayName } from '../../lib/spriteSheets';
+import { getSheetDef, sheetCellStyle, fallbackColorFor, creatureDisplayName, battleSpriteUrl } from '../../lib/spriteSheets';
 import { folderForSpecies, IDLE, loadIdleFrame, loadSilhouette, SILHOUETTES } from '../../lib/creatureAnimation';
 
 /**
@@ -15,6 +15,14 @@ import { folderForSpecies, IDLE, loadIdleFrame, loadSilhouette, SILHOUETTES } fr
  *   idle spec, the portrait cycles its idle_a/b/c frames at the spec's
  *   durations, falling back to the static sheet cell while frames load or
  *   if a load fails. The static cell is never replaced by a guessed frame.
+ *   Idle frames are FRONT-facing art, so they may only stand in for the
+ *   FRONT view: a 'back' request always renders the back view (the sheet's
+ *   back cell, or the species' battle-back cut when one is registered).
+ *   Back-sprite fix, 2026-10-29 (owner bug report): the idle cycle used
+ *   to override ANY requested view, so in battle the player's creature
+ *   showed its front idle frames and faced the player — Tyrage was the
+ *   reported case, every species with an idle spec had the same defect
+ *   on the DOM battle surfaces (WorldEngine billboards, ArenaBattleView).
  * - Discovery silhouettes: when undiscovered is set and a silhouette exists
  *   for the creature, the silhouette renders instead of the sheet cell
  *   (nothing flashes the real art first — the box stays empty until the
@@ -52,6 +60,9 @@ export default function CreaturePortrait({
   // stops the cycle and the static cell shows instead.
   useEffect(() => {
     if (!animateIdle || !idleSpec || !folder || undiscovered) return;
+    // Idle frames are front-facing art (see header): never cycle them
+    // for a non-front view, or a back-view request ends up facing front.
+    if (view !== 'front') return;
     let cancelled = false;
     let timer = 0;
     const step = (idx: number) => {
@@ -68,7 +79,7 @@ export default function CreaturePortrait({
     step(0);
     return () => { cancelled = true; window.clearTimeout(timer); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [folder, animateIdle, undiscovered]);
+  }, [folder, animateIdle, undiscovered, view]);
 
   // Silhouette load (undiscovered, or no-def fallback).
   useEffect(() => {
@@ -83,7 +94,11 @@ export default function CreaturePortrait({
   }, [folder, hasSilhouette, undiscovered, !!def]);
 
   const showSilhouette = ((undiscovered && hasSilhouette) || (!def && hasSilhouette)) && !!silUrl;
-  const showIdle = !!def && animateIdle && !!idleSpec && !idleFailed && !!idleUrl && !undiscovered;
+  const showIdle = !!def && view === 'front' && animateIdle && !!idleSpec && !idleFailed && !!idleUrl && !undiscovered;
+  // Battle-back cut (Gearkid / Mechapion, registered in spriteSheets):
+  // a full-image back view cut from the species' own 2D sheet, used for
+  // the player side of a battle when the atlas has no genuine back cell.
+  const battleBackUrl = view === 'back' && def ? battleSpriteUrl(speciesId, true) : null;
   // Undiscovered and no silhouette loaded yet: empty box, never the real
   // art (even when a sheet def exists but no silhouette does). No-def,
   // not undiscovered, with a silhouette still loading: the blob below,
@@ -100,6 +115,8 @@ export default function CreaturePortrait({
         <img src={silUrl!} alt={`${label} (undiscovered)`} width={size} height={size} style={{ width: size, height: size, imageRendering: 'pixelated', transform: mirror ? 'scaleX(-1)' : undefined }} />
       ) : showIdle ? (
         <img src={idleUrl!} alt={label} width={size} height={size} style={{ width: size, height: size, imageRendering: 'pixelated', transform: mirror ? 'scaleX(-1)' : undefined }} />
+      ) : battleBackUrl ? (
+        <img src={battleBackUrl} alt={label} width={size} height={size} style={{ width: size, height: size, objectFit: 'contain', transform: mirror ? 'scaleX(-1)' : undefined }} />
       ) : def ? (
         <div style={{ ...sheetCellStyle(def, view, size), transform: mirror ? 'scaleX(-1)' : undefined }} aria-label={label} />
       ) : (

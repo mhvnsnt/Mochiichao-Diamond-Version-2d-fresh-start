@@ -249,5 +249,6 @@
   250,
   239,
   229
- ]
+ ],
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): the frame labelled battle_back (64,0) holds FRONT art (face mask). The genuine back view already exists in this atlas at (256,0) (overworld_back \u2014 faceless, matching the BATTLE BACK pose labelled on the species' main 2D sheet). src/lib/spriteSheets.ts now uses (256,0) as the battle back cell. This frame's role is left as-is pending a Sprite Art lane re-lock; do not regenerate defs without applying this correction."
 }
