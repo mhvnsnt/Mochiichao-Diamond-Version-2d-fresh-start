@@ -34,22 +34,22 @@
   },
   {
    "cell": 1,
-   "role": "battle_front",
+   "role": "battle_back",
    "file": "finblade_cell_01.png",
    "game_ready": true,
    "source_cell": 1,
-   "lock_note": "",
+   "lock_note": "ROLE SWAPPED 2026-10-29 (art-completion finding, applied in back-choice correction): eye re-check \u2014 back of head, red underside, NO eyes: this is the genuine REAR. Was mislabelled battle_front.",
    "eye_status": "eye_confirmed",
    "atlas_x": 64,
    "atlas_y": 0
   },
   {
    "cell": 2,
-   "role": "battle_back",
+   "role": "battle_front",
    "file": "finblade_cell_02.png",
    "game_ready": true,
    "source_cell": 2,
-   "lock_note": "",
+   "lock_note": "ROLE SWAPPED 2026-10-29: eye re-check \u2014 red eyes and face: this is the FRONT. Was mislabelled battle_back.",
    "eye_status": "eye_confirmed",
    "atlas_x": 128,
    "atlas_y": 0
@@ -60,7 +60,7 @@
    "file": "finblade_cell_03.png",
    "game_ready": true,
    "source_cell": 3,
-   "lock_note": "",
+   "lock_note": "DORSAL (top) view \u2014 not the battle back. The 2026-10-29 back-sprite-fix note below is superseded on this point by the art-completion cell re-read: a true rear exists at (64,0).",
    "eye_status": "extractor_assigned_spot_checked",
    "atlas_x": 192,
    "atlas_y": 0
@@ -155,5 +155,7 @@
   243,
   243,
   243
- ]
+ ],
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): the frame labelled battle_back (128,0) holds FRONT art (face). No true rear view of this species exists anywhere in the repo; the closest rear-facing art is the dorsal cell at (192,0) (overworld_back), which src/lib/spriteSheets.ts now uses as the battle back cell. A true rear view is on the missing-art list (back-sprite-fix AUDIT.md).",
+ "back_choice_correction_2026_10_29": "Art-completion finding applied: battle front = atlas (128,0), battle back = atlas (64,0) (roles swapped vs the lock); (192,0) is the dorsal cell. spriteSheets.ts 022 + backSpriteGate audited table updated to match. Supersedes the dorsal-as-back reading in battle_back_correction_2026_10_29."
 }

@@ -1,0 +1,10 @@
+{
+  "file": "gearkid-back-cut.png",
+  "role": "battle_back_player_cut",
+  "source_sheet": "src/assets/sprites-2d/gearkid/main.webp",
+  "source_region": "main sheet grid row 2, col 2 \u2014 standing back pose (wind-up key down the spine, gear head from behind, no visor)",
+  "cut_method": "background flood-fill / connected-component isolation from the sheet's off-white background; no ground shadow present in source pose, none added",
+  "audit": "back-sprite-fix 2026-10-29 \u2014 cut because the locked atlas carries no genuine battle back view for this species (see AUDIT.md)",
+  "sha256": "50a872c3be2348f2de603b4c0489ca85f2ad1aa8b6790a9009f4dba18be376b3",
+  "bytes": 78763
+}

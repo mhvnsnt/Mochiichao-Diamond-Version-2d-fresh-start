@@ -263,5 +263,6 @@
   238,
   234,
   229
- ]
+ ],
+ "battle_back_correction_2026_10_29": "AUDIT 2026-10-29 (back-sprite fix): this manifest has NO battle_back frame; the generated def fell back to the battle_front cell, so the player side showed the front. The atlas's best rear cell is overworld_back_3 (320,0, three-quarter rear), now the def's back cell, and the true back view was cut from the species' main 2D sheet as src/assets/sprites/mechapion/mechapion-back-cut.png, registered as the player battle override in src/lib/spriteSheets.ts."
 }
