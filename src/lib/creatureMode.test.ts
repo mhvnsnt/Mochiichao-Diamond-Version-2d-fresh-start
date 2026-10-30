@@ -26,7 +26,7 @@ import {
   REGULAR_ATTACK,
   type Roamer,
 } from "./creatureMode";
-import encountersData from "../data/core/encounters.json";
+import { bundlePoolFor } from "./spawnSelector";
 import { FULL_WORLD } from "../world/FullWorldMaps";
 
 const seq = (vals: number[]) => {
@@ -175,9 +175,13 @@ describe("engagement layer", () => {
 
 describe("the classic grass path is untouched by this layer", () => {
   it("the seed encounter tables still carry their grass method + pools", () => {
-    const grass = (encountersData as any).encounters.filter((e: any) => e.method === "grass");
-    expect(grass.length).toBeGreaterThan(0);
-    expect(grass[0].slots.length).toBeGreaterThan(0);
+    // Gap-fill S5: the meadow/pond seed rows retired into the
+    // garden-complex bundle; the grass pool is read from the bundle
+    // selector now, not from encounters.json's retired copy. The
+    // cave seed row stays in encounters.json (no bundle file yet).
+    const meadow = bundlePoolFor("meadow-route-01", "grass");
+    expect(meadow).not.toBeNull();
+    expect(meadow!.slots.length).toBeGreaterThan(0);
   });
   it("live maps still carry encounter pools for the grass roll", () => {
     const withPools = Object.values(FULL_WORLD as any).filter(
