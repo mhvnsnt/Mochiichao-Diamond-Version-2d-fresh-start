@@ -220,6 +220,19 @@ a superseded asset under the current-version law.
   gate. The per-cast build-out the spec enables (human model
   sheets, pilot-six §2 palette sheets, the height charts, the
   shared hands library) is tracked in the spec's §6 gap list.
+- **Cast artifacts:** the build-out this reference pointed at
+  has landed (PR #35, 2026-10-30) and is registered CURRENT in
+  `show/production/rigs/README.md` and
+  `show/production/tooling/TOOLING-INDEX.md`: human model
+  sheets (`show/production/model-sheets/humans/`), §2 palette
+  files (`show/production/model-sheets/palettes/`), the two
+  §1c height charts, and the SHARED hands library v1
+  (`show/production/rigs/SHARED/hands/`). The owed pieces are
+  registered as owed in those registrations (¾ turnarounds
+  ×3, expression sets with gate H-2 NOT PASS, hands v2 poses,
+  Lustre palette deltas). This reference registers the
+  format's artifacts; it re-marks no method and changes no
+  gate.
 
 ### Remainders-pass registrations — 2026-10-28 (documentation landing package)
 
@@ -654,6 +667,19 @@ for yourself and the agents, so we never regress.*
   `show/production/tooling/TOOLING-INDEX.md`. The cast build-out
   the spec enables (spec §6) is tracked separately; nothing in
   this entry marks it done.
+
+- **2026-10-30 — Cast build-out registered CURRENT; no method
+  re-marked.** The per-cast build-out the rig-and-sheet
+  standard enables (spec §6) landed in PR #35: human model
+  sheets for Mochiko, Hex and Aeon, §2 palette files for the
+  pilot six + the three humans, the principal/secondary
+  height charts, and the SHARED hands library v1.
+  Registrations added in `show/production/rigs/README.md` and
+  `show/production/tooling/TOOLING-INDEX.md`, with the owed
+  pieces named in the open next to each artifact (¾
+  turnarounds ×3, expression sets — gate H-2 NOT PASS, hands
+  v2 poses, Lustre palette deltas). This closes the open
+  dependency named in the wiring entry above.
 
 ---
 

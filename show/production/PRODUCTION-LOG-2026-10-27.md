@@ -2044,3 +2044,50 @@ follow-up — this entry does not claim them.
 ## 2026-10-30 — Cast gaps build landed for review (PR #35)
 
 Built from the game's existing production art (owner correction: the humans were never sheetless): show model sheets (spec §1b) for **Mochiko, Hex, Aeon** under `show/production/model-sheets/humans/` (v2 likeness of record + world-views turnarounds + atlas portraits/battle cells + the built Blair-10 talking sets on record; ¾ views and expression sets carried as explicit OWED placeholders, gate H-2 open) · §2 CMYK palette files for the pilot six + the three humans under `model-sheets/palettes/`, sampled from the canon cutouts (Wispkin from the reference of record, sha256 b9de2318…) · principal + secondary height charts under `model-sheets/` (creature units repo-stated, human units derived and labelled) · shared generic-hands library v1 (15 poses) under `rigs/SHARED/hands/` · `rigs/BUILD-NOTES-cast-gaps-2026-10-30.md` with sources per piece, the canon-lock check, and five contradictions found in the game material (Mochiko/Hex world-pass divergences from the v2 locks, missing battle fullsize sources named by the atlas manifests, Kittember 'black coat' text vs sampled dark grey). Additions only; not merged — pending review.
+
+---
+
+## 2026-10-30 — Cast build-out (PR #35) registered CURRENT
+
+PR #35 merged (merge 67ecf40e0c) — the cast build-out the
+rig-and-sheet spec's §6 gap list called for: show model
+sheets (§1b) for Mochiko, Hex, Aeon
+(`show/production/model-sheets/humans/`), §2 CMYK palette
+files for the pilot six + the three humans
+(`show/production/model-sheets/palettes/`), the principal +
+secondary height charts (`show/production/model-sheets/
+height-chart-principal.png`, `height-chart-secondary.png`,
+`height-chart-data.md`), the shared generic-hands library v1
+(`show/production/rigs/SHARED/hands/`), and the build record
+(`show/production/rigs/BUILD-NOTES-cast-gaps-2026-10-30.md`).
+
+This registration closes the open dependency named in the
+PR #33 wiring entry above ("the cast build-out the spec
+enables … had not landed a PR at this wiring's check … this
+entry does not claim them"). It is claimed now, and
+registered where production work reads:
+
+- `show/production/rigs/README.md` — new CURRENT cast
+  artifacts section (every artifact named with its path and
+  status), a cast-artifacts bullet in the rig standard, and
+  Files entries for the build notes and the SHARED hands
+  library.
+- `show/production/tooling/TOOLING-INDEX.md` — dated
+  cast-artifacts section; the standard's Class B row now
+  points at the landed build-out.
+- `show/production/animation-method/METHOD-REGISTRY.md` —
+  the rig-and-sheet method reference now records the
+  build-out as landed + registered; change-log entry added;
+  no method re-marked, no gate changed.
+
+**Registered OWED, in the open (not complete):** ¾ (TQ)
+turnaround views ×3 (Mochiko, Hex, Aeon — no ¾ drawing exists
+in the game material); expression sets beyond the face of
+record ×3 — gate H-2 stays NOT PASS on all three human
+sheets until the registers named in each sheet are drawn;
+full-res battle views ×3 (only the 64px atlas cells survive
+in the repo); hands library v2 poses (point, generic grip,
+TQ set, wave, palm-up offer); Lustre palette deltas for
+Mochii, Gabu, Kittember, Sproutle. Mouth sets stand at gate
+H-1 material PASS, still pending the owner's eye-check;
+voice casting remains AWAITING OWNER for all three humans.
