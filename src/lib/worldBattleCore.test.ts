@@ -13,6 +13,9 @@ import {
   worldFullPp,
   worldNoPpLine,
   worldEvolutionAfterPayoff,
+  worldNextChainEvolution,
+  worldQueueEvolution,
+  type PendingEvolution,
   worldSpendPp,
   worldStatusTickLine,
 } from "./worldBattleCore";
@@ -456,7 +459,57 @@ describe("worldEvolutionAfterPayoff (S6 step 7: live-path evolution hook)", () =
     expect(engine).toContain("worldEvolutionAfterPayoff(plan, bs.playerTeamIdx, member?.speciesId)");
     expect(engine).toContain("payoffEndsBattleRef");
     expect(engine).toContain("buildMidFightPrompt(");
-    expect(engine).toContain("evolveInstance(evolved, evo.rule.targetId)");
+    // Step 8 generalised step 7's single-evolution handler into the
+    // drain (one prompt per queued evolution, same performer), so
+    // the lock moves from evo.rule to the queue entry's rule.
+    expect(engine).toContain("evolveInstance(evolved, entry.rule.targetId)");
     expect(engine).toContain('phase: "evolution"');
+  });
+});
+
+describe("worldQueueEvolution + worldNextChainEvolution (S6 step 8: mid-battle evolution deferral)", () => {
+  const plan = (endLevel: number, levelUps: unknown[], partyIndex = 0) => ({
+    recipients: [{ partyIndex, levelUps, endLevel }],
+  });
+  it("queues a ready mid-battle evolution once, earliest wins, and never queues a not-ready one", () => {
+    const empty: PendingEvolution[] = [];
+    const q1 = worldQueueEvolution(empty, plan(16, ["lv"]), 0, "013");
+    expect(q1).toHaveLength(1);
+    expect(q1[0].targetId).toBe("014");
+    expect(q1[0].endLevel).toBe(16);
+    // Same member, same rule again: unchanged (same length, same entry).
+    const q2 = worldQueueEvolution(q1, plan(16, ["lv"]), 0, "013");
+    expect(q2).toHaveLength(1);
+    expect(q2[0]).toBe(q1[0]);
+    // A different party index queues alongside, in order.
+    const q3 = worldQueueEvolution(q2, plan(18, ["lv"], 1), 1, "038");
+    expect(q3).toHaveLength(2);
+    expect(q3[1].targetId).toBe("039");
+    // Not ready: unchanged, same reference.
+    expect(worldQueueEvolution(q3, plan(15, ["lv"]), 0, "013")).toBe(q3);
+    expect(worldQueueEvolution(q3, null, 0, "013")).toBe(q3);
+  });
+  it("chain step: an evolved species at its next rule's level is ready, otherwise null", () => {
+    expect(worldNextChainEvolution("014", 32)).toEqual({
+      rule: { speciesId: "014", targetId: "015", method: "level", level: 32 },
+      targetId: "015",
+    });
+    expect(worldNextChainEvolution("014", 31)).toBeNull();
+    expect(worldNextChainEvolution("039", 32)?.targetId).toBe("040");
+    expect(worldNextChainEvolution("015", 99)).toBeNull();
+    expect(worldNextChainEvolution("001", 99)).toBeNull();
+  });
+  it("host source lock: the host queues mid-battle, drains at victory, and clears on a fresh battle", () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const engine = readFileSync(join(here, "../world/WorldEngine.tsx"), "utf8");
+    expect(engine).toContain("pendingEvolutionsRef");
+    expect(engine).toContain("worldQueueEvolution(pendingEvolutionsRef.current, plan, idx, member?.speciesId)");
+    expect(engine).toContain("worldNextChainEvolution(evolvedMember.speciesId, evolvedMember.level)");
+    expect(engine).toContain("drainEvolutions(");
+    // Both battle starts clear a stale queue, so a lost battle's
+    // pending evolution cannot fire at the next battle's victory.
+    const starts = engine.split("triggerWildBattle").length - 1;
+    expect(starts).toBeGreaterThan(0);
+    expect(engine).toContain("pendingEvolutionsRef.current = [];");
   });
 });
