@@ -1,4 +1,5 @@
 import { TILE, buildMap } from "./WorldConstants";
+import { ENCOUNTER_TABLES } from "../lib/encounters";
 
 function buildEdgeExits(xStart: number, xEnd: number, y: number, to: string, enterY: number, dir: string) {
   const exits = [];
@@ -83,6 +84,25 @@ export const SECTOR_0: any = {
     { id:"mom", x:5, y:9, sprite:"👩", name:"Your Mom", facing:"down", movement:"wander", wanderRadius:1, isHeal: true, dialog:["There you are! The truck beat us here.","Come inside. Your room is upstairs. The boxes can wait. Go set the clock first — a new home needs a correct time.","Good. Now go say hello next door. Hex's family just moved in too. You two will need each other out there.","Wait. Before you run off — here. Sprint Boots. Hold B and you can run. A trainer who cannot run will always be late."] },
     { id:"rival_hex", x:15, y:10, sprite:"😤", name:"Hex", facing:"down", dialog:["You again? I already picked my starter. Razorgater, obviously.","Don't think I'll go easy on you just because we grew up here.","Next time we meet, we BATTLE. Count on it."], battle: { team:[{ id:"004", name:"Razorgater", hp:50, maxHp:50, atk:65, def:64, spd:48, moves:["Chrome Claw","Tackle"], type:"Water", level:5 }], reward:100, badge:null } },
     { id:"fat_guy", x:9, y:13, sprite:"🧑‍🦲", name:"Technology Enthusiast", facing:"down", movement:"wander", wanderRadius:1, dialog:["Technology is incredible!", "You can now store up to 6 Mochiichao in your party!", "Any more you catch are instantly sent to your PC!"] },
+    // Living-world placements (world-encounter package): townsfolk and
+    // creature citizens for the encounter director (src/lib/livingWorld.ts,
+    // data in src/data/core/living-world/). The director owns their
+    // routines (phase schedules) and the events/arcs they anchor; these
+    // entries are their placed home positions + stock talk. Creatures
+    // speak in cries only — their dialog renders sound, never words.
+    // Personal names beyond role are owner slots; role names follow the
+    // maps' existing pattern (Technology Enthusiast, Dockhand Juno).
+    { id:"dock_fisher", x:8, y:18, sprite:"🎣", name:"Dock Fisher", facing:"down", dialog:["You didn't see a runner, did you? Grey hood, fast feet?","He took my Pupbble right off the bay steps. Forty years I've fished this harbour. She's been beside me for nine of them.","They say he makes camp in the tall grass on Route 1. If you're headed that way... that's all. That's everything I have to ask with."] },
+    { id:"fisher_pupbble", x:9, y:18, sprite:"🐶", name:"Pupbble", facing:"down", dialog:["Pupbble: *contented yip, watching the water*"] },
+    { id:"lab_mochii", x:12, y:5, sprite:"🐾", name:"Mochii", facing:"down", dialog:["Mochii: *a bright chirp at everyone who passes the lab door*"] },
+    { id:"duel_ranger_a", x:14, y:12, sprite:"🧢", name:"Street Ranger", facing:"down", dialog:["That's MY partner he's fighting with. Say it plainly, or fight me for the right to."] },
+    { id:"duel_ranger_b", x:16, y:12, sprite:"🎒", name:"Street Ranger", facing:"down", dialog:["Mind your own battles, Ranger."] },
+    { id:"bh_net_mender", x:20, y:18, sprite:"🧶", name:"Net Mender", facing:"down", dialog:["Mending nets is just knots, all the way down. Like most honest work."] },
+    // BW2 lane: the town resident — a Mochii that lives by the dock
+    // (spec §6 town roamers are residents, not encounters). Wanders
+    // the sand/dock strip on the existing NPC step; talking to it is
+    // a cry, as creatures speak in cries.
+    { id:"dock_mochii", creatureId:"001", x:12, y:17, sprite:"", name:"Mochii", facing:"down", movement:"wander", wanderRadius:2, dialog:["Mochi! Mochii~!", "(The harbor Mochii watches the water. It seems to live here.)"] },
   ],
   signs: [
     // v5: Sector 0 had sign TILES (tile 10) but an empty signs array,
@@ -111,7 +131,14 @@ export const SECTOR_0: any = {
     { id: "block_route_1", x:14, y:1, dialog:["Wait! It's dangerous to go into the tall grass without a partner!","Go see Prof. Aeon at his lab first!"], condition: "noStarter" },
     { id: "block_route_1", x:15, y:1, dialog:["Wait! It's dangerous to go into the tall grass without a partner!","Go see Prof. Aeon at his lab first!"], condition: "noStarter" },
     { id: "block_route_1", x:16, y:1, dialog:["Wait! It's dangerous to go into the tall grass without a partner!","Go see Prof. Aeon at his lab first!"], condition: "noStarter" },
-    { id: "block_route_1", x:17, y:1, dialog:["Wait! It's dangerous to go into the tall grass without a partner!","Go see Prof. Aeon at his lab first!"], condition: "noStarter" }
+    { id: "block_route_1", x:17, y:1, dialog:["Wait! It's dangerous to go into the tall grass without a partner!","Go see Prof. Aeon at his lab first!"], condition: "noStarter" },
+    // Living-world witnessed scenes (director: src/lib/livingWorld.ts).
+    // Stock step-on presentations of bh_snatch_at_bay_steps and
+    // bh_duel_in_the_plaza: the scene (and, for the duel, the battle
+    // against the cheat) plays through the engine's existing event
+    // path today. Outcome branching + the witnessed deed writes
+    // resolve through the director — the engine hook is specified in
+    // the living-world package's LANDING-RECORD, not claimed here.
   ],
   encounters: []
 };
@@ -119,6 +146,7 @@ export const SECTOR_0: any = {
 export const AEON_LAB: any = {
   name: "Aeon's Lab",
   music: "sector0_theme",
+  interior: true, // BW2 lane: the Lab is an interior — it was the one opening-stretch interior missing the flag, so the interior light law (no screen tint indoors) could not see it
   weather: "clear",
   width: 13, height: 14,
   playerStart: { x:6, y:12 },
@@ -126,6 +154,8 @@ export const AEON_LAB: any = {
     return buildMap(13, 14, (x, y) => {
       if (x===6&&y===13) return TILE.DOOR;
       if (x===0||x===12||y===0||y===13) return TILE.WALL;
+      if ((x===2||x===10)&&y===1) return TILE.TERMINAL; // BW2 lane: working terminals in the bench block, not generic blocks
+      if ((x===1||x===11)&&y===12) return TILE.PLANT; // BW2 lane: door plants
       if (y>=1&&y<=3) return TILE.BUILDING; // computers / books
       return TILE.PATH; // inside
     });
@@ -191,33 +221,26 @@ export const ROUTE_1: any = {
     { id:"trainer_lass", x:19, y:20, sprite:"👧", name:"Lass Amy", facing:"left", dialog:["My Mochiichao is the cutest!", "It's super bouncy! Watch out!"], postBattleDialog: ["Aww, my cute Mochii...", "You're really strong!"], battle:{ team:[{id:"001",name:"Mochii",hp:38,maxHp:38,atk:35,def:35,spd:45,moves:["Foam Burst","Tackle"],type:"Water", level:4}], reward:100, badge:null } },
     { id:"trainer_hiker", x:14, y:30, sprite:"⛏️", name:"Hiker Dan", facing:"up", dialog:["This path is rough, but my partner is tough!", "Tyrage, show them your earth-shattering power!"], postBattleDialog: ["We crumbled like rocks...", "I'll carve a new path to victory next time."], battle:{ team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:40,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth", level:6}], reward:180, badge:null } },
     { id:"trainer_bugcatcher", x:4, y:6, sprite:"🐛", name:"Bug Catcher Rick", facing:"right", dialog:["I use the tall grass to find bug Mochiichao!"], postBattleDialog: ["I should've caught stronger bugs!"], battle:{ team:[{id:"016",name:"Squirmite",hp:30,maxHp:30,atk:35,def:35,spd:50,moves:["Web Blast","Tackle"],type:"Bug", level:3}], reward:80, badge:null } },
+    // BW2 lane — visible roamers v1 (spec §6): species from this
+    // map's own encounter pool, living in its tall-grass patches on
+    // the existing NPC wander step. They are seen, they wander, they
+    // answer in cries. NOT yet battle-linked: flee/chase behaviour
+    // and touch-encounters are the roamer engine step in ROLLOUT.
+    { id:"roamer_sproutle_r1", creatureId:"038", x:5, y:8, sprite:"", name:"Sproutle", facing:"down", movement:"wander", wanderRadius:2, dialog:["Sproutle! Sprout~!", "(A wild Sproutle, grazing the tall grass.)"] },
+    { id:"roamer_mochii_r1", creatureId:"001", x:17, y:21, sprite:"", name:"Mochii", facing:"down", movement:"wander", wanderRadius:2, dialog:["Mochi! Mochii~!", "(A wild Mochii. It watches you, curious.)"] },
+    { id:"roamer_zephling_r1", creatureId:"019", x:21, y:7, sprite:"", name:"Zephling", facing:"down", movement:"wander", wanderRadius:2, dialog:["Zeph! Zephling!", "(A wild Zephling, quick as the wind.)"] },
   ],
   signs: [
     { x:15, y:35, text:"ROUTE 1.0\nNorth to Silicon Town" },
     { x:12, y:12, text:"TRAINER TIP:\nTap Mochiichao in the wild to encounter them!" }
   ],
   exits: [
-    // Four-fixes lane (gap fix): the south-edge exits used to land
-    // the player at sector0 (x,1) for the same x they crossed at —
-    // but sector0's row 1 is only walkable at x=15 (the gate
-    // corridor); x=13/14/16/17 are the Lab and east building's wall
-    // tiles, so returning players materialised INSIDE the wall and
-    // had to bump back out through the north exit. All five
-    // crossings now land on the corridor tile (15,1), the tile the
-    // northbound gate already uses.
-    ...[13, 14, 15, 16, 17].map(x => ({ x, y: 39, to: "sector0", enterAt: { x: 15, y: 1 }, dir: "down" })),
+    ...buildEdgeExits(13, 17, 39, "sector0", 1, "down"),
     ...buildEdgeExits(13, 17, 0, "binary_fields", 33, "up")
   ],
   doors: [],
   events: [],
-  encounters: [
-    { mapZone:"tall_grass", rate:0.15, pool:[
-        {id:"038",name:"Sproutle",hp:35,maxHp:35,atk:35,def:35,spd:50,moves:["Tackle"],type:"Grass",level:3},
-        {id:"001",name:"Mochii",hp:38,maxHp:38,atk:35,def:35,spd:45,moves:["Foam Burst","Tackle"],type:"Water",level:3},
-        {id:"010",name:"Kittember",hp:34,maxHp:34,atk:42,def:28,spd:55,moves:["Claw","Tackle"],type:"Fire",level:4},
-        {id:"019",name:"Zephling",hp:30,maxHp:30,atk:35,def:30,spd:65,moves:["Wind Blast"],type:"Flying",level:4}
-    ]}
-  ]
+  encounters: []
 };
 
 export const MOCHIIPLEX_1: any = {
@@ -231,15 +254,28 @@ export const MOCHIIPLEX_1: any = {
     return buildMap(15, 12, (x, y) => {
       if ((x===7||x===8)&&y===11) return TILE.DOOR;
       if (x===0||x===14||y===0||y===11) return TILE.WALL;
-      if (y===1||y===2) return TILE.BUILDING;
+      // BW2 lane — no bare interiors: back wall carries the working
+      // set (heal machines + PC terminals + stocked shelves), a real
+      // counter row the staff stand at, seating and door plants.
+      if ((x===5||x===6)&&y===1) return TILE.HEAL_MACHINE;
+      if ((x===11||x===12)&&y===1) return TILE.TERMINAL;
+      if (y===1) return TILE.BUILDING; // stocked shelves (shelf texture)
+      if (y===2&&x>=2&&x<=12) return TILE.COUNTER;
+      if ((x===2||x===3||x===11||x===12)&&y===9) return TILE.BENCH;
+      if ((x===1||x===13)&&y===10) return TILE.PLANT;
       return TILE.PATH;
     });
   })(),
   npcs: [
-    { id: "healer_1", x: 7, y: 3, sprite: "👩‍⚕️", name: "Center Nurse", facing: "down", movement: "wander", wanderRadius: 1, dialog: ["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."], isHeal: true },
-    { id: "shop_1", x: 3, y: 3, sprite: "🛒", name: "Clerk", facing: "down", movement: "wander", wanderRadius: 1, dialog: ["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."], isShop: true }
+    // BW2 lane: staff hold their posts at the counter (roles, not
+    // wanderers) — the nurse heals, the clerk sells, a patient waits.
+    { id: "healer_1", x: 7, y: 3, sprite: "👩‍⚕️", name: "Center Nurse", facing: "down", dialog: ["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."], isHeal: true },
+    { id: "shop_1", x: 3, y: 3, sprite: "🛒", name: "Clerk", facing: "down", dialog: ["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."], isShop: true },
+    { id: "plex_waiting_trainer", x: 11, y: 7, sprite: "🧢", name: "Waiting Trainer", facing: "left", dialog: ["My Zephling got clipped by a Kittember on Route 1.0.", "The nurse says rest here is free. It really is, huh."] }
   ],
-  signs: [],
+  signs: [
+    { x:4, y:2, text:"MOCHII CENTER\nHealing is free — it is always free. Cubes and patches at the west end of the counter." }
+  ],
   exits: [],
   doors: [
     { x:7, y:11, to:"binary_fields", enterAt:{x:24, y:7}, label:"Exit" },
@@ -280,7 +316,17 @@ export const BINARY_FIELDS: any = {
   npcs: [
     { id:"dojo1_guard", x:14, y:9, sprite:"🥋", name:"Dojo Acolyte", facing:"down", movement:"wander", wanderRadius:1, dialog:["The Binary Dojo awaits within!", "Master Lin is the strongest trainer in Silicon Town."] },
     { id:"town_lass", x:10, y:20, sprite:"👧", name:"Town Girl", facing:"down", movement:"wander", wanderRadius:1, dialog:["This is Silicon Town! It's a bustling hub of commerce.", "You should check out the MochiiPlex to the East!"] },
-    { id:"town_oldman", x:23, y:12, sprite:"👴", name:"Old Man", facing:"left", movement:"wander", wanderRadius:1, dialog:["They say before the Mainframe Region was made...", "There was a glowing ethereal creator named Mythar...", "He's the origin of all Mochiichao. A true mythical deity!"] }
+    { id:"town_oldman", x:23, y:12, sprite:"👴", name:"Old Man", facing:"left", movement:"wander", wanderRadius:1, dialog:["They say before the Mainframe Region was made...", "There was a glowing ethereal creator named Mythar...", "He's the origin of all Mochiichao. A true mythical deity!"] },
+    // Living-world placements (world-encounter package): the stranger
+    // arc giver, her creature citizen, and townsfolk for the encounter
+    // director (src/lib/livingWorld.ts, data in
+    // src/data/core/living-world/). Same rules as the Boot Harbor
+    // placements: role names (personal names are owner slots),
+    // creatures speak in cries only.
+    { id:"travelling_herbalist", x:23, y:7, sprite:"🧕", name:"Travelling Herbalist", facing:"down", dialog:["Mind the pack, it bruises. ...Sorry. I'm not usually short with strangers.","My Kittember slipped her lead on Route 1, two dusks past. She won't come to a shout — she comes to the smell of the pack at dusk, when her flame burns low.","West grass, south of the cross path. If you're there at dusk and you see a little flame that won't come closer... just be still. She'll decide."] },
+    { id:"herbalist_kittember", x:25, y:7, sprite:"🐈", name:"Kittember", facing:"left", dialog:["Kittember: *tail-flame low and calm, curled against the herbalist's pack*"] },
+    { id:"field_hand", x:6, y:20, sprite:"🧑‍🌾", name:"Field Hand", facing:"right", dialog:["Pupbble! Here, girl — HERE— ...Sorry. She's been gone since the grass rustled at dawn.","She's small, she's quick, and she's TERRIFIED of strangers. Which is everyone, to her, except me."] },
+    { id:"plex_shopper", x:22, y:9, sprite:"🛍️", name:"Plex Shopper", facing:"down", dialog:["The Plex had a queue out the door this morning. Good. Busy means alive."] }
   ],
   signs: [
     { x:12, y:8, text:"BINARY DOJO\nMaster Lin - The Unbreakable Core" },
@@ -290,12 +336,11 @@ export const BINARY_FIELDS: any = {
   exits: [
     ...buildEdgeExits(13, 17, 34, "route_1", 1, "down"),
     ...buildVertExits(0, 15, 25, "binary_woods", 30, "left"),
-    // Victory Route gate: badges>=8, following the mauveville_arena
-    // 'ciphers>=10' precedent. LIVE since the four-fixes lane's gap
-    // fix: WorldEngine's move() now evaluates exit conditions with
-    // the same isDoorOpen check doors use (before this, the
-    // condition was unenforced metadata and the exit fired with
-    // zero badges).
+    // Victory Route gate: badges>=8 is metadata here, following the
+    // mauveville_arena 'ciphers>=10' precedent. WorldEngine enforces
+    // no exit condition except hasStarter/noStarter events, so the
+    // 8-badge enforcement is OWED by an engine-lane change and is
+    // NOT claimed as live in this PR.
     { x:14, y:0, to:"victory_route", enterAt:{x:14, y:39}, dir:"up", condition:"badges>=8" },
   ],
   doors: [
@@ -320,7 +365,14 @@ export const BINARY_FIELDS: any = {
     // patch the door opened unconditionally, early in Sequence 3.
     { x:24, y:14, to:"dojo_8", enterAt:{x:7, y:16}, label:"Return Dojo — Dojo 8", condition:"badges>=7" }
   ],
-  events: [],
+  events: [
+    // Living-world witnessed scenes (director: src/lib/livingWorld.ts).
+    // Stock step-on presentations of st_stray_in_the_fields and
+    // st_cube_snatch_at_the_plex — the scenes play through the
+    // engine's existing event path today; outcome branching + the
+    // witnessed deed writes resolve through the director (engine
+    // hook specified in the living-world LANDING-RECORD).
+  ],
   encounters: []
 };
 
@@ -419,9 +471,7 @@ export const BINARY_WOODS: any = {
     { id: "hacker_grunt2_event", x:13, y:11, dialog:["Hacker Grunt: The woods belong to the Liberation Front now!"], npc: { name: "Hacker Grunt", sprite: "🕶️" }, battle: { team:[{id:"010",name:"Kittember",hp:36,maxHp:36,atk:55,def:28,spd:68,moves:["Claw","Stare Down"],type:"Fire",level:12}], reward:350, badge:null } },
     { id: "hacker_grunt2_event", x:14, y:11, dialog:["Hacker Grunt: The woods belong to the Liberation Front now!"], npc: { name: "Hacker Grunt", sprite: "🕶️" }, battle: { team:[{id:"010",name:"Kittember",hp:36,maxHp:36,atk:55,def:28,spd:68,moves:["Claw","Stare Down"],type:"Fire",level:12}], reward:350, badge:null } }
   ],
-  encounters: [
-    { mapZone:"tall_grass", rate:0.22, pool:[ {id:"010",name:"Kittember",hp:42,maxHp:42,atk:50,def:38,spd:55,moves:["Claw"],type:"Fire",level:10} ]}
-  ]
+  encounters: []
 };
 
 export const CAVE_OF_ECHOES: any = {
@@ -466,9 +516,7 @@ export const CAVE_OF_ECHOES: any = {
   ],
   doors: [],
   events: [],
-  encounters: [
-    { mapZone:"cave", rate:0.25, pool:[ {id:"004",name:"Razorgater",hp:44,maxHp:44,atk:48,def:54,spd:38,moves:["Chrome Screech","Tackle"],type:"Steel",level:15} ] }
-  ]
+  encounters: []
 };
 
 export const NEON_CITY: any = {
@@ -569,9 +617,7 @@ export const SCRAP_JUNKYARD: any = {
   ],
   doors: [],
   events: [],
-  encounters: [
-    { mapZone:"tall_grass", rate:0.22, pool:[ {id:"005",name:"Chromejaww",hp:58,maxHp:58,atk:62,def:72,spd:40,moves:["Chrome Screech"],type:"Steel",level:20} ]}
-  ]
+  encounters: []
 };
 
 export const CORAL_APPROACH: any = {
@@ -731,13 +777,7 @@ export const DOJO_2: any = {
     { id:"dojo_acolyte_gale", x:3, y:6, sprite:"🥋", name:"Acolyte Gale", facing:"down", dialog:["The wind tests everyone who climbs."], battle:{ team:[{id:"019",name:"Zephling",hp:40,maxHp:40,atk:55,def:35,spd:60,moves:["Tackle","Swift Movement"],type:"Aero",level:17}], reward:500, badge:null } },
     { id:"dojo_acolyte_skye", x:7, y:6, sprite:"🥋", name:"Acolyte Skye", facing:"down", dialog:["Master Falk's wind shows no mercy."], battle:{ team:[{id:"019",name:"Zephling",hp:40,maxHp:40,atk:55,def:35,spd:60,moves:["Tackle","Swift Movement"],type:"Aero",level:18},{id:"020",name:"Aerobeak",hp:60,maxHp:60,atk:75,def:55,spd:80,moves:["Tackle","Swift Movement"],type:"Aero",level:18}], reward:600, badge:null } },
   ],
-  // Four-fixes lane (gap fix): the exit used to land the player at
-  // binary_woods (7,37) — a BUILDING tile in the middle of the dojo's
-  // own exterior wall (escapable only by bumping back into the door).
-  // It now lands at (7,39), the grass in front of the door at (7,38),
-  // the same in-front-of-the-door pattern every other interior exit
-  // uses.
-  exits: [{ x:5, y:15, to:"binary_woods", enterAt:{x:7, y:39}, dir:"down" }], doors: [], events: [], encounters: []
+  exits: [{ x:5, y:15, to:"binary_woods", enterAt:{x:7, y:37}, dir:"down" }], doors: [], events: [], encounters: []
 };
 
 
@@ -793,6 +833,8 @@ export const SECTOR0_HOUSE_1F: any = {
       if (x===6&&y===1) return TILE.STAIRS_UP;
       if (x===6&&y===2) return TILE.PATH; // stair approach, else the stair is unreachable
       if (x===0||x===12||y===0||y===11) return TILE.WALL;
+      if ((x===1||x===11)&&y===10) return TILE.PLANT; // BW2 lane: door plants
+      if (x>=8&&x<=9&&y>=5&&y<=6) return TILE.BUILDING; // BW2 lane: mid-room table island — the room was one big empty floor
       if (y>=1&&y<=2) return TILE.BUILDING; // kitchen counter / table
       return TILE.PATH;
     });
@@ -824,8 +866,8 @@ export const SECTOR0_HOUSE_2F: any = {
     return buildMap(13, 12, (x, y) => {
       if (x===6&&y===11) return TILE.STAIRS_DOWN;
       if (x===0||x===12||y===0||y===11) return TILE.WALL;
-      if (x>=2&&x<=4&&y>=2&&y<=3) return TILE.BUILDING; // PC desk
-      if (x>=8&&x<=10&&y>=2&&y<=3) return TILE.BUILDING; // bed
+      if (x>=2&&x<=4&&y>=2&&y<=3) return TILE.TERMINAL; // BW2 lane: the PC desk is a terminal, not a block
+      if (x>=8&&x<=10&&y>=2&&y<=3) return TILE.BED; // BW2 lane: the bed is a bed
       return TILE.PATH;
     });
   })(),
@@ -865,6 +907,8 @@ export const SECTOR0_RIVAL_HOUSE: any = {
     return buildMap(13, 12, (x, y) => {
       if (x===6&&y===11) return TILE.DOOR;
       if (x===0||x===12||y===0||y===11) return TILE.WALL;
+      if (x===10&&y===1) return TILE.TERMINAL; // BW2 lane: Hex's desk terminal — his house is lived-in differently
+      if ((x===1||x===11)&&y===10) return TILE.PLANT; // BW2 lane: door plants
       if (y>=1&&y<=2) return TILE.BUILDING;
       return TILE.PATH;
     });
@@ -1715,3 +1759,27 @@ export const FULL_WORLD: Record<string, any> = {
   data_isle_7: DATA_ISLE_7,
   region2_arrival: REGION2_ARRIVAL
 };
+
+// Encounter mirror (stub-kill S-6, 2026-10-29): the core tables in
+// src/data/core/encounters.json are the SINGLE source for wild
+// spawns. The four inline zone arrays that used to live in the map
+// literals above were migrated into those tables verbatim and are
+// retired; each map's `encounters` is now DERIVED from its core
+// table at module load (legacy zone shape, for any reader that still
+// looks at the map object). WorldEngine itself rolls through
+// src/lib/encounters.ts and never reads this mirror. If a table and
+// this mirror ever disagree, the table is right by construction —
+// the mirror is generated from it, never edited by hand.
+for (const table of ENCOUNTER_TABLES) {
+  if (table.method === "placed") continue;
+  const map = FULL_WORLD[table.mapId];
+  if (!map) continue;
+  map.encounters = [
+    {
+      mapZone: table.method === "cave" ? "cave" : "tall_grass",
+      rate: table.rate ?? 0,
+      pool: table.slots.map((s) => ({ id: s.speciesId, level: s.minLevel })),
+      mirrorOfCoreTable: table.areaId,
+    },
+  ];
+}
