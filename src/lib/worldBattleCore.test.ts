@@ -9,6 +9,8 @@ import {
   worldBattleHit,
   worldCanActGateLine,
   worldCheckCanAct,
+  worldEndTurnTick,
+  worldStatusTickLine,
 } from "./worldBattleCore";
 
 // Flat battle mons, as WorldEngine builds them: atk/def/spd where
@@ -307,5 +309,33 @@ describe("worldCheckCanAct (S6 step 4: paralysis can-act gate)", () => {
     expect(stuck.canAct).toBe(false);
     expect(stuck.reason).toBe("frozen");
     expect(stuck.patch).toEqual({});
+  });
+});
+
+describe("worldEndTurnTick", () => {
+  it("poison ticks 1/8 max HP: 80 -> 10", () => {
+    const r = worldEndTurnTick({ ...GRASS_FLAT, maxHp: 80, status: "poison" });
+    expect(r).toEqual({ damage: 10, status: "poison", toxicCounter: null });
+  });
+  it("burn ticks 1/8 max HP: 80 -> 10, and the min-1 floor holds at 7 -> 1", () => {
+    expect(worldEndTurnTick({ ...GRASS_FLAT, maxHp: 80, status: "burn" }).damage).toBe(10);
+    expect(worldEndTurnTick({ ...GRASS_FLAT, maxHp: 7, status: "burn" }).damage).toBe(1);
+  });
+  it("a full instance ticks on its own maxHp: burn at 21 -> 2", () => {
+    const r = worldEndTurnTick({ ...WATER_INSTANCE, maxHp: 21, status: "burn" });
+    expect(r.damage).toBe(2);
+    expect(r.status).toBe("burn");
+  });
+  it("toxic ticks 1/16 x counter and the counter rises: 80, counter 2 -> 10, next 3", () => {
+    const r = worldEndTurnTick({ ...GRASS_FLAT, maxHp: 80, status: "toxic", toxicCounter: 2 });
+    expect(r).toEqual({ damage: 10, status: "toxic", toxicCounter: 3 });
+  });
+  it("paralysis and no status do not tick", () => {
+    expect(worldEndTurnTick({ ...GRASS_FLAT, maxHp: 80, status: "paralysis" }).damage).toBe(0);
+    expect(worldEndTurnTick({ ...GRASS_FLAT, maxHp: 80, status: null }).damage).toBe(0);
+  });
+  it("the tick log line matches the resolver's wording", () => {
+    expect(worldStatusTickLine("Sproutle", "poison", 10)).toBe("Sproutle took 10 damage from poison!");
+    expect(worldStatusTickLine("Sproutle", "burn", 2)).toBe("Sproutle took 2 damage from burn!");
   });
 });
