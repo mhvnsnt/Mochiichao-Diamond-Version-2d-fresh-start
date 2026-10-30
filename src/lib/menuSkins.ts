@@ -59,9 +59,19 @@ import './menuSkins.css';
  * - Pause / Bag / Shop are NOT re-wired here: they already render
  *   Y2K styling from earlier batches (.pause-y2k-panel, .bag-y2k,
  *   .shop-y2k in index.css) and are left exactly as they are.
+ *
+ * UI flesh-out (2026-10-30): Bag and Shop DO join the selection
+ * table below — the parity audit's gap G8 (bag/shop had preset
+ * files in docs/ui-art/menu-skins/ but no entry in this code, so a
+ * player could never pick their flavours). Their .bag-y2k /
+ * .shop-y2k classes stay as the 'default' flavour's look, exactly
+ * as the note above promises; the new rows only make the three
+ * shipped flavours selectable, with values verbatim from
+ * bag.y2k-skins.json / shop.y2k-skins.json. Pause stays out (its
+ * panel is the menu-editor's seat, not this table's).
  */
 
-export type MenuSkinMenu = 'pc' | 'party' | 'save' | 'battle' | 'dialogue';
+export type MenuSkinMenu = 'pc' | 'party' | 'save' | 'battle' | 'dialogue' | 'bag' | 'shop';
 export type MenuSkinFlavour = 'default' | 'pastel-day' | 'chrome-midnight' | 'bubblegum-pop';
 
 export interface MenuSkinVariant {
@@ -83,6 +93,8 @@ export const MENU_SKIN_MENUS: { menu: MenuSkinMenu; label: string; presetFile: s
   { menu: 'save', label: 'Save Files', presetFile: 'docs/ui-art/menu-skins/save-slots.y2k-skins.json' },
   { menu: 'battle', label: 'Battle HUD', presetFile: 'docs/ui-art/menu-skins/battle.y2k-skins.json' },
   { menu: 'dialogue', label: 'Dialogue', presetFile: 'docs/ui-art/menu-skins/dialogue.y2k-skins.json' },
+  { menu: 'bag', label: 'Bag', presetFile: 'docs/ui-art/menu-skins/bag.y2k-skins.json' },
+  { menu: 'shop', label: 'Shop', presetFile: 'docs/ui-art/menu-skins/shop.y2k-skins.json' },
 ];
 
 export const MENU_SKIN_FLAVOURS: { flavour: MenuSkinFlavour; label: string }[] = [
@@ -186,6 +198,20 @@ const SKINS: Record<MenuSkinMenu, Record<Exclude<MenuSkinFlavour, 'default'>, Me
   // Verbatim from dialogue.y2k-skins.json (radius 14, matching the
   // --menu-dialogue-radius default the box already uses).
   dialogue: withIds('dialogue', [pastel(14, '#fdf2f8'), chrome(14, '#050810'), bubblegum(14, '#fdf2f8')]),
+  // UI flesh-out (2026-10-30, audit gap G8): verbatim from
+  // bag.y2k-skins.json (radius 28; the preset's three variants are
+  // exactly the shared factory values, like pc/party above).
+  bag: withIds('bag', [pastel(28, '#fdf2f8'), chrome(28, '#0b1526'), bubblegum(28, '#fdf2f8')]),
+  // Verbatim from shop.y2k-skins.json (radius 28). Shop's pastel
+  // differs from the shared factory (pale-yellow fill/background
+  // #fefce8, gold cursor, stars + hearts), so it is written out;
+  // chrome and bubblegum match the factory values.
+  shop: withIds('shop', [{
+    id: 'pastel-day', name: 'Pastel Day', flavour: 'pastel-day',
+    panel: { fill: ['#ffffff', '#fefce8'], border: '#000000', borderWidthPx: 3, radiusPx: 28, selectedFrame: '4px solid #fbbf24 + soft glow' },
+    text: { label: '#0f172a', sublabel: '#334155' }, cursor: '#fbbf24',
+    background: '#fefce8', symbols: 'stars + hearts, pointer-events none, behind panels', gloss: true, glow: false,
+  }, chrome(28, '#0b1526'), bubblegum(28, '#fdf2f8')]),
 };
 
 /** Selected-frame rendering of each preset's selectedFrame string:
@@ -211,7 +237,7 @@ const CHANGE_EVENT = 'mochiichao-menu-skin-changed';
 export type MenuSkinChoices = Record<MenuSkinMenu, MenuSkinFlavour>;
 
 export const DEFAULT_MENU_SKIN_CHOICES: MenuSkinChoices = {
-  pc: 'default', party: 'default', save: 'default', battle: 'default', dialogue: 'default',
+  pc: 'default', party: 'default', save: 'default', battle: 'default', dialogue: 'default', bag: 'default', shop: 'default',
 };
 
 export function loadMenuSkinChoices(): MenuSkinChoices {

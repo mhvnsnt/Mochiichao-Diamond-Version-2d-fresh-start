@@ -9,6 +9,8 @@ import { useMenuLayout } from '../../lib/menuLayoutLive';
 import { getActiveMenuConfig } from '../../lib/menuEditor';
 import { getDayNightMenuVariant, getWorldMenuVariant, dayNightMenuVarStyle } from '../../lib/dayNightMenuVariants';
 import { playCue } from '../../lib/soundCues';
+import { useMenuNavigation } from '../../lib/useMenuNavigation';
+import { postNotice } from '../../lib/uiNotice';
 
 /** In-game pause menu (X / Esc / Menu button). Real game buttons, no brackets. */
 export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle, onNavigate }: {
@@ -100,6 +102,10 @@ export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle
         setTimeout(() => playCue('ui.save'), 160);
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+        // UI kit (2026-10-30): the same confirmation also posts to
+        // the HUD notice channel, so it is still seen when the
+        // player closes the menu before the label swap fades.
+        postNotice('Saved!');
       },
     },
     loadsave: { label: 'Load / Save Files', help: 'Open your save files.', action: onSaveLoad },
@@ -115,6 +121,25 @@ export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle
       action: base[k].action,
     }));
   const safeSelected = Math.min(selected, items.length - 1);
+
+  // UI kit keyboard wiring (2026-10-30): the pause menu gains the
+  // keyboard selection buttonMode.ts records it never had ("the
+  // pause menu — which has no keyboard selection at all" was a
+  // labelled NEED there). Arrows move the same cursor the mouse
+  // moves (wrap on — a short, fully-visible menu), confirm runs
+  // the selected row's action, and Escape / X (the game's B
+  // button) closes to the game. WorldEngine's overworld keys are
+  // guarded off while this menu is open (see WorldEngine), so an
+  // arrow here can never also walk the player.
+  useMenuNavigation({
+    rows: items,
+    selected: safeSelected,
+    onSelect: setSelected,
+    onConfirm: (i) => { items[i]?.action(); },
+    onCancel: onClose,
+    wrap: true,
+    cancelKeys: ['x'],
+  });
 
   return (
     <div className="absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" style={pausePlacementStyle}>

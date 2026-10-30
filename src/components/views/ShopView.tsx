@@ -5,6 +5,10 @@ import { DATA_CARD_COST, DATA_CARD_ID } from '../../lib/monster-tamer-systems';
 import { ITEM_ICONS } from '../../lib/uiArt';
 import { MenuHelpLine } from '../game/MenuList';
 import { useMenuLayout, cssAlignment } from '../../lib/menuLayoutLive';
+import { useMenuSkin, menuSkinVars } from '../../lib/menuSkins';
+import { useMenuNavigation } from '../../lib/useMenuNavigation';
+import UiWindow from '../game/UiWindow';
+import { UiChoiceMenu } from '../game/UiChoiceMenu';
 import { sellPrice } from '../../lib/playableWiring';
 import { shopBuyPrice } from '../../lib/shopPricing';
 import { applyMusic } from '../../lib/musicPlacement';
@@ -67,6 +71,16 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
   const deedLedger = useGameStore(s => s.deedLedger);
   const bandPrice = (cost: number) => shopBuyPrice(cost, deedLedger);
   const [mode, setMode] = useState<'menu' | 'buy' | 'sell'>('menu');
+  // UI kit skin seat (2026-10-30, parity audit gap G8): the shop
+  // joins the per-menu skin table (menuSkins.ts 'shop' row, values
+  // from docs/ui-art/menu-skins/shop.y2k-skins.json). null = the
+  // .shop-y2k default look below, untouched.
+  const skin = useMenuSkin('shop');
+  // UI kit (2026-10-30): the Buy/Sell/Quit menu gains a real
+  // cursor (it rendered a static ► on every row before — there
+  // was no selection to move). Hover/focus move it like every
+  // other menu; useMenuNavigation below moves it by keyboard.
+  const [menuSelected, setMenuSelected] = useState(0);
   // Selection changes on click / keyboard focus ONLY. Hover selection
   // was removed after the 2026-10-27 live playtest: moving the mouse
   // down to the Buy button crossed intervening rows, and the last
@@ -148,6 +162,65 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
     setSelected(0);
   };
 
+  // UI kit keyboard wiring (2026-10-30): every shop surface gains
+  // the menu keyboard model. Before this, the shop's lists and its
+  // Buy/Sell/Quit menu were click/focus only and Escape did
+  // nothing anywhere in the shop — a keyboard player could enter
+  // the shop and never leave it without a mouse. Now: arrows move
+  // the cursor (wrap), Enter runs the highlighted row's own action
+  // (the same handlers the buttons call), and Escape/B steps back
+  // one level — list → Buy/Sell/Quit menu → out of the shop. The
+  // confirm window owns the keyboard while it is open (all three
+  // hooks disable), and its Y/N handler above still answers.
+  const activateMenuRow = (i: number) => {
+    if (i === 0) { playCue('ui.confirm'); setMode('buy'); setSelected(0); }
+    else if (i === 1) { playCue('ui.confirm'); setMode('sell'); setSelected(0); }
+    else { playCue('ui.cancel'); onBack(); }
+  };
+  useMenuNavigation({
+    rows: [{}, {}, {}],
+    selected: menuSelected,
+    onSelect: (i) => { if (i !== menuSelected) playCue('ui.cursor'); setMenuSelected(i); },
+    onConfirm: activateMenuRow,
+    onCancel: () => onBack(),
+    wrap: true,
+    // activateMenuRow plays the decision cues itself (it is the
+    // same code the buttons run), so this hook stays silent.
+    cues: false,
+    enabled: mode === 'menu' && !confirm,
+  });
+  useMenuNavigation({
+    rows: SHOP_ITEMS,
+    selected: Math.min(selected, SHOP_ITEMS.length - 1),
+    onSelect: (i) => { if (i !== selected) playCue('ui.cursor'); setSelected(i); },
+    onConfirm: () => {
+      // Mirrors the Buy button exactly, including its disabled
+      // state: an unaffordable row speaks the error cue instead
+      // of opening a confirm that could only refuse.
+      if (!infiniteMoney && wallet < bandPrice(buySelected.cost)) { playCue('ui.error'); return; }
+      playCue('ui.confirm');
+      setConfirm({ kind: 'buy', id: buySelected.id, name: buySelected.name, price: bandPrice(buySelected.cost) });
+    },
+    onCancel: () => { playCue('ui.cancel'); setMode('menu'); },
+    wrap: true,
+    cues: false,
+    enabled: mode === 'buy' && !confirm,
+  });
+  useMenuNavigation({
+    rows: sellable,
+    selected: Math.min(selected, Math.max(0, sellable.length - 1)),
+    onSelect: (i) => { if (i !== selected) playCue('ui.cursor'); setSelected(i); },
+    onConfirm: () => {
+      if (!sellSelected) return;
+      playCue('ui.confirm');
+      setConfirm({ kind: 'sell', id: sellSelected.id, name: sellSelected.name, price: sellSelected.sellPrice });
+    },
+    onCancel: () => { playCue('ui.cancel'); setMode('menu'); },
+    wrap: true,
+    cues: false,
+    enabled: mode === 'sell' && !confirm && sellable.length > 0,
+  });
+
   // Shop Y2K skin ONLY (per-menu skins 3/8): .shop-y2k (index.css) gives
   // this screen the Y2K skin — glossy yellow gradient, white border,
   // glow, star/heart accents. Buy/Sell/Quit order, stock, prices,
@@ -155,7 +228,7 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
   // sparkles below are decorative (aria-hidden, non-interactive)
   // and sit in the screen's padding corners.
   return (
-    <div className="shop-y2k game-screen flex flex-col p-4 sm:p-6 overflow-hidden bg-[#0b1526]" data-menu-layout={shopMenuLayout.entryId}>
+    <div className="shop-y2k game-screen flex flex-col p-4 sm:p-6 overflow-hidden bg-[#0b1526]" data-menu-layout={shopMenuLayout.entryId} data-menu-skin={skin?.id} style={menuSkinVars(skin)}>
       <span aria-hidden="true" className="pointer-events-none select-none absolute top-2 left-3 text-yellow-200 text-lg">✦</span>
       <span aria-hidden="true" className="pointer-events-none select-none absolute top-2 right-3 text-amber-300 text-lg">♥</span>
       <span aria-hidden="true" className="pointer-events-none select-none absolute bottom-2 left-3 text-yellow-300 text-base">★</span>
@@ -172,9 +245,24 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
 
       {mode === 'menu' && (
         <div className="flex flex-col gap-3 max-w-md">
-          <button onClick={() => { playCue('ui.confirm'); setMode('buy'); setSelected(0); }} className="game-button px-4 py-3 text-left font-bold min-h-[48px]">► Buy</button>
-          <button onClick={() => { playCue('ui.confirm'); setMode('sell'); setSelected(0); }} className="game-button px-4 py-3 text-left font-bold min-h-[48px]">► Sell</button>
-          <button onClick={() => { playCue('ui.cancel'); onBack(); }} className="game-button px-4 py-3 text-left font-bold min-h-[48px]">► Quit</button>
+          {/* UI kit (2026-10-30): the ► is now a real cursor on
+              menuSelected (mouse hover/focus and the keyboard hook
+              all move the same one), with the kit's selected ring —
+              before, every row wore a static ► and nothing was
+              actually selected. Click behaviour is unchanged
+              (activateMenuRow is the buttons' own code). */}
+          {['Buy', 'Sell', 'Quit'].map((label, i) => (
+            <button
+              key={label}
+              onClick={() => activateMenuRow(i)}
+              onMouseEnter={() => { if (i !== menuSelected) playCue('ui.cursor'); setMenuSelected(i); }}
+              onFocus={() => { if (i !== menuSelected) playCue('ui.cursor'); setMenuSelected(i); }}
+              aria-current={i === menuSelected || undefined}
+              className={`game-button px-4 py-3 text-left font-bold min-h-[48px] ${i === menuSelected ? 'ring-2 ring-yellow-300 brightness-125' : 'opacity-90'}`}
+            >
+              {i === menuSelected ? '► ' : ''}{label}
+            </button>
+          ))}
           <MenuHelpLine text="Buy items, sell items from your bag, or leave the shop." />
         </div>
       )}
@@ -265,16 +353,22 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
 
       {confirm && (
         <div className="absolute inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="game-panel p-6 w-full max-w-sm">
+          {/* UI kit (2026-10-30): the transaction confirm is a
+              UiWindow + UiChoiceMenu — same wording, same
+              doConfirm / cancel paths (doConfirm keeps its
+              register/error cues as the choke point), plus
+              arrow-key choice and Escape = No. The Y/N handler
+              above still answers directly. */}
+          <UiWindow className="w-full max-w-sm" ariaLabel={confirm.kind === 'buy' ? `Buy ${confirm.name}?` : `Sell ${confirm.name}?`}>
             <div className="text-white font-bold text-lg mb-2">
               {confirm.kind === 'buy' ? `Buy ${confirm.name} for ${confirm.price} CR?` : `Sell ${confirm.name} for ${confirm.price} CR?`}
             </div>
             <p className="text-sm text-slate-400 mb-4">No money or items change until you confirm.</p>
-            <div className="flex gap-2">
-              <button onClick={doConfirm} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">Yes</button>
-              <button onClick={() => { playCue('ui.cancel'); setConfirm(null); }} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">No</button>
-            </div>
-          </div>
+            <UiChoiceMenu
+              options={['Yes', 'No']}
+              onChoose={(i) => { if (i === 0) doConfirm(); else { playCue('ui.cancel'); setConfirm(null); } }}
+            />
+          </UiWindow>
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import HumanPortrait from './HumanPortrait';
 import StdWindow from './StdWindow';
+import { UiChoiceMenu } from './UiChoiceMenu';
 import { useGameStore } from '../../store/gameStore';
 import { TEXT_SPEED_MS } from '../../lib/gameSettings';
 import { messageWindowStyle } from '../../lib/hudCustom';
@@ -31,6 +32,12 @@ import { playCue } from '../../lib/soundCues';
  *   arrow is hidden and advance completes the dialogue — unless this
  *   is a choice dialogue, in which case YES / NO buttons appear
  *   instead and advance does nothing (the player must choose).
+ *   (2026-10-30, UI kit: the buttons are UiChoiceMenu — a cursor
+ *   menu. Advance on the last page now confirms the HIGHLIGHTED
+ *   answer through the same choose() choke point, arrows move the
+ *   highlight, and Escape/B answers NO; the "advance does nothing"
+ *   rule above is superseded for the last page only. Paging on
+ *   earlier pages is unchanged.)
  * - Portrait on the left: the speaker's human slot when it has art,
  *   otherwise HumanPortrait's silhouette placeholder — never emoji,
  *   never a text-only floating box. Speakers with no sheet yet
@@ -304,9 +311,18 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
             <div className="text-teal-300 text-xs text-right mt-2 animate-pulse">▼</div>
           )}
           {isLast && typingDone && choice && onChoice && (
-            <div className="flex gap-3 mt-3 justify-end">
-              <button onClick={(e) => { e.stopPropagation(); choose(true); }} className="game-button px-6 py-2 font-bold min-h-[48px]">YES</button>
-              <button onClick={(e) => { e.stopPropagation(); choose(false); }} className="game-button px-6 py-2 font-bold min-h-[48px]">NO</button>
+            <div className="mt-3">
+              {/* UI kit (2026-10-30): the YES/NO seat is now the
+                  kit's UiChoiceMenu — same two buttons, same seat,
+                  same choose() choke point for cues and answers,
+                  plus the choice-menu behaviour the source games
+                  have and this box never did: a visible cursor
+                  that arrows move (with wrap), Enter confirms the
+                  highlighted answer, and Escape/B answers NO
+                  instead of trapping a keyboard player. Y/N still
+                  answer directly (handler above), and clicking a
+                  button still answers it. */}
+              <UiChoiceMenu options={['YES', 'NO']} onChoose={(i) => choose(i === 0)} />
             </div>
           )}
         </div>

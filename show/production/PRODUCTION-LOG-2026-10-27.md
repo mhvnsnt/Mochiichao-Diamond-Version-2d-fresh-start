@@ -2179,3 +2179,53 @@ per-sheet record are BlairWitch sheet-format checks; the
 cast sheets are markdown/PNG production sheets). A follow-up
 pass re-checks them and records the result; this entry does
 not claim it.
+
+## 2026-10-30 — UI template kit + menu flesh-out (owner order, this PR)
+
+Owner order 2026-10-30: use all the cn-gigaleak repos and the
+reverse-engineering repos to flesh out the game with templates
+and clean, user-friendly, industry-standard menus/windows/UI.
+
+Search record (per surface): cn-gigaleak + show repos — trees
+(61,122 paths over 55 repos), code search (10 queries; "dialogue
+box" 0 hits), release assets (the 2026-10-30 hunt sweep re-mined:
+148 repos / 490 releases / 6,403 assets); local disk — the
+34-clone Pokemon decomp corpus (pokeheartgold in depth), the
+menu-parity audit, the dialogue lanes. Headline: the CN fleet
+holds NO game-menu/dialogue-box templates (its menu material is
+DVD-menu artwork, all-rights-reserved, study-grade only); the
+game's UI grammar was ported from the decomp family that
+actually holds it (HGSS/Emerald list-menu architecture) and the
+game's own shipped systems. BW2 contributes no UI code (no
+public BW2 decomp exists). Full catalogue + provenance:
+docs/ui-art/UI-TEMPLATE-KIT-2026-10-30.md.
+
+Landed in this PR: one token set (src/lib/uiTokens.ts +
+uiKit.css); navigation logic ported from pokeheartgold
+src/list_menu.c ListMenu_ProcessInput (src/lib/uiMenuNav.ts +
+10 tests) bound to the game's buttonMode translation
+(src/lib/useMenuNavigation.ts); templates UiWindow / UiListMenu
+/ UiChoiceMenu / UiNotice (the notice is ORIGINAL — the corpus
+has no toast system; labelled in its header). Applied: pause
+menu gains the keyboard model buttonMode.ts had recorded as a
+labelled NEED (WorldEngine guard stops overworld keys,
+including held movement, while pause is open — the shared root
+of "no way back / keys leak under menus"); dialogue YES/NO
+becomes UiChoiceMenu (same choose() choke point; Escape = NO);
+Bag and Shop join the menu-skin table, closing parity-audit
+gap G8 in code (values verbatim from docs/ui-art/menu-skins/
+bag/shop.y2k-skins.json); Bag's Mend Patch picker and Toss
+confirm and the Shop's menu cursor, list keyboard model and
+transaction confirm are rebuilt on the kit (before: the picker
+and the shop's confirm were mouse-only and Escape did nothing
+anywhere in the shop). The locked v32 title/main menu is
+untouched; the kit builds under and around it.
+
+Proof: tsc clean; vitest 551/551 (44 files, incl. the kit's
+10 new navigation tests); npm run build passes; 20 screenshots
+of the real app driven end-to-end (title -> settings -> save
+slots -> world -> pause -> bag picker/heal/toss -> shop
+buy-by-keyboard) in the lane record. Gaps stated in the kit
+doc: quantity stepper not yet ported (source named), party
+screen stays its own state machine, documents-archive release
+contents unverified. Left unmerged for Doro's verify + merge.

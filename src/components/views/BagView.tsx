@@ -6,6 +6,11 @@ import { ITEM_ICONS } from '../../lib/uiArt';
 import { MenuHelpLine } from '../game/MenuList';
 import { useMenuLayout } from '../../lib/menuLayoutLive';
 import { playCue } from '../../lib/soundCues';
+import { useMenuSkin, menuSkinVars } from '../../lib/menuSkins';
+import { useMenuNavigation } from '../../lib/useMenuNavigation';
+import UiWindow from '../game/UiWindow';
+import { UiChoiceMenu } from '../game/UiChoiceMenu';
+import { UiListMenu } from '../game/UiListMenu';
 
 /**
  * Bag, v5.2 heal wiring: Mend Patch now actually heals (see Use
@@ -31,6 +36,47 @@ const ITEM_DETAILS: Record<string, { name: string; desc: string; pocket: string 
   revive_core: { name: 'Revive Core', desc: 'Reboots a fainted Mochiichao to 50% capacity.', pocket: 'Medicine' },
   [DATA_CARD_ID]: { name: 'Data Card', desc: 'Stores a captured creature\u2019s data. Swap it at the PC.', pocket: 'Storage' },
 };
+
+/**
+ * MendTargetPicker — the Mend Patch target window, on the UI kit
+ * templates (2026-10-30): a UiWindow holding a UiListMenu whose
+ * rows are the party. Fainted / full-HP members are DISABLED rows
+ * (rendered, greyed, never landable — the kit's LIST_HEADER/disabled
+ * rule), Cancel is the last row and Escape/B reaches it too, so the
+ * window can always be left by keyboard alone. Before the kit, this
+ * window was mouse-only (its buttons had no keyboard model at all).
+ * Row labels keep the exact wording the old buttons carried.
+ */
+function MendTargetPicker({ party, mendCur, onHeal, onCancel }: {
+  party: any[];
+  mendCur: (m: any) => number;
+  onHeal: (idx: number) => void;
+  onCancel: () => void;
+}) {
+  const [selected, setSelected] = useState(() => {
+    const first = party.findIndex((m: any) => { const c = mendCur(m); return c > 0 && c < m.maxHp; });
+    return first >= 0 ? first : 0;
+  });
+  const items = party.map((m: any, i: number) => {
+    const cur = mendCur(m);
+    const usable = cur > 0 && cur < m.maxHp;
+    return {
+      label: `${m.nickname || 'Your Mochiichao'} — ${cur}/${m.maxHp} HP${usable ? '' : cur <= 0 ? ' (fainted)' : ' (full HP)'}`,
+      disabled: !usable,
+      action: () => onHeal(i),
+    };
+  });
+  return (
+    <div className="absolute inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+      <UiWindow className="w-full max-w-sm" ariaLabel="Heal who with a Mend Patch?">
+        <div className="text-white font-bold text-lg mb-2">Heal who with a Mend Patch?</div>
+        <p className="text-sm text-slate-400 mb-4">Restores 50 HP. Fainted members cannot be revived by a Mend Patch.</p>
+        <UiListMenu items={items} selected={selected} onSelect={setSelected} onCancel={onCancel} wrap={false} gapPx={8} />
+        <button onClick={() => { playCue('ui.cancel'); onCancel(); }} className="game-button px-4 py-2 font-bold min-h-[48px] w-full mt-3">Cancel</button>
+      </UiWindow>
+    </div>
+  );
+}
 
 function ItemIcon({ id }: { id: string }) {
   const slot = ITEM_ICONS[id];
@@ -89,6 +135,12 @@ export default function BagView({ onBack }: { onBack: () => void }) {
   const [confirmToss, setConfirmToss] = useState(false);
   const [mendSelect, setMendSelect] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  // UI kit skin seat (2026-10-30, parity audit gap G8): the bag
+  // joins the per-menu skin table (menuSkins.ts 'bag' row, values
+  // from docs/ui-art/menu-skins/bag.y2k-skins.json). null = the
+  // .bag-y2k default look below, untouched; a picked flavour
+  // restyles via data-menu-skin + variables like PcView/RosterView.
+  const skin = useMenuSkin('bag');
 
   const entries = Object.entries(inventory)
     .filter(([, count]) => count > 0)
@@ -159,13 +211,34 @@ export default function BagView({ onBack }: { onBack: () => void }) {
     setMendSelect(false);
   };
 
+  // UI kit keyboard wiring (2026-10-30): the item list gains the
+  // menu keyboard model it never had — arrows move the same cursor
+  // the mouse moves (selectEntry, so the per-pocket cursor model
+  // above hears every move), Left/Right page through the pockets,
+  // and Escape (the B button) leaves the bag, like Quit/Close.
+  // Disabled while either overlay window is open (they own the
+  // keyboard then). Enter is deliberately NOT bound here: focus +
+  // native button activation already runs Use/Toss/Quit, and the
+  // rows themselves only select.
+  useMenuNavigation({
+    rows: entries,
+    selected: Math.min(selected, Math.max(0, entries.length - 1)),
+    onSelect: (i) => { const e = entries[i]; if (e) selectEntry(i, e.pocket); },
+    onCancel: () => { playCue('ui.cancel'); onBack(); },
+    wrap: true,
+    // selectEntry already plays the cursor cue (it is this
+    // screen's selection choke point), so the hook stays silent.
+    cues: false,
+    enabled: !confirmToss && !mendSelect && entries.length > 0,
+  });
+
   // Bag Y2K skin ONLY (per-menu skins 2/8): .bag-y2k (index.css) gives
   // this screen the Y2K skin — glossy green gradient, white border,
   // glow, star/heart accents. Pocket order, inputs, and behaviour are
   // unchanged; the sparkles below are decorative (aria-hidden,
   // non-interactive) and sit in the screen's padding corners.
   return (
-    <div className="bag-y2k game-screen flex flex-col p-4 sm:p-6 overflow-hidden bg-[#0b1526]" data-menu-layout={bagMenuLayout.entryId}>
+    <div className="bag-y2k game-screen flex flex-col p-4 sm:p-6 overflow-hidden bg-[#0b1526]" data-menu-layout={bagMenuLayout.entryId} data-menu-skin={skin?.id} style={menuSkinVars(skin)}>
       <span aria-hidden="true" className="pointer-events-none select-none absolute top-2 left-3 text-lime-200 text-lg">✦</span>
       <span aria-hidden="true" className="pointer-events-none select-none absolute top-2 right-3 text-yellow-300 text-lg">♥</span>
       <span aria-hidden="true" className="pointer-events-none select-none absolute bottom-2 left-3 text-emerald-200 text-base">★</span>
@@ -304,35 +377,27 @@ export default function BagView({ onBack }: { onBack: () => void }) {
         </div>
       )}
       {mendSelect && (
-        <div className="absolute inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="game-panel p-6 w-full max-w-sm">
-            <div className="text-white font-bold text-lg mb-2">Heal who with a Mend Patch?</div>
-            <p className="text-sm text-slate-400 mb-4">Restores 50 HP. Fainted members cannot be revived by a Mend Patch.</p>
-            <div className="flex flex-col gap-2">
-              {party.map((m: any, i: number) => {
-                const cur = mendCur(m);
-                const usable = cur > 0 && cur < m.maxHp;
-                return (
-                  <button key={i} disabled={!usable} onClick={() => healMember(i)} className="game-button px-4 py-2 font-bold min-h-[48px] text-left disabled:opacity-40">
-                    {m.nickname || 'Your Mochiichao'} — {cur}/{m.maxHp} HP{usable ? '' : cur <= 0 ? ' (fainted)' : ' (full HP)'}
-                  </button>
-                );
-              })}
-              <button onClick={() => { playCue('ui.cancel'); setMendSelect(false); }} className="game-button px-4 py-2 font-bold min-h-[48px]">Cancel</button>
-            </div>
-          </div>
-        </div>
+        <MendTargetPicker
+          party={party}
+          mendCur={mendCur}
+          onHeal={healMember}
+          onCancel={() => setMendSelect(false)}
+        />
       )}
       {confirmToss && current && (
         <div className="absolute inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="game-panel p-6 w-full max-w-sm">
+          {/* UI kit (2026-10-30): the toss confirm is a UiWindow +
+              UiChoiceMenu — same wording, same doTossYes / cancel
+              paths, plus arrow-key choice and Escape = No. The
+              v5.3 Y/N handler above still answers directly. */}
+          <UiWindow className="w-full max-w-sm" ariaLabel={`Toss one ${current.name}?`}>
             <div className="text-white font-bold text-lg mb-2">Toss one {current.name}?</div>
             <p className="text-sm text-slate-400 mb-4">It will be removed from your bag.</p>
-            <div className="flex gap-2">
-              <button onClick={doTossYes} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">Yes</button>
-              <button onClick={() => { playCue('ui.cancel'); setConfirmToss(false); }} className="game-button px-4 py-2 font-bold min-h-[48px] flex-1">No</button>
-            </div>
-          </div>
+            <UiChoiceMenu
+              options={['Yes', 'No']}
+              onChoose={(i) => { if (i === 0) doTossYes(); else { playCue('ui.cancel'); setConfirmToss(false); } }}
+            />
+          </UiWindow>
         </div>
       )}
     </div>

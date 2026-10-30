@@ -1,0 +1,89 @@
+/*
+ * uiKit.css — styles for the UI template kit (UiWindow / UiListMenu /
+ * UiChoiceMenu / UiNotice), driven by the uiTokens token set
+ * (src/lib/uiTokens.ts, which imports this file — the same pattern
+ * menuSkins.ts uses for menuSkins.css).
+ *
+ * Rules here style ONLY kit-owned classes. The shared frame classes
+ * (.game-panel / .std-window / .game-button / .game-title) are NOT
+ * redefined — kit components render those classes and inherit the
+ * one frame, the skins, and the day/night variants untouched.
+ */
+:root {
+  --ui-space-row: 15px;
+  --ui-window-pad: 16px;
+  --ui-type-help: 14px;
+  --ui-type-body: 16px;
+  --ui-frame-panel: #16233a;
+  --ui-frame-border: #22d3ee;
+  --ui-frame-accent: #fbbf24;
+  --ui-frame-text: #f1f5f9;
+  --ui-frame-danger: #ef4444;
+  --ui-frame-radius: 14px;
+  --ui-min-target: 48px;
+}
+
+.ui-window {
+  padding: var(--ui-window-pad);
+}
+
+.ui-window-title {
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.ui-window-close {
+  min-width: var(--ui-min-target);
+  min-height: var(--ui-min-target);
+  padding: 0 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+/* Section header row inside a UiListMenu (HGSS LIST_HEADER seat):
+ * visible structure, never selectable, never focusable. */
+.ui-list-header {
+  padding: 4px 8px;
+  font-size: var(--ui-type-help);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+/* Disabled rows stay legible but unmistakably inactive — greyer
+ * than the resting 0.9-opacity rows, no pointer affordance. The
+ * native :disabled rule on .game-button already halves opacity;
+ * this adds the desaturation so state reads at a glance. */
+.ui-list-disabled {
+  filter: grayscale(0.7);
+  cursor: not-allowed;
+}
+
+/* Scroll affordances at the edges of a scrolled UiListMenu window
+ * (▲ above the first row / ▼ below the last, only while more rows
+ * exist in that direction — the shop list's shipped pattern). */
+.ui-list-scroll {
+  text-align: center;
+  font-size: 12px;
+  color: #7dd3fc;
+  line-height: 1;
+}
+
+/* HUD notification (UiNotice): a base-register StdWindow toast,
+ * bottom-centre above the dialogue layer, pointer-transparent so
+ * it never blocks play. It carries UI feedback text only. */
+.ui-notice {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(5.5rem, calc(5.5rem + env(safe-area-inset-bottom)));
+  z-index: 90;
+  pointer-events: none;
+  padding: 10px 18px;
+  font-weight: 700;
+  font-size: var(--ui-type-body);
+  color: var(--ui-frame-text);
+  text-align: center;
+  max-width: min(92vw, 34rem);
+}

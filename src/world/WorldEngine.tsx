@@ -1617,15 +1617,21 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   // walking stays 140 ms. Mom's dialogue promises exactly this
   // ("Hold B and you can run"); before, nothing read the key.
   useEffect(() => {
-    if (!heldDir || screen !== "overworld" || isTransitioning) return;
+    if (!heldDir || screen !== "overworld" || isTransitioning || pauseOpen) return;
     const interval = setInterval(() => {
       move(heldDir.dx, heldDir.dy);
     }, (useGameStore.getState().fastForward || (sprintHeld && hasSprintBoots)) ? 70 : 140);
     return () => clearInterval(interval);
-  }, [heldDir, move, screen, isTransitioning, sprintHeld, hasSprintBoots]);
+  }, [heldDir, move, screen, isTransitioning, sprintHeld, hasSprintBoots, pauseOpen]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // UI template kit (2026-10-30): while the pause menu is open
+      // it owns the keyboard (GameShell's PauseMenu runs the kit
+      // navigation model). Before this guard, this handler kept
+      // processing keys behind the open menu: arrows walked the
+      // player under it and Escape re-opened instead of closing.
+      if (pauseOpen) return;
       if (screen === "overworld") {
         // Sequence build: keyboard holds route through heldDir,
         // exactly like the touch D-pad (pointer down = one step +
@@ -1721,7 +1727,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [screen, move, dialog, playerPos, playerDir, battleState, buttonMode, battleMenu, doModeSwap, doEngage, doDistract]);
+  }, [screen, move, dialog, playerPos, playerDir, battleState, buttonMode, battleMenu, doModeSwap, doEngage, doDistract, pauseOpen]);
 
   const interact = () => {
     let dx = 0, dy = 0;

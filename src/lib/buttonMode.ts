@@ -21,9 +21,11 @@
  *   Settings Menu Creator pages (Q/E flip pages 1-4), the Settings
  *   row value (Q/E cycle the focused row), and the battle move
  *   list (Q/E move the selected move). Screens with no list
- *   (dialogue, overworld field, pause menu — which has no keyboard
- *   selection at all) get no shoulder action; that is NEED, not
- *   a silent no-op claimed as wired.
+ *   (dialogue, overworld field) get no shoulder action; that is
+ *   NEED, not a silent no-op claimed as wired. (2026-10-30, UI
+ *   kit: the pause menu HAS a list now — GameShell wires it
+ *   through useMenuNavigation, so Q/E page-flip and the L = A
+ *   copy below apply there like on every other list surface.)
  * - L_EQUALS_A (value 2): FireRed main.c copies L onto A for both
  *   new and held presses. On the web, the 'l' key therefore does
  *   exactly what Enter / Space does, on every surface where A

@@ -17,6 +17,7 @@ import CheatConsoleView from './components/views/CheatConsoleView';
 import IntroSequence from './components/IntroSequence';
 import { playMusic } from './lib/music';
 import MochiiMindUI from './components/MochiiMindUI';
+import UiNotice from './components/game/UiNotice';
 
 export type ViewState = 'STARTER_SELECT' | 'WORLD' | 'BATTLE' | 'ROSTER' | 'SHOP' | 'BAG' | 'PC' | 'GARDEN' | 'RING' | 'ARENA' | 'CREATURE' | 'CHEATS' | 'DEX';
 
@@ -67,6 +68,13 @@ export default function App() {
       <div className="z-[101]">
         <MochiiMindUI isOpen={isMindOpen} onClose={() => setIsMindOpen(false)} />
       </div>
+
+      {/* UI kit HUD notification host (2026-10-30): renders the
+          uiNotice bus as a StdWindow toast — feedback posted by
+          any screen (first producer: the pause menu's Save row)
+          stays visible across screen changes. Renders nothing
+          while no notice is posted. */}
+      <UiNotice />
     </div>
   );
 }
