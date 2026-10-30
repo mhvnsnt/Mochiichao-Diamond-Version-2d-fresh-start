@@ -84,3 +84,7 @@ folder — is classified under the project's working method, the
 **construction-kit rule**: [`show/WORKING-METHOD.md`](../../WORKING-METHOD.md).
 
 **Owner doctrine quoted at List 30 landing (2026-10-27, from #296).** "Spectacle is per-power-family — every power gets its own staging grammar; speed is one family among them." This is an owner ruling carried by #296 (`show/production/296-SONIC-GRAMMAR.md`); List 32's per-family packages cite it from here.
+
+## Later addition — the show standard's research base (2026-10-29)
+
+- [`2026-10-29-pokemon-anime-production/REPORT.md`](2026-10-29-pokemon-anime-production/REPORT.md) — the owner's show standard (owner law 2026-10-29: the Mochiichao show is made like the Pokémon anime, full stack, bar at first-episode level) with the sourced production research under it: 300+ shots and 4,000–5,000 drawings per episode (OLM producer, via AWN), Iwane's cuts and timing account (Animage 2015), the 8-stage pipeline and the bank system (Bulbapedia), and honest flags where numbers are not published (TV average shot length, angles per scene). Research base for the show pipeline plan; pairs with the 2026-10-28 TV spec gap analysis above.
