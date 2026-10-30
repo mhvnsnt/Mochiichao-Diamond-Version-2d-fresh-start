@@ -13,11 +13,11 @@
      "method": "grass",
      "slots": [
       {
-       "habitatClass": null,
+       "habitatClass": "canopy",
        "maxLevel": null,
        "minLevel": null,
        "speciesId": "kittember",
-       "status": "canon-prose, numbers owed: season canon map lists wild Kittember among the Forest's canon contents; no canon source numbers its levels or rate",
+       "status": "canon-prose, numbers owed: season canon map lists wild Kittember among the Forest's canon contents; no canon source numbers its levels or rate | habitatClass canopy (S2 Landing 1): grass x dark-forest-surface [canopy, small-ground], zone-primary class; the bundle note defines grass here as forest-floor walking in this zone. Levels/weight stay null \u2014 binding invents no numbers.",
        "timeOfDay": null,
        "weather": null,
        "weight": null
