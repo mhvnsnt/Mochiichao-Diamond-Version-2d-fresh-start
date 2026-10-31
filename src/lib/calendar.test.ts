@@ -4,6 +4,7 @@
 // only (CLOCK §5.3: fiction day names are canon, not filled here),
 // so no test asserts a day name.
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { useGameStore } from "../store/gameStore";
 import {
   announcementsForDay,
@@ -271,5 +272,32 @@ describe("publishScheduleAnnouncements store method (S12 slice 3, through the re
       "schedule:a:9",
       "schedule:a:10",
     ]);
+  });
+});
+
+describe("PauseMenu announcements section source lock (S12 slice 4)", () => {
+  it("the section reads the store list through announcementsForDay and renders inside the pause panel, without adding a menu row", () => {
+    const src = readFileSync(
+      new URL("../components/game/GameShell.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(src).toContain("announcementsForDay");
+    expect(src).toContain("deriveWorldState");
+    expect(src).toContain("Announcements");
+    expect(src).toContain("No announcements today.");
+    expect(src).toContain("No announcements yet.");
+    expect(src).toContain("<AnnouncementsSection />");
+    // No new row: the pause rows record gains no announcements key.
+    expect(src).not.toMatch(/announcements:\s*\{ label/);
+    // The section reads the store list, not a new data file.
+    expect(src).toContain("useGameStore(s => s.announcements)");
+  });
+  it("today-filtering is exactly announcementsForDay: other days never appear today", () => {
+    const list: readonly Announcement[] = [
+      { id: "schedule:a:9", dayIndex: 9, kind: "calendar", text: "Yesterday's row." },
+      { id: "schedule:a:10", dayIndex: 10, kind: "calendar", text: "Today's row." },
+    ];
+    expect(announcementsForDay(list, 10).map((a) => a.text)).toEqual(["Today's row."]);
+    expect(announcementsForDay(list, 11)).toEqual([]);
   });
 });
