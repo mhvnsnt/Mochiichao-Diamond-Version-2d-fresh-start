@@ -18,7 +18,7 @@ import { worldFullPp } from '../lib/worldBattleCore';
 import { backfillIndividuals, driftLeadMood, followerLeadId, resetLeadMoodOnChange, withMoodEvent } from '../lib/individual';
 import { withPendingHandover, type PendingFindHandover } from '../lib/followerFind';
 import { withResearchTally, type ResearchTallies } from '../lib/research';
-import { publishAnnouncement as publishAnnouncementList, type Announcement } from '../lib/calendar';
+import { publishAnnouncement as publishAnnouncementList, publishScheduleAnnouncements as publishScheduleAnnouncementsList, type Announcement, type CalendarContext, type ScheduleEntry } from '../lib/calendar';
 
 interface GameState {
   playerName: string;
@@ -61,6 +61,14 @@ interface GameState {
   // slice publishes nothing of its own.
   announcements: readonly Announcement[];
   publishAnnouncement: (ann: Announcement) => void;
+  // Announcements (gap-fill S12 slice 3, G-17 calendar publisher):
+  // the store half of slice 3's pure publisher. Rows, context, and
+  // text are all caller-supplied; this method publishes nothing of
+  // its own, and a no-op run keeps the same list reference, so the
+  // store skips the set exactly as slices 2's publishAnnouncement
+  // does. No host calls this yet — the day-change hook is a later
+  // slice — and no schedule rows or text live here.
+  publishScheduleAnnouncements: (entries: readonly ScheduleEntry[], ctx: CalendarContext, dayIndex: number, textFor: (entry: ScheduleEntry) => string | null | undefined) => void;
   completedEvents: string[];
   defeatedTrainers: string[];
   
@@ -302,6 +310,11 @@ export const useGameStore = create<GameState>((set, get) => ({
   publishAnnouncement: (ann) => {
     const current = get().announcements;
     const next = publishAnnouncementList(current, ann);
+    if (next !== current) set({ announcements: next });
+  },
+  publishScheduleAnnouncements: (entries, ctx, dayIndex, textFor) => {
+    const current = get().announcements;
+    const next = publishScheduleAnnouncementsList(current, entries, ctx, dayIndex, textFor);
     if (next !== current) set({ announcements: next });
   },
   completedEvents: [],
