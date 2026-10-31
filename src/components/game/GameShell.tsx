@@ -10,6 +10,45 @@ import { useMenuLayout } from '../../lib/menuLayoutLive';
 import { getActiveMenuConfig } from '../../lib/menuEditor';
 import { getDayNightMenuVariant, getWorldMenuVariant, dayNightMenuVarStyle } from '../../lib/dayNightMenuVariants';
 import { playCue } from '../../lib/soundCues';
+import { announcementsForDay } from '../../lib/calendar';
+import { deriveWorldState } from '../../lib/worldClock';
+
+/**
+ * Gap-fill S12 slice 4 — the pause menu's first announcement reader.
+ * It reads ONLY the store's published list (slices 2–3) through slice
+ * 1's announcementsForDay: when the save is clock-anchored, the
+ * section shows today's announcements (dayIndex from S1's
+ * deriveWorldState over the anchor, the same derivation the engine
+ * uses); when no anchor exists yet it falls back to the whole list,
+ * so a published announcement is never hidden by a missing clock.
+ * It adds NO menu row — the pause rows, their order, and their
+ * actions are the menu-editor config's job, untouched here — and it
+ * publishes nothing, so an empty list honestly reads as no news
+ * rather than borrowing another system's text. A published
+ * announcement for any other day simply does not appear today;
+ * history (announcementsSince) is a later slice's reader, not
+ * silently folded in here.
+ */
+function AnnouncementsSection() {
+  const announcements = useGameStore(s => s.announcements);
+  const anchor = useGameStore(s => s.worldClock);
+  const today = anchor ? deriveWorldState(anchor, Date.now()).dayIndex : null;
+  const shown = today === null ? announcements : announcementsForDay(announcements, today);
+  return (
+    <div className="mt-4">
+      <div className="font-bold text-white text-sm">Announcements</div>
+      {shown.length === 0 ? (
+        <div className="text-xs text-slate-400 mt-1">{today === null ? 'No announcements yet.' : 'No announcements today.'}</div>
+      ) : (
+        <div className="text-sm text-slate-300 mt-1 space-y-1">
+          {shown.map((ann) => (
+            <div key={ann.id}>{ann.text}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** In-game pause menu (X / Esc / Menu button). Real game buttons, no brackets. */
 export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle, onNavigate }: {
@@ -130,6 +169,7 @@ export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle
         <h2 className="game-title text-2xl text-center mb-2">{pauseCfg.title}</h2>
         <MenuList items={items} selected={safeSelected} onSelect={setSelected} gapPx={pauseMenuLayout.overrides.rowSpacing} />
         {pauseMenuLayout.overrides.helpBar !== false && <MenuHelpLine text={items[safeSelected]?.help || ''} />}
+        <AnnouncementsSection />
       </UiPanel>
     </div>
   );
