@@ -54,10 +54,14 @@
 //   and stays empty; this transform fills nothing).
 //
 // Deliberately NOT here: NO pressure tally (no stored battle counts,
-// no window, no decay-on-tick — that is the next slice); NO host
-// call site in encounters.ts or WorldEngine (the roll site keeps
-// rolling the untransformed tables until a host adopts this with a
-// tally); NO level-band change (pressure touches weights only);
+// no window, no decay-on-tick — that is the next slice); NO
+// level-band change (pressure touches weights only);
+// S13 slice 4 (2026-10-31) supersedes the host half of this note:
+// encounters.ts now adopts this transform via applyRollOverlays
+// (season, then pressure), fed by the tally's BattlePressure shape.
+// WorldEngine still calls the unoverlaid roll, so live play is
+// unchanged until the engine slice passes live pressure; no
+// pressure data is authored yet.
 // NO swarm/positive overlay (the other hand of the layer, separate);
 // NO pressure data for any area or species.
 
