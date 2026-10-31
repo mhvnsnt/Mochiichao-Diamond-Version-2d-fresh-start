@@ -191,9 +191,9 @@ describe("battlePressureTableCanRoll", () => {
   });
 });
 
-describe("S13 slice-2 staging lock", () => {
-  it("no host adopts the transform yet: encounters.ts does not import it", () => {
+describe("S13 slice-4 adoption lock (retires the slice-2 staging lock)", () => {
+  it("the roll module adopts the transform: encounters.ts imports it", () => {
     const src = readFileSync(new URL("./encounters.ts", import.meta.url), "utf8");
-    expect(src).not.toContain("battlePressure");
+    expect(src).toContain("battlePressure");
   });
 });
