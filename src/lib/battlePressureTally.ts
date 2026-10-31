@@ -54,6 +54,18 @@
 // window, or decay rate for
 // any area or species; NO swarm/positive overlay; NO level-band
 // change (tally touches pressure levels only, never slot levels).
+// S13 slice 5 (2026-10-31) gives the tally its stored facts: the
+// game store gains pressureEvents + appendPressureEvent (validated
+// by assertValidPressureEvent above, so a stored fact is always
+// tallyable) + a battlePressures reader, and this module gains
+// the one-call host composition pressuresFromPressureEvents.
+// Deliberately STILL NOT here: NO battle-end call site in
+// WorldEngine (nothing appends yet — the call site is a later
+// slice, which must also settle which battles count: wild only
+// vs all battles fought in the area); NO authored bands, window,
+// or decay rate for any area or species; NO WorldEngine roll
+// call-site change (the engine still calls the unoverlaid roll);
+// NO swarm/positive overlay; NO depths-table change.
 
 import type { BattlePressure } from "./battlePressure";
 
@@ -85,6 +97,26 @@ export interface PressureBand {
   level: number;
 }
 
+/**
+ * Validate one pressure event the way the tally does: non-empty
+ * area and species ids and an integer dayIndex >= 0. The store's
+ * writer (gap-fill S13 slice 5) calls this so a stored fact is
+ * always tallyable; the tally itself calls it too, so there is
+ * one rule, not two. Throws loudly naming the offending field.
+ */
+export function assertValidPressureEvent(event: PressureEvent): void {
+  if (!event.areaId || !event.speciesId) {
+    throw new Error(
+      `pressureTally: event for area "${event.areaId}" species "${event.speciesId}" has an empty id — refusing to tally`,
+    );
+  }
+  if (!isIntegerAtLeastZero(event.dayIndex)) {
+    throw new Error(
+      `pressureTally: event for species "${event.speciesId}" has dayIndex ${String(event.dayIndex)}, which must be an integer >= 0`,
+    );
+  }
+}
+
 function isIntegerAtLeastZero(value: number): boolean {
   return Number.isInteger(value) && value >= 0;
 }
@@ -114,16 +146,7 @@ export function tallyPressureEvents(
   }
   const counts = new Map<string, PressureCount>();
   for (const event of events) {
-    if (!event.areaId || !event.speciesId) {
-      throw new Error(
-        `pressureTally: event for area "${event.areaId}" species "${event.speciesId}" has an empty id — refusing to tally`,
-      );
-    }
-    if (!isIntegerAtLeastZero(event.dayIndex)) {
-      throw new Error(
-        `pressureTally: event for species "${event.speciesId}" has dayIndex ${String(event.dayIndex)}, which must be an integer >= 0`,
-      );
-    }
+    assertValidPressureEvent(event);
     if (event.dayIndex < window.startDay || event.dayIndex > window.endDay) {
       continue;
     }
@@ -206,6 +229,22 @@ export function pressureLevelsFromCounts(
   return [...byArea.entries()]
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([areaId, pressures]) => ({ areaId, pressures }));
+}
+
+/**
+ * Host one-call shape (gap-fill S13 slice 5): stored facts ->
+ * counts in the window -> levels through the caller's bands.
+ * Pure composition over the two functions above, no new rule,
+ * so a host never composes tally-then-bands itself and cannot
+ * drift into its own order. The store's battlePressures reader
+ * is exactly this call over its stored facts.
+ */
+export function pressuresFromPressureEvents(
+  events: readonly PressureEvent[],
+  window: PressureWindow,
+  bands: readonly PressureBand[],
+): BattlePressure[] {
+  return pressureLevelsFromCounts(tallyPressureEvents(events, window), bands);
 }
 
 /**
