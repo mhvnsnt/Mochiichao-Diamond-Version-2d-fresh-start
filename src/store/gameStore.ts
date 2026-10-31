@@ -18,6 +18,7 @@ import { worldFullPp } from '../lib/worldBattleCore';
 import { backfillIndividuals, driftLeadMood, followerLeadId, resetLeadMoodOnChange, withMoodEvent } from '../lib/individual';
 import { withPendingHandover, type PendingFindHandover } from '../lib/followerFind';
 import { withResearchTally, type ResearchTallies } from '../lib/research';
+import { publishAnnouncement as publishAnnouncementList, type Announcement } from '../lib/calendar';
 
 interface GameState {
   playerName: string;
@@ -44,6 +45,22 @@ interface GameState {
   // content (#97: zero instanced) and writers are slice 3.
   research: ResearchTallies;
   recordResearchTally: (speciesId: string, taskId: string, by?: number) => void;
+  // Announcements (gap-fill S12 slice 2, G-17 store half): the ONLY
+  // stored announcement state — the published list itself, in
+  // publish order. No publisher lives here and no reader lives
+  // here: publishers (the calendar, later the ecology branches)
+  // call publishAnnouncement, and readers use slice 1's
+  // announcementsForDay / announcementsSince over this list.
+  // Publishing an invalid or duplicate-id announcement is a
+  // no-op that keeps the same list reference (slice 1's rule),
+  // so the store skips the set exactly as the research section
+  // does. SaveMenu serializes the whole store, so this list
+  // persists with saves like dex; old saves carry no field and
+  // load with the empty default through loadState's spread.
+  // Announcement TEXT is publisher-supplied content — this
+  // slice publishes nothing of its own.
+  announcements: readonly Announcement[];
+  publishAnnouncement: (ann: Announcement) => void;
   completedEvents: string[];
   defeatedTrainers: string[];
   
@@ -280,6 +297,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     const current = get().research;
     const next = withResearchTally(current, speciesId, taskId, by);
     if (next !== current) set({ research: next });
+  },
+  announcements: [],
+  publishAnnouncement: (ann) => {
+    const current = get().announcements;
+    const next = publishAnnouncementList(current, ann);
+    if (next !== current) set({ announcements: next });
   },
   completedEvents: [],
   defeatedTrainers: [],
