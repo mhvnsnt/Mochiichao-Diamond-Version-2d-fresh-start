@@ -4,7 +4,9 @@
 // small/standard/large) — no value here comes from running the code first.
 import { describe, expect, it } from "vitest";
 import {
+  MOOD_EVENT_DELTAS,
   applyMoodDelta,
+  applyMoodEvent,
   backfillIndividuals,
   driftLeadMood,
   followerLeadId,
@@ -17,6 +19,7 @@ import {
   rollPersonalitySeed,
   varianceFromSeed,
   validatePersonalitySeed,
+  withMoodEvent,
 } from "./individual";
 import { createMochii } from "./engine";
 import { useGameStore } from "../store/gameStore";
@@ -330,5 +333,45 @@ describe("individual backfill through loadState (S7 slice 2, the real funnel)", 
     useGameStore.getState().loadState({ wallet: 42 } as never);
     expect(useGameStore.getState().party).toBe(before);
     expect(useGameStore.getState().wallet).toBe(42);
+  });
+});
+
+describe("mood event economy (S8 slice 3, TEARDOWN-HGSS §1 deltas)", () => {
+  it("carries the teardown's exact event deltas", () => {
+    expect(MOOD_EVENT_DELTAS).toEqual({
+      "level-up": 40,
+      "battle-item": 10,
+      vitamin: 8,
+      "poison-recovery-1hp": -50,
+    });
+  });
+
+  it("applies each event delta, clamped at the range ends", () => {
+    expect(applyMoodEvent(0, "level-up")).toBe(40);
+    expect(applyMoodEvent(100, "level-up")).toBe(127);
+    expect(applyMoodEvent(-90, "level-up")).toBe(-50);
+    expect(applyMoodEvent(0, "battle-item")).toBe(10);
+    expect(applyMoodEvent(0, "vitamin")).toBe(8);
+    expect(applyMoodEvent(0, "poison-recovery-1hp")).toBe(-50);
+    expect(applyMoodEvent(-100, "poison-recovery-1hp")).toBe(-127);
+    expect(applyMoodEvent(undefined, "level-up")).toBe(40);
+    expect(() => applyMoodEvent(0, "bitter-medicine" as never)).toThrow(RangeError);
+  });
+
+  it("withMoodEvent is non-mutating, and a no-op where there is no seat or no movement", () => {
+    const m = createMochii("001", 5)!;
+    m.individual!.mood = 10;
+    const levelled = withMoodEvent(m, "level-up");
+    expect(levelled).not.toBe(m);
+    expect(levelled.individual!.mood).toBe(50);
+    expect(m.individual!.mood).toBe(10);
+    // No individual record: same object back.
+    const bare = createMochii("001", 5)!;
+    delete (bare as any).individual;
+    expect(withMoodEvent(bare, "level-up")).toBe(bare);
+    // Already at the clamp: same object back (host can skip the set).
+    const capped = createMochii("001", 5)!;
+    capped.individual!.mood = 127;
+    expect(withMoodEvent(capped, "level-up")).toBe(capped);
   });
 });

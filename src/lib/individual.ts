@@ -59,6 +59,10 @@
 //    per-step tick. That cadence choice is this slice's, stated here,
 //    not a canon claim). No reaction selection, no find generation:
 //    those still wait on the behaviour-profile seam.
+//  - S8 slice 3: the mood event economy (MOOD_EVENT_DELTAS /
+//    applyMoodEvent / withMoodEvent below, TEARDOWN-HGSS §1 numbers).
+//    Reaction selection itself lives in followerReaction.ts; find
+//    generation still waits on the behaviour-profile seam.
 
 import type { IndividualRecord, IndividualVariance, MochiiInstance } from "./types";
 
@@ -145,12 +149,53 @@ export function driftMood(mood: number | undefined | null): number {
 
 /**
  * Apply an event delta to a mood and clamp. Deltas are caller-supplied:
- * no event source (place, weather, battle outcome) feeds deltas yet —
- * those writers are later S8 slices, and this function is where they land.
+ * the named events below (slice 3) carry teardown deltas; any other
+ * writer passes its own delta here, never a guessed table.
  */
 export function applyMoodDelta(mood: number | undefined | null, delta: number): number {
   const base = typeof mood === "number" ? clampMood(mood) : FOLLOWER_MOOD_NEUTRAL;
   return clampMood(base + (Number.isFinite(delta) ? Math.trunc(delta) : 0));
+}
+
+/**
+ * S8 slice 3 — mood event deltas, TEARDOWN-HGSS §1
+ * (~/workspace/bw2-hgss-teardown/TEARDOWN-HGSS.md, "Mood — the hidden
+ * engine"): level-up +40, battle items +10, vitamins +8, recovering
+ * from poison at 1 HP -50. Bitter medicine is -20..-40 by strength on
+ * that page with no tier table, so it has NO event entry here:
+ * callers pass the strength's delta through applyMoodDelta directly,
+ * never a guessed tier. Host wiring this slice: level-up only, in
+ * WorldEngine's payoffCommitLevel (one +40 per level beat actually
+ * committed); battle-item, vitamin, and poison-recovery writers land
+ * at their own item/recovery sites in later slices, not here.
+ */
+export const MOOD_EVENT_DELTAS = {
+  "level-up": 40,
+  "battle-item": 10,
+  vitamin: 8,
+  "poison-recovery-1hp": -50,
+} as const;
+
+export type MoodEvent = keyof typeof MOOD_EVENT_DELTAS;
+
+export function applyMoodEvent(mood: number | undefined | null, event: MoodEvent): number {
+  const delta: number | undefined = (MOOD_EVENT_DELTAS as Record<string, number | undefined>)[event];
+  if (delta === undefined) throw new RangeError(`unknown mood event: ${String(event)}`);
+  return applyMoodDelta(mood, delta);
+}
+
+/**
+ * S8 slice 3 — apply a mood event to one member, non-mutating. A
+ * member with no individual record is returned AS-IS (mood has no
+ * seat; backfill is loadState's job, not a battle/item writer's).
+ * A member whose mood does not move (already at the clamp) is also
+ * returned AS-IS, so a host can skip its set on a no-op.
+ */
+export function withMoodEvent(member: MochiiInstance, event: MoodEvent): MochiiInstance {
+  if (!member || !member.individual) return member;
+  const mood = applyMoodEvent(member.individual.mood, event);
+  if (mood === readMood(member.individual)) return member;
+  return { ...member, individual: { ...member.individual, mood } };
 }
 
 /**
