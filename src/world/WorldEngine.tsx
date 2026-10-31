@@ -30,7 +30,9 @@ import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackgroun
 import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
 import type { MoveAnimationProfile } from "../lib/moveAnimation";
 import { isDoorOpen, sealedDoorText } from "../lib/doorGate";
-import { withMoodEvent } from "../lib/individual";
+import { withMoodEvent, readMood } from "../lib/individual";
+import { selectFollowerReaction, followerTalkLine } from "../lib/followerReaction";
+import { recognisePlace } from "../lib/place";
 // Creature Mode + Dual Encounters (PMD-mode package, owner orders
 // 2026-10-29 ~20:12–20:17 CDT): mode swap, the companion Ranger, visible
 // roamers and the engagement layer. All rules live in lib/creatureMode.ts
@@ -962,7 +964,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     const o = tileOverrides[`${currentMap}:${x},${y}`];
     return o !== undefined ? o : mapData.tiles[y]?.[x];
   }, [tileOverrides, currentMap, mapData]);
-  const { gameHour, phase, tint, ambient } = useDayNight(1000);
+  const { gameHour, phase, tint, ambient, state: dayNightState } = useDayNight(1000);
   // Sound-full-coverage: phase-aware placement — when the clock
   // crosses into night, the resolver swaps the field classes to
   // their night arrangements (Gen 4/5 ship night variants for
@@ -2064,6 +2066,41 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     if (sign) {
       setDialog({ lines: [sign.text] });
       setScreen("dialog");
+    }
+
+    // Gap-fill S8 slice 4 — talk to the follower. TEARDOWN-HGSS §1:
+    // the follower "can be talked to at any time; talking is a
+    // system". The follower trails one step behind, so it is rarely
+    // the facing tile; the trigger is adjacency (Manhattan 1), and
+    // it runs only after NPCs, doors, and signs have had their
+    // chance — this branch displaces nothing, and pressing A on
+    // empty ground previously did nothing. Creature mode is
+    // excluded: the render gate below passes follower={null}
+    // there, so there is no visible follower to talk to. Talking
+    // itself changes no mood (the teardown lists no talk delta);
+    // the line comes from the slice-3 selector over the S4
+    // PlaceFact for this map and the S1 clock phase, with species
+    // types from SPECIES_DB and mood from the lead's record
+    // (readMood: absent reads neutral). On an unzoned map the fact
+    // is honestly unzoned (primaryClass null), so only the default
+    // line can fire there — and on every joined map today the
+    // seeded rule cannot fire either (meadow small-ground, forest
+    // canopy, cave small-ground; none is water/waters-edge), so the
+    // discomfort line is live code, not yet live-reachable, until a
+    // waters-edge join lands.
+    if (!sign && follower && controlMode !== "creature" && followerLead) {
+      const adjacent = Math.abs(follower.x - playerPos.x) + Math.abs(follower.y - playerPos.y) === 1;
+      if (adjacent) {
+        const place = recognisePlace({ mapId: currentMap, worldState: dayNightState, playerPos });
+        const selection = selectFollowerReaction({
+          mood: readMood((followerLead as any).individual),
+          speciesTypes: (SPECIES_DB as any)[followerLead.speciesId]?.types ?? [],
+          place,
+        });
+        setDialog({ lines: [followerTalkLine(battleMonName(followerLead), selection)] });
+        setScreen("dialog");
+        return;
+      }
     }
   };
 
@@ -3765,7 +3802,10 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         const npc = npcAt(fx, fy);
         const door = mapData.doors?.find((d: any) => d.x === fx && d.y === fy);
         const sign = mapData.signs?.find((s: any) => s.x === fx && s.y === fy);
-        const label = npc ? `Talk to ${npc.name}` : door ? (isDoorOpen(door.condition, badges) ? `Enter ${door.label || "door"}` : `Sealed: ${door.label || "door"}`) : sign ? "Read sign" : null;
+        // S8 slice 4: the follower prompt rides the same A button —
+        // adjacent follower, no NPC/door/sign facing, ranger mode.
+        const followerAdjacent = !!(follower && controlMode !== "creature" && Math.abs(follower.x - playerPos.x) + Math.abs(follower.y - playerPos.y) === 1);
+        const label = npc ? `Talk to ${npc.name}` : door ? (isDoorOpen(door.condition, badges) ? `Enter ${door.label || "door"}` : `Sealed: ${door.label || "door"}`) : sign ? "Read sign" : followerAdjacent ? `Talk to ${battleMonName(followerLead)}` : null;
         if (!label) return null;
         return (
           <button
