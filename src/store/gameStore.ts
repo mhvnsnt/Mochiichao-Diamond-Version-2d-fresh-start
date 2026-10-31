@@ -15,7 +15,7 @@ import type { WorldClockAnchor } from '../lib/worldClock';
 import { applyFontRoles } from '../lib/fonts';
 import { applySoundMode } from '../lib/audioRouting';
 import { worldFullPp } from '../lib/worldBattleCore';
-import { backfillIndividuals, driftLeadMood, resetLeadMoodOnChange } from '../lib/individual';
+import { backfillIndividuals, driftLeadMood, resetLeadMoodOnChange, withMoodEvent } from '../lib/individual';
 
 interface GameState {
   playerName: string;
@@ -430,7 +430,17 @@ export const useGameStore = create<GameState>((set, get) => ({
     // empty pp array; a member whose pp was never tracked gains
     // its full list, the same initialisation createMochii uses.
     set(state => ({
-      party: state.party.map(m => ({ ...m, hp: m.maxHp, currentHp: m.maxHp, status: null, pp: worldFullPp(m.moves) })),
+      party: state.party.map(m => {
+        const healed = { ...m, hp: m.maxHp, currentHp: m.maxHp, status: null, pp: worldFullPp(m.moves) };
+        // Gap-fill S8 slice 5: recovering from poison at 1 HP pays
+        // -50 mood (TEARDOWN-HGSS §1). The test is the PRE-heal state:
+        // status exactly "poison" (not toxic — the teardown names
+        // poison) and (currentHp ?? hp) === 1. A member poisoned above
+        // 1 HP, a member at 1 HP without poison, and a member with no
+        // individual record all heal unchanged (withMoodEvent).
+        const wasPoisonAt1 = m.status === "poison" && ((m as any).currentHp ?? m.hp) === 1;
+        return wasPoisonAt1 ? withMoodEvent(healed, "poison-recovery-1hp") : healed;
+      }),
       rangerHp: state.rangerMaxHp > 0 ? state.rangerMaxHp : state.rangerHp
     }));
   },
