@@ -80,5 +80,5 @@ export interface MochiiInstance {
   status: string | null;
   moves: string[]; // move IDs
   pp: number[]; // current PP
-  individual?: IndividualRecord; // S7: rolled at creation; absent on old saves
+  individual?: IndividualRecord; // S7: rolled at creation; absent in old save files, backfilled by gameStore.loadState on load (slice 2)
 }
