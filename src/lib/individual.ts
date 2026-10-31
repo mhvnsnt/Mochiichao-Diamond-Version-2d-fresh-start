@@ -32,6 +32,14 @@
 //    one (slice 1 is the only writer, and it writes valid records).
 //  - The open teardown-hgss PR #50 touches ONLY the schema file, not this
 //    module or the instance type, so there is no file collision.
+//  - S8 slice 1 (this slice): follower mood seat + state machine. The
+//    record gains an optional mood (-127..127, start 0 per movement.json);
+//    the pure functions below are the whole state machine so far — range,
+//    drift, delta. NOT wired here, by design: no drift tick runs in any
+//    host yet, no lead-change reset, no reaction selection, no find
+//    generation (findState stays a later slice with the behaviour-profile
+//    seam, as PR #50's own description says). Mood is never shown to the
+//    player as a number (PR #50 schema semantics).
 
 import type { IndividualRecord, IndividualVariance, MochiiInstance } from "./types";
 
@@ -75,7 +83,55 @@ export function createIndividual(seed: number = rollPersonalitySeed()): Individu
     personalitySeed: seed,
     variance: varianceFromSeed(seed),
     deviations: [],
+    // S8 slice 1: movement.json follower.mood.startValue.
+    mood: FOLLOWER_MOOD_NEUTRAL,
   };
+}
+
+export const FOLLOWER_MOOD_MIN = -127;
+export const FOLLOWER_MOOD_MAX = 127;
+export const FOLLOWER_MOOD_NEUTRAL = 0;
+
+/**
+ * Writer-side normaliser: truncate to integer, clamp to -127..127.
+ * A non-finite input reads as neutral rather than throwing, so a bad
+ * delta can never poison a stored mood.
+ */
+export function clampMood(value: number): number {
+  if (!Number.isFinite(value)) return FOLLOWER_MOOD_NEUTRAL;
+  return Math.max(FOLLOWER_MOOD_MIN, Math.min(FOLLOWER_MOOD_MAX, Math.trunc(value)));
+}
+
+/**
+ * Read a record's mood: a stored integer clamped into range; an absent
+ * or non-integer mood reads neutral. Never throws and never repairs the
+ * record — a present record without a mood field (S7 slices 1–2 output)
+ * is a valid neutral, not a defect to fix.
+ */
+export function readMood(record: IndividualRecord | undefined | null): number {
+  if (!record || typeof record.mood !== "number") return FOLLOWER_MOOD_NEUTRAL;
+  return clampMood(record.mood);
+}
+
+/**
+ * movement.json follower.mood.drift, verbatim: one step toward neutral
+ * per tick. An absent mood drifts as neutral (stays 0).
+ */
+export function driftMood(mood: number | undefined | null): number {
+  const m = typeof mood === "number" ? clampMood(mood) : FOLLOWER_MOOD_NEUTRAL;
+  if (m > 0) return m - 1;
+  if (m < 0) return m + 1;
+  return FOLLOWER_MOOD_NEUTRAL;
+}
+
+/**
+ * Apply an event delta to a mood and clamp. Deltas are caller-supplied:
+ * no event source (place, weather, battle outcome) feeds deltas yet —
+ * those writers are later S8 slices, and this function is where they land.
+ */
+export function applyMoodDelta(mood: number | undefined | null, delta: number): number {
+  const base = typeof mood === "number" ? clampMood(mood) : FOLLOWER_MOOD_NEUTRAL;
+  return clampMood(base + (Number.isFinite(delta) ? Math.trunc(delta) : 0));
 }
 
 /**
