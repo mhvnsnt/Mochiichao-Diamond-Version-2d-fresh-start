@@ -46,7 +46,7 @@
  * happened" from "a new announcement exists" by reference.
  */
 
-import type { GamePhase, Season } from "./worldClock";
+import type { GamePhase, Season, WorldState } from "./worldClock";
 
 /** A weekly-calendar / availability row. Every condition field that
  *  is null means "any" for that dimension; a set field must match. */
@@ -249,6 +249,71 @@ export function announcementsBefore(
  */
 export function scheduleAnnouncementId(entry: ScheduleEntry, dayIndex: number): string {
   return `schedule:${entry.id}:${dayIndex}`;
+}
+
+/**
+ * S12 slice 7 — the calendar host context (G-17's missing producer).
+ * Until now every calendar caller had to hand-build a
+ * CalendarContext, and no caller in the repo did: the S1 clock
+ * derives weekday/season/gamePhase on every tick (worldClock's
+ * deriveWorldState) but nothing turned that reading into the
+ * calendar's matching context, so scheduleMatches had no live
+ * caller at all. This adapter is that turn: weekday, gamePhase
+ * and season come straight from the reading, never re-derived
+ * here, and the two dimensions the clock does NOT produce stay
+ * caller-supplied — story flags (default: none set) and the
+ * weather key (default: none, so a weather-demanding row never
+ * matches by default, exactly as slice 1's rule requires).
+ * The reading is taken as a Pick, not the whole WorldState, so a
+ * test can supply the three clock fields without fabricating a
+ * full clock reading, and a host passes its real reading
+ * unchanged. Weekday names are still NOT authored here (CLOCK
+ * §5.3: canon); only the index travels.
+ */
+export interface CalendarHostOptions {
+  /** Flags the host reports as set; default: none. */
+  storyFlags?: ReadonlySet<string> | readonly string[];
+  /** Weather key the host reports, or null when it has none. */
+  weatherKey?: string | null;
+  /** Week length the weekday index is read against; default 7
+   *  (worldClock's default). A non-integer or non-positive value
+   *  is carried through and falls back to 7 inside
+   *  scheduleMatches, rather than matching nothing everywhere. */
+  daysPerWeek?: number;
+}
+
+/** The three clock fields the calendar reads, as a Pick so hosts
+ *  pass a real WorldState and tests pass just these fields. */
+export type WorldClockReading = Pick<
+  WorldState,
+  "weekday" | "gamePhase" | "season"
+>;
+
+export function calendarContextFromWorldState(
+  state: WorldClockReading,
+  opts: CalendarHostOptions = {},
+): CalendarContext {
+  return {
+    weekday: state.weekday,
+    gamePhase: state.gamePhase,
+    season: state.season,
+    storyFlags: opts.storyFlags ?? [],
+    weatherKey: opts.weatherKey ?? null,
+    daysPerWeek: opts.daysPerWeek ?? 7,
+  };
+}
+
+/** The host's one call: matching rows for a live clock reading.
+ *  Pure composition of the adapter over schedulesForState — no
+ *  new matching rule lives here, so a row matches here exactly
+ *  when it matches slice 1's schedulesForState on the adapted
+ *  context. */
+export function schedulesForWorldState(
+  entries: readonly ScheduleEntry[],
+  state: WorldClockReading,
+  opts: CalendarHostOptions = {},
+): ScheduleEntry[] {
+  return schedulesForState(entries, calendarContextFromWorldState(state, opts));
 }
 
 export function publishScheduleAnnouncements(
