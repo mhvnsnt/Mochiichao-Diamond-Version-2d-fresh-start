@@ -438,3 +438,84 @@ describe("mood event hosts (S8 slice 5, TEARDOWN-HGSS §1 events at real sites)"
     expect(itemBranch).toContain('withMoodEvent({ ...target, hp: healed, currentHp: healed }, "battle-item")');
   });
 });
+
+describe("find handover through the store (S8 slice 7, talk-site host)", () => {
+  // Fixture item ids are test-only strings, never shipped find rows:
+  // no find table exists on main, and this slice authors none. The
+  // store is a shared singleton across tests in this file, so every
+  // inventory assertion reads its before-count first.
+  const carrying = (species: string, mood: number, count: number) => {
+    const m = createMochii(species, 5)!;
+    m.individual!.mood = mood;
+    (m.individual as any).findState = { pendingItemId: "test-pebble", withheldCount: count };
+    return m;
+  };
+
+  it("hands a carried find to the bag and empties the lead's findState, touching no one else", () => {
+    const lead = carrying("001", 0, 1);
+    const second = createMochii("004", 5)!;
+    const store = useGameStore.getState();
+    store.loadState({ party: [lead, second] } as never);
+    const before = useGameStore.getState().inventory["test-pebble"] || 0;
+    const outcome = useGameStore.getState().handoverFollowerFind();
+    expect(outcome).toEqual({ outcome: "handed", itemId: "test-pebble" });
+    const s = useGameStore.getState();
+    expect(s.inventory["test-pebble"]).toBe(before + 1);
+    expect(s.party[0].individual!.findState).toEqual({ pendingItemId: null, withheldCount: 0 });
+    expect(s.party[0].individual!.mood).toBe(0);
+    expect(s.party[1]).toBe(second);
+    // The fixture itself was never mutated: the store path copies.
+    expect(lead.individual!.findState).toEqual({ pendingItemId: "test-pebble", withheldCount: 1 });
+  });
+
+  it("withholds at low mood: the bag is untouched, the item stays carried, the count rises", () => {
+    const lead = carrying("001", -25, 0);
+    useGameStore.getState().loadState({ party: [lead] } as never);
+    const before = useGameStore.getState().inventory["test-pebble"] || 0;
+    const outcome = useGameStore.getState().handoverFollowerFind();
+    expect(outcome).toEqual({ outcome: "withheld", itemId: "test-pebble" });
+    const s = useGameStore.getState();
+    expect(s.inventory["test-pebble"] || 0).toBe(before);
+    expect(s.party[0].individual!.findState).toEqual({ pendingItemId: "test-pebble", withheldCount: 1 });
+    expect(s.party[0].individual!.mood).toBe(-25);
+  });
+
+  it("returns none and sets nothing when the lead carries no pending find", () => {
+    const lead = createMochii("001", 5)!;
+    useGameStore.getState().loadState({ party: [lead] } as never);
+    const beforeParty = useGameStore.getState().party;
+    const beforeInv = { ...useGameStore.getState().inventory };
+    const outcome = useGameStore.getState().handoverFollowerFind();
+    expect(outcome).toEqual({ outcome: "none", itemId: null });
+    expect(useGameStore.getState().party).toBe(beforeParty);
+    expect(useGameStore.getState().inventory).toEqual(beforeInv);
+  });
+
+  it("never resolves another member's carried find: only the lead's counts", () => {
+    const lead = createMochii("001", 5)!;
+    const second = carrying("004", 0, 0);
+    (second as any).hp = 0;
+    (second as any).currentHp = 0;
+    useGameStore.getState().loadState({ party: [lead, second] } as never);
+    const outcome = useGameStore.getState().handoverFollowerFind();
+    expect(outcome).toEqual({ outcome: "none", itemId: null });
+    const s = useGameStore.getState();
+    expect(s.party[1].individual!.findState).toEqual({ pendingItemId: "test-pebble", withheldCount: 0 });
+  });
+
+  it("the WorldEngine talk branch resolves the handover before the reaction line (host source lock)", () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const engine = readFileSync(join(here, "../world/WorldEngine.tsx"), "utf8");
+    const start = engine.indexOf("Gap-fill S8 slice 4");
+    const branch = engine.slice(
+      start,
+      engine.indexOf("DialogueBox owns typing", start),
+    );
+    expect(branch).toContain("useGameStore.getState().handoverFollowerFind()");
+    expect(branch).toContain("followerHandoverLine(battleMonName(followerLead), handover.outcome)");
+    expect(branch).toContain("followerTalkLine(battleMonName(followerLead), selection)");
+    expect(branch.indexOf("handoverFollowerFind()")).toBeLessThan(
+      branch.indexOf("followerTalkLine(battleMonName(followerLead), selection)"),
+    );
+  });
+});
