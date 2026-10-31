@@ -30,6 +30,7 @@ import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackgroun
 import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
 import type { MoveAnimationProfile } from "../lib/moveAnimation";
 import { isDoorOpen, sealedDoorText } from "../lib/doorGate";
+import { withMoodEvent } from "../lib/individual";
 // Creature Mode + Dual Encounters (PMD-mode package, owner orders
 // 2026-10-29 ~20:12–20:17 CDT): mode swap, the companion Ranger, visible
 // roamers and the engagement layer. All rules live in lib/creatureMode.ts
@@ -386,7 +387,11 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       if (!cur) return t;
       const c = { ...cur, stats: { ...(cur.stats || {}) } };
       if (!commitNextLevel(c)) return t;
-      next[idx] = c;
+      // Gap-fill S8 slice 3: a level actually committed pays +40 mood
+      // (TEARDOWN-HGSS §1, level-up event). One +40 per level beat, on
+      // the member that levelled; a member with no individual record
+      // or already at the clamp comes back unchanged (withMoodEvent).
+      next[idx] = withMoodEvent(c, "level-up");
       return next;
     });
   };
