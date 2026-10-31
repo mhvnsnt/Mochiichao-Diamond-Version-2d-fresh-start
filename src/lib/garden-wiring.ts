@@ -14,6 +14,13 @@ import {
 } from './mochiichao-systems';
 import { GARDEN_CRITTERS } from './garden-data';
 import { deriveWorldState, type WorldClockAnchor } from './worldClock';
+import {
+  solveHabitat,
+  type HabitatPlacement,
+  type HabitatRecipe,
+  type SolveHabitatOptions,
+  type SolvedHabitat,
+} from './garden-habitats';
 
 export interface FarmPlot {
   id: string;
@@ -38,6 +45,10 @@ export interface GardenSaveRecord extends GardenCreature {
   sparWins?: number;
   egg?: { speciesId: string; parentA: string; parentB: string; stepsRemaining: number } | null;
   collectedCritters?: string[];
+  /** W3 placement block: zoneId -> cell key -> placed item. See the W3 section at the end of this file. */
+  placements?: GardenPlacements;
+  /** W3 derived cache: zoneId -> slice-1 solver output for that zone. Derived, never hand-edited. */
+  habitats?: GardenZoneHabitats;
 }
 
 /** Upgrade a pass-3 GardenCreature to a full GardenSaveRecord, defaults only. */
@@ -58,6 +69,8 @@ export function upgradeGardenRecord(
     sparWins: (base as GardenSaveRecord).sparWins ?? 0,
     egg: (base as GardenSaveRecord).egg ?? null,
     collectedCritters: (base as GardenSaveRecord).collectedCritters ?? [],
+    placements: (base as GardenSaveRecord).placements ?? {},
+    habitats: (base as GardenSaveRecord).habitats ?? {},
   };
 }
 
@@ -76,6 +89,7 @@ export function newGardenRecord(speciesId: string, seed: number): GardenSaveReco
       { id: 'plot-3', seed: null, plantedAt: 0, readyAt: 0, harvested: false },
     ],
     raceWins: 0, sparWins: 0, egg: null, collectedCritters: [],
+    placements: {}, habitats: {},
   };
 }
 
@@ -260,3 +274,209 @@ export function gardenSummary(rec: GardenSaveRecord): string {
   return `${rec.speciesId} — Form ${gardenForm(rec.garden)}, dominant ${dominantStat(rec.garden)}, variant ${typeVariant(rec.garden) || 'none'}, Bond ${rec.bond}, Rebirths ${rec.rebirths}, Mythic ${rec.mythic ? 'yes' : 'no'}`;
 }
 export { applyGardenItem };
+
+/**
+ * W3 — Placement records in the Garden save (gap-fill S14 slice 3, 2026-10-31).
+ *
+ * DQB2 WIRING-PLAN W3: GardenSaveRecord gains a placements block (per-zone
+ * cell -> { itemId, rotation }, chunked by Garden zone) plus the derived
+ * habitats cache (slice-1 solver output per zone, recomputed on placement
+ * change — derived, never hand-edited).
+ *
+ * Rules, all stated here so a later slice can be checked against them:
+ * - Placements is a two-level map: zoneId -> cell key -> cell. A cell key
+ *   is the caller's distinct position key within the zone (e.g. "x,y");
+ *   this module never parses it, and it never invents a coordinate grid.
+ * - Rotation is the placed item's facing, a finite number. No
+ *   quarter-turn restriction is imposed — no canon rotation step exists
+ *   in the plan, so none is invented here.
+ * - All setters are pure: inputs are only read, never mutated; each
+ *   returns a new record with copied maps. Removing the last cell of a
+ *   zone drops the zone key; removing an absent cell returns the record
+ *   unchanged (same reference).
+ * - Setters invalidate the derived cache: any placement change returns
+ *   the record with habitats cleared to {}, so the cache never claims
+ *   to describe placements it does not match. Clearing is invalidation,
+ *   not a solved value — recomputeHabitats is the only function that
+ *   writes solved values into the cache.
+ * - The solver conversion carries itemId only: a W3 cell has no
+ *   material, richness, band, or category data, so converted cells read
+ *   categories from the caller's optional categoriesFor callback
+ *   (default: none), material null, richness 0, band 0. That means
+ *   extent counts the zone's cells and finish/character read from
+ *   defaults until an item catalogue lands — stated, not hidden.
+ *   Category requirements match only through categoriesFor.
+ * - The per-zone cap is slice 1's named parameter, applied per zone
+ *   with alreadyRegistered 0 (one habitat per zone per record), so a
+ *   cap of 0 recognises nothing and a cap of 1 or more allows the
+ *   zone's habitat.
+ * - upgradeGardenRecord only defaults an absent placements block to {}
+ *   and an absent cache to {} — it never recomputes, because
+ *   recomputing needs caller-supplied recipes. Old saves therefore load
+ *   with an empty placements block (additive-only migration), and
+ *   plantPlot / harvestPlot / cocoon functions are untouched by this
+ *   slice (verified by the diff: this section plus the two optional
+ *   record fields and their defaults, nothing else).
+ *
+ * Deliberately NOT here: NO host (GardenView and gameStore do not call
+ * these functions yet — staging locks in garden-placements.test.ts);
+ * NO composition cache (variants/combos from slice 2 are not stored
+ * here — the cache holds the slice-1 base only); NO item catalogue
+ * (no material/richness/band/categories authored); NO attraction
+ * binding (W4); NO recipe data authored (owner slot S1).
+ */
+
+/** One placed item in a Garden zone, at a distinct position key. */
+export interface GardenPlacementCell {
+  itemId: string;
+  /** Placed facing, a finite number; no step restriction is imposed. */
+  rotation: number;
+}
+
+/** Per-zone placements: zoneId -> cell key -> placed item. */
+export type GardenPlacements = Record<string, Record<string, GardenPlacementCell>>;
+
+/** Derived habitats cache: zoneId -> slice-1 solver output for that zone. */
+export type GardenZoneHabitats = Record<string, SolvedHabitat | null>;
+
+/** Options for the W3 solver reads: slice-1 options plus the category lookup. */
+export interface GardenPlacementSolveOptions extends SolveHabitatOptions {
+  /** Category tags for an itemId, for wildcard requirements. Defaults to none. */
+  categoriesFor?: (itemId: string) => readonly string[];
+}
+
+function placementFail(message: string): never {
+  throw new Error(`gardenPlacement: ${message}`);
+}
+
+function placementKey(value: unknown, what: string): string {
+  if (typeof value !== "string" || value.length === 0) placementFail(`${what} must be a non-empty string`);
+  return value as string;
+}
+
+function validatePlacementCell(cell: GardenPlacementCell, what: string): void {
+  if (cell === null || typeof cell !== "object") placementFail(`${what} must be an object`);
+  placementKey(cell.itemId, `${what} itemId`);
+  if (typeof cell.rotation !== "number" || !Number.isFinite(cell.rotation)) {
+    placementFail(`${what} rotation must be a finite number`);
+  }
+}
+
+/** The empty placements block: the value old saves migrate to. */
+export function emptyPlacements(): GardenPlacements {
+  return {};
+}
+
+/**
+ * Place (or replace) one cell in a zone. Pure: returns a new record;
+ * the input record and its maps are never mutated. Invalidates the
+ * derived habitats cache (cleared to {}).
+ */
+export function setPlacementCell(
+  rec: GardenSaveRecord,
+  zoneId: string,
+  cellKey: string,
+  cell: GardenPlacementCell,
+): GardenSaveRecord {
+  placementKey(zoneId, "zoneId");
+  placementKey(cellKey, "cellKey");
+  validatePlacementCell(cell, `cell "${cellKey}"`);
+  const placements = rec.placements ?? {};
+  const zone = placements[zoneId] ?? {};
+  return {
+    ...rec,
+    placements: { ...placements, [zoneId]: { ...zone, [cellKey]: { ...cell } } },
+    habitats: {},
+  };
+}
+
+/**
+ * Remove one cell from a zone. Removing the last cell of a zone drops
+ * the zone key. Removing an absent cell or zone returns the record
+ * unchanged (same reference). Invalidates the cache on a real removal.
+ */
+export function removePlacementCell(
+  rec: GardenSaveRecord,
+  zoneId: string,
+  cellKey: string,
+): GardenSaveRecord {
+  placementKey(zoneId, "zoneId");
+  placementKey(cellKey, "cellKey");
+  const placements = rec.placements ?? {};
+  const zone = placements[zoneId];
+  if (zone === undefined || zone[cellKey] === undefined) return rec;
+  const nextZone = { ...zone };
+  delete nextZone[cellKey];
+  const nextPlacements = { ...placements };
+  if (Object.keys(nextZone).length === 0) {
+    delete nextPlacements[zoneId];
+  } else {
+    nextPlacements[zoneId] = nextZone;
+  }
+  return { ...rec, placements: nextPlacements, habitats: {} };
+}
+
+/** Cells of one zone, in zone-map order, as copies (treat as read-only). */
+export function placementCellsInZone(
+  rec: GardenSaveRecord,
+  zoneId: string,
+): Array<{ key: string; cell: GardenPlacementCell }> {
+  placementKey(zoneId, "zoneId");
+  const zone = (rec.placements ?? {})[zoneId] ?? {};
+  return Object.entries(zone).map(([key, cell]) => ({ key, cell: { ...cell } }));
+}
+
+/**
+ * Convert one zone's placements to the slice-1 solver's placement
+ * shape. ItemId only: categories come from the caller's callback,
+ * material/richness/band read solver defaults (see the W3 header).
+ */
+export function zonePlacementToHabitatPlacement(
+  rec: GardenSaveRecord,
+  zoneId: string,
+  categoriesFor?: (itemId: string) => readonly string[],
+): HabitatPlacement {
+  placementKey(zoneId, "zoneId");
+  if (categoriesFor !== undefined && typeof categoriesFor !== "function") {
+    placementFail("categoriesFor must be a function");
+  }
+  const cells = placementCellsInZone(rec, zoneId).map(({ key, cell }) => ({
+    id: key,
+    itemId: cell.itemId,
+    categories: categoriesFor ? [...categoriesFor(cell.itemId)] : [],
+  }));
+  return { zoneId, cells };
+}
+
+/**
+ * Recognise one zone's habitat from its placements, or null.
+ * Recipes are caller-supplied; no recipe content lives here.
+ */
+export function solveZoneHabitat(
+  rec: GardenSaveRecord,
+  zoneId: string,
+  recipes: readonly HabitatRecipe[],
+  options: GardenPlacementSolveOptions = {},
+): SolvedHabitat | null {
+  const placement = zonePlacementToHabitatPlacement(rec, zoneId, options.categoriesFor);
+  return solveHabitat(placement, recipes, options);
+}
+
+/**
+ * Recompute the derived habitats cache for every zone that has
+ * placements. Pure: returns a new record; the input record is never
+ * mutated, and farm/cocoon/egg and every other record field ride
+ * through unchanged. Zones with no placements get no cache entry.
+ */
+export function recomputeHabitats(
+  rec: GardenSaveRecord,
+  recipes: readonly HabitatRecipe[],
+  options: GardenPlacementSolveOptions = {},
+): GardenSaveRecord {
+  const placements = rec.placements ?? {};
+  const habitats: GardenZoneHabitats = {};
+  for (const zoneId of Object.keys(placements)) {
+    habitats[zoneId] = solveZoneHabitat(rec, zoneId, recipes, options);
+  }
+  return { ...rec, habitats };
+}
