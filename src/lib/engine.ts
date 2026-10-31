@@ -1,4 +1,5 @@
 import { MochiiInstance, SpeciesData } from "./types";
+import { createIndividual } from "./individual";
 import { SPECIES_DB } from "./species";
 import { MOVES_DB } from "./moves";
 import { getSpeciesLearnset } from "./learnsets-loader";
@@ -49,7 +50,12 @@ export function createMochii(speciesId: string, level: number): MochiiInstance |
     stages: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 },
     status: null,
     moves,
-    pp
+    pp,
+    // S7 slice 1: the #80 individual record, rolled once at creation and
+    // stable for life (evolveInstance mutates in place, so it keeps this
+    // record). No live system reads it yet, and it changes no stat, HP,
+    // move, or PP value — the static-IV stat calculation above is untouched.
+    individual: createIndividual(),
   };
 }
 
