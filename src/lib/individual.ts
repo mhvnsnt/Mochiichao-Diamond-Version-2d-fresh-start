@@ -61,8 +61,14 @@
 //    those still wait on the behaviour-profile seam.
 //  - S8 slice 3: the mood event economy (MOOD_EVENT_DELTAS /
 //    applyMoodEvent / withMoodEvent below, TEARDOWN-HGSS §1 numbers).
-//    Reaction selection itself lives in followerReaction.ts; find
-//    generation still waits on the behaviour-profile seam.
+//    Reaction selection itself lives in followerReaction.ts.
+//  - S8 slice 6: find generation lives in followerFind.ts (roll +
+//    mood-gated handover as pure functions over a caller-supplied
+//    table) and the findState seat lives on IndividualRecord in
+//    types.ts; what is still open is the walking host (no roll rate
+//    is authored anywhere) and the per-area tables themselves (no
+//    find rows exist on main — the data lane authors them, this
+//    slice authors none).
 
 import type { IndividualRecord, IndividualVariance, MochiiInstance } from "./types";
 
