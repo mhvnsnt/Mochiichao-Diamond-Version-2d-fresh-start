@@ -10,7 +10,7 @@ import { useMenuLayout } from '../../lib/menuLayoutLive';
 import { getActiveMenuConfig } from '../../lib/menuEditor';
 import { getDayNightMenuVariant, getWorldMenuVariant, dayNightMenuVarStyle } from '../../lib/dayNightMenuVariants';
 import { playCue } from '../../lib/soundCues';
-import { announcementsBefore, announcementsForDay } from '../../lib/calendar';
+import { announcementsBefore, announcementsForDay, announcementsSince } from '../../lib/calendar';
 import { deriveWorldState } from '../../lib/worldClock';
 
 /**
@@ -39,6 +39,19 @@ import { deriveWorldState } from '../../lib/worldClock';
  * Note the naming correction to slice 4's header: announcementsSince
  * looks forward (on or after), so it is NOT the history read — the
  * strict before-read is, and that is what this slice adds.
+ *
+ * Gap-fill S12 slice 6 — the upcoming reader, in this same section.
+ * When the save is clock-anchored, announcements published AFTER
+ * today read through slice 1's announcementsSince from today + 1
+ * under an "Upcoming" heading below the Earlier block; the heading
+ * appears only when upcoming announcements exist, so an empty
+ * future adds no clutter. The +1 matters: announcementsSince is
+ * inclusive, so reading from today would repeat today's list under
+ * a second heading. When unanchored there is no Upcoming block at
+ * all, for the same reason as Earlier: with no clock the whole
+ * list is already today's fallback, and splitting it into
+ * today-vs-future without a day would invent a boundary. The
+ * section still publishes nothing and adds no menu row.
  */
 function AnnouncementsSection() {
   const announcements = useGameStore(s => s.announcements);
@@ -46,6 +59,7 @@ function AnnouncementsSection() {
   const today = anchor ? deriveWorldState(anchor, Date.now()).dayIndex : null;
   const shown = today === null ? announcements : announcementsForDay(announcements, today);
   const earlier = today === null ? [] : announcementsBefore(announcements, today);
+  const upcoming = today === null ? [] : announcementsSince(announcements, today + 1);
   return (
     <div className="mt-4">
       <div className="font-bold text-white text-sm">Announcements</div>
@@ -63,6 +77,16 @@ function AnnouncementsSection() {
           <div className="font-bold text-white text-xs">Earlier</div>
           <div className="text-sm text-slate-300 mt-1 space-y-1">
             {earlier.map((ann) => (
+              <div key={ann.id}>{ann.text}</div>
+            ))}
+          </div>
+        </div>
+      )}
+      {upcoming.length > 0 && (
+        <div className="mt-3">
+          <div className="font-bold text-white text-xs">Upcoming</div>
+          <div className="text-sm text-slate-300 mt-1 space-y-1">
+            {upcoming.map((ann) => (
               <div key={ann.id}>{ann.text}</div>
             ))}
           </div>
