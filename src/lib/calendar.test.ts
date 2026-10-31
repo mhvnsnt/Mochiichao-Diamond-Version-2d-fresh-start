@@ -4,6 +4,7 @@
 // only (CLOCK §5.3: fiction day names are canon, not filled here),
 // so no test asserts a day name.
 import { describe, expect, it } from "vitest";
+import { useGameStore } from "../store/gameStore";
 import {
   announcementsForDay,
   announcementsSince,
@@ -146,5 +147,53 @@ describe("announcement reads (S12 slice 1)", () => {
     expect(announcementsSince(list, 6).map((a) => a.id)).toEqual(["b"]);
     expect(announcementsSince(list, 5).map((a) => a.id)).toEqual(["a", "b", "c"]);
     expect(announcementsSince(list, 8)).toEqual([]);
+  });
+});
+
+describe("announcement store section (S12 slice 2, through the real store)", () => {
+  it("publishes through the store in order and skips the set on a no-op", () => {
+    useGameStore.setState({ announcements: [] });
+    const store = useGameStore.getState();
+    store.publishAnnouncement(ann({ id: "a", dayIndex: 5 }));
+    store.publishAnnouncement(ann({ id: "b", dayIndex: 7, kind: "town" }));
+    expect(useGameStore.getState().announcements.map((a) => a.id)).toEqual(["a", "b"]);
+    const before = useGameStore.getState().announcements;
+    // Duplicate id: first wins, same reference, no set.
+    useGameStore.getState().publishAnnouncement(ann({ id: "a", text: "Different text." }));
+    expect(useGameStore.getState().announcements).toBe(before);
+    expect(useGameStore.getState().announcements[0].text).toBe("Something happens.");
+    // Invalid: same reference, no set.
+    useGameStore.getState().publishAnnouncement(ann({ id: "", dayIndex: 9 }));
+    useGameStore.getState().publishAnnouncement(ann({ id: "c", dayIndex: -1 }));
+    expect(useGameStore.getState().announcements).toBe(before);
+    expect(useGameStore.getState().announcements).toHaveLength(2);
+  });
+  it("the stored list feeds slice 1's reads with no stored derivation anywhere", () => {
+    useGameStore.setState({ announcements: [] });
+    const store = useGameStore.getState();
+    store.publishAnnouncement(ann({ id: "a", dayIndex: 5 }));
+    store.publishAnnouncement(ann({ id: "b", dayIndex: 7 }));
+    store.publishAnnouncement(ann({ id: "c", dayIndex: 5 }));
+    const list = useGameStore.getState().announcements;
+    expect(announcementsForDay(list, 5).map((a) => a.id)).toEqual(["a", "c"]);
+    expect(announcementsSince(list, 6).map((a) => a.id)).toEqual(["b"]);
+    expect("announcementsForDay" in useGameStore.getState()).toBe(false);
+  });
+  it("announcements survive a save round-trip, and a partial load without them does not wipe them", () => {
+    useGameStore.setState({ announcements: [] });
+    useGameStore.getState().publishAnnouncement(ann({ id: "a", dayIndex: 5 }));
+    const saved = JSON.parse(
+      JSON.stringify({ announcements: useGameStore.getState().announcements }),
+    );
+    useGameStore.setState({ announcements: [] });
+    useGameStore.getState().loadState(saved as never);
+    expect(useGameStore.getState().announcements.map((a) => a.id)).toEqual(["a"]);
+    useGameStore.getState().loadState({ wallet: 42 } as never);
+    expect(useGameStore.getState().announcements.map((a) => a.id)).toEqual(["a"]);
+  });
+  it("an old save with no announcements field loads with the empty default", () => {
+    useGameStore.setState({ announcements: [] });
+    useGameStore.getState().loadState({ wallet: 42 } as never);
+    expect(useGameStore.getState().announcements).toEqual([]);
   });
 });
