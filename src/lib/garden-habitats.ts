@@ -39,6 +39,11 @@
 // placements block, and only then does this solver get a host); NO
 // attraction binding (W4); NO recipe data authored for any habitat
 // (owner slot S1); NO preference bands per resident (owner slot S3).
+//
+// Addendum, S14 slice 3 (2026-10-31): W3 has landed — garden-wiring.ts
+// now imports solveHabitat as the placement host, so the slice-1
+// staging lock's garden-wiring half is superseded (see the lock test);
+// GardenView still does not read the solver.
 
 /** One placed item in a Garden zone, at a distinct position. */
 export interface HabitatCell {
