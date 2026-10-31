@@ -39,6 +39,15 @@
 
 import encountersJson from "../data/core/encounters.json";
 import { BUNDLE_POOLS, bundlePoolCanRoll } from "./spawnSelector";
+// S13 slice 4 (2026-10-31): the roll site adopts the S13 transforms.
+// seasonOverlay.ts and battlePressure.ts import only TYPES from this
+// module, so these value imports create no runtime cycle. The tally
+// module is deliberately NOT imported here: the tally's output
+// shape IS BattlePressure, and a host composes tally and roll in
+// two calls (tally -> pressures -> applyRollOverlays).
+import { applySeasonOverlayFor, type SeasonOverlay } from "./seasonOverlay";
+import { applyBattlePressureFor, type BattlePressure } from "./battlePressure";
+import type { Season } from "./worldClock";
 
 export type EncounterMethod = "grass" | "surf" | "fish" | "cave" | "placed";
 
@@ -162,6 +171,111 @@ export function rollEncounterStep(
   if (table.rate == null) return null;
   if (rng() >= table.rate) return null;
   return pickFromTable(table, rng);
+}
+
+// ------------------------------------------------------------------
+// S13 slice 4 (2026-10-31): roll-site adoption of the S13 overlays.
+//
+// Slices 1–3 built the transforms as pure code with staging locks
+// proving no host adopted them yet. This slice retires those two
+// locks (season, pressure) by adopting both transforms HERE, in the
+// roll module WorldEngine already rolls through — so a host needs
+// exactly one call to roll an overlaid table, and the authored
+// tables still stay byte-identical (both transforms return new
+// tables; the input table is never mutated).
+//
+// Composition order, fixed so a roll is deterministic: season first,
+// then battle pressure. The order does not change the weights —
+// slice 2's commute proof shows (w * m) / (1 + p) either way — but
+// fixing it here means no host can drift into its own order.
+//
+// Deliberately NOT here: NO WorldEngine call-site change (the engine
+// still calls the unoverlaid rollEncounterStep, so live play is
+// unchanged until the engine slice passes live overlays + pressure);
+// NO authored overlays, bands, windows, or decay rates (all remain
+// caller-supplied; rates and the pressure floor stay OPEN per
+// GAP-FILL-PLAN); NO tally import (see the import note above);
+// NO swarm/positive overlay; NO level-band change; NO depths-table
+// change (empty stays empty — an empty table overlays to empty and
+// the overlaid roll refuses it loudly instead of picking nothing).
+// ------------------------------------------------------------------
+
+/** Caller-supplied roll-time overlays for one roll. All optional. */
+export interface RollOverlays {
+  /** Season overlays to select from; used only when `season` is set. */
+  overlays?: readonly SeasonOverlay[];
+  /** The season to look up in `overlays`. Absent = no season step. */
+  season?: Season;
+  /** Battle-pressure records; looked up by the table's own areaId. */
+  pressures?: readonly BattlePressure[];
+}
+
+/**
+ * Apply the season overlay (when a season is given) and then the
+ * battle-pressure transform for this table's area, in that order.
+ * Returns a new table; the input table and its slots are never
+ * mutated. With no season and no pressures the result is an
+ * equal-weight copy — the overlaid roll is the plain roll.
+ */
+export function applyRollOverlays(
+  table: EncounterTable,
+  opts: RollOverlays = {},
+): EncounterTable {
+  const afterSeason =
+    opts.season === undefined
+      ? table
+      : applySeasonOverlayFor(table, opts.overlays ?? [], opts.season);
+  return applyBattlePressureFor(afterSeason, opts.pressures ?? []);
+}
+
+/** An overlaid table can drive a roll only with a live slot. */
+export function rollOverlaysTableCanRoll(table: EncounterTable): boolean {
+  return (
+    table.slots.length > 0 &&
+    table.slots.every((s) => Number.isFinite(s.weight) && s.weight > 0)
+  );
+}
+
+/**
+ * Weighted slot pick over the overlaid table. Throws loudly naming
+ * the area when the overlays leave no live slot, instead of picking
+ * from an empty table.
+ */
+export function pickFromTableWithOverlays(
+  table: EncounterTable,
+  opts: RollOverlays,
+  rng: () => number,
+): EncounterPick {
+  const overlaid = applyRollOverlays(table, opts);
+  if (!rollOverlaysTableCanRoll(overlaid)) {
+    throw new Error(
+      `rollOverlays: overlays leave no live slot for area "${table.areaId}" — refusing to pick`,
+    );
+  }
+  return pickFromTable(overlaid, rng);
+}
+
+/**
+ * One overlaid step: overlays first, then the plain step's rate roll
+ * and slot pick over the overlaid table. Returns null when the step
+ * produces no encounter or the table has no authored rate; throws
+ * loudly (before consuming any further RNG) when the rate roll
+ * passes but the overlays left no live slot.
+ */
+export function rollEncounterStepWithOverlays(
+  table: EncounterTable,
+  opts: RollOverlays,
+  rng: () => number,
+): EncounterPick | null {
+  const overlaid = applyRollOverlays(table, opts);
+  if (overlaid.rate == null) return null;
+  if (rng() >= overlaid.rate) return null;
+  if (!rollOverlaysTableCanRoll(overlaid)) {
+    throw new Error(
+      `rollOverlays: overlays leave no live slot for area "${table.areaId}" — refusing to pick`,
+    );
+  }
+  return pickFromTable(overlaid, rng);
 }
 
 /** Placed roamer seeds (creature mode): the table's slots, in order. */
