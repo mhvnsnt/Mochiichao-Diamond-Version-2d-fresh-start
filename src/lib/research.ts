@@ -187,6 +187,38 @@ export function withResearchTally(
   };
 }
 
+// Gap-fill S11 slice 3 — the W2 writer contract: one tally per kind.
+//
+// Slice 2 left writers gated on "authored task defs to know WHICH
+// taskId to raise". That gate is now closed by a system contract,
+// not by per-species data, so no species content is invented here:
+// a writer records under taskId === the kind string itself
+// ('observe' | 'feed' | 'battle-witness' | 'track' | 'care').
+// One task per kind per species; the tier ladder (slice 1) carries
+// multiple goals for that kind, so no second task per kind is ever
+// needed. Def authors therefore write exactly one def per kind per
+// species with taskId = kind — that is the meeting point where a
+// writer's tally and a def's checkmarks meet. A def carrying any
+// other taskId reads a tally no writer writes and earns nothing
+// until something writes that id, exactly as slice 1's rule says.
+// This contract authors no per-species target, weight, or list;
+// those stay data-lane work. What it fixes is only the namespace,
+// so writers can land now and defs can meet them later without a
+// migration. If the data lane ever authors a different taskId
+// scheme, the migration is mechanical: rename the kind keys in
+// stored tallies to the new ids, one key per kind.
+// - Writers landing under this contract: feed (slice 3, GardenView
+//   Data-Fruit feed). Still gated, NOT invented here: observe (its
+//   host is the S10 roamer path, itself gated on #152 profiles);
+//   battle-witness (its event semantics — which battle outcomes
+//   count as witnessing — are not stated in any held source, so no
+//   battle-end site claims the verb yet); track (the #89 path has
+//   no held call site); care (no Garden care action exists — the
+//   phase-4 care loop is unimported library, not a player action).
+export function researchTaskIdForKind(kind: ResearchTaskKind): string {
+  return kind;
+}
+
 /** Level 10 = the entry is Complete. */
 export function isResearchComplete(
   defs: ResearchTaskDef[],

@@ -2,10 +2,12 @@
 // from the rules in research.ts and the sources cited there — no value
 // here comes from running the code first.
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import {
   isResearchComplete,
   researchLevel,
   researchPoints,
+  researchTaskIdForKind,
   taskCheckmarks,
   tiersReached,
   withResearchTally,
@@ -189,5 +191,50 @@ describe("research store section (S11 slice 2, through the real store)", () => {
     useGameStore.setState({ research: {} });
     useGameStore.getState().loadState({ wallet: 42 } as never);
     expect(useGameStore.getState().research).toEqual({});
+  });
+});
+
+describe("researchTaskIdForKind + feed writer (S11 slice 3, W2 contract)", () => {
+  it("the taskId for a kind IS the kind, for all five closed kinds", () => {
+    expect(researchTaskIdForKind("observe")).toBe("observe");
+    expect(researchTaskIdForKind("feed")).toBe("feed");
+    expect(researchTaskIdForKind("battle-witness")).toBe("battle-witness");
+    expect(researchTaskIdForKind("track")).toBe("track");
+    expect(researchTaskIdForKind("care")).toBe("care");
+  });
+  it("a writer tally under the kind id meets a kind-id def: feed 2 vs tiers [1,2] is 2 checkmarks", () => {
+    const tallies = withResearchTally(
+      withResearchTally({}, "038", researchTaskIdForKind("feed")),
+      "038",
+      researchTaskIdForKind("feed"),
+    );
+    expect(tallies).toEqual({ "038": { feed: 2 } });
+    expect(
+      researchLevel([def("feed", "feed", [1, 2])], tallies, "038"),
+    ).toBe(2);
+    expect(
+      researchPoints([def("feed", "feed", [1, 2])], tallies, "038"),
+    ).toBe(20);
+  });
+  it("a def under any other id reads nothing from a kind tally — the contract is the meeting point", () => {
+    const tallies = withResearchTally({}, "038", researchTaskIdForKind("feed"), 5);
+    expect(researchLevel([def("feed-task", "feed", [1])], tallies, "038")).toBe(0);
+  });
+  it("the store path under the contract: recordResearchTally with the kind id, read back through the derivation", () => {
+    useGameStore.setState({ research: {} });
+    const store = useGameStore.getState();
+    store.recordResearchTally("038", researchTaskIdForKind("feed"));
+    store.recordResearchTally("038", researchTaskIdForKind("feed"));
+    const tallies = useGameStore.getState().research;
+    expect(tallies).toEqual({ "038": { feed: 2 } });
+    expect(researchLevel([def("feed", "feed", [1, 2])], tallies, "038")).toBe(2);
+  });
+  it("GardenView feed writer source lock: feed() records the fed species under the feed kind id", () => {
+    const src = readFileSync(
+      new URL("../components/views/GardenView.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(src).toContain("researchTaskIdForKind('feed')");
+    expect(src).toContain("recordResearchTally(current.speciesId, researchTaskIdForKind('feed'))");
   });
 });
