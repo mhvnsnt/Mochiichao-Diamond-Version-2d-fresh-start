@@ -21,14 +21,19 @@
 //  - NOT wired here, by design: the variance stats do NOT feed
 //    createMochii's stat calculation yet (that function still uses its
 //    static IV 15, as before — changing live stats is a balance decision
-//    for the S7 follow-up, not smuggled into this slice), mood is NOT
-//    derived here (S8's HGSS-pattern derived read), and old saves are NOT
-//    backfilled here (the field is optional, so old instances load
-//    unchanged; backfill on load is the next S7 sub-step).
+//    for the S7 follow-up, not smuggled into this slice), and mood is NOT
+//    derived here (S8's HGSS-pattern derived read).
+//  - Slice 2 (this landing): old saves ARE backfilled on load — see
+//    ensureIndividual/backfillIndividuals below and their use in
+//    gameStore.loadState, the one funnel every save-load path uses.
+//    Backfill fills only ABSENCE: a member that already carries a
+//    record keeps it exactly (never re-rolled); a present-but-malformed
+//    record is not repaired here, because no writer on main can produce
+//    one (slice 1 is the only writer, and it writes valid records).
 //  - The open teardown-hgss PR #50 touches ONLY the schema file, not this
 //    module or the instance type, so there is no file collision.
 
-import type { IndividualRecord, IndividualVariance } from "./types";
+import type { IndividualRecord, IndividualVariance, MochiiInstance } from "./types";
 
 export const INDIVIDUAL_SEED_MIN = 0;
 export const INDIVIDUAL_SEED_MAX = 4294967295;
@@ -71,4 +76,22 @@ export function createIndividual(seed: number = rollPersonalitySeed()): Individu
     variance: varianceFromSeed(seed),
     deviations: [],
   };
+}
+
+/**
+ * S7 slice 2 — backfill for one instance from an old save: if it already
+ * carries an individual record, return it untouched (same object, never
+ * re-rolled); otherwise return a copy carrying a freshly rolled record.
+ * Pure: the input instance is never mutated, so a save object can be
+ * backfilled in memory without rewriting the save file until next save.
+ */
+export function ensureIndividual(instance: MochiiInstance): MochiiInstance {
+  if (!instance || typeof instance !== "object") return instance;
+  if (instance.individual) return instance;
+  return { ...instance, individual: createIndividual() };
+}
+
+/** S7 slice 2 — backfill a whole party/pc array (absence only, per member). */
+export function backfillIndividuals(members: MochiiInstance[]): MochiiInstance[] {
+  return members.map(ensureIndividual);
 }
