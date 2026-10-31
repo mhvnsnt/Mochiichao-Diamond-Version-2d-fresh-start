@@ -19,7 +19,7 @@ import { worldFullPp } from '../lib/worldBattleCore';
 import { backfillIndividuals, driftLeadMood, followerLeadId, resetLeadMoodOnChange, withMoodEvent } from '../lib/individual';
 import { withPendingHandover, type PendingFindHandover } from '../lib/followerFind';
 import { withResearchTally, type ResearchTallies } from '../lib/research';
-import { calendarContextFromWorldState, publishAnnouncement as publishAnnouncementList, publishScheduleAnnouncements as publishScheduleAnnouncementsList, type Announcement, type CalendarContext, type CalendarHostOptions, type ScheduleEntry } from '../lib/calendar';
+import { calendarContextFromWorldState, publishAnnouncement as publishAnnouncementList, publishScheduleAnnouncements as publishScheduleAnnouncementsList, publishSchedulesForWorldState as publishSchedulesForWorldStateList, type Announcement, type CalendarContext, type CalendarHostOptions, type ScheduleEntry } from '../lib/calendar';
 
 interface GameState {
   playerName: string;
@@ -81,6 +81,17 @@ interface GameState {
   // This method publishes nothing and stores nothing — it is a
   // reading, recomputed from the anchor on every call.
   currentCalendarContext: (opts?: CalendarHostOptions) => CalendarContext | null;
+  // Announcements (gap-fill S12 slice 8, G-17 host publish): the
+  // one call the day-change host will make — the store's own
+  // clock reading (deriveWorldState over the anchor, dayIndex
+  // included) through slice 8's pure publish, so a host no longer
+  // derives, adapts, and publishes in three steps. Null-anchored
+  // saves are a no-op (no clock, no day, nothing published);
+  // anchored saves publish exactly what slice 3 would publish for
+  // that reading, and a no-op run skips the set as before. No
+  // host calls this yet — the WorldEngine tick hook is a later
+  // slice — and no schedule rows or text live here.
+  publishSchedulesForCurrentDay: (entries: readonly ScheduleEntry[], textFor: (entry: ScheduleEntry) => string | null | undefined, opts?: CalendarHostOptions) => void;
   completedEvents: string[];
   defeatedTrainers: string[];
   
@@ -333,6 +344,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     const anchor = get().worldClock;
     if (!anchor) return null;
     return calendarContextFromWorldState(deriveWorldState(anchor, Date.now()), opts);
+  },
+  publishSchedulesForCurrentDay: (entries, textFor, opts) => {
+    const anchor = get().worldClock;
+    if (!anchor) return;
+    const current = get().announcements;
+    const next = publishSchedulesForWorldStateList(current, entries, deriveWorldState(anchor, Date.now()), textFor, opts);
+    if (next !== current) set({ announcements: next });
   },
   completedEvents: [],
   defeatedTrainers: [],

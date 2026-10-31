@@ -14,6 +14,7 @@ import {
   calendarContextFromWorldState,
   publishAnnouncement,
   publishScheduleAnnouncements,
+  publishSchedulesForWorldState,
   scheduleAnnouncementId,
   scheduleMatches,
   schedulesForState,
@@ -469,5 +470,93 @@ describe("PauseMenu upcoming reader source lock (S12 slice 6)", () => {
     expect(announcementsSince(list, 11).map((a) => a.text)).toEqual(["Tomorrow's row.", "Later row."]);
     // Reading from today would repeat today under a second heading.
     expect(announcementsSince(list, 10).map((a) => a.text)).toEqual(["Today's row.", "Tomorrow's row.", "Later row."]);
+  });
+});
+
+describe("publishSchedulesForWorldState (S12 slice 8, host publish, pure)", () => {
+  const reading = { weekday: 3, gamePhase: "dusk" as const, season: "autumn" as const, dayIndex: 10 };
+  const rows = [
+    entry({ id: "a", weekday: 3, season: "autumn", gamePhase: "dusk" }),
+    entry({ id: "b", weekday: 3, season: "summer" }),
+    entry({ id: "c", weekday: 4 }),
+    entry({ id: "d", gamePhase: "dusk", storyFlag: "flag-x" }),
+  ];
+  const textFor = (e: ScheduleEntry) => `Notice for ${e.id}.`;
+  it("publishes only the matching row, with the mechanical schedule id for the reading's day", () => {
+    const out = publishSchedulesForWorldState([], rows, reading, textFor);
+    expect(out).toEqual([{ id: "schedule:a:10", dayIndex: 10, kind: "calendar", text: "Notice for a." }]);
+  });
+  it("is a same-reference no-op on a same-day rerun and publishes again on a new day", () => {
+    const first = publishSchedulesForWorldState([], rows, reading, textFor);
+    expect(publishSchedulesForWorldState(first, rows, reading, textFor)).toBe(first);
+    const nextDay = publishSchedulesForWorldState(first, rows, { ...reading, dayIndex: 11 }, textFor);
+    expect(nextDay.map((a) => a.id)).toEqual(["schedule:a:10", "schedule:a:11"]);
+    expect(nextDay[1]?.dayIndex).toBe(11);
+  });
+  it("publishes nothing for a no-text row or a weather-demanding row with no caller weather, and publishes it once weather is supplied", () => {
+    const noText = publishSchedulesForWorldState([], rows, reading, () => null);
+    expect(noText).toEqual([]);
+    const weatherRow = [entry({ id: "w", weatherKey: "rain" })];
+    expect(publishSchedulesForWorldState([], weatherRow, reading, textFor)).toEqual([]);
+    expect(publishSchedulesForWorldState([], weatherRow, reading, textFor, { weatherKey: "rain" })).toEqual([
+      { id: "schedule:w:10", dayIndex: 10, kind: "calendar", text: "Notice for w." },
+    ]);
+  });
+  it("agrees exactly with slice 3's publisher on the slice-7 adapted context, and passes caller flags through", () => {
+    const opts = { storyFlags: ["flag-x"] };
+    const viaSlice8 = publishSchedulesForWorldState([], rows, reading, textFor, opts);
+    const viaSlice3 = publishScheduleAnnouncements(
+      [],
+      rows,
+      calendarContextFromWorldState(reading, opts),
+      10,
+      textFor,
+    );
+    expect(viaSlice8).toEqual(viaSlice3);
+    expect(viaSlice8.map((a) => a.id)).toEqual(["schedule:a:10", "schedule:d:10"]);
+    // Without the flag, the flag-demanding row stays unpublished.
+    expect(
+      publishSchedulesForWorldState([], rows, reading, textFor).map((a) => a.id),
+    ).toEqual(["schedule:a:10"]);
+  });
+});
+
+describe("publishSchedulesForCurrentDay store method (S12 slice 8, through the real store)", () => {
+  it("is a no-op when unanchored", () => {
+    useGameStore.setState({ worldClock: null, announcements: [] });
+    useGameStore
+      .getState()
+      .publishSchedulesForCurrentDay([entry({ id: "host-row" })], () => "Host notice.");
+    expect(useGameStore.getState().announcements).toEqual([]);
+  });
+  it("publishes the matching row for the store's own reading, once, with the reading's dayIndex", () => {
+    const anchor = newGameAnchor(Date.now());
+    useGameStore.setState({ worldClock: anchor, announcements: [] });
+    const expected = deriveWorldState(anchor, Date.now());
+    const row = entry({
+      id: "host-row",
+      weekday: expected.weekday,
+      gamePhase: expected.gamePhase,
+      season: expected.season,
+    });
+    const store = useGameStore.getState();
+    store.publishSchedulesForCurrentDay([row], () => "Host notice.");
+    const after = useGameStore.getState().announcements;
+    expect(after).toEqual([
+      { id: `schedule:host-row:${expected.dayIndex}`, dayIndex: expected.dayIndex, kind: "calendar", text: "Host notice." },
+    ]);
+    // A second call on the same day adds nothing.
+    useGameStore.getState().publishSchedulesForCurrentDay([row], () => "Host notice.");
+    expect(useGameStore.getState().announcements).toEqual(after);
+    useGameStore.setState({ worldClock: null, announcements: [] });
+  });
+  it("the store method derives from the anchor through deriveWorldState and the slice-8 pure publish", () => {
+    const src = readFileSync(
+      new URL("../store/gameStore.ts", import.meta.url),
+      "utf8",
+    );
+    expect(src).toContain("publishSchedulesForCurrentDay");
+    expect(src).toContain("deriveWorldState");
+    expect(src).toContain("publishSchedulesForWorldState");
   });
 });

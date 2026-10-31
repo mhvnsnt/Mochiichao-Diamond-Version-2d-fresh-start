@@ -338,3 +338,39 @@ export function publishScheduleAnnouncements(
   }
   return out;
 }
+
+/**
+ * S12 slice 8 — the host's publish call, pure form. Before this
+ * slice a host had to do three steps itself and get all three
+ * right: derive the clock reading, adapt it to a CalendarContext
+ * (slice 7), and publish through slice 3 with the reading's own
+ * dayIndex. A full WorldState reading carries dayIndex, and the
+ * type requires it here, so no day is invented or defaulted.
+ * This function is that composition, and nothing else:
+ * it adapts the reading (slice 7's adapter, unchanged) and hands
+ * the adapted context plus the reading's dayIndex to slice 3's
+ * publisher, so a row publishes here exactly when slice 3 would
+ * publish it for the same reading — same ids, same dedupe, same
+ * same-reference no-op, same no-text-no-publish rule. No new
+ * matching rule, no new id shape, no weekday names, no rows, no
+ * text invented here. The store method of the same name (slice 8's
+ * store half) is the only caller that supplies a live reading;
+ * the WorldEngine day-change hook that will call it on a tick is
+ * still a later slice, and with zero schedule rows authored this
+ * publishes nothing in live play — stated, not hidden.
+ */
+export function publishSchedulesForWorldState(
+  list: readonly Announcement[],
+  entries: readonly ScheduleEntry[],
+  state: WorldClockReading & { dayIndex: number },
+  textFor: (entry: ScheduleEntry) => string | null | undefined,
+  opts: CalendarHostOptions = {},
+): readonly Announcement[] {
+  return publishScheduleAnnouncements(
+    list,
+    entries,
+    calendarContextFromWorldState(state, opts),
+    state.dayIndex,
+    textFor,
+  );
+}
