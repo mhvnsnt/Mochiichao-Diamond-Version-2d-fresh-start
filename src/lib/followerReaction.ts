@@ -117,3 +117,26 @@ export function selectFollowerReaction(
   }
   return { reaction: null, moodBand: band };
 }
+
+// ── S8 slice 4 — talk-to-follower host text ─────────────────────────
+// The host (WorldEngine's talk-to-follower branch) maps a selection
+// onto ONE line of dialogue. Both lines below are this host's OWN
+// original text — never HGSS text, never a quote from the teardown.
+// The discomfort line is the original rendering of the seeded
+// FIRE-on-wet-ground rule only; the default line is the talk
+// interaction's plain greeting, NOT a reaction claim: a null
+// selection means "no authored reaction for this context", and the
+// host still answers the talk instead of silently doing nothing.
+// moodBand deliberately does NOT change the text: the teardown
+// gates finds (and, in HGSS, a mood icon) on mood, not these lines,
+// so no band->text mapping is invented here. The band stays on the
+// selection for the future animation / find-gating readers.
+export function followerTalkLine(
+  name: string,
+  selection: FollowerReactionSelection,
+): string {
+  if (selection.reaction === "terrain-discomfort") {
+    return `${name} shuffles uneasily here, keeping clear of the wet ground.`;
+  }
+  return `${name} looks up at you, ready to keep going.`;
+}
