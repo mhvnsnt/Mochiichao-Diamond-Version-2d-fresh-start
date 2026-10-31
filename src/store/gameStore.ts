@@ -15,6 +15,7 @@ import type { WorldClockAnchor } from '../lib/worldClock';
 import { applyFontRoles } from '../lib/fonts';
 import { applySoundMode } from '../lib/audioRouting';
 import { worldFullPp } from '../lib/worldBattleCore';
+import { backfillIndividuals } from '../lib/individual';
 
 interface GameState {
   playerName: string;
@@ -380,7 +381,19 @@ export const useGameStore = create<GameState>((set, get) => ({
     applyFontRoles(nextSettings);
     applySoundMode(nextSettings.sound);
     setAutosaveHold(null);
-    set({ ...state, settings: nextSettings, introCompleted: true, rivalName: (state as any).rivalName || 'Hex', autosaveHeldForSlot: null });
+    // Gap-fill S7 slice 2: old saves carry party/pc members with no
+    // individual record (slice 1 made the field optional so they load
+    // unchanged). Backfill here, in memory, for exactly the arrays this
+    // save carries — a member with a record keeps it (never re-rolled),
+    // and a partial loadState call carrying no party/pc adds no key, so
+    // the store's current arrays are never wiped by a partial load.
+    // Every save-load path funnels through loadState (SaveMenu's
+    // loadGame, IntroSequence, CheatConsole, WorldEngine autosave), so
+    // this one site covers all of them.
+    const backfilled: Partial<GameState> = {};
+    if (Array.isArray(state.party)) backfilled.party = backfillIndividuals(state.party);
+    if (Array.isArray(state.pc)) backfilled.pc = backfillIndividuals(state.pc);
+    set({ ...state, ...backfilled, settings: nextSettings, introCompleted: true, rivalName: (state as any).rivalName || 'Hex', autosaveHeldForSlot: null });
   },
   completeIntro: () => set({ introCompleted: true }),
   
