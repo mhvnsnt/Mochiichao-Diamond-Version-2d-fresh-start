@@ -8,6 +8,40 @@ import { MenuHelpLine } from '../game/MenuList';
 import Black2SystemsPanel from '../game/Black2SystemsPanel';
 import { getActiveMenuConfig } from '../../lib/menuEditor';
 import { playTitleCry } from '../../lib/titleCryGate';
+import { researchKindCounts } from '../../lib/research';
+
+/**
+ * Gap-fill S11 slice 4 — the W4 Dex research section. Recorded facts
+ * only: one count per #97 kind for the selected species, read from
+ * the store research tallies. No level, points, or checkmarks here —
+ * no per-species defs exist yet, so a derived level would read 0 by
+ * empty-def default, not by measurement. Caught entries only, the
+ * same gate as the footprint block below; seen and undiscovered
+ * entries show no research block. A caught entry with no tallies
+ * honestly says none are recorded yet.
+ */
+function ResearchSection({ speciesId, status }: { speciesId: string; status: 'caught' | 'seen' | 'undiscovered' }) {
+  const research = useGameStore((s) => s.research);
+  if (status !== 'caught' || !speciesId) return null;
+  const counts = researchKindCounts(research, speciesId);
+  const total = counts.observe + counts.feed + counts['battle-witness'] + counts.track + counts.care;
+  return (
+    <div className="mt-4">
+      <div className="font-bold text-white text-sm">Research notes</div>
+      {total === 0 ? (
+        <div className="text-xs text-slate-400 mt-1">No research recorded yet.</div>
+      ) : (
+        <div className="text-sm text-slate-300 mt-1 space-y-1">
+          <div>Observed: {counts.observe}</div>
+          <div>Fed: {counts.feed}</div>
+          <div>Battle witnessed: {counts['battle-witness']}</div>
+          <div>Tracked: {counts.track}</div>
+          <div>Cared for: {counts.care}</div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** Shared dex row button (all looks): portrait + # + name/??? + status. */
 function DexRowButton({ row, isSelected, onSelect, statusOf, creatureName, portrait, accent }: {
@@ -112,6 +146,7 @@ function GatedDetail({ kind, speciesId, status, name, num, species, detailPortra
         {kind === 'slot' && (
           <p className="text-sm text-slate-400 mt-3 leading-relaxed">Unfilled slot — no creature is recorded here yet.</p>
         )}
+        <ResearchSection speciesId={speciesId} status={status} />
         {children}
       </div>
     </div>
@@ -663,6 +698,9 @@ export default function DexView({ onBack }: { onBack: () => void }) {
                     <div className="text-xs text-slate-500">Cry audio resolves at PR time (PR #209 files on main).</div>
                   )}
                 </div>
+              )}
+              {selected.kind === 'creature' && (
+                <ResearchSection speciesId={selected.speciesId} status={selectedStatus} />
               )}
               {selected.kind === 'creature' && selectedStatus === 'undiscovered' && (
                 <p className="text-sm text-slate-400 mt-3 leading-relaxed">Meet or catch this Mochiichao to reveal it.</p>
