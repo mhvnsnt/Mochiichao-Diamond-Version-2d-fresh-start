@@ -202,3 +202,58 @@ export function announcementsSince(
   if (!Number.isInteger(dayIndex) || dayIndex < 0) return [];
   return list.filter((ann) => ann.dayIndex >= dayIndex);
 }
+
+/**
+ * S12 slice 3 — the calendar's first publisher (GAP-FILL-PLAN G-17:
+ * "first publisher is the calendar itself"). This is a derivation
+ * over caller-supplied rows, not content: the rows, the clock
+ * context, and the announcement TEXT all come from the caller.
+ * A row with no text (textFor returns null, undefined, or blank)
+ * publishes nothing — this module never invents announcement text,
+ * schedule rows, weekday names, or places.
+ *
+ * Semantics, stated so a later host cannot misread them:
+ * - Only rows matching the context right now are candidates
+ *   (scheduleMatches, so a weather-demanding row with no caller
+ *   weather never publishes, exactly as it never matches).
+ * - Each published announcement carries kind "calendar" and the
+ *   mechanical id `schedule:<row id>:<dayIndex>`. The dayIndex in
+ *   the id is what makes re-running on a new day publish again
+ *   while re-running on the same day is a no-op: publishAnnouncement
+ *   already dedupes by id, first wins, so a host may call this on
+ *   every clock tick without spamming duplicates.
+ * - A row that starts matching later in the same day (a later
+ *   gamePhase, a flag set mid-day) publishes when it first matches,
+ *   because its id was not published before; a row that matched
+ *   earlier in the day does not publish twice.
+ * - No-op runs return the SAME list reference, so the store (slice
+ *   2's pattern) can skip the set. The input list is never mutated.
+ * - An invalid dayIndex (non-integer or negative) publishes nothing
+ *   and returns the same reference.
+ */
+export function scheduleAnnouncementId(entry: ScheduleEntry, dayIndex: number): string {
+  return `schedule:${entry.id}:${dayIndex}`;
+}
+
+export function publishScheduleAnnouncements(
+  list: readonly Announcement[],
+  entries: readonly ScheduleEntry[],
+  ctx: CalendarContext,
+  dayIndex: number,
+  textFor: (entry: ScheduleEntry) => string | null | undefined,
+): readonly Announcement[] {
+  if (!Number.isInteger(dayIndex) || dayIndex < 0) return list;
+  let out = list;
+  for (const entry of entries) {
+    if (!scheduleMatches(entry, ctx)) continue;
+    const text = textFor(entry);
+    if (text === null || text === undefined || text.trim() === "") continue;
+    out = publishAnnouncement(out, {
+      id: scheduleAnnouncementId(entry, dayIndex),
+      dayIndex,
+      kind: "calendar",
+      text,
+    });
+  }
+  return out;
+}
