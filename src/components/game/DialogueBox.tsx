@@ -100,6 +100,9 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
   const pagesKey = pages.join('\n');
   useEffect(() => { setPageIdx(0); setShown(0); }, [pagesKey]);
   const [shown, setShown] = useState(0);
+  const [choiceIdx, setChoiceIdx] = useState(0);
+  const choiceIdxRef = React.useRef(0);
+  choiceIdxRef.current = choiceIdx;
   // Settings wiring: TEXT SPEED row controls this interval.
   // MID 18ms is the pre-existing interval, kept exactly.
   const textSpeed = useGameStore(s => s.settings.textSpeed);
@@ -196,6 +199,16 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
       // Y/N now answer directly; Enter/Space are left alone for
       // choice dialogues so a focused YES/NO button can activate.
       if (choice && onChoice) {
+        // M1 (2026-10-29): Pokemon-style YES/NO cursor on the last
+        // page. Arrow keys / WASD move the cursor, A/Enter/Space
+        // picks the highlighted answer (YES by default, as in the
+        // decomps' YesNo menu), B/Escape/Backspace answers NO.
+        // Answers go through choose() so the sound cues fire.
+        if (stateRef.current.isLast && stateRef.current.typingDone) {
+          if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','s','a','d'].includes(e.key)) { e.preventDefault(); setChoiceIdx(i => 1 - i); return; }
+          if (isConfirmKey(e, buttonMode)) { e.preventDefault(); choose(choiceIdxRef.current === 0); return; }
+          if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'x' || e.key === 'X') { e.preventDefault(); choose(false); return; }
+        }
         if (e.key === 'y' || e.key === 'Y') { choose(true); return; }
         if (e.key === 'n' || e.key === 'N') { choose(false); return; }
         // Sequence build (2026-10-28): before this, the early return
@@ -305,8 +318,8 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
           )}
           {isLast && typingDone && choice && onChoice && (
             <div className="flex gap-3 mt-3 justify-end">
-              <button onClick={(e) => { e.stopPropagation(); choose(true); }} className="game-button px-6 py-2 font-bold min-h-[48px]">YES</button>
-              <button onClick={(e) => { e.stopPropagation(); choose(false); }} className="game-button px-6 py-2 font-bold min-h-[48px]">NO</button>
+              <button onMouseEnter={() => setChoiceIdx(0)} onClick={(e) => { e.stopPropagation(); choose(true); }} className={`game-button px-6 py-2 font-bold min-h-[48px] ${choiceIdx === 0 ? 'ring-2 ring-yellow-300' : ''}`}>{choiceIdx === 0 ? '► ' : ''}YES</button>
+              <button onMouseEnter={() => setChoiceIdx(1)} onClick={(e) => { e.stopPropagation(); choose(false); }} className={`game-button px-6 py-2 font-bold min-h-[48px] ${choiceIdx === 1 ? 'ring-2 ring-yellow-300' : ''}`}>{choiceIdx === 1 ? '► ' : ''}NO</button>
             </div>
           )}
         </div>

@@ -792,6 +792,11 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   };
   const npcRuntimeRef = React.useRef<Record<string, NpcRuntime>>({});
   const [npcStates, setNpcStates] = useState<Record<string, NpcWalkState>>({});
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('qa')) {
+      (window as any).__qaw = { battleState, dialog, npcStates }; if ((window as any).__qa) (window as any).__qa.resolve = resolveBattleMove;
+    }
+  });
   // Refs so the tick callback stays stable while the player
   // walks (otherwise the interval would restart on every step
   // and wandering NPCs would rarely move).

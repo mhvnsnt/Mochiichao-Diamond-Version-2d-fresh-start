@@ -58,6 +58,7 @@ export const MAP_PLACEMENT: Record<string, Placement> = {
   sector0_house_1f: "town",
   sector0_house_2f: "town",
   sector0_rival_house: "town",
+  sector0_neighbor_house: "town",
   aeon_lab: "town",
   boot_bay: "town",
   mochiiplex_1: "center",

@@ -29,7 +29,7 @@ export const TRAINER_TEAMS: TrainerRow[] = [
     "team": [
       {
         "speciesId": "038",
-        "level": 5
+        "level": 3
       }
     ],
     "reward": 120
@@ -55,7 +55,7 @@ export const TRAINER_TEAMS: TrainerRow[] = [
     "team": [
       {
         "speciesId": "007",
-        "level": 6
+        "level": 5
       }
     ],
     "reward": 180
@@ -523,7 +523,7 @@ export const TRAINER_TEAMS: TrainerRow[] = [
     "team": [
       {
         "speciesId": "007",
-        "level": 8
+        "level": 7
       }
     ],
     "reward": 300
@@ -536,7 +536,7 @@ export const TRAINER_TEAMS: TrainerRow[] = [
     "team": [
       {
         "speciesId": "004",
-        "level": 9
+        "level": 8
       }
     ],
     "reward": 350
@@ -549,7 +549,7 @@ export const TRAINER_TEAMS: TrainerRow[] = [
     "team": [
       {
         "speciesId": "001",
-        "level": 10
+        "level": 8
       }
     ],
     "reward": 400
@@ -562,7 +562,7 @@ export const TRAINER_TEAMS: TrainerRow[] = [
     "team": [
       {
         "speciesId": "038",
-        "level": 11
+        "level": 9
       }
     ],
     "reward": 450

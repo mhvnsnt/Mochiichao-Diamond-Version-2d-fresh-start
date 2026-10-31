@@ -47,6 +47,7 @@ const GOLDEN: Record<string, string> = {
   sector0_house_1f: "interior",
   sector0_house_2f: "interior",
   sector0_rival_house: "interior",
+  sector0_neighbor_house: "interior",
   route_2: "route",
   stoneport_city: "town",
   dojo_3: "dojo",

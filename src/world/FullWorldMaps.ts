@@ -84,6 +84,11 @@ export const SECTOR_0: any = {
     { id:"mom", x:5, y:9, sprite:"👩", name:"Your Mom", facing:"down", movement:"wander", wanderRadius:1, isHeal: true, dialog:["There you are! The truck beat us here.","Come inside. Your room is upstairs. The boxes can wait. Go set the clock first — a new home needs a correct time.","Good. Now go say hello next door. Hex's family just moved in too. You two will need each other out there.","Wait. Before you run off — here. Sprint Boots. Hold B and you can run. A trainer who cannot run will always be late."] },
     { id:"rival_hex", x:15, y:10, sprite:"😤", name:"Hex", facing:"down", dialog:["You again? I already picked my starter. Razorgater, obviously.","Don't think I'll go easy on you just because we grew up here.","Next time we meet, we BATTLE. Count on it."], battle: { team:[{ id:"004", name:"Razorgater", hp:50, maxHp:50, atk:65, def:64, spd:48, moves:["Chrome Claw","Tackle"], type:"Water", level:5 }], reward:100, badge:null } },
     { id:"fat_guy", x:9, y:13, sprite:"🧑‍🦲", name:"Technology Enthusiast", facing:"down", movement:"wander", wanderRadius:1, dialog:["Technology is incredible!", "You can now store up to 6 Mochiichao in your party!", "Any more you catch are instantly sent to your PC!"] },
+    // M1 (2026-10-29): Local Kid + Fisherman moved over from the old
+    // Maps.ts Sector 0 list (same names and dialogue) so the town has
+    // its full M1 cast with walking art. Placed on free grass tiles.
+    { id:"local_kid", x:18, y:15, sprite:"👤", name:"Local Kid", facing:"down", movement:"wander", wanderRadius:1, dialog:["I heard there's a branded Kittember in the tall grass near the woods...","It had a glowing 'H' burned into its side. Creepy."] },
+    { id:"fisherman", x:12, y:19, sprite:"🎣", name:"Fisherman", facing:"down", dialog:["The waters here are calm, but I've seen something HUGE moving deep below...","The old-timers call it Astroleviathan. I call it my nightmare."] },
     // Living-world placements (world-encounter package): townsfolk and
     // creature citizens for the encounter director (src/lib/livingWorld.ts,
     // data in src/data/core/living-world/). The director owns their
@@ -129,6 +134,7 @@ export const SECTOR_0: any = {
     // now PATH, so the player can step (6,9)->(6,8)->(6,7) and
     // (26,9)->(26,8)->(26,7) into the houses.
     { x:6, y:7, to:"sector0_house_1f", enterAt:{x:6, y:10}, label:"Your House" },
+    { x:19, y:3, to:"sector0_neighbor_house", enterAt:{x:5, y:8}, label:"Neighbor's House" },
     { x:26, y:7, to:"sector0_rival_house", enterAt:{x:6, y:10}, label:"Hex's House" }
   ],
   events: [
@@ -228,9 +234,9 @@ export const ROUTE_1: any = {
     return m;
   })(),
   npcs: [
-    { id:"trainer_youngster", x:8, y:7, sprite:"👦", name:"Youngster Jay", facing:"down", dialog:["Hey! You're a trainer, right?", "Sproutle's defenses are rock solid!", "Let's go!"], postBattleDialog: ["Looks like defense isn't everything.", "I need to train harder..."], battle:{ team:[{id:"038",name:"Sproutle",hp:35,maxHp:35,atk:35,def:35,spd:50,moves:["Web Blast","Tackle"],type:"Grass", level:5}], reward:120, badge:null } },
+    { id:"trainer_youngster", x:8, y:7, sprite:"👦", name:"Youngster Jay", facing:"down", dialog:["Hey! You're a trainer, right?", "Sproutle's defenses are rock solid!", "Let's go!"], postBattleDialog: ["Looks like defense isn't everything.", "I need to train harder..."], battle:{ team:[{id:"038",name:"Sproutle",hp:35,maxHp:35,atk:35,def:35,spd:50,moves:["Web Blast","Tackle"],type:"Grass", level:3}], reward:120, badge:null } },
     { id:"trainer_lass", x:19, y:20, sprite:"👧", name:"Lass Amy", facing:"left", dialog:["My Mochiichao is the cutest!", "It's super bouncy! Watch out!"], postBattleDialog: ["Aww, my cute Mochii...", "You're really strong!"], battle:{ team:[{id:"001",name:"Mochii",hp:38,maxHp:38,atk:35,def:35,spd:45,moves:["Foam Burst","Tackle"],type:"Water", level:4}], reward:100, badge:null } },
-    { id:"trainer_hiker", x:14, y:30, sprite:"⛏️", name:"Hiker Dan", facing:"up", dialog:["This path is rough, but my partner is tough!", "Tyrage, show them your earth-shattering power!"], postBattleDialog: ["We crumbled like rocks...", "I'll carve a new path to victory next time."], battle:{ team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:40,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth", level:6}], reward:180, badge:null } },
+    { id:"trainer_hiker", x:14, y:30, sprite:"⛏️", name:"Hiker Dan", facing:"up", dialog:["This path is rough, but my partner is tough!", "Tyrage, show them your earth-shattering power!"], postBattleDialog: ["We crumbled like rocks...", "I'll carve a new path to victory next time."], battle:{ team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:40,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth", level:5}], reward:180, badge:null } },
     { id:"trainer_bugcatcher", x:4, y:6, sprite:"🐛", name:"Bug Catcher Rick", facing:"right", dialog:["I use the tall grass to find bug Mochiichao!"], postBattleDialog: ["I should've caught stronger bugs!"], battle:{ team:[{id:"016",name:"Squirmite",hp:30,maxHp:30,atk:35,def:35,spd:50,moves:["Web Blast","Tackle"],type:"Bug", level:3}], reward:80, badge:null } },
     // BW2 lane — visible roamers v1 (spec §6): species from this
     // map's own encounter pool, living in its tall-grass patches on
@@ -325,7 +331,7 @@ export const BINARY_FIELDS: any = {
     });
   })(),
   npcs: [
-    { id:"dojo1_guard", x:14, y:9, sprite:"🥋", name:"Dojo Acolyte", facing:"down", movement:"wander", wanderRadius:1, dialog:["The Binary Dojo awaits within!", "Master Lin is the strongest trainer in Silicon Town."] },
+    { id:"dojo1_guard", x:13, y:9, sprite:"🥋", name:"Dojo Acolyte", facing:"right", dialog:["The Binary Dojo awaits within!", "Master Lin is the strongest trainer in Silicon Town."] },
     { id:"town_lass", x:10, y:20, sprite:"👧", name:"Town Girl", facing:"down", movement:"wander", wanderRadius:1, dialog:["This is Silicon Town! It's a bustling hub of commerce.", "You should check out the MochiiPlex to the East!"] },
     { id:"town_oldman", x:23, y:12, sprite:"👴", name:"Old Man", facing:"left", movement:"wander", wanderRadius:1, dialog:["They say before the Mainframe Region was made...", "There was a glowing ethereal creator named Mythar...", "He's the origin of all Mochiichao. A true mythical deity!"] },
     // Living-world placements (world-encounter package): the stranger
@@ -405,11 +411,11 @@ export const DOJO_1: any = {
     });
   })(),
   npcs: [
-    { id:"dojo_acolyte_1", x:7, y:12, sprite:"🥋", name:"Acolyte Ken", dialog:["Master Lin does not shout. He builds. Watch how his creatures stand."], battle:{ team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:60,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth",level:8}], reward:300, badge:null } },
-    { id:"dojo_acolyte_2", x:4, y:8, sprite:"🥷", name:"Acolyte Ren", dialog:["Feel the power of the Core!"], battle:{ team:[{id:"004",name:"Razorgater",hp:50,maxHp:50,atk:65,def:64,spd:48,moves:["Chrome Claw","Tackle"],type:"Steel",level:9}], reward:350, badge:null } },
-    { id:"dojo_acolyte_3", x:11, y:8, sprite:"🤺", name:"Acolyte Shin", dialog:["Speed and precision. Can you handle it?"], battle:{ team:[{id:"001",name:"Mochii",hp:40,maxHp:40,atk:45,def:35,spd:50,moves:["Water Orb","Swift Movement"],type:"Water",level:10}], reward:400, badge:null } },
-    { id:"dojo_acolyte_4", x:8, y:5, sprite:"💂", name:"Acolyte Ryu", dialog:["You must have an iron will to pass me!"], battle:{ team:[{id:"038",name:"Sproutle",hp:55,maxHp:55,atk:45,def:60,spd:30,moves:["Vine Lash","Tackle"],type:"Grass",level:11}], reward:450, badge:null } },
-    { id:"master_lin", x:8, y:2, sprite:"🥋", name:"Master Lin", dialog:["A dojo is a machine. Every part has a place. Show me where you fit."], postBattleDialog:["You fit. Take the Core Fragment. It opens roads that only a steady trainer can open."], battle:{ team:[{id:"039",name:"Shellguard",hp:90,maxHp:90,atk:55,def:95,spd:25,moves:["Chrome Guard","Tackle","Shell Burst","Rockfall"],type:"Grass",level:14}], reward:1500, badge:"Core Fragment", hmReward:"Mighty Push" }, isDojoBoss: true },
+    { id:"dojo_acolyte_1", x:7, y:12, sprite:"🥋", name:"Acolyte Ken", dialog:["Master Lin does not shout. He builds. Watch how his creatures stand."], battle:{ team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:60,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth",level:7}], reward:300, badge:null } },
+    { id:"dojo_acolyte_2", x:4, y:8, sprite:"🥷", name:"Acolyte Ren", dialog:["Feel the power of the Core!"], battle:{ team:[{id:"004",name:"Razorgater",hp:50,maxHp:50,atk:65,def:64,spd:48,moves:["Chrome Claw","Tackle"],type:"Steel",level:8}], reward:350, badge:null } },
+    { id:"dojo_acolyte_3", x:11, y:8, sprite:"🤺", name:"Acolyte Shin", dialog:["Speed and precision. Can you handle it?"], battle:{ team:[{id:"001",name:"Mochii",hp:40,maxHp:40,atk:45,def:35,spd:50,moves:["Water Orb","Swift Movement"],type:"Water",level:8}], reward:400, badge:null } },
+    { id:"dojo_acolyte_4", x:8, y:5, sprite:"💂", name:"Acolyte Ryu", dialog:["You must have an iron will to pass me!"], battle:{ team:[{id:"038",name:"Sproutle",hp:55,maxHp:55,atk:45,def:60,spd:30,moves:["Vine Lash","Tackle"],type:"Grass",level:9}], reward:450, badge:null } },
+    { id:"master_lin", x:8, y:2, sprite:"🥋", name:"Master Lin", dialog:["A dojo is a machine. Every part has a place. Show me where you fit."], postBattleDialog:["You fit. Take the Core Fragment. It opens roads that only a steady trainer can open."], battle:{ team:[{id:"039",name:"Shellguard",hp:90,maxHp:90,atk:55,def:95,spd:25,moves:["Chrome Guard","Tackle","Shell Burst","Rockfall"],type:"Grass",level:12}], reward:1500, badge:"Core Fragment", hmReward:"Mighty Push" }, isDojoBoss: true },
   ],
   signs: [],
   exits: [
@@ -418,12 +424,12 @@ export const DOJO_1: any = {
   ],
   doors: [],
   events: [
-    { id: "dojo_acolyte_1_event", x:6, y:13, dialog:["Acolyte Ken: Stop right there! You must prove yourself!"], npc: { name: "Acolyte Ken", sprite: "🥋" }, battle: { team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:60,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth",level:8}], reward:300, badge:null } },
-    { id: "dojo_acolyte_1_event", x:7, y:13, dialog:["Acolyte Ken: Stop right there! You must prove yourself!"], npc: { name: "Acolyte Ken", sprite: "🥋" }, battle: { team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:60,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth",level:8}], reward:300, badge:null } },
-    { id: "dojo_acolyte_1_event", x:8, y:13, dialog:["Acolyte Ken: Stop right there! You must prove yourself!"], npc: { name: "Acolyte Ken", sprite: "🥋" }, battle: { team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:60,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth",level:8}], reward:300, badge:null } },
-    { id: "dojo_acolyte_2_event", x:3, y:9, dialog:["Acolyte Ren: Feel the power of the Core!"], npc: { name: "Acolyte Ren", sprite: "🥷" }, battle: { team:[{id:"004",name:"Razorgater",hp:50,maxHp:50,atk:65,def:64,spd:48,moves:["Chrome Claw","Tackle"],type:"Steel",level:9}], reward:350, badge:null } },
-    { id: "dojo_acolyte_2_event", x:4, y:9, dialog:["Acolyte Ren: Feel the power of the Core!"], npc: { name: "Acolyte Ren", sprite: "🥷" }, battle: { team:[{id:"004",name:"Razorgater",hp:50,maxHp:50,atk:65,def:64,spd:48,moves:["Chrome Claw","Tackle"],type:"Steel",level:9}], reward:350, badge:null } },
-    { id: "dojo_acolyte_2_event", x:5, y:9, dialog:["Acolyte Ren: Feel the power of the Core!"], npc: { name: "Acolyte Ren", sprite: "🥷" }, battle: { team:[{id:"004",name:"Razorgater",hp:50,maxHp:50,atk:65,def:64,spd:48,moves:["Chrome Claw","Tackle"],type:"Steel",level:9}], reward:350, badge:null } }
+    { id: "dojo_acolyte_1_event", x:6, y:13, dialog:["Acolyte Ken: Stop right there! You must prove yourself!"], npc: { name: "Acolyte Ken", sprite: "🥋" }, battle: { team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:60,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth",level:7}], reward:300, badge:null } },
+    { id: "dojo_acolyte_1_event", x:7, y:13, dialog:["Acolyte Ken: Stop right there! You must prove yourself!"], npc: { name: "Acolyte Ken", sprite: "🥋" }, battle: { team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:60,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth",level:7}], reward:300, badge:null } },
+    { id: "dojo_acolyte_1_event", x:8, y:13, dialog:["Acolyte Ken: Stop right there! You must prove yourself!"], npc: { name: "Acolyte Ken", sprite: "🥋" }, battle: { team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:60,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth",level:7}], reward:300, badge:null } },
+    { id: "dojo_acolyte_2_event", x:3, y:9, dialog:["Acolyte Ren: Feel the power of the Core!"], npc: { name: "Acolyte Ren", sprite: "🥷" }, battle: { team:[{id:"004",name:"Razorgater",hp:50,maxHp:50,atk:65,def:64,spd:48,moves:["Chrome Claw","Tackle"],type:"Steel",level:8}], reward:350, badge:null } },
+    { id: "dojo_acolyte_2_event", x:4, y:9, dialog:["Acolyte Ren: Feel the power of the Core!"], npc: { name: "Acolyte Ren", sprite: "🥷" }, battle: { team:[{id:"004",name:"Razorgater",hp:50,maxHp:50,atk:65,def:64,spd:48,moves:["Chrome Claw","Tackle"],type:"Steel",level:8}], reward:350, badge:null } },
+    { id: "dojo_acolyte_2_event", x:5, y:9, dialog:["Acolyte Ren: Feel the power of the Core!"], npc: { name: "Acolyte Ren", sprite: "🥷" }, battle: { team:[{id:"004",name:"Razorgater",hp:50,maxHp:50,atk:65,def:64,spd:48,moves:["Chrome Claw","Tackle"],type:"Steel",level:8}], reward:350, badge:null } }
   ],
   encounters: []
 };
@@ -944,6 +950,31 @@ export const SECTOR0_RIVAL_HOUSE: any = {
   encounters: []
 };
 
+export const SECTOR0_NEIGHBOR_HOUSE: any = {
+  name: "Sector 0 — Neighbor's House",
+  music: "sector0_theme",
+  weather: "clear",
+  interior: true,
+  width: 11, height: 10,
+  playerStart: { x:5, y:8 },
+  tiles: buildMap(11, 10, (x, y) => {
+    if (x===5&&y===9) return TILE.DOOR;
+    if (x===0||x===10||y===0||y===9) return TILE.WALL;
+    if (y>=1&&y<=2) return TILE.BUILDING;
+    return TILE.PATH;
+  }),
+  npcs: [
+    { id:"neighbor_tinker", x:3, y:5, sprite:"🧑‍🔧", name:"Tinker Ollo", facing:"right", dialog:["Moving day, huh? Boot Harbor runs on two things: dock coffee and Mochiichao.","Tall grass is where wild ones hide. Weaken one first, THEN throw a Luigi Cube.","A cube thrown at a full-HP Mochiichao usually just bounces off."] },
+    { id:"neighbor_kid", x:7, y:4, sprite:"🧒", name:"Pip", facing:"down", dialog:["Fire beats steel! My big sister says the Silicon Town dojo master uses a steel shell.","If I had a fire-type I'd go win that badge myself."] },
+  ],
+  signs: [],
+  exits: [],
+  doors: [
+    { x:5, y:9, to:"sector0", enterAt:{x:19, y:4}, label:"Boot Harbor" }
+  ],
+  events: [],
+  encounters: []
+};
 export const ROUTE_2: any = {
   name: "Route 2.0 — Harbour Road",
   music: "route1_theme",
@@ -1751,6 +1782,7 @@ export const FULL_WORLD: Record<string, any> = {
   sector0_house_1f: SECTOR0_HOUSE_1F,
   sector0_house_2f: SECTOR0_HOUSE_2F,
   sector0_rival_house: SECTOR0_RIVAL_HOUSE,
+  sector0_neighbor_house: SECTOR0_NEIGHBOR_HOUSE,
   route_2: ROUTE_2,
   stoneport_city: STONEPORT_CITY,
   dojo_3: DOJO_3,

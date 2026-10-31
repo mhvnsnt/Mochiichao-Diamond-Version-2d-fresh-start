@@ -1,3 +1,4 @@
+import { M1_SHOW_ALL } from './m1';
 /**
  * Settings Font row — single extensible font list, 2026-10-25.
  *
@@ -138,7 +139,10 @@ export function applyFontRoles(roles: FontRoles): void {
   ];
   try {
     for (const [v, id] of vars) {
-      const opt = fontById(id);
+      // M1 (2026-10-29): every role uses the readable dialogue font so the
+      // HUD and menus stop dropping digits. Saved choices are untouched;
+      // ?all restores them.
+      const opt = fontById(M1_SHOW_ALL ? id : roles.dialogueFont);
       document.documentElement.style.setProperty(v, `'${opt.family}', "Trebuchet MS", "Segoe UI", system-ui, sans-serif`);
     }
   } catch {

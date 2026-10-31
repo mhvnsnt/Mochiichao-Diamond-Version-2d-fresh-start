@@ -6,7 +6,7 @@ import { MAP_SCENE, sceneForMap } from '../src/lib/sceneMap';
 describe('scene map', () => {
   it('covers every FULL_WORLD map key exactly once', () => {
     const keys = Object.keys(FULL_WORLD);
-    expect(keys.length).toBe(45);
+    expect(keys.length).toBe(46);
     expect(Object.keys(MAP_SCENE).sort()).toEqual([...keys].sort());
   });
 
