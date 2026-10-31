@@ -16,6 +16,7 @@ import {
   gardenNowMinutes,
 } from '../../lib/garden-wiring';
 import { GARDEN_CRITTERS } from '../../lib/garden-data';
+import { researchTaskIdForKind } from '../../lib/research';
 
 /**
  * Mochi Garden — Mainframe Gardens as a reachable screen (pass 1).
@@ -46,6 +47,7 @@ export default function GardenView({ onBack }: { onBack: () => void }) {
   // and SaveMenu saves it with the game. GardenView behaviour is unchanged.
   const garden = useGameStore(s => s.gardenRecords);
   const setGardenRecord = useGameStore(s => s.setGardenRecord);
+  const recordResearchTally = useGameStore(s => s.recordResearchTally);
   const gardenMinutes = useGameStore(s => s.gardenMinutes) || 0;
   const setGardenMinutes = useGameStore(s => s.setGardenMinutes);
   // S1 TAIL part 2: the Garden reads the world clock when the save is
@@ -96,6 +98,13 @@ export default function GardenView({ onBack }: { onBack: () => void }) {
     if (!current) return;
     const next = { ...rec, garden: applyGardenItem(rec.garden, item), trainingSessions: rec.trainingSessions + 1 };
     setGardenRecord(current.id, next);
+    // Gap-fill S11 slice 3 — feed tally writer: one Data-Fruit feed
+    // is one 'feed' research fact for the fed species, under the
+    // W2 writer contract (taskId === kind, see research.ts). One
+    // click is one tally, never a second verb: feeding is not care,
+    // not observation, and not a training session in research
+    // terms — trainingSessions above is the Garden's own counter.
+    recordResearchTally(current.speciesId, researchTaskIdForKind('feed'));
     setNote(`${label} fed. Your Mochiichao looks happier.`);
   };
 
