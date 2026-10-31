@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { useGameStore } from "../store/gameStore";
 import {
+  announcementsBefore,
   announcementsForDay,
   announcementsSince,
   publishAnnouncement,
@@ -150,6 +151,17 @@ describe("announcement reads (S12 slice 1)", () => {
     expect(announcementsSince(list, 6).map((a) => a.id)).toEqual(["b"]);
     expect(announcementsSince(list, 5).map((a) => a.id)).toEqual(["a", "b", "c"]);
     expect(announcementsSince(list, 8)).toEqual([]);
+  });
+  it("announcementsBefore (S12 slice 5) reads strictly earlier days, in order, excluding today", () => {
+    expect(announcementsBefore(list, 6).map((a) => a.id)).toEqual(["a", "c"]);
+    expect(announcementsBefore(list, 5)).toEqual([]);
+    expect(announcementsBefore(list, 8).map((a) => a.id)).toEqual(["a", "b", "c"]);
+    expect(announcementsBefore(list, 0)).toEqual([]);
+  });
+  it("announcementsBefore reads nothing on an invalid day", () => {
+    expect(announcementsBefore(list, -1)).toEqual([]);
+    expect(announcementsBefore(list, 5.5)).toEqual([]);
+    expect(announcementsBefore(list, Number.NaN)).toEqual([]);
   });
 });
 
@@ -299,5 +311,30 @@ describe("PauseMenu announcements section source lock (S12 slice 4)", () => {
     ];
     expect(announcementsForDay(list, 10).map((a) => a.text)).toEqual(["Today's row."]);
     expect(announcementsForDay(list, 11)).toEqual([]);
+  });
+});
+
+describe("PauseMenu history reader source lock (S12 slice 5)", () => {
+  it("the section reads earlier announcements through announcementsBefore under an Earlier heading", () => {
+    const src = readFileSync(
+      new URL("../components/game/GameShell.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(src).toContain("announcementsBefore");
+    expect(src).toContain("Earlier");
+    // Earlier renders only when earlier announcements exist.
+    expect(src).toContain("earlier.length > 0");
+    // Today's section is untouched by the history addition.
+    expect(src).toContain("announcementsForDay");
+    expect(src).toContain("No announcements today.");
+  });
+  it("history is the strict before-read, not the since-read", () => {
+    const list: readonly Announcement[] = [
+      { id: "old", dayIndex: 9, kind: "calendar", text: "Yesterday's row." },
+      { id: "today", dayIndex: 10, kind: "calendar", text: "Today's row." },
+      { id: "future", dayIndex: 11, kind: "calendar", text: "Tomorrow's row." },
+    ];
+    expect(announcementsBefore(list, 10).map((a) => a.text)).toEqual(["Yesterday's row."]);
+    expect(announcementsSince(list, 10).map((a) => a.text)).toEqual(["Today's row.", "Tomorrow's row."]);
   });
 });
