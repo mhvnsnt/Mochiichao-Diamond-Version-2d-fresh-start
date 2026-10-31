@@ -65,6 +65,11 @@ export interface IndividualRecord {
   personalitySeed: number; // uint32, 0..4294967295
   variance: IndividualVariance;
   deviations: IndividualDeviation[];
+  // S8 slice 1: follower mood, HGSS-pattern short-term value, -127..127.
+  // Optional: absent reads as neutral (0) via readMood in individual.ts.
+  // The schema slot for this field lands with the teardown-hgss lane's
+  // open PR #50 (schema file only); this slice does not touch that file.
+  mood?: number;
 }
 
 export interface MochiiInstance {
