@@ -288,10 +288,14 @@ describe("solveHabitat purity and loud failures", () => {
 });
 
 describe("S14 slice-1 staging locks", () => {
-  it("no host reads the solver yet: garden-wiring and GardenView do not import it", () => {
+  // Superseded in part by S14 slice 3 (W3, 2026-10-31): garden-wiring.ts
+  // is now the placement host and imports solveHabitat by design — the
+  // slice-1 header named exactly this as W3's job. Only the GardenView
+  // half of this lock still stands: no screen reads the solver yet.
+  it("slice-3 supersession: garden-wiring hosts the solver; GardenView still does not read it", () => {
     const wiring = readFileSync(new URL("./garden-wiring.ts", import.meta.url), "utf8");
-    expect(wiring).not.toContain("garden-habitats");
-    expect(wiring).not.toContain("solveHabitat");
+    expect(wiring).toContain("garden-habitats");
+    expect(wiring).toContain("solveHabitat");
     const view = readFileSync(new URL("../components/views/GardenView.tsx", import.meta.url), "utf8");
     expect(view).not.toContain("garden-habitats");
     expect(view).not.toContain("solveHabitat");
