@@ -16,10 +16,13 @@
 //
 // Deliberately NOT here: NO overlay data is authored (no seasonal
 // weight for any species — seasonal species sets are ecology /
-// data-lane content, not invented here); NO host call site in
-// encounters.ts or WorldEngine (the roll site keeps rolling the
-// untransformed tables until a host adopts this with authored
-// overlays); NO level-band change (multipliers touch weights only);
+// data-lane content, not invented here); NO level-band change
+// (multipliers touch weights only);
+// S13 slice 4 (2026-10-31) supersedes the host half of this note:
+// encounters.ts now adopts this transform via applyRollOverlays
+// (season, then pressure). WorldEngine still calls the unoverlaid
+// roll, so live play is unchanged until the engine slice passes
+// live overlays; no overlays are authored yet.
 // NO B2 battle-pressure transform (that is S13's second transform,
 // on this same roll site, and lands separately — pressure is derived
 // over battle facts, not a seasonal weight table, so the two must

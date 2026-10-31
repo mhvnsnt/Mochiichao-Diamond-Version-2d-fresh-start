@@ -46,9 +46,12 @@
 // Deliberately NOT here: NO stored battle counts (no store field,
 // no writer — the events are caller-supplied facts, as the tally's
 // input, not a record this module keeps); NO host call site in
-// encounters.ts or WorldEngine (the roll site keeps rolling the
-// untransformed tables until a host adopts tally + transform with
-// authored bands); NO authored bands, window, or decay rate for
+// WorldEngine (the engine still calls the unoverlaid roll);
+// S13 slice 4 (2026-10-31) adopts the TRANSFORM in encounters.ts via
+// applyRollOverlays, but this tally still has no host feeding it
+// events, and no bands are authored — the roll module takes the
+// tally's output shape, not the tally itself; NO authored bands,
+// window, or decay rate for
 // any area or species; NO swarm/positive overlay; NO level-band
 // change (tally touches pressure levels only, never slot levels).
 
