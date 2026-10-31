@@ -2833,7 +2833,14 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       }
       const healed = Math.min(target.maxHp, cur + 50);
       const updatedTeam = [...playerTeam];
-      updatedTeam[action.index] = { ...target, hp: healed, currentHp: healed };
+      // Gap-fill S8 slice 5: a battle item used on a member pays +10
+      // mood (TEARDOWN-HGSS §1, battle items). Mend Patch is the one
+      // battle-usable item with a wired effect in this build, so this
+      // branch is the battle-item host; the out-of-battle BagView use
+      // of the same item is not a battle item and pays nothing. A
+      // member with no individual record or already at the clamp
+      // comes back unchanged (withMoodEvent).
+      updatedTeam[action.index] = withMoodEvent({ ...target, hp: healed, currentHp: healed }, "battle-item");
       setPlayerTeam(updatedTeam);
       const newLog = [...bs.log, `Used a Mend Patch on ${battleMonName(target)}!`, `${battleMonName(target)} restored to ${healed}/${target.maxHp} HP.`];
       const next = { ...bs, player: action.index === bs.playerTeamIdx ? { ...bs.player, hp: healed, currentHp: healed } : bs.player, log: newLog, phase: "enemy_turn" };

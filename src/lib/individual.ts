@@ -164,10 +164,11 @@ export function applyMoodDelta(mood: number | undefined | null, delta: number): 
  * from poison at 1 HP -50. Bitter medicine is -20..-40 by strength on
  * that page with no tier table, so it has NO event entry here:
  * callers pass the strength's delta through applyMoodDelta directly,
- * never a guessed tier. Host wiring this slice: level-up only, in
- * WorldEngine's payoffCommitLevel (one +40 per level beat actually
- * committed); battle-item, vitamin, and poison-recovery writers land
- * at their own item/recovery sites in later slices, not here.
+ * never a guessed tier. Host wiring: level-up in WorldEngine's
+ * payoffCommitLevel (slice 3, one +40 per level beat actually
+ * committed); battle-item in WorldEngine's battle Mend Patch branch
+ * and poison-recovery-1hp in gameStore's healParty (slice 5). Vitamin
+ * has no item or host in this build and stays unwired, never invented.
  */
 export const MOOD_EVENT_DELTAS = {
   "level-up": 40,
