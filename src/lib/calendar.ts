@@ -203,6 +203,22 @@ export function announcementsSince(
   return list.filter((ann) => ann.dayIndex >= dayIndex);
 }
 
+/** S12 slice 5 — the history read: announcements published BEFORE
+ *  this day, in input order. An invalid day argument reads nothing.
+ *  This is the reader slice 4 deferred: announcementsSince looks
+ *  forward (on or after), so it cannot serve a history section —
+ *  a history section needs the strict before-read, not the
+ *  since-read. Today's announcements are NOT in this list (slice
+ *  4's announcementsForDay owns today); a later slice's reader
+ *  that wants "everything up to today" composes the two reads. */
+export function announcementsBefore(
+  list: readonly Announcement[],
+  dayIndex: number,
+): Announcement[] {
+  if (!Number.isInteger(dayIndex) || dayIndex < 0) return [];
+  return list.filter((ann) => ann.dayIndex < dayIndex);
+}
+
 /**
  * S12 slice 3 — the calendar's first publisher (GAP-FILL-PLAN G-17:
  * "first publisher is the calendar itself"). This is a derivation

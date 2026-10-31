@@ -10,7 +10,7 @@ import { useMenuLayout } from '../../lib/menuLayoutLive';
 import { getActiveMenuConfig } from '../../lib/menuEditor';
 import { getDayNightMenuVariant, getWorldMenuVariant, dayNightMenuVarStyle } from '../../lib/dayNightMenuVariants';
 import { playCue } from '../../lib/soundCues';
-import { announcementsForDay } from '../../lib/calendar';
+import { announcementsBefore, announcementsForDay } from '../../lib/calendar';
 import { deriveWorldState } from '../../lib/worldClock';
 
 /**
@@ -26,14 +26,26 @@ import { deriveWorldState } from '../../lib/worldClock';
  * publishes nothing, so an empty list honestly reads as no news
  * rather than borrowing another system's text. A published
  * announcement for any other day simply does not appear today;
- * history (announcementsSince) is a later slice's reader, not
- * silently folded in here.
+ * history was a later slice's reader, not silently folded in here.
+ *
+ * Gap-fill S12 slice 5 — the history reader, in this same section.
+ * When the save is clock-anchored, announcements published BEFORE
+ * today read through slice 5's announcementsBefore under an
+ * "Earlier" heading below today's list; the heading appears only
+ * when earlier announcements exist, so an empty history adds no
+ * clutter. When unanchored there is no Earlier block at all: with
+ * no clock the whole list is already today's fallback, and splitting
+ * it into today-vs-earlier without a day would invent a boundary.
+ * Note the naming correction to slice 4's header: announcementsSince
+ * looks forward (on or after), so it is NOT the history read — the
+ * strict before-read is, and that is what this slice adds.
  */
 function AnnouncementsSection() {
   const announcements = useGameStore(s => s.announcements);
   const anchor = useGameStore(s => s.worldClock);
   const today = anchor ? deriveWorldState(anchor, Date.now()).dayIndex : null;
   const shown = today === null ? announcements : announcementsForDay(announcements, today);
+  const earlier = today === null ? [] : announcementsBefore(announcements, today);
   return (
     <div className="mt-4">
       <div className="font-bold text-white text-sm">Announcements</div>
@@ -44,6 +56,16 @@ function AnnouncementsSection() {
           {shown.map((ann) => (
             <div key={ann.id}>{ann.text}</div>
           ))}
+        </div>
+      )}
+      {earlier.length > 0 && (
+        <div className="mt-3">
+          <div className="font-bold text-white text-xs">Earlier</div>
+          <div className="text-sm text-slate-300 mt-1 space-y-1">
+            {earlier.map((ann) => (
+              <div key={ann.id}>{ann.text}</div>
+            ))}
+          </div>
         </div>
       )}
     </div>
