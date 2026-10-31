@@ -4,6 +4,7 @@
 import { describe, expect, it } from "vitest";
 import {
   FOLLOWER_REACTION_RULES,
+  followerTalkLine,
   moodBand,
   selectFollowerReaction,
   type FollowerReactionRule,
@@ -111,5 +112,28 @@ describe("selectFollowerReaction (S8 slice 3, seeded teardown rule)", () => {
     expect(
       selectFollowerReaction({ mood: 0, place: place({ weatherKey: "rain" }) }, rainRow).reaction,
     ).toBe("terrain-discomfort");
+  });
+});
+
+describe("followerTalkLine (S8 slice 4, host's own text)", () => {
+  it("renders the seeded discomfort reaction in original words", () => {
+    const line = followerTalkLine("Kittember", {
+      reaction: "terrain-discomfort",
+      moodBand: "neutral",
+    });
+    expect(line).toContain("Kittember");
+    expect(line).toContain("wet ground");
+  });
+
+  it("renders a plain greeting for a null selection — no invented reaction", () => {
+    const line = followerTalkLine("Sproutle", { reaction: null, moodBand: "neutral" });
+    expect(line).toContain("Sproutle");
+    expect(line).not.toContain("wet ground");
+  });
+
+  it("does not let the mood band rewrite the text", () => {
+    const low = followerTalkLine("Sproutle", { reaction: null, moodBand: "low" });
+    const high = followerTalkLine("Sproutle", { reaction: null, moodBand: "high" });
+    expect(low).toBe(high);
   });
 });
