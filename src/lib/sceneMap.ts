@@ -48,6 +48,7 @@ export const MAP_SCENE: Record<string, SceneId> = {
   sector0_house_1f: 'house',
   sector0_house_2f: 'house',
   sector0_rival_house: 'house',
+  sector0_neighbor_house: 'house',
   route_2: 'route',
   stoneport_city: 'harbour',
   dojo_3: 'dojo',

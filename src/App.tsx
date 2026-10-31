@@ -17,6 +17,7 @@ import CheatConsoleView from './components/views/CheatConsoleView';
 import IntroSequence from './components/IntroSequence';
 import { playMusic } from './lib/music';
 import MochiiMindUI from './components/MochiiMindUI';
+import { M1_SHOW_ALL } from './lib/m1';
 
 export type ViewState = 'STARTER_SELECT' | 'WORLD' | 'BATTLE' | 'ROSTER' | 'SHOP' | 'BAG' | 'PC' | 'GARDEN' | 'RING' | 'ARENA' | 'CREATURE' | 'CHEATS' | 'DEX';
 
@@ -54,6 +55,8 @@ export default function App() {
       {/* MochiiMind toggle — v4: moved below the HUD (top 4.5rem) so it
           no longer overlaps the WorldEngine A/B cluster at bottom-right,
           which was partially clipped in the live playtest. */}
+      {/* M1: MochiiMind hidden unless ?all (not deleted). */}
+      {M1_SHOW_ALL && <>
       <button
         onClick={() => setIsMindOpen(!isMindOpen)}
         className="game-button fixed right-4 z-[100] px-3 py-2 text-sm font-bold"
@@ -65,6 +68,7 @@ export default function App() {
       <div className="z-[101]">
         <MochiiMindUI isOpen={isMindOpen} onClose={() => setIsMindOpen(false)} />
       </div>
+      </>}
     </div>
   );
 }

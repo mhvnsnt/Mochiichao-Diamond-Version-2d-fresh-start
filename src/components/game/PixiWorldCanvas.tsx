@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Application, Container, Graphics, Sprite, Text, Texture, TilingSprite } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Sprite, Text, Texture, TilingSprite } from 'pixi.js';
 import { getSheetDef, worldCell } from '../../lib/spriteSheets';
 import { fallbackColorFor } from '../../lib/spriteSheets';
 import { playerSlot, slotForNpc } from '../../lib/humanSheets';
@@ -8,6 +8,26 @@ import { creatureWalkFrameUrl } from '../../lib/creatureWalkFrames';
 import { tileAnimeFrame, tileAnimeSignature } from '../../lib/tileAnime';
 import { useGameStore } from '../../store/gameStore';
 import { getStyleProfile } from '../../lib/styleProfiles';
+import { loadTownTiles, townTilesReady, townTileLayers } from '../../world/townTiles';
+
+// Flicker fix (2026-10-29, from PR #6): Texture.from(url) on a
+// not-yet-loaded URL gives an empty texture in pixi 8, so each
+// walk-frame phase drew nothing until (and, for cached sprites,
+// even after) it loaded: creatures vanished and came back on the
+// anim tick. Frames are now preloaded through Assets; a frame is
+// only used once it is ready, and the sheet cell stands in until
+// then.
+const readyFrames = new Set<string>();
+const pendingFrames = new Set<string>();
+function readyUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (readyFrames.has(url)) return url;
+  if (!pendingFrames.has(url)) {
+    pendingFrames.add(url);
+    Assets.load(url).then(() => readyFrames.add(url)).catch(() => {});
+  }
+  return null;
+}
 
 /**
  * PixiJS world renderer (Phase 2, world canvas only).
@@ -443,6 +463,8 @@ export default function PixiWorldCanvas({
       worldRef.current = world;
       appRef.current = app;
       draw();
+      // M1: redraw once the CC0 town/field sheet is ready.
+      loadTownTiles().then((tx) => { if (!cancelled && tx) draw(); });
       // BW2 pass: preload the tile textures through an Image element
       // + Texture.from(img) — the exact pattern this codebase's own
       // pixiSheet.ts loader uses, because it is the one that works
@@ -521,7 +543,7 @@ export default function PixiWorldCanvas({
       }
       staticFpRef.current = h.toString(36) + ':' + (mapData.doors || []).map((d: any) => d.label || '').join(',');
     }
-    const staticKey = `${mapId ?? (mapData as any)?.id ?? (mapData as any)?.name ?? 'map'}|${mapW}x${mapH}|${tile.toFixed(2)}|${staticFpRef.current}`;
+    const staticKey = `${mapId ?? (mapData as any)?.id ?? (mapData as any)?.name ?? 'map'}|${mapW}x${mapH}|${tile.toFixed(2)}|${staticFpRef.current}|${townTilesReady() ? 'town' : 'flat'}`;
     const buildStatic = staticKeyRef.current !== staticKey || !staticBaseRef.current || !staticFgRef.current || !staticLabelsRef.current;
 
     // Camera: centre the player, clamp so the map fills the view.
@@ -580,12 +602,50 @@ export default function PixiWorldCanvas({
       gFg = staticFgRef.current!;
     }
 
+    // M1: Kenney town/field tiles render into their own layer,
+    // directly above the static base. The layer container is
+    // rebuilt per draw but its sprites come from the tile-sprite
+    // cache (see the loop); tiles it covers are skipped by the
+    // static build via the loop's continue, and the static key
+    // carries the sheet-ready flag so the static layer rebuilds
+    // once when the sheet lands.
+    const townTex = townTilesReady();
+    const tileLayer = new Container();
+    world.addChildAt(tileLayer, world.getChildIndex(g) + 1);
     for (let y = 0; y < mapH; y++) {
       for (let x = 0; x < mapW; x++) {
         const t = mapData.tiles?.[y]?.[x] ?? 1;
         const base = TILE_COLORS[t] ?? TILE_COLORS[0];
         const px = x * tile;
         const py = y * tile;
+        // M1: CC0 Kenney town/field tiles when the sheet is loaded;
+        // unmapped tiles (water, cave, tall grass...) keep the drawn look.
+        // EXTERIORS ONLY (port adaptation): TILE.WALL is both the
+        // outdoor tree line and every interior's border wall, and the
+        // town sheet maps WALL to a tree — indoors that would strip
+        // the walls off every interior on current main, so interiors
+        // keep main's rendering untouched.
+        const layers = townTex && !(mapData as any)?.interior ? townTileLayers(mapData.tiles, x, y) : null;
+        if (layers) {
+          // Sprites are cached in the tile-sprite cache and swept
+          // by the same used-keys pass as the BW2/env sprites —
+          // recreating ~1,000 sprites per draw (the branch's shape)
+          // churns the renderer; the cache makes the steady-state
+          // town layer allocation-free per draw.
+          for (const cell of layers) {
+            const key = `town:${cell}:${x}:${y}`;
+            let sp = tileSpritesRef.current.get(key);
+            if (!sp) {
+              sp = new Sprite(townTex[cell]);
+              tileSpritesRef.current.set(key, sp);
+            }
+            sp.position.set(px, py);
+            sp.width = tile; sp.height = tile;
+            tileLayer.addChild(sp);
+            usedTileKeys.add(key);
+          }
+          continue;
+        }
         if (buildStatic) g.rect(px, py, tile, tile).fill(base);
         // Environment pull-in: exterior tiles resolve through the
         // HGSS/Diamond kit first (tile SETS + ported cycle frames);
@@ -898,7 +958,7 @@ export default function PixiWorldCanvas({
             // sheet-only walk sets keep the sheet cell — named as a
             // gap in docs/SEQUENCE-PLAN.md, never faked.
             const frameDir = npc.facing === 'up' ? 'up' : npc.facing === 'left' ? 'left' : npc.facing === 'right' ? 'right' : 'down';
-            const frameUrl = npc.creatureId ? creatureWalkFrameUrl(npc.creatureId, frameDir, animTick % 4) : null;
+            const frameUrl = npc.creatureId ? readyUrl(creatureWalkFrameUrl(npc.creatureId, frameDir, animTick % 4)) : null;
             if (frameUrl) {
               const key = `npc-${npc.id}-walk-${frameUrl}`;
               let sp = sheetSpritesRef.current.get(key);
@@ -985,7 +1045,7 @@ export default function PixiWorldCanvas({
         build: (parent) => {
           const cx = (follower.x + 0.5) * tile;
           const cy = (follower.y + 0.5) * tile;
-          const frameUrl = creatureWalkFrameUrl(follower.speciesId, follower.dir, animTick % 4);
+          const frameUrl = readyUrl(creatureWalkFrameUrl(follower.speciesId, follower.dir, animTick % 4));
           if (frameUrl) {
             const key = `follower-walk-${frameUrl}`;
             let sp = sheetSpritesRef.current.get(key);
@@ -1088,13 +1148,16 @@ export default function PixiWorldCanvas({
         }
         // Pass 8: wired walk frame wins over the static sheet cell
         // when Creature Mode passes one; otherwise the old path runs.
-        if (playerWalkFrameUrl) {
-          const key = `player-walk-${playerWalkFrameUrl}`;
+        // Flicker fix: only use the walk frame once it is loaded;
+        // until then the static sheet path below draws the player.
+        const readyPlayerFrame = readyUrl(playerWalkFrameUrl);
+        if (readyPlayerFrame) {
+          const key = `player-walk-${readyPlayerFrame}`;
           let sp = sheetSpritesRef.current.get(key);
           if (!sp) {
             sp = new Sprite();
             sheetSpritesRef.current.set(key, sp);
-            sp.texture = Texture.from(playerWalkFrameUrl);
+            sp.texture = Texture.from(readyPlayerFrame);
           }
           sp.anchor.set(0.5, 1);
           sp.position.set(cx, cy + tile * 0.5 + bob);

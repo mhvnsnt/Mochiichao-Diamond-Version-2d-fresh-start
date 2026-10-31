@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { saveGame } from '../../lib/saveSystem';
+import { m1PauseVisible } from '../../lib/m1';
 import CreaturePortrait from './CreaturePortrait';
 import { UiPanel } from './UiArt';
 import { UI_ART } from '../../lib/uiArt';
@@ -108,7 +109,7 @@ export function PauseMenu({ onClose, onRoster, onShop, onSaveLoad, onQuitToTitle
   };
   const navKeys = new Set(['bag', 'pc', 'dex', 'garden', 'ring', 'arena', 'creature', 'cheats']);
   const items = pauseCfg.order
-    .filter((k) => base[k] && pauseCfg.visible[k] !== false && (onNavigate || !navKeys.has(k)))
+    .filter((k) => base[k] && pauseCfg.visible[k] !== false && m1PauseVisible(k) && (onNavigate || !navKeys.has(k)))
     .map((k) => ({
       label: k === 'save' && saved ? 'Saved!' : (pauseCfg.labels[k] ?? base[k].label),
       help: pauseCfg.help[k] ?? base[k].help,
