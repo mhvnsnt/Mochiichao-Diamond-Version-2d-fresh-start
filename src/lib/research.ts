@@ -227,3 +227,41 @@ export function isResearchComplete(
 ): boolean {
   return researchLevel(defs, tallies, speciesId) >= RESEARCH_LEVEL_CAP;
 }
+
+// Gap-fill S11 slice 4 — the W4 Dex display read (pure, tested).
+//
+// The Dex surface shows recorded FACTS only, never a derived level:
+// no per-species defs exist yet (slice 1's rule — defs are
+// caller-supplied, and #97's coverage note is "zero instanced"), so
+// a level computed over an empty def list would read 0 for every
+// species by default, not by measurement. Levels, points, and
+// checkmarks therefore stay off the surface until defs land; what
+// the surface shows is the tally count per kind, which is a stored
+// fact the writers already write. A tally under a taskId outside
+// #97's closed kind vocabulary is ignored here, exactly as slice 1
+// ignores a def outside it — only kind-keyed tallies are facts
+// this vocabulary can display. The kept-gate decision slice 1 left
+// to this slice: the Dex component shows this section for caught
+// species only, matching the footprint/cry gating already in
+// DexView (seen and undiscovered entries show no research block).
+/** #97's kind vocabulary in display order. */
+export const RESEARCH_KIND_ORDER: readonly ResearchTaskKind[] = [
+  "observe",
+  "feed",
+  "battle-witness",
+  "track",
+  "care",
+];
+
+/** Recorded tally count per kind for one species; absent = 0. */
+export function researchKindCounts(
+  tallies: ResearchTallies,
+  speciesId: string,
+): Record<ResearchTaskKind, number> {
+  const speciesTallies = tallies[speciesId] ?? {};
+  const counts = {} as Record<ResearchTaskKind, number>;
+  for (const kind of RESEARCH_KIND_ORDER) {
+    counts[kind] = cleanCount(speciesTallies[kind]);
+  }
+  return counts;
+}
