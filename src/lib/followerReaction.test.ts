@@ -4,6 +4,7 @@
 import { describe, expect, it } from "vitest";
 import {
   FOLLOWER_REACTION_RULES,
+  followerHandoverLine,
   followerTalkLine,
   moodBand,
   selectFollowerReaction,
@@ -135,5 +136,20 @@ describe("followerTalkLine (S8 slice 4, host's own text)", () => {
     const low = followerTalkLine("Sproutle", { reaction: null, moodBand: "low" });
     const high = followerTalkLine("Sproutle", { reaction: null, moodBand: "high" });
     expect(low).toBe(high);
+  });
+});
+
+describe("followerHandoverLine (S8 slice 7, handover line before the reaction line)", () => {
+  it("names no item id: the handed line says the find went into the bag", () => {
+    const line = followerHandoverLine("Kittember", "handed");
+    expect(line).toContain("Kittember");
+    expect(line).toContain("bag");
+    expect(line).not.toContain("test-pebble");
+  });
+
+  it("renders the sulk for a withheld find, in original words", () => {
+    const line = followerHandoverLine("Sproutle", "withheld");
+    expect(line).toContain("Sproutle");
+    expect(line).toContain("sulking");
   });
 });
