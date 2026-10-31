@@ -20,6 +20,8 @@ import { backfillIndividuals, driftLeadMood, followerLeadId, resetLeadMoodOnChan
 import { withPendingHandover, type PendingFindHandover } from '../lib/followerFind';
 import { withResearchTally, type ResearchTallies } from '../lib/research';
 import { calendarContextFromWorldState, publishAnnouncement as publishAnnouncementList, publishScheduleAnnouncements as publishScheduleAnnouncementsList, publishSchedulesForWorldState as publishSchedulesForWorldStateList, type Announcement, type CalendarContext, type CalendarHostOptions, type ScheduleEntry } from '../lib/calendar';
+import type { BattlePressure } from '../lib/battlePressure';
+import { assertValidPressureEvent, pressuresFromPressureEvents, type PressureBand, type PressureEvent, type PressureWindow } from '../lib/battlePressureTally';
 
 interface GameState {
   playerName: string;
@@ -92,6 +94,30 @@ interface GameState {
   // host calls this yet — the WorldEngine tick hook is a later
   // slice — and no schedule rows or text live here.
   publishSchedulesForCurrentDay: (entries: readonly ScheduleEntry[], textFor: (entry: ScheduleEntry) => string | null | undefined, opts?: CalendarHostOptions) => void;
+  // Battle pressure (gap-fill S13 slice 5, G-4 B2 writer): the ONLY
+  // stored pressure state — the battle facts themselves, in the
+  // order they were recorded. Levels, bands, windows and decay
+  // are DERIVED at read time by slice 3's tally and are never
+  // stored here (the same law as the deed ledger and research
+  // tallies: facts stored, derivations computed). The append is
+  // validated by the tally's own rule, so a stored fact is
+  // always tallyable, and it stores a copy, so later mutation
+  // of the caller's object cannot corrupt the ledger. SaveMenu
+  // serializes the whole store, so the facts persist with saves
+  // like dex; old saves carry no field and load with the empty
+  // default through loadState's spread. No writer calls this yet
+  // — the battle-end call site is a later slice, which must also
+  // settle which battles count (wild only vs all battles fought
+  // in the area) — and no bands, window, or decay rate live here.
+  pressureEvents: PressureEvent[];
+  appendPressureEvent: (event: PressureEvent) => void;
+  // Battle pressure (gap-fill S13 slice 5, G-4 B2 host read): the
+  // one call the roll host will make — the stored facts through
+  // slice 3's tally and the caller's bands, in one call, so no
+  // host composes tally-then-bands itself. Window and bands stay
+  // caller-supplied; this method stores nothing and publishes
+  // nothing, and a host that passes no bands gets no records.
+  battlePressures: (window: PressureWindow, bands: readonly PressureBand[]) => BattlePressure[];
   completedEvents: string[];
   defeatedTrainers: string[];
   
@@ -352,6 +378,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     const next = publishSchedulesForWorldStateList(current, entries, deriveWorldState(anchor, Date.now()), textFor, opts);
     if (next !== current) set({ announcements: next });
   },
+  pressureEvents: [],
+  appendPressureEvent: (event) => {
+    assertValidPressureEvent(event);
+    set(s => ({ pressureEvents: [...s.pressureEvents, { ...event }] }));
+  },
+  battlePressures: (window, bands) => pressuresFromPressureEvents(get().pressureEvents, window, bands),
   completedEvents: [],
   defeatedTrainers: [],
   gardenRecords: {},
