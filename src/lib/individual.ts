@@ -69,6 +69,13 @@
 //    is authored anywhere) and the per-area tables themselves (no
 //    find rows exist on main — the data lane authors them, this
 //    slice authors none).
+//  - S8 slice 7: the handover half now has its host —
+//    withPendingHandover in followerFind.ts (pure decision) +
+//    gameStore.handoverFollowerFind (bag write) called from the
+//    slice-4 talk-to-follower branch in WorldEngine, whose dialog
+//    pages the handover line before the reaction line. Still open:
+//    the walking roll host and the per-area tables (a carried find
+//    cannot occur in live play until a roll host sets one).
 
 import type { IndividualRecord, IndividualVariance, MochiiInstance } from "./types";
 
