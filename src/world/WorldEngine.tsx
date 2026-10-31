@@ -31,7 +31,7 @@ import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../li
 import type { MoveAnimationProfile } from "../lib/moveAnimation";
 import { isDoorOpen, sealedDoorText } from "../lib/doorGate";
 import { withMoodEvent, readMood } from "../lib/individual";
-import { selectFollowerReaction, followerTalkLine } from "../lib/followerReaction";
+import { selectFollowerReaction, followerTalkLine, followerHandoverLine } from "../lib/followerReaction";
 import { recognisePlace } from "../lib/place";
 // Creature Mode + Dual Encounters (PMD-mode package, owner orders
 // 2026-10-29 ~20:12–20:17 CDT): mode swap, the companion Ranger, visible
@@ -2097,7 +2097,25 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           speciesTypes: (SPECIES_DB as any)[followerLead.speciesId]?.types ?? [],
           place,
         });
-        setDialog({ lines: [followerTalkLine(battleMonName(followerLead), selection)] });
+        // Gap-fill S8 slice 7 — find handover at the talk site.
+        // The handover resolves FIRST (gameStore action: handed
+        // lands in the bag, withheld stays carried with its count
+        // raised), and its line, when there is one, pages BEFORE
+        // the slice-4 reaction line — the reaction line still
+        // shows, so slice 4's behaviour is added to, not replaced.
+        // With no pending find the action returns "none" and sets
+        // nothing, so a plain talk shows exactly the slice-4 single
+        // reaction line. The lead the action resolves is the same rule as
+        // this branch's followerLead (first living, else first —
+        // individual.followerLeadId), read from the same store
+        // party, so the handover can never land on another member.
+        const handover = useGameStore.getState().handoverFollowerFind();
+        const lines: string[] = [];
+        if (handover.outcome === "handed" || handover.outcome === "withheld") {
+          lines.push(followerHandoverLine(battleMonName(followerLead), handover.outcome));
+        }
+        lines.push(followerTalkLine(battleMonName(followerLead), selection));
+        setDialog({ lines });
         setScreen("dialog");
         return;
       }

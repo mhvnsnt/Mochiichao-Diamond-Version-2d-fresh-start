@@ -42,7 +42,10 @@
 //   the host's job (it owns item ids and the bag). This module
 //   decides what was found and whether the follower hands it over;
 //   a withheld find is carried on the record (findState) until a
-//   later handover attempt, never silently dropped.
+//   later handover attempt, never silently dropped. S8 slice 7 adds
+//   the host side of that sentence (withPendingHandover below + the
+//   gameStore handoverFollowerFind action, called from the slice-4
+//   talk site): the decision stays here, the bag write stays there.
 //
 // Mood gating, stated as this slice's reading (the teardown gives
 // "good mood" / "bad mood" language, no numeric cutoffs): the
@@ -58,6 +61,7 @@
 // may roll a chance, but none is invented in this slice.
 
 import { moodBand } from "./followerReaction";
+import { readMood } from "./individual";
 import type { FollowerFindState, IndividualRecord, MochiiInstance } from "./types";
 
 /** One row of a per-area find table. `weight` defaults to 1; `rare` defaults to false. */
@@ -191,4 +195,50 @@ export function withFind(
     return member;
   }
   return { ...member, individual: { ...member.individual, findState: next } };
+}
+
+// ── S8 slice 7 — handover of a carried find ─────────────────────────
+// The other half of the find loop: a find a follower is CARRYING
+// (findState.pendingItemId, set only by a roll host — none exists yet,
+// so no live path can carry a find today) is resolved when the player
+// talks to the follower (the slice-4 talk site; the store action in
+// gameStore.ts is the host, this function is the pure decision).
+// The mood gate is the same one as slice 6's findHandover: a low-band
+// follower withholds (the carried item stays pending and the withheld
+// count rises by one); neutral/high hands it over (the state empties
+// and the host adds the item id to the bag — the bag write is the
+// host's job, not this function's, because this module owns no
+// inventory). No item display name is produced here: no find row or
+// display-name table exists on main, so the host's line names no item
+// (see followerHandoverLine in followerReaction.ts) rather than
+// leaking a data id into dialogue. Pure and non-mutating, same
+// as-is contract as withFind: no record, no pending item, or a state
+// that does not move returns the member unchanged.
+/** The outcome of attempting to take a carried find from a member. */
+export interface PendingFindHandover {
+  outcome: "none" | "handed" | "withheld";
+  itemId: string | null;
+}
+
+export function withPendingHandover(member: MochiiInstance): {
+  member: MochiiInstance;
+  handover: PendingFindHandover;
+} {
+  const none: PendingFindHandover = { outcome: "none", itemId: null };
+  if (!member || !member.individual) return { member, handover: none };
+  const current = readFindState(member.individual);
+  if (!current.pendingItemId) return { member, handover: none };
+  const handover = findHandover(readMood(member.individual));
+  const next = applyFindToState(
+    current,
+    { itemId: current.pendingItemId, rare: false },
+    handover,
+  );
+  if (next.pendingItemId === current.pendingItemId && next.withheldCount === current.withheldCount) {
+    return { member, handover: none };
+  }
+  return {
+    member: { ...member, individual: { ...member.individual, findState: next } },
+    handover: { outcome: handover, itemId: current.pendingItemId },
+  };
 }

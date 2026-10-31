@@ -11,6 +11,7 @@ import {
   readFindState,
   rollFind,
   withFind,
+  withPendingHandover,
   type FollowerFindTable,
 } from "./followerFind";
 import { createMochii } from "./engine";
@@ -185,5 +186,50 @@ describe("applyFindToState + withFind (S8 slice 6, carried finds)", () => {
       pendingItemId: null,
       withheldCount: 0,
     });
+  });
+});
+
+describe("withPendingHandover (S8 slice 7, carried find resolved at talk)", () => {
+  const carrying = (mood: number, pending: unknown, count: number) => {
+    const m = createMochii("001", 5)!;
+    m.individual!.mood = mood;
+    (m.individual as any).findState = { pendingItemId: pending, withheldCount: count };
+    return m;
+  };
+
+  it("returns none and the member as-is with no record, no pending item, or malformed pending", () => {
+    const bare = createMochii("001", 5)!;
+    delete (bare as any).individual;
+    expect(withPendingHandover(bare)).toEqual({
+      member: bare,
+      handover: { outcome: "none", itemId: null },
+    });
+    const fresh = createMochii("001", 5)!;
+    expect(withPendingHandover(fresh).handover).toEqual({ outcome: "none", itemId: null });
+    expect(withPendingHandover(fresh).member).toBe(fresh);
+    const malformed = carrying(0, 42, 1);
+    expect(withPendingHandover(malformed).handover).toEqual({ outcome: "none", itemId: null });
+    expect(withPendingHandover(malformed).member).toBe(malformed);
+  });
+
+  it("hands over at neutral/high mood, emptying the state without mutating the input", () => {
+    const member = carrying(0, "test-pebble", 2);
+    const { member: next, handover } = withPendingHandover(member);
+    expect(handover).toEqual({ outcome: "handed", itemId: "test-pebble" });
+    expect(next).not.toBe(member);
+    expect(next.individual!.findState).toEqual({ pendingItemId: null, withheldCount: 0 });
+    expect(member.individual!.findState).toEqual({ pendingItemId: "test-pebble", withheldCount: 2 });
+    const high = carrying(30, "test-pebble", 0);
+    expect(withPendingHandover(high).handover.outcome).toBe("handed");
+  });
+
+  it("withholds at low mood, keeping the item and raising the count by one", () => {
+    const member = carrying(-10, "test-pebble", 2);
+    const { member: next, handover } = withPendingHandover(member);
+    expect(handover).toEqual({ outcome: "withheld", itemId: "test-pebble" });
+    expect(next).not.toBe(member);
+    expect(next.individual!.findState).toEqual({ pendingItemId: "test-pebble", withheldCount: 3 });
+    expect(member.individual!.findState).toEqual({ pendingItemId: "test-pebble", withheldCount: 2 });
+    expect(next.individual!.mood).toBe(-10);
   });
 });

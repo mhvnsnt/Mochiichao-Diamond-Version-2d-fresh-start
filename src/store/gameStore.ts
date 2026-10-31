@@ -15,7 +15,8 @@ import type { WorldClockAnchor } from '../lib/worldClock';
 import { applyFontRoles } from '../lib/fonts';
 import { applySoundMode } from '../lib/audioRouting';
 import { worldFullPp } from '../lib/worldBattleCore';
-import { backfillIndividuals, driftLeadMood, resetLeadMoodOnChange, withMoodEvent } from '../lib/individual';
+import { backfillIndividuals, driftLeadMood, followerLeadId, resetLeadMoodOnChange, withMoodEvent } from '../lib/individual';
+import { withPendingHandover, type PendingFindHandover } from '../lib/followerFind';
 
 interface GameState {
   playerName: string;
@@ -231,6 +232,14 @@ interface GameState {
   // non-change never churns the store, saves, or re-renders.
   driftFollowerMood: () => void;
   resetFollowerMoodOnLeadChange: (prevLeadId: string | null) => void;
+  // Gap-fill S8 slice 7 — find handover at the talk site (pure
+  // decision in src/lib/followerFind.ts; WorldEngine's talk-to-
+  // follower branch calls this). Returns the outcome so the host
+  // can pick its dialog line; skips the set entirely when the lead
+  // carries no pending find, so a plain talk never churns the
+  // store. A handed find lands in the bag by its data id (no
+  // display-name table exists yet, so no name is produced here).
+  handoverFollowerFind: () => PendingFindHandover;
   addBadge: (badge: string) => void;
   updateDex: (id: string, status: 'seen' | 'caught') => void;
   completeEvent: (id: string) => void;
@@ -508,6 +517,25 @@ export const useGameStore = create<GameState>((set, get) => ({
     const party = get().party;
     const next = resetLeadMoodOnChange(party, prevLeadId);
     if (next !== party) set({ party: next });
+  },
+
+  handoverFollowerFind: () => {
+    const party = get().party;
+    const leadId = followerLeadId(party);
+    if (!leadId) return { outcome: "none", itemId: null };
+    const idx = party.findIndex((m) => m.id === leadId);
+    if (idx < 0) return { outcome: "none", itemId: null };
+    const { member: nextMember, handover } = withPendingHandover(party[idx]);
+    if (handover.outcome === "none" || nextMember === party[idx]) return handover;
+    const nextParty = [...party];
+    nextParty[idx] = nextMember;
+    if (handover.outcome === "handed" && handover.itemId) {
+      const handedId = handover.itemId;
+      set((s) => ({ party: nextParty, inventory: { ...s.inventory, [handedId]: (s.inventory[handedId] || 0) + 1 } }));
+    } else {
+      set({ party: nextParty });
+    }
+    return handover;
   },
 
   addBadge: (badge) => set(s => ({ badges: s.badges.includes(badge) ? s.badges : [...s.badges, badge] })),

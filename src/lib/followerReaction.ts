@@ -140,3 +140,25 @@ export function followerTalkLine(
   }
   return `${name} looks up at you, ready to keep going.`;
 }
+
+// ── S8 slice 7 — find-handover line at the talk site ───────────────
+// When the talk-to-follower host (slice 4) finds a carried find on
+// the lead, it resolves the handover first (withPendingHandover in
+// followerFind.ts + the gameStore action) and shows one of these
+// lines BEFORE the reaction line above — the reaction line still
+// shows, so slice 4's behaviour is added to, not replaced. Both
+// lines are this host's OWN original text. No item is named: no find
+// row or display-name table exists on main, so naming the item would
+// mean printing a data id into dialogue; the handed line says the
+// find went into the bag, which is what the host action does.
+// The outcome type is kept as a plain union here (not imported from
+// followerFind.ts) so this module stays free of a find-module import.
+export function followerHandoverLine(
+  name: string,
+  outcome: "handed" | "withheld",
+): string {
+  if (outcome === "handed") {
+    return `${name} holds out something it found on the way — you tuck it into your bag.`;
+  }
+  return `${name} clutches something it found and turns away, sulking.`;
+}
