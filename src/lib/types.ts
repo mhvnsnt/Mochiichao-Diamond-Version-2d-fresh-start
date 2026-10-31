@@ -41,6 +41,32 @@ export interface SpeciesData {
   apiSearchTags?: string[];
 }
 
+// Individual record, gap-fill S7 slice 1 — the #80 shape
+// (src/data/core/schemas/individual.schema.json, mochiichao/individual/v1),
+// as a TypeScript type. Optional on the instance so old saves load
+// unchanged; rolled at creation by createIndividual (src/lib/individual.ts).
+export interface IndividualVariance {
+  stats: { hp: number; atk: number; def: number; spa: number; spd: number; spe: number };
+  sizeClass: "small" | "standard" | "large";
+  temperamentRead: string | null;
+}
+
+export interface IndividualDeviation {
+  trait: string;
+  speciesPattern: string;
+  individualValue: string;
+  status: "RULED" | "PROPOSED" | "SPECIES-TYPICAL";
+  ruledBy?: string | null;
+  ruledOn?: string | null;
+  source?: string | null;
+}
+
+export interface IndividualRecord {
+  personalitySeed: number; // uint32, 0..4294967295
+  variance: IndividualVariance;
+  deviations: IndividualDeviation[];
+}
+
 export interface MochiiInstance {
   id: string; // unique uuid
   speciesId: string;
@@ -54,4 +80,5 @@ export interface MochiiInstance {
   status: string | null;
   moves: string[]; // move IDs
   pp: number[]; // current PP
+  individual?: IndividualRecord; // S7: rolled at creation; absent on old saves
 }
