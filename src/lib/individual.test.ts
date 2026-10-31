@@ -23,6 +23,9 @@ import {
 } from "./individual";
 import { createMochii } from "./engine";
 import { useGameStore } from "../store/gameStore";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 describe("individual record (S7 slice 1, #80 shape)", () => {
   it("derives variance from seed 0x12345678 by hand", () => {
@@ -373,5 +376,65 @@ describe("mood event economy (S8 slice 3, TEARDOWN-HGSS §1 deltas)", () => {
     const capped = createMochii("001", 5)!;
     capped.individual!.mood = 127;
     expect(withMoodEvent(capped, "level-up")).toBe(capped);
+  });
+});
+
+describe("mood event hosts (S8 slice 5, TEARDOWN-HGSS §1 events at real sites)", () => {
+  it("healParty pays -50 only to a member poisoned at exactly 1 HP, and still fully heals everyone", () => {
+    const at1 = createMochii("001", 5)!;
+    at1.individual!.mood = 0;
+    (at1 as any).status = "poison";
+    (at1 as any).hp = 1;
+    (at1 as any).currentHp = 1;
+    const poisonedHigh = createMochii("004", 5)!;
+    poisonedHigh.individual!.mood = 20;
+    (poisonedHigh as any).status = "poison";
+    (poisonedHigh as any).hp = 5;
+    (poisonedHigh as any).currentHp = 5;
+    const plainAt1 = createMochii("010", 5)!;
+    plainAt1.individual!.mood = 30;
+    (plainAt1 as any).hp = 1;
+    (plainAt1 as any).currentHp = 1;
+    // A record-less member: loadState backfills it first (S7 slice 2),
+    // so by healParty it HAS a seat at mood 0 and pays -50 like at1.
+    const bareAt1 = createMochii("001", 5)!;
+    delete (bareAt1 as any).individual;
+    (bareAt1 as any).status = "poison";
+    (bareAt1 as any).hp = 1;
+    (bareAt1 as any).currentHp = 1;
+    useGameStore.getState().loadState({ party: [at1, poisonedHigh, plainAt1, bareAt1] } as never);
+    useGameStore.getState().healParty();
+    const s = useGameStore.getState();
+    expect(s.party[0].individual!.mood).toBe(-50);
+    expect(s.party[0].hp).toBe(s.party[0].maxHp);
+    expect(s.party[0].status).toBeNull();
+    expect(s.party[1].individual!.mood).toBe(20);
+    expect(s.party[1].status).toBeNull();
+    expect(s.party[2].individual!.mood).toBe(30);
+    expect(s.party[3].individual).toBeDefined();
+    expect(s.party[3].individual!.mood).toBe(-50);
+    expect(s.party[3].hp).toBe(s.party[3].maxHp);
+  });
+
+  it("healParty clamps the poison-at-1HP penalty at -127", () => {
+    const at1 = createMochii("001", 5)!;
+    at1.individual!.mood = -100;
+    (at1 as any).status = "poison";
+    (at1 as any).hp = 1;
+    (at1 as any).currentHp = 1;
+    useGameStore.getState().loadState({ party: [at1] } as never);
+    useGameStore.getState().healParty();
+    expect(useGameStore.getState().party[0].individual!.mood).toBe(-127);
+  });
+
+  it("the battle Mend Patch branch pays battle-item mood (host source lock)", () => {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const engine = readFileSync(join(here, "../world/WorldEngine.tsx"), "utf8");
+    const itemBranch = engine.slice(
+      engine.indexOf('action.type === "item"'),
+      engine.indexOf('action.type === "move"'),
+    );
+    expect(itemBranch).toContain('if (action.itemId !== "mend_patch") return;');
+    expect(itemBranch).toContain('withMoodEvent({ ...target, hp: healed, currentHp: healed }, "battle-item")');
   });
 });
