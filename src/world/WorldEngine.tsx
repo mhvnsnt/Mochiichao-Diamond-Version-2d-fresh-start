@@ -282,6 +282,12 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   const gameState = useGameStore(s => s); // We need the whole state to save
   const { saveSlot, currentMap } = gameState;
   const party = useGameStore(s => s.party);
+  // Gap-fill S8 slice 2: follower mood host actions (store actions;
+  // the pure rules live in src/lib/individual.ts). Selected here so
+  // the follower effects below can call them without subscribing to
+  // the whole store twice over.
+  const driftFollowerMood = useGameStore(s => s.driftFollowerMood);
+  const resetFollowerMoodOnLeadChange = useGameStore(s => s.resetFollowerMoodOnLeadChange);
   const hasSprintBoots = useGameStore(s => s.hasSprintBoots);
   const initializeStarter = useGameStore(s => s.initializeStarter);
   const badges = useGameStore(s => s.badges);
@@ -1452,6 +1458,43 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
         moving: true,
       }
     : null;
+
+  // ── FOLLOWER MOOD, HOST SIDE (gap-fill S8 slice 2) ──────────────
+  // The follower's mood lives on the lead's individual record (slice 1);
+  // this is where it moves. Two effects, both gated to the overworld
+  // screen — the follower exists only there, so a battle switch or a
+  // battle hour is not a follower event (the refs still advance while
+  // gated, so returning to the overworld never fires a backlog burst).
+  // (1) LEAD CHANGE: when the lead id changes, the incoming lead's
+  // mood resets to neutral (PR #50's "resets when the party lead
+  // changes", read as the new follower starting neutral). The first
+  // observation only records the lead — it does not reset it.
+  // (2) DRIFT TICK: each S1 world-clock hour (gameHour, from
+  // useDayNight above) drifts the lead's mood one step toward neutral
+  // (movement.json drift; the per-hour cadence is this slice's stated
+  // choice — movement.json names no cadence — see individual.ts).
+  // Mood is never displayed as a number anywhere; these effects write
+  // the record only, and the store actions skip the set on a no-op,
+  // so neither effect can loop against its own party write.
+  const followerLeadIdRef = React.useRef<string | null | undefined>(undefined);
+  const followerHourRef = React.useRef<number | undefined>(undefined);
+  useEffect(() => {
+    const leadId = followerLead ? (followerLead as any).id ?? null : null;
+    const prev = followerLeadIdRef.current;
+    followerLeadIdRef.current = leadId;
+    if (screen === "overworld" && prev !== undefined && prev !== leadId) {
+      resetFollowerMoodOnLeadChange(prev);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [followerLead, screen]);
+  useEffect(() => {
+    const prev = followerHourRef.current;
+    followerHourRef.current = gameHour;
+    if (screen === "overworld" && prev !== undefined && prev !== gameHour) {
+      driftFollowerMood();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameHour, screen]);
 
   // ── Creature Mode + roamers (PMD-mode package) ──────────────────
   // Control mode: "ranger" (default, the game as it was) or "creature"
