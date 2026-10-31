@@ -15,7 +15,7 @@ import type { WorldClockAnchor } from '../lib/worldClock';
 import { applyFontRoles } from '../lib/fonts';
 import { applySoundMode } from '../lib/audioRouting';
 import { worldFullPp } from '../lib/worldBattleCore';
-import { backfillIndividuals } from '../lib/individual';
+import { backfillIndividuals, driftLeadMood, resetLeadMoodOnChange } from '../lib/individual';
 
 interface GameState {
   playerName: string;
@@ -225,6 +225,12 @@ interface GameState {
   buyItem: (itemId: string, cost: number) => boolean;
   useItem: (itemId: string) => boolean;
   updatePartyMember: (index: number, updated: MochiiInstance) => void;
+  // Gap-fill S8 slice 2 — follower mood host actions (pure helpers in
+  // src/lib/individual.ts; WorldEngine calls these). Both skip the set
+  // when the helper returns the party unchanged, so a no-op tick or a
+  // non-change never churns the store, saves, or re-renders.
+  driftFollowerMood: () => void;
+  resetFollowerMoodOnLeadChange: (prevLeadId: string | null) => void;
   addBadge: (badge: string) => void;
   updateDex: (id: string, status: 'seen' | 'caught') => void;
   completeEvent: (id: string) => void;
@@ -482,6 +488,16 @@ export const useGameStore = create<GameState>((set, get) => ({
       newParty[index] = updated;
       return { party: newParty };
     });
+  },
+  driftFollowerMood: () => {
+    const party = get().party;
+    const next = driftLeadMood(party);
+    if (next !== party) set({ party: next });
+  },
+  resetFollowerMoodOnLeadChange: (prevLeadId) => {
+    const party = get().party;
+    const next = resetLeadMoodOnChange(party, prevLeadId);
+    if (next !== party) set({ party: next });
   },
 
   addBadge: (badge) => set(s => ({ badges: s.badges.includes(badge) ? s.badges : [...s.badges, badge] })),
