@@ -6,6 +6,9 @@ import { describe, expect, it } from "vitest";
 import {
   applyMoodDelta,
   backfillIndividuals,
+  driftLeadMood,
+  followerLeadId,
+  resetLeadMoodOnChange,
   clampMood,
   createIndividual,
   driftMood,
@@ -216,6 +219,93 @@ describe("follower mood (S8 slice 1, HGSS-pattern state machine)", () => {
     const member = createMochii("010", 5)!;
     delete (member as any).individual;
     expect(ensureIndividual(member).individual!.mood).toBe(0);
+  });
+});
+
+describe("follower mood host behaviours (S8 slice 2, lead + tick)", () => {
+  // Party members are real createMochii instances; fainting is set by
+  // hand (hp + currentHp to 0), because no live path faints a member
+  // outside a battle. Expected numbers are hand-computed from the
+  // rules in individual.ts — no value here comes from running the code.
+  const faint = (m: any) => { m.hp = 0; m.currentHp = 0; return m; };
+  const moodOf = (m: any) => m.individual.mood;
+
+  it("picks the first living member, else the first, else null", () => {
+    const a = createMochii("001", 5)!;
+    const b = createMochii("004", 5)!;
+    const c = createMochii("010", 5)!;
+    expect(followerLeadId([a, b, c])).toBe(a.id);
+    faint(a);
+    expect(followerLeadId([a, b, c])).toBe(b.id);
+    faint(b); faint(c);
+    expect(followerLeadId([a, b, c])).toBe(a.id);
+    expect(followerLeadId([])).toBeNull();
+  });
+
+  it("drifts ONLY the lead, one step toward neutral, and no-ops as-is", () => {
+    const lead = createMochii("001", 5)!;
+    const second = createMochii("004", 5)!;
+    lead.individual!.mood = 5;
+    second.individual!.mood = -20;
+    const party = [lead, second];
+    const ticked = driftLeadMood(party);
+    expect(ticked).not.toBe(party);
+    expect(moodOf(ticked[0])).toBe(4);
+    expect(moodOf(ticked[1])).toBe(-20);
+    // Negative lead drifts upward; a neutral lead returns the same array.
+    lead.individual!.mood = -3;
+    expect(moodOf(driftLeadMood([lead, second])[0])).toBe(-2);
+    lead.individual!.mood = 0;
+    expect(driftLeadMood(party)).toBe(party);
+    // A lead with no record gains none from a tick.
+    const bare = createMochii("010", 5)!;
+    delete (bare as any).individual;
+    expect(driftLeadMood([bare])).toEqual([bare]);
+  });
+
+  it("resets the INCOMING lead on change, and only on a real change", () => {
+    const a = createMochii("001", 5)!;
+    const b = createMochii("004", 5)!;
+    a.individual!.mood = 10;
+    b.individual!.mood = 42;
+    const party = [a, b];
+    // First observation: no reset, whatever the lead is.
+    expect(resetLeadMoodOnChange(party, null)).toBe(party);
+    expect(resetLeadMoodOnChange(party, undefined)).toBe(party);
+    // Same lead: no reset.
+    expect(resetLeadMoodOnChange(party, a.id)).toBe(party);
+    // Lead changes to b (a fainted): b resets, a untouched.
+    faint(a);
+    const reset = resetLeadMoodOnChange(party, a.id);
+    expect(resetLeadMoodOnChange(party, a.id)).not.toBe(party);
+    expect(moodOf(reset[1])).toBe(0);
+    expect(moodOf(reset[0])).toBe(10);
+    expect(party[1].individual!.mood).toBe(42);
+    // Incoming lead already neutral: no-op as-is.
+    b.individual!.mood = 0;
+    expect(resetLeadMoodOnChange(party, a.id)).toBe(party);
+  });
+
+  it("drives the real store actions without touching other members", () => {
+    const a = createMochii("001", 5)!;
+    const b = createMochii("004", 5)!;
+    a.individual!.mood = 7;
+    b.individual!.mood = -9;
+    const store = useGameStore.getState();
+    store.loadState({ party: [a, b] } as never);
+    useGameStore.getState().driftFollowerMood();
+    let s = useGameStore.getState();
+    expect(s.party[0].individual!.mood).toBe(6);
+    expect(s.party[1].individual!.mood).toBe(-9);
+    // Lead change to b resets b only; the store's own lead id is the
+    // previous frame's lead, so the action takes it explicitly. The
+    // faint goes through updatePartyMember, never a direct mutation.
+    const fainted = { ...s.party[0], hp: 0, currentHp: 0 } as never;
+    useGameStore.getState().updatePartyMember(0, fainted);
+    useGameStore.getState().resetFollowerMoodOnLeadChange(a.id);
+    s = useGameStore.getState();
+    expect(s.party[1].individual!.mood).toBe(0);
+    expect(s.party[0].individual!.mood).toBe(6);
   });
 });
 
