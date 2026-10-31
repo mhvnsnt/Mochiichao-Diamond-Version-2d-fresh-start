@@ -6,18 +6,22 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { useGameStore } from "../store/gameStore";
+import { deriveWorldState, newGameAnchor } from "./worldClock";
 import {
   announcementsBefore,
   announcementsForDay,
   announcementsSince,
+  calendarContextFromWorldState,
   publishAnnouncement,
   publishScheduleAnnouncements,
   scheduleAnnouncementId,
   scheduleMatches,
   schedulesForState,
+  schedulesForWorldState,
   type Announcement,
   type CalendarContext,
   type ScheduleEntry,
+  type WorldClockReading,
 } from "./calendar";
 
 const ctx = (over: Partial<CalendarContext> = {}): CalendarContext => ({
@@ -336,6 +340,105 @@ describe("PauseMenu history reader source lock (S12 slice 5)", () => {
     ];
     expect(announcementsBefore(list, 10).map((a) => a.text)).toEqual(["Yesterday's row."]);
     expect(announcementsSince(list, 10).map((a) => a.text)).toEqual(["Today's row.", "Tomorrow's row."]);
+  });
+});
+
+describe("calendar host context (S12 slice 7, pure adapter)", () => {
+  const reading = (over: Partial<WorldClockReading> = {}): WorldClockReading => ({
+    weekday: 3,
+    gamePhase: "dusk",
+    season: "autumn",
+    ...over,
+  });
+  it("carries weekday, gamePhase and season straight from the clock reading, with empty flags, no weather, and a 7-day week by default", () => {
+    expect(calendarContextFromWorldState(reading())).toEqual({
+      weekday: 3,
+      gamePhase: "dusk",
+      season: "autumn",
+      storyFlags: [],
+      weatherKey: null,
+      daysPerWeek: 7,
+    });
+  });
+  it("passes caller story flags (Set or array), weather, and week length through unchanged", () => {
+    expect(
+      calendarContextFromWorldState(reading(), {
+        storyFlags: new Set(["flag-x"]),
+        weatherKey: "rain",
+        daysPerWeek: 5,
+      }),
+    ).toEqual({
+      weekday: 3,
+      gamePhase: "dusk",
+      season: "autumn",
+      storyFlags: new Set(["flag-x"]),
+      weatherKey: "rain",
+      daysPerWeek: 5,
+    });
+    expect(
+      calendarContextFromWorldState(reading(), { storyFlags: ["flag-y"] }).storyFlags,
+    ).toEqual(["flag-y"]);
+  });
+  it("does not re-derive time: a different reading gives a different context, field for field", () => {
+    expect(calendarContextFromWorldState(reading({ weekday: 0, gamePhase: "night", season: "winter" }))).toEqual({
+      weekday: 0,
+      gamePhase: "night",
+      season: "winter",
+      storyFlags: [],
+      weatherKey: null,
+      daysPerWeek: 7,
+    });
+  });
+});
+
+describe("schedulesForWorldState (S12 slice 7, host one-call shape)", () => {
+  const reading: WorldClockReading = { weekday: 3, gamePhase: "dusk", season: "autumn" };
+  it("matches rows against the derived context in input order, with caller flags deciding flag-demanding rows", () => {
+    const rows = [
+      entry({ id: "a", weekday: 3, season: "autumn", gamePhase: "dusk" }),
+      entry({ id: "b", weekday: 3, season: "summer" }),
+      entry({ id: "c", weekday: 4 }),
+      entry({ id: "d", gamePhase: "dusk", storyFlag: "flag-x" }),
+    ];
+    expect(schedulesForWorldState(rows, reading).map((r) => r.id)).toEqual(["a"]);
+    expect(schedulesForWorldState(rows, reading, { storyFlags: ["flag-x"] }).map((r) => r.id)).toEqual(["a", "d"]);
+    // The same rows through slice 1's schedulesForState on the adapted context agree exactly.
+    expect(schedulesForState(rows, calendarContextFromWorldState(reading, { storyFlags: ["flag-x"] })).map((r) => r.id)).toEqual(["a", "d"]);
+  });
+});
+
+describe("currentCalendarContext store method (S12 slice 7, through the real store)", () => {
+  it("is null when unanchored, and matches deriveWorldState over the store anchor when anchored", () => {
+    useGameStore.setState({ worldClock: null });
+    expect(useGameStore.getState().currentCalendarContext()).toBeNull();
+    const anchor = newGameAnchor(Date.now());
+    useGameStore.setState({ worldClock: anchor });
+    const expected = deriveWorldState(anchor, Date.now());
+    const got = useGameStore.getState().currentCalendarContext();
+    expect(got?.weekday).toBe(expected.weekday);
+    expect(got?.gamePhase).toBe(expected.gamePhase);
+    expect(got?.season).toBe(expected.season);
+    expect(got?.storyFlags).toEqual([]);
+    expect(got?.weatherKey).toBeNull();
+    expect(got?.daysPerWeek).toBe(7);
+    const withOpts = useGameStore.getState().currentCalendarContext({
+      storyFlags: new Set(["flag-x"]),
+      weatherKey: "rain",
+      daysPerWeek: 5,
+    });
+    expect(withOpts?.storyFlags).toEqual(new Set(["flag-x"]));
+    expect(withOpts?.weatherKey).toBe("rain");
+    expect(withOpts?.daysPerWeek).toBe(5);
+    useGameStore.setState({ worldClock: null });
+  });
+  it("the store method derives from the anchor through deriveWorldState and the slice-7 adapter", () => {
+    const src = readFileSync(
+      new URL("../store/gameStore.ts", import.meta.url),
+      "utf8",
+    );
+    expect(src).toContain("currentCalendarContext");
+    expect(src).toContain("deriveWorldState");
+    expect(src).toContain("calendarContextFromWorldState");
   });
 });
 
