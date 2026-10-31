@@ -4,9 +4,13 @@
 // small/standard/large) — no value here comes from running the code first.
 import { describe, expect, it } from "vitest";
 import {
+  applyMoodDelta,
   backfillIndividuals,
+  clampMood,
   createIndividual,
+  driftMood,
   ensureIndividual,
+  readMood,
   rollPersonalitySeed,
   varianceFromSeed,
   validatePersonalitySeed,
@@ -145,6 +149,73 @@ describe("individual backfill (S7 slice 2, old saves)", () => {
     expect(twice[0].individual!.personalitySeed).toBe(once[0].individual!.personalitySeed);
     expect(twice[1].individual!.personalitySeed).toBe(keptSeed);
     expect(backfillIndividuals([])).toEqual([]);
+  });
+});
+
+describe("follower mood (S8 slice 1, HGSS-pattern state machine)", () => {
+  // All expected numbers are hand-computed from the rules in
+  // individual.ts (range -127..127; drift one step toward neutral;
+  // deltas clamped) — no value here comes from running the code first.
+  it("clamps to -127..127, truncates, and reads non-finite as neutral", () => {
+    expect(clampMood(127)).toBe(127);
+    expect(clampMood(-127)).toBe(-127);
+    expect(clampMood(128)).toBe(127);
+    expect(clampMood(-128)).toBe(-127);
+    expect(clampMood(5.9)).toBe(5);
+    expect(clampMood(-5.9)).toBe(-5);
+    expect(clampMood(NaN)).toBe(0);
+    expect(clampMood(Infinity)).toBe(0);
+  });
+
+  it("reads an absent or non-integer mood as neutral, clamps a stored one", () => {
+    expect(readMood(undefined)).toBe(0);
+    expect(readMood(null)).toBe(0);
+    expect(readMood({ personalitySeed: 1, variance: varianceFromSeed(1), deviations: [] })).toBe(0);
+    expect(readMood({ personalitySeed: 1, variance: varianceFromSeed(1), deviations: [], mood: 42 })).toBe(42);
+    expect(readMood({ personalitySeed: 1, variance: varianceFromSeed(1), deviations: [], mood: 200 })).toBe(127);
+    expect(readMood({ personalitySeed: 1, variance: varianceFromSeed(1), deviations: [], mood: "x" } as never)).toBe(0);
+  });
+
+  it("drifts one step toward neutral per tick, never past it", () => {
+    expect(driftMood(5)).toBe(4);
+    expect(driftMood(1)).toBe(0);
+    expect(driftMood(0)).toBe(0);
+    expect(driftMood(-1)).toBe(0);
+    expect(driftMood(-5)).toBe(-4);
+    expect(driftMood(127)).toBe(126);
+    expect(driftMood(-127)).toBe(-126);
+    expect(driftMood(undefined)).toBe(0);
+    expect(driftMood(null)).toBe(0);
+  });
+
+  it("applies deltas clamped, and ignores a non-finite delta", () => {
+    expect(applyMoodDelta(0, 10)).toBe(10);
+    expect(applyMoodDelta(120, 10)).toBe(127);
+    expect(applyMoodDelta(-120, -10)).toBe(-127);
+    expect(applyMoodDelta(undefined, 5)).toBe(5);
+    expect(applyMoodDelta(10, -3)).toBe(7);
+    expect(applyMoodDelta(5, NaN)).toBe(5);
+  });
+
+  it("createIndividual seeds mood 0, and a new creature carries it", () => {
+    expect(createIndividual(0x12345678).mood).toBe(0);
+    const m = createMochii("001", 5)!;
+    expect(m.individual!.mood).toBe(0);
+  });
+
+  it("a present record keeps its mood through ensureIndividual; a moodless record reads neutral", () => {
+    const kept = createMochii("001", 5)!;
+    kept.individual!.mood = 42;
+    expect(ensureIndividual(kept)).toBe(kept);
+    expect(kept.individual!.mood).toBe(42);
+    const old = createMochii("004", 5)!;
+    delete (old.individual as any).mood;
+    expect(ensureIndividual(old)).toBe(old);
+    expect(readMood(old.individual)).toBe(0);
+    // A backfilled old member (no record at all) gets a fresh record at mood 0.
+    const member = createMochii("010", 5)!;
+    delete (member as any).individual;
+    expect(ensureIndividual(member).individual!.mood).toBe(0);
   });
 });
 
