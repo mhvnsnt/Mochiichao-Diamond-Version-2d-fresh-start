@@ -9,6 +9,7 @@ import Black2SystemsPanel from '../game/Black2SystemsPanel';
 import { getActiveMenuConfig } from '../../lib/menuEditor';
 import { playTitleCry } from '../../lib/titleCryGate';
 import { researchKindCounts } from '../../lib/research';
+import { worldAreasForSpecies, dexAreaLabel, dexAreaMessage } from '../../lib/dexAreas';
 
 /**
  * Gap-fill S11 slice 4 — the W4 Dex research section. Recorded facts
@@ -37,6 +38,36 @@ function ResearchSection({ speciesId, status }: { speciesId: string; status: 'ca
           <div>Battle witnessed: {counts['battle-witness']}</div>
           <div>Tracked: {counts.track}</div>
           <div>Cared for: {counts.care}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Gap-fill S11 slice 5 — the W4 Dex area section (habitat Landing 8).
+ * Areas come only from encounters.json worldAreas (live-map rows, via
+ * dexAreas.ts): bundle pools and the cave-route-01 seed table are
+ * deliberately NOT sources, so no spawn-table area is ever presented
+ * as a place. Seen and caught entries both show it — unlike the
+ * footprint/research blocks, an area is knowledge from meeting the
+ * creature, not ownership. Undiscovered entries show nothing here.
+ * A discovered entry with no worldArea row honestly says none is
+ * recorded yet, rather than borrowing another source's area.
+ */
+function AreaSection({ speciesId, status }: { speciesId: string; status: 'caught' | 'seen' | 'undiscovered' }) {
+  if (status === 'undiscovered' || !speciesId) return null;
+  const areas = worldAreasForSpecies(speciesId);
+  return (
+    <div className="mt-4">
+      <div className="font-bold text-white text-sm">Found in</div>
+      {areas.length === 0 ? (
+        <div className="text-xs text-slate-400 mt-1">No recorded area yet.</div>
+      ) : (
+        <div className="text-sm text-slate-300 mt-1 space-y-1">
+          {areas.map((a) => (
+            <div key={`${a.areaId}-${a.method}`}>{dexAreaLabel(a)}</div>
+          ))}
         </div>
       )}
     </div>
@@ -147,6 +178,7 @@ function GatedDetail({ kind, speciesId, status, name, num, species, detailPortra
           <p className="text-sm text-slate-400 mt-3 leading-relaxed">Unfilled slot — no creature is recorded here yet.</p>
         )}
         <ResearchSection speciesId={speciesId} status={status} />
+        <AreaSection speciesId={speciesId} status={status} />
         {children}
       </div>
     </div>
@@ -492,7 +524,13 @@ export default function DexView({ onBack }: { onBack: () => void }) {
             {gen1Side === 'DATA' ? gated : (
               <div className="text-slate-300 text-sm">
                 <div className="font-black text-2xl text-white">#{pad(selected.num)} {selectedName}</div>
-                <p className="text-slate-400 leading-relaxed mt-3">Area: where this creature is found is not in the Mochiichao roster data yet — no area data is invented here.</p>
+                {selected.kind === 'creature' && selectedStatus !== 'undiscovered' ? (
+                  <AreaSection speciesId={selected.speciesId} status={selectedStatus} />
+                ) : selected.kind === 'creature' ? (
+                  <p className="text-slate-400 leading-relaxed mt-3">Undiscovered — meet or catch this Mochiichao to reveal it.</p>
+                ) : (
+                  <p className="text-slate-400 leading-relaxed mt-3">Unfilled slot — no creature is recorded here yet.</p>
+                )}
                 <button onClick={() => setGen1Side('DATA')} className="game-button px-4 py-2 mt-4">BACK TO DATA</button>
               </div>
             )}
@@ -557,7 +595,7 @@ export default function DexView({ onBack }: { onBack: () => void }) {
           )}
           <div className="flex gap-2 mt-4 flex-wrap">
             <button onClick={() => setGen2Page((p) => (p === 1 ? 2 : 1))} className="game-button px-4 py-2">PAGE ({gen2Page}/2)</button>
-            <button onClick={() => setCryMsg('Area: where this creature is found is not in the Mochiichao roster data yet — no area data is invented here.')} className="game-button px-4 py-2">AREA</button>
+            <button onClick={() => setCryMsg(selected.kind === 'creature' ? dexAreaMessage(selected.speciesId, selectedStatus) : 'Unfilled slot.')} className="game-button px-4 py-2">AREA</button>
             <button onClick={playSelectedCry} className="game-button px-4 py-2">CRY</button>
           </div>
         </div>
@@ -701,6 +739,9 @@ export default function DexView({ onBack }: { onBack: () => void }) {
               )}
               {selected.kind === 'creature' && (
                 <ResearchSection speciesId={selected.speciesId} status={selectedStatus} />
+              )}
+              {selected.kind === 'creature' && (
+                <AreaSection speciesId={selected.speciesId} status={selectedStatus} />
               )}
               {selected.kind === 'creature' && selectedStatus === 'undiscovered' && (
                 <p className="text-sm text-slate-400 mt-3 leading-relaxed">Meet or catch this Mochiichao to reveal it.</p>
