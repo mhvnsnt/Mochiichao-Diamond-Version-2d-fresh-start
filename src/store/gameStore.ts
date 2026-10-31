@@ -11,6 +11,7 @@ import type { KeepsakeFact } from '../lib/itemMeaning';
 import { GameSettings, DEFAULT_SETTINGS, loadStoredSettings, persistSettings } from '../lib/gameSettings';
 import { deriveRangerMaxHp, applyRangerDamage, applyRangerHeal, applyRangerFullHeal } from '../lib/rangerDefense';
 import { setAutosaveHold, getAutosaveHold } from '../lib/saveSystem';
+import { deriveWorldState } from '../lib/worldClock';
 import type { WorldClockAnchor } from '../lib/worldClock';
 import { applyFontRoles } from '../lib/fonts';
 import { applySoundMode } from '../lib/audioRouting';
@@ -18,7 +19,7 @@ import { worldFullPp } from '../lib/worldBattleCore';
 import { backfillIndividuals, driftLeadMood, followerLeadId, resetLeadMoodOnChange, withMoodEvent } from '../lib/individual';
 import { withPendingHandover, type PendingFindHandover } from '../lib/followerFind';
 import { withResearchTally, type ResearchTallies } from '../lib/research';
-import { publishAnnouncement as publishAnnouncementList, publishScheduleAnnouncements as publishScheduleAnnouncementsList, type Announcement, type CalendarContext, type ScheduleEntry } from '../lib/calendar';
+import { calendarContextFromWorldState, publishAnnouncement as publishAnnouncementList, publishScheduleAnnouncements as publishScheduleAnnouncementsList, type Announcement, type CalendarContext, type CalendarHostOptions, type ScheduleEntry } from '../lib/calendar';
 
 interface GameState {
   playerName: string;
@@ -69,6 +70,17 @@ interface GameState {
   // does. No host calls this yet — the day-change hook is a later
   // slice — and no schedule rows or text live here.
   publishScheduleAnnouncements: (entries: readonly ScheduleEntry[], ctx: CalendarContext, dayIndex: number, textFor: (entry: ScheduleEntry) => string | null | undefined) => void;
+  // Announcements (gap-fill S12 slice 7, G-17 host context): the
+  // producer the day-change host will call — the S1 clock reading
+  // turned into the calendar's matching context. Null when the
+  // save is unanchored (no clock, no context); anchored saves get
+  // weekday/season/phase straight from deriveWorldState, never
+  // re-derived here. Story flags and weather stay caller-supplied
+  // (the clock produces neither); defaults are empty flags and no
+  // weather, so a weather-demanding row never matches by default.
+  // This method publishes nothing and stores nothing — it is a
+  // reading, recomputed from the anchor on every call.
+  currentCalendarContext: (opts?: CalendarHostOptions) => CalendarContext | null;
   completedEvents: string[];
   defeatedTrainers: string[];
   
@@ -316,6 +328,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     const current = get().announcements;
     const next = publishScheduleAnnouncementsList(current, entries, ctx, dayIndex, textFor);
     if (next !== current) set({ announcements: next });
+  },
+  currentCalendarContext: (opts) => {
+    const anchor = get().worldClock;
+    if (!anchor) return null;
+    return calendarContextFromWorldState(deriveWorldState(anchor, Date.now()), opts);
   },
   completedEvents: [],
   defeatedTrainers: [],
