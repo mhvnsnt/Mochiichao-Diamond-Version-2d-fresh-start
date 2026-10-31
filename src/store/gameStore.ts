@@ -17,6 +17,7 @@ import { applySoundMode } from '../lib/audioRouting';
 import { worldFullPp } from '../lib/worldBattleCore';
 import { backfillIndividuals, driftLeadMood, followerLeadId, resetLeadMoodOnChange, withMoodEvent } from '../lib/individual';
 import { withPendingHandover, type PendingFindHandover } from '../lib/followerFind';
+import { withResearchTally, type ResearchTallies } from '../lib/research';
 
 interface GameState {
   playerName: string;
@@ -31,6 +32,18 @@ interface GameState {
   inventory: { [key: string]: number };
   badges: string[];
   dex: Record<string, string>; // 'seen' | 'caught'
+  // Research (gap-fill S11 slice 2, Arceus WIRING-PLAN W1 store half):
+  // the ONLY stored research state, facts only — {speciesId:
+  // {taskId: count}}. Levels and points are DERIVED at read time by
+  // src/lib/research.ts and are never stored here (a stored level
+  // would be a landing defect, the same law as the deed ledger).
+  // SaveMenu serializes the whole store, so this section persists
+  // with saves like dex; old saves carry no field and load with
+  // the empty default through loadState's spread. No level, no
+  // task list, no writer lives here: task defs are data-lane
+  // content (#97: zero instanced) and writers are slice 3.
+  research: ResearchTallies;
+  recordResearchTally: (speciesId: string, taskId: string, by?: number) => void;
   completedEvents: string[];
   defeatedTrainers: string[];
   
@@ -262,6 +275,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   badges: [],
   dex: {},
+  research: {},
+  recordResearchTally: (speciesId, taskId, by = 1) => {
+    const current = get().research;
+    const next = withResearchTally(current, speciesId, taskId, by);
+    if (next !== current) set({ research: next });
+  },
   completedEvents: [],
   defeatedTrainers: [],
   gardenRecords: {},

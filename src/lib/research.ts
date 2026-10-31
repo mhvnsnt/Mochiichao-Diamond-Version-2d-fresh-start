@@ -142,6 +142,51 @@ export function researchPoints(
   return speciesCheckmarks(defs, tallies, speciesId) * RESEARCH_POINTS_PER_CHECKMARK;
 }
 
+// Gap-fill S11 slice 2 — the tally writer core (pure, tested).
+//
+// W1's store half: tallies are stored facts, levels are derived at
+// read time (slice 1). This helper is the ONE way a tally count
+// changes: it returns a new ResearchTallies with exactly one count
+// raised, and the SAME reference when nothing changes, so a store
+// action can skip its set on a no-op (the S8 slice-2/7 pattern:
+// a no-change tick never churns the store, saves, or re-renders).
+// - `by` defaults to 1 and is floored; 0, negative, NaN, or infinite
+//   `by` is a no-op, never a decrement — tallies only ever grow.
+// - An empty speciesId or taskId is a no-op: a tally with no owner
+//   or no task is not a fact.
+// - A stored count that is negative or non-finite is cleaned to 0
+//   before adding (the same cleanCount slice 1 reads through), so a
+//   corrupted save cannot drag a tally below zero.
+// - This helper does NOT validate the taskId against any def list:
+//   kind lives in the def, not in the tally, and slice 1 already
+//   answers a tally taskId with no def by earning nothing. A writer
+//   that invents a taskId therefore cannot inflate a level — it
+//   earns zero until authored defs name that id.
+// - Deliberately NOT here: no live writer calls this yet. Writers
+//   (observe / feed / care / battle-witness / track) are slice 3,
+//   and they need authored task defs to know WHICH taskId to raise:
+//   no per-species research task data exists in canon (#97's own
+//   coverage note: "Contents: zero instanced"), so no taskId is
+//   authored or guessed in this slice. The store action below is
+//   the seat those writers will call.
+export function withResearchTally(
+  tallies: ResearchTallies,
+  speciesId: string,
+  taskId: string,
+  by = 1,
+): ResearchTallies {
+  if (!speciesId || !taskId) return tallies;
+  if (typeof by !== "number" || !Number.isFinite(by)) return tallies;
+  const delta = Math.floor(by);
+  if (delta <= 0) return tallies;
+  const speciesTallies = tallies[speciesId] ?? {};
+  const prev = cleanCount(speciesTallies[taskId]);
+  return {
+    ...tallies,
+    [speciesId]: { ...speciesTallies, [taskId]: prev + delta },
+  };
+}
+
 /** Level 10 = the entry is Complete. */
 export function isResearchComplete(
   defs: ResearchTaskDef[],
