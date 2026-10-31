@@ -338,3 +338,33 @@ describe("PauseMenu history reader source lock (S12 slice 5)", () => {
     expect(announcementsSince(list, 10).map((a) => a.text)).toEqual(["Today's row.", "Tomorrow's row."]);
   });
 });
+
+describe("PauseMenu upcoming reader source lock (S12 slice 6)", () => {
+  it("the section reads future announcements through announcementsSince from today + 1 under an Upcoming heading", () => {
+    const src = readFileSync(
+      new URL("../components/game/GameShell.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(src).toContain("announcementsSince");
+    expect(src).toContain("Upcoming");
+    // Upcoming renders only when upcoming announcements exist.
+    expect(src).toContain("upcoming.length > 0");
+    // The since-read starts after today, so today is never repeated.
+    expect(src).toContain("today + 1");
+    // Today's and history sections are untouched by the upcoming addition.
+    expect(src).toContain("announcementsForDay");
+    expect(src).toContain("announcementsBefore");
+    expect(src).toContain("Earlier");
+  });
+  it("upcoming is the since-read from the day after today, never today itself", () => {
+    const list: readonly Announcement[] = [
+      { id: "old", dayIndex: 9, kind: "calendar", text: "Yesterday's row." },
+      { id: "today", dayIndex: 10, kind: "calendar", text: "Today's row." },
+      { id: "future", dayIndex: 11, kind: "calendar", text: "Tomorrow's row." },
+      { id: "later", dayIndex: 13, kind: "calendar", text: "Later row." },
+    ];
+    expect(announcementsSince(list, 11).map((a) => a.text)).toEqual(["Tomorrow's row.", "Later row."]);
+    // Reading from today would repeat today under a second heading.
+    expect(announcementsSince(list, 10).map((a) => a.text)).toEqual(["Today's row.", "Tomorrow's row.", "Later row."]);
+  });
+});
