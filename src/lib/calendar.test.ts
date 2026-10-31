@@ -9,6 +9,8 @@ import {
   announcementsForDay,
   announcementsSince,
   publishAnnouncement,
+  publishScheduleAnnouncements,
+  scheduleAnnouncementId,
   scheduleMatches,
   schedulesForState,
   type Announcement,
@@ -195,5 +197,79 @@ describe("announcement store section (S12 slice 2, through the real store)", () 
     useGameStore.setState({ announcements: [] });
     useGameStore.getState().loadState({ wallet: 42 } as never);
     expect(useGameStore.getState().announcements).toEqual([]);
+  });
+});
+
+describe("publishScheduleAnnouncements (S12 slice 3, pure publisher)", () => {
+  const textFor = (entry: ScheduleEntry) => `Happening at ${entry.place}.`;
+  it("publishes matching rows in input order with derived ids and kind calendar", () => {
+    const rows = [
+      entry({ id: "a", weekday: 2 }),
+      entry({ id: "b", weekday: 3 }),
+      entry({ id: "c", gamePhase: "day" }),
+    ];
+    const out = publishScheduleAnnouncements([], rows, ctx(), 9, textFor);
+    expect(out.map((a) => a.id)).toEqual(["schedule:a:9", "schedule:c:9"]);
+    expect(out.map((a) => a.kind)).toEqual(["calendar", "calendar"]);
+    expect(out.map((a) => a.dayIndex)).toEqual([9, 9]);
+    expect(out[0].text).toBe("Happening at place-a.");
+    expect(scheduleAnnouncementId(rows[0], 9)).toBe("schedule:a:9");
+  });
+  it("skips rows with no text, and a weather-demanding row with no caller weather", () => {
+    const rows = [
+      entry({ id: "notext", place: "place-b" }),
+      entry({ id: "blank", place: "place-c" }),
+      entry({ id: "misty", weatherKey: "mist", place: "place-d" }),
+    ];
+    const out = publishScheduleAnnouncements(
+      [],
+      rows,
+      ctx(),
+      9,
+      (e) => (e.id === "notext" ? null : e.id === "blank" ? "   " : `At ${e.place}.`),
+    );
+    expect(out).toEqual([]);
+  });
+  it("re-running the same day is a same-reference no-op; a new day publishes again", () => {
+    const rows = [entry({ id: "a", weekday: 2 })];
+    const first = publishScheduleAnnouncements([], rows, ctx(), 9, textFor);
+    expect(first).toHaveLength(1);
+    expect(publishScheduleAnnouncements(first, rows, ctx(), 9, () => "Different text.")).toBe(first);
+    expect(first[0].text).toBe("Happening at place-a."); // first wins
+    const next = publishScheduleAnnouncements(first, rows, ctx(), 10, textFor);
+    expect(next.map((a) => a.id)).toEqual(["schedule:a:9", "schedule:a:10"]);
+  });
+  it("a row matching only later in the day publishes on first match, not twice", () => {
+    const rows = [entry({ id: "dusk-row", gamePhase: "dusk" })];
+    const none = publishScheduleAnnouncements([], rows, ctx(), 9, textFor);
+    expect(none).toEqual([]);
+    const once = publishScheduleAnnouncements(none, rows, ctx({ gamePhase: "dusk" }), 9, textFor);
+    expect(once.map((a) => a.id)).toEqual(["schedule:dusk-row:9"]);
+    expect(publishScheduleAnnouncements(once, rows, ctx({ gamePhase: "dusk" }), 9, textFor)).toBe(once);
+  });
+  it("an invalid dayIndex publishes nothing and returns the same reference, without mutating the input", () => {
+    const list: readonly Announcement[] = [ann()];
+    const rows = [entry({ id: "a" })];
+    expect(publishScheduleAnnouncements(list, rows, ctx(), -1, textFor)).toBe(list);
+    expect(publishScheduleAnnouncements(list, rows, ctx(), 1.5, textFor)).toBe(list);
+    expect(list).toHaveLength(1);
+  });
+});
+
+describe("publishScheduleAnnouncements store method (S12 slice 3, through the real store)", () => {
+  it("publishes through the store, skips the set on a same-day rerun, and publishes again the next day", () => {
+    useGameStore.setState({ announcements: [] });
+    const rows = [entry({ id: "a", weekday: 2 }), entry({ id: "b", weekday: 3 })];
+    const textFor = (e: ScheduleEntry) => `Happening at ${e.place}.`;
+    useGameStore.getState().publishScheduleAnnouncements(rows, ctx(), 9, textFor);
+    expect(useGameStore.getState().announcements.map((a) => a.id)).toEqual(["schedule:a:9"]);
+    const before = useGameStore.getState().announcements;
+    useGameStore.getState().publishScheduleAnnouncements(rows, ctx(), 9, textFor);
+    expect(useGameStore.getState().announcements).toBe(before);
+    useGameStore.getState().publishScheduleAnnouncements(rows, ctx(), 10, textFor);
+    expect(useGameStore.getState().announcements.map((a) => a.id)).toEqual([
+      "schedule:a:9",
+      "schedule:a:10",
+    ]);
   });
 });
