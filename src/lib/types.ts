@@ -70,6 +70,18 @@ export interface IndividualRecord {
   // The schema slot for this field lands with the teardown-hgss lane's
   // open PR #50 (schema file only); this slice does not touch that file.
   mood?: number;
+  // S8 slice 6: follower find state — what the follower is currently
+  // carrying after picking up a find it has not handed over (see
+  // followerFind.ts). Optional: absent reads as empty (no pending
+  // item, zero withholdings) via readFindState there. The schema file
+  // is the teardown-hgss lane's PR #50, which this slice does not touch.
+  findState?: FollowerFindState;
+}
+
+/** S8 slice 6 — a find carried by the follower, pending handover. */
+export interface FollowerFindState {
+  pendingItemId: string | null;
+  withheldCount: number;
 }
 
 export interface MochiiInstance {
