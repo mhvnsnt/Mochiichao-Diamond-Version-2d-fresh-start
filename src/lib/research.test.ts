@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import {
   isResearchComplete,
+  researchKindCounts,
   researchLevel,
   researchPoints,
   researchTaskIdForKind,
@@ -236,5 +237,45 @@ describe("researchTaskIdForKind + feed writer (S11 slice 3, W2 contract)", () =>
     );
     expect(src).toContain("researchTaskIdForKind('feed')");
     expect(src).toContain("recordResearchTally(current.speciesId, researchTaskIdForKind('feed'))");
+  });
+});
+
+describe("researchKindCounts (S11 slice 4)", () => {
+  it("a species with no tallies reads 0 for all five kinds", () => {
+    expect(researchKindCounts({}, "038")).toEqual({
+      observe: 0, feed: 0, "battle-witness": 0, track: 0, care: 0,
+    });
+  });
+  it("kind-keyed tallies count; other species do not leak in", () => {
+    let tallies: ResearchTallies = {};
+    tallies = withResearchTally(tallies, "038", "feed");
+    tallies = withResearchTally(tallies, "038", "feed");
+    tallies = withResearchTally(tallies, "038", "observe");
+    tallies = withResearchTally(tallies, "004", "feed");
+    tallies = withResearchTally(tallies, "004", "feed");
+    tallies = withResearchTally(tallies, "004", "feed");
+    expect(researchKindCounts(tallies, "038")).toEqual({
+      observe: 1, feed: 2, "battle-witness": 0, track: 0, care: 0,
+    });
+  });
+  it("a tally under a non-kind taskId is ignored, not displayed", () => {
+    const tallies: ResearchTallies = { "038": { caught: 5, feed: 1 } };
+    expect(researchKindCounts(tallies, "038").feed).toBe(1);
+    expect(researchKindCounts(tallies, "038").observe).toBe(0);
+  });
+  it("negative and non-finite stored counts clean to 0", () => {
+    const tallies: ResearchTallies = { "038": { feed: -3, care: NaN } };
+    expect(researchKindCounts(tallies, "038").feed).toBe(0);
+    expect(researchKindCounts(tallies, "038").care).toBe(0);
+  });
+  it("DexView research section source lock: the section renders kind counts for caught entries", () => {
+    const src = readFileSync(
+      new URL("../components/views/DexView.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(src).toContain("researchKindCounts");
+    expect(src).toContain("Research notes");
+    expect(src).toContain("<ResearchSection speciesId={speciesId} status={status} />");
+    expect(src).toContain("<ResearchSection speciesId={selected.speciesId} status={selectedStatus} />");
   });
 });
