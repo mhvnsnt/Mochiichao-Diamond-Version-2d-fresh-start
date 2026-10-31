@@ -40,6 +40,25 @@
 //    generation (findState stays a later slice with the behaviour-profile
 //    seam, as PR #50's own description says). Mood is never shown to the
 //    player as a number (PR #50 schema semantics).
+//  - S8 slice 2: the two host behaviours that make the seat move.
+//    followerLeadId / driftLeadMood / resetLeadMoodOnChange below are
+//    pure party-level helpers; the store exposes them as actions and
+//    WorldEngine (the follower's host — the only place a follower is
+//    rendered) calls them: a lead change resets the INCOMING lead's
+//    mood to neutral (PR #50's "resets when the party lead changes",
+//    read as the new follower starting neutral — the outgoing lead's
+//    stored mood is left untouched at the moment of the switch (it
+//    resets only if and when it becomes lead again), and each
+//    world-clock hour
+//    ticks the lead's mood one step toward neutral (movement.json
+//    drift, with the tick defined here as the S1 world-clock hour —
+//    one game-hour per 15 real seconds in WorldEngine's useDayNight —
+//    because movement.json names no cadence of its own, and a per-hour
+//    tick keeps a short-term mood alive across a play session instead
+//    of draining it in seconds on a per-second tick or in steps on a
+//    per-step tick. That cadence choice is this slice's, stated here,
+//    not a canon claim). No reaction selection, no find generation:
+//    those still wait on the behaviour-profile seam.
 
 import type { IndividualRecord, IndividualVariance, MochiiInstance } from "./types";
 
@@ -132,6 +151,72 @@ export function driftMood(mood: number | undefined | null): number {
 export function applyMoodDelta(mood: number | undefined | null, delta: number): number {
   const base = typeof mood === "number" ? clampMood(mood) : FOLLOWER_MOOD_NEUTRAL;
   return clampMood(base + (Number.isFinite(delta) ? Math.trunc(delta) : 0));
+}
+
+/**
+ * S8 slice 2 — the follower lead, as WorldEngine derives it (its
+ * followerLead line, verbatim in rule): the first party member with
+ * (currentHp ?? hp) > 0, else the first member, else null. Party
+ * records carry no egg state today, so the config's
+ * "first_alive_non_egg_else_first_non_egg" collapses to exactly this
+ * (WorldEngine's own comment). The (currentHp ?? hp) read mirrors the
+ * host, which carries both fields on battle copies while the type
+ * declares hp only — hence the any-cast, not a type change.
+ */
+export function followerLeadId(members: readonly MochiiInstance[]): string | null {
+  if (!Array.isArray(members) || members.length === 0) return null;
+  const lead = members.find((m: any) => (m?.currentHp ?? m?.hp) > 0) ?? members[0];
+  return lead?.id ?? null;
+}
+
+/**
+ * S8 slice 2 — one drift tick for the lead only: the lead's mood moves
+ * one step toward neutral (driftMood); every other member is returned
+ * untouched. Pure and non-mutating: when the lead has no individual
+ * record (a member the load backfill never saw — load/create cover
+ * every normal path, so this is a guard, not a writer) or its mood
+ * already reads neutral, the input array is returned AS-IS (same
+ * reference), so a store action can skip the set entirely and a
+ * no-op tick never churns saves or re-renders.
+ */
+export function driftLeadMood(members: MochiiInstance[]): MochiiInstance[] {
+  const leadId = followerLeadId(members);
+  if (!leadId) return members;
+  const idx = members.findIndex((m) => m.id === leadId);
+  if (idx < 0) return members;
+  const lead = members[idx];
+  if (!lead.individual) return members;
+  const drifted = driftMood(lead.individual.mood);
+  if (drifted === readMood(lead.individual)) return members;
+  const next = [...members];
+  next[idx] = { ...lead, individual: { ...lead.individual, mood: drifted } };
+  return next;
+}
+
+/**
+ * S8 slice 2 — lead-change reset: when the party lead changes, the
+ * INCOMING lead's mood resets to neutral (0). prevLeadId null means
+ * "first observation" — no change event has been seen yet, so nothing
+ * resets (otherwise the first frame of every session would wipe the
+ * lead's mood). Same lead, no lead, a lead with no individual record,
+ * or a lead already neutral: the input array is returned AS-IS.
+ * Pure and non-mutating, same store-set-skip contract as driftLeadMood.
+ */
+export function resetLeadMoodOnChange(
+  members: MochiiInstance[],
+  prevLeadId: string | null | undefined,
+): MochiiInstance[] {
+  if (prevLeadId == null) return members;
+  const leadId = followerLeadId(members);
+  if (!leadId || leadId === prevLeadId) return members;
+  const idx = members.findIndex((m) => m.id === leadId);
+  if (idx < 0) return members;
+  const lead = members[idx];
+  if (!lead.individual) return members;
+  if (readMood(lead.individual) === FOLLOWER_MOOD_NEUTRAL) return members;
+  const next = [...members];
+  next[idx] = { ...lead, individual: { ...lead.individual, mood: FOLLOWER_MOOD_NEUTRAL } };
+  return next;
 }
 
 /**
