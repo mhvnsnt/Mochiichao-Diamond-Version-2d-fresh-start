@@ -1,5 +1,16 @@
 # ---------------------------------------------------------------------------
-# Mochiichao Studio - Tier 2 Kaggle Generation Runner v2.1 (corrected build)
+# Mochiichao Studio - Tier 2 Kaggle Generation Runner v2.2 (corrected build)
+# v2.2 (2026-11-05, orchestrator pre-flight close): the negative prompt drops
+# the bare word "tail". It banned the ghost-tail bottom the owner-directed
+# body spec REQUIRES (rigs/builds/wispkin/BODY-SPEC-OWNER-DIRECTION.md:
+# "BOTTOM: the body tapers into a little floating ghost tail ... that
+# dissolves into the smoke trail"; gate: "ghost-tail-to-smoke bottom" must
+# read in frame). That spec's "No legs, no feet, no tail" means no
+# legs-and-tail animal body (the Psyduck shape stripped of those parts);
+# "legs, feet" stay in the negative to ban exactly that body. The positive
+# already asks for the ghost tail; v2.1's negative fought it. This closes
+# the canonical-prompt gap flagged in tier2-first-generation-PREP.md.
+# Canonical first-generation prompt confirmed = this CONFIG (v2.2).
 # Execution target: Kaggle T4 x2 notebook, ComfyUI headless API on :8188
 # Mode: Wan 2.2 Turbo generation + gate-packet preparation
 #
@@ -39,7 +50,7 @@ CONFIG = {
                "gently up and down in place, mask tilting slowly as if listening, "
                "smoke curling softly below. Locked-off camera, plain solid background."),
     "negative": ("3d render, photorealistic, realistic human skull, anatomy, teeth, "
-                 "legs, feet, tail, hair, beak, bill, extra characters, text, watermark, "
+                 "legs, feet, hair, beak, bill, extra characters, text, watermark, "
                  "style change, design change"),
 }
 LOCKS = {
