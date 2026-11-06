@@ -1,0 +1,271 @@
+{
+  "creature": "gabu",
+  "version": "bake-v2",
+  "source": "Mars's own Tripo model, baked from GLB (not loaded raw in game)",
+  "game_rule": "looks 3D, runs 2D \u2014 game eats only these 2D sheets",
+  "cell_size": 64,
+  "lighting": "v2: key sun 3.5 + secondary 2.2 + back fill 2.2 + side fill 2.0 + top rim 2.8 + back rim 1.5 + world ambient 0.45 \u2014 back/side no longer darker than front (verify by eye)",
+  "view_mapping": "Dorowani/Gabu mapping: front=angle90, back=angle270, side=angle0, other-side=angle180. NOT the Megalochrome mapping.",
+  "honest_limit": "Walk and battle frames are WHOLE-BODY pose variants (bob, lean, tilt, shift) of an unrigged static Tripo model. They are NOT skeletal limb animation and must never be described as limb-animated walking.",
+  "neutral_sheet": {
+    "file": "gabu_sheet_v2.png",
+    "width": 192,
+    "height": 64
+  },
+  "walk_strips": {
+    "front": "gabu_walk_front_strip.png",
+    "back": "gabu_walk_back_strip.png",
+    "side": "gabu_walk_side_strip.png"
+  },
+  "battle_strips": {
+    "front": "gabu_front_battle_strip.png",
+    "back": "gabu_back_battle_strip.png"
+  },
+  "frames": [
+    {
+      "kind": "neutral",
+      "view": "front",
+      "source_angle": "angle90",
+      "source_file": "gabu_angle90.png",
+      "file": "gabu_front_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 44
+    },
+    {
+      "kind": "neutral",
+      "view": "back",
+      "source_angle": "angle270",
+      "source_file": "gabu_angle270.png",
+      "file": "gabu_back_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 44
+    },
+    {
+      "kind": "neutral",
+      "view": "side",
+      "source_angle": "angle0",
+      "source_file": "gabu_angle0.png",
+      "file": "gabu_side_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 49
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "front",
+      "walk_frame": "w0",
+      "source_file": "gabu_walk_front_w0.png",
+      "file": "gabu_walk_front_w0_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 44
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "front",
+      "walk_frame": "w1",
+      "source_file": "gabu_walk_front_w1.png",
+      "file": "gabu_walk_front_w1_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 43
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "front",
+      "walk_frame": "w2",
+      "source_file": "gabu_walk_front_w2.png",
+      "file": "gabu_walk_front_w2_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 45
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "front",
+      "walk_frame": "w3",
+      "source_file": "gabu_walk_front_w3.png",
+      "file": "gabu_walk_front_w3_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 47
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "back",
+      "walk_frame": "w0",
+      "source_file": "gabu_walk_back_w0.png",
+      "file": "gabu_walk_back_w0_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 44
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "back",
+      "walk_frame": "w1",
+      "source_file": "gabu_walk_back_w1.png",
+      "file": "gabu_walk_back_w1_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 43
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "back",
+      "walk_frame": "w2",
+      "source_file": "gabu_walk_back_w2.png",
+      "file": "gabu_walk_back_w2_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 45
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "back",
+      "walk_frame": "w3",
+      "source_file": "gabu_walk_back_w3.png",
+      "file": "gabu_walk_back_w3_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 47
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "side",
+      "walk_frame": "w0",
+      "source_file": "gabu_walk_side_w0.png",
+      "file": "gabu_walk_side_w0_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 49
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "side",
+      "walk_frame": "w1",
+      "source_file": "gabu_walk_side_w1.png",
+      "file": "gabu_walk_side_w1_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 46
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "side",
+      "walk_frame": "w2",
+      "source_file": "gabu_walk_side_w2.png",
+      "file": "gabu_walk_side_w2_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 52
+    },
+    {
+      "kind": "walk_pose_variant",
+      "view": "side",
+      "walk_frame": "w3",
+      "source_file": "gabu_walk_side_w3.png",
+      "file": "gabu_walk_side_w3_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 56
+    },
+    {
+      "kind": "battle_pose_variant",
+      "view": "front",
+      "battle_pose": "battle_ready",
+      "source_file": "gabu_battle_ready_front.png",
+      "file": "gabu_battle_ready_front_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 42
+    },
+    {
+      "kind": "battle_pose_variant",
+      "view": "front",
+      "battle_pose": "battle_attack",
+      "source_file": "gabu_battle_attack_front.png",
+      "file": "gabu_battle_attack_front_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 39
+    },
+    {
+      "kind": "battle_pose_variant",
+      "view": "front",
+      "battle_pose": "battle_recoil",
+      "source_file": "gabu_battle_recoil_front.png",
+      "file": "gabu_battle_recoil_front_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 55
+    },
+    {
+      "kind": "battle_pose_variant",
+      "view": "back",
+      "battle_pose": "battle_ready",
+      "source_file": "gabu_battle_ready_back.png",
+      "file": "gabu_battle_ready_back_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 42
+    },
+    {
+      "kind": "battle_pose_variant",
+      "view": "back",
+      "battle_pose": "battle_attack",
+      "source_file": "gabu_battle_attack_back.png",
+      "file": "gabu_battle_attack_back_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 39
+    },
+    {
+      "kind": "battle_pose_variant",
+      "view": "back",
+      "battle_pose": "battle_recoil",
+      "source_file": "gabu_battle_recoil_back.png",
+      "file": "gabu_battle_recoil_back_64.png",
+      "width": 64,
+      "height": 64,
+      "trimmed_width": 64,
+      "trimmed_height": 55
+    }
+  ],
+  "views_done": [
+    "front",
+    "back",
+    "side",
+    "other-side (angle180 neutral render)",
+    "walk pose variants front/back/side (4 frames each)",
+    "battle poses front/back (ready, attack, recoil)"
+  ],
+  "views_missing": [
+    "true limb-animated walk cycles (impossible on unrigged static)",
+    "side facing the other direction as a walk/battle strip (mirror side frames in game code)"
+  ],
+  "roster_id": "148",
+  "roster_note": "Gen 2 choosable starter, confirmed 2026-10-25."
+}
