@@ -17,7 +17,8 @@
       "status": "IN_PROGRESS",
       "engine": "Wan 2.2 TI2V 5B + Wan22 Turbo LoRA (4-step, CFG 1.0) on Kaggle T4 x2",
       "baseline_measured": "test 1: 20 steps, 28m28s, likeness REJECTED (plain I2V drift to a realistic 3D skull)",
-      "ab_rerun": "IN_FLIGHT (v2 notebook: baseline cell vs optimized cell, seed 42)",
+      "ab_rerun": "BLOCKED_NO_REPORT_2026-11-04 (unchanged 2026-11-05 ~03:04 CST, re-verified live): no measured times exist. The 2026-10-27 rerun ran in the owner's browser session and never reported; its Kaggle kernel marsfmmg/mochiichao-comfyui-wan-v2 is STILL in error state (kernels_status HTTP 200, status: error, checked 2026-11-05 ~03:04 CST) and its log shows a CPU run (nvidia-smi not found, torch cuda False). Workspace-wide search 2026-11-04 found no A/B record file (only the blank template). Pre-flight closed 2026-11-05: live quota re-check (kernels_list HTTP 200, no new kernel since 2026-10-28, no kernel running; 9.414 h observed used this week per keep-busy ledger — observed, not Kaggle-reported; Kaggle API exposes no remaining-quota endpoint) and canonical-prompt gap (runner v2.2 confirmed canonical; negative drops bare 'tail', which banned the ghost-tail bottom the owner-directed body spec requires). Still open, owner-side: the A/B report itself (measured times). No GPU job started this run; first locked generation not run, still sequenced after the A/B report lands.",
+      "runner_version": "v2.2 (2026-11-05: negative drops bare 'tail' per owner-directed Wispkin body spec; see tier2-first-generation-PREP.md)",
       "target_clip": "workspace: mochiichao-show/gen-kaggle-tests/ (media stays in workspace storage per FULLSTACK media discipline; passing clips register in show/shared/clip-index.json)",
       "likeness_gate": "PENDING_VERIFICATION",
       "locks": {
