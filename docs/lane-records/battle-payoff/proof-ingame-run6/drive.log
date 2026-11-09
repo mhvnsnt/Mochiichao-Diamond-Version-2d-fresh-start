@@ -1,0 +1,38 @@
+SEED: {"ok":true,"lead":"004 Lv.6 exp 338/343","party":1,"patchedKeys":[],"allKeys":["mochiichao_last_title_creature","mochii_saves_1","mochiichao_settings_v1"]}
+clicked LOAD THIS SAVE INSTEAD
+IN WORLD HUD: true
+shot 00b-in-grass
+BATTLE FIRED: true
+shot 01-foe-faint-before
+STATUS: WILD ENCOUNTER 1000 CR Kittember Lv.7 FIRE TYPE Razorgater Lv.6 22/22 HP EXP > A wild Kittember appeared! Tackle NORMAL | PWR 40 Swift Movement NORMAL | PWR 40 
+clicked move: TackleNORMAL | PWR 40
+clicked move: TackleNORMAL | PWR 40
+clicked move: TackleNORMAL | PWR 40
+clicked move: TackleNORMAL | PWR 40
+clicked move: TackleNORMAL | PWR 40
+PAYOFF TEXT at 6037 ms; gauge: 
+shot 02-exp-text-battle-visible
+shot 03-gauge-sweep-burst-0
+shot 03-gauge-sweep-burst-1
+shot 03-gauge-sweep-burst-2
+shot 03-gauge-sweep-burst-3
+shot 03-gauge-sweep-burst-4
+shot 03-gauge-sweep-burst-5
+shot 03-gauge-sweep-burst-6
+shot 04-level-up-message
+shot 05-stat-window-diffs-over-battle
+shot 06-stat-window-values-over-battle
+shot 07-gauge-final-sweep-burst-0
+shot 07-gauge-final-sweep-burst-1
+shot 07-gauge-final-sweep-burst-2
+shot 07-gauge-final-sweep-burst-3
+shot 07-gauge-final-sweep-burst-4
+shot 07-gauge-final-sweep-burst-5
+shot 07-gauge-final-sweep-burst-6
+shot 08-victory-banner
+shot 10-final-state
+FINAL BODY: WILD ENCOUNTER 1000 CR VICTORY! Flow continues — your journey goes on. Continue ► Kittember Lv.7 FIRE TYPE Razorgater Lv.6 6/22 HP EXP > Razorgater used Tackle! > Dealt 5 damage! > Kittember fainted! RESOLVING... MochiiMind
+BEATS: {"payoffSeen":true,"gaugeShot":true,"levelShot":true,"diffShot":true,"trueShot":true}
+shot 09-world-resumed
+WORLD RESUMED: true
+DONE

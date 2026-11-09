@@ -1,0 +1,10 @@
+SEED: {"ok":true,"lead":"004 Lv.6 exp 338/343","party":1}
+IN WORLD HUD: true
+shot 00b-in-grass
+BATTLE FIRED: true
+shot 01-foe-faint-before
+clicked move: TackleNORMAL | PWR 40
+clicked move: TackleNORMAL | PWR 40
+clicked move: TackleNORMAL | PWR 40
+BEATS: {"payoffSeen":false,"gaugeShot":false,"levelShot":false,"diffShot":false,"trueShot":false}
+DONE
