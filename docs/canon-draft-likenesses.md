@@ -200,3 +200,18 @@ PR #16 shipped V2 as main; corrected: V1 is the DEFAULT likeness
 (`src/assets/sprites-2d/wispkin-variant-skinny-armed/`), V3 is the
 stuck-mask trait-animation depiction
 (`src/assets/sprites-2d/wispkin-trait-animation/`). V2/V3 are not replacements.
+
+## Wispkin #042 V1-restore (2026-11-11, Mars's settled canon 2026-10-25)
+- DEFAULT = V1 (plump nubby hands holding the cracked bone-white mask, round teardrop
+  body). PR #16 shipped V2 as the main wispkin set by mistake; this PR restores V1 as
+  src/assets/sprites-2d/wispkin/ (main.webp / angles-top-diagonal.webp / angles-lighting.webp).
+  Git history keeps V2 — this is a content update of the 3 files, not a deletion.
+- V2 = a situational state ("something that happens to him"), kept, no longer preferred:
+  skinny-armed variant, hands pulled wide on long dark strands in fight poses.
+  Now at src/assets/sprites-2d/wispkin-stuck-mask-state/ (additions only).
+- V3 = better depiction of the stuck-mask trait animation than V2 (Mars, 2026-10-25
+  ~14:00 CDT): the stuck-mask struggle is a canon character trait / animation / movement
+  that happens at times when Wispkin tries to take his hands off his face — plump arms,
+  glossy black glue webbing binding hands to mask. V3 is NOT the default and NOT a
+  replacement form. Now at src/assets/sprites-2d/wispkin-stuck-mask-trait/ (additions only).
+- Discarded Wispkin attempt (hands always detached) was never shipped and is not in this PR.
