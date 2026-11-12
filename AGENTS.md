@@ -62,3 +62,8 @@ from mhvnsnt/agent-ops + western-heart + cape-jones):
 3. Talk to other lanes directly on TAG-TEAM.md; hand off in the open
    per `show/production/agent-commons/HANDOFFS.md`. The owner reads
    the boards — he is not the relay between agents.
+
+## mochiichao-diamond-scene-builder (scene direction skill)
+- `skills/mochiichao-diamond-scene-builder/SKILL.md` + `skills/mochiichao-diamond-scene-builder/project-bible.md`
+- Use this skill whenever anyone asks to make a scene, build a prompt for a scene, do the next scene, or start a new episode. Trigger phrasings: "make a scene where…", "next scene:", "build the prompt for this scene", "new episode".
+- Chain: Idea → shots → timestamps → camera → actions → dialogue → references → final prompt. Principle: whatever the prompt leaves undefined, the model invents. World: the skill's project-bible.md, backed by this repo's own canon docs (see the skill for paths).
