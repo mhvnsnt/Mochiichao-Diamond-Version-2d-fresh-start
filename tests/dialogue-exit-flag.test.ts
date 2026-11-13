@@ -85,11 +85,13 @@ describe("dialogue exit/flag checks — live files", () => {
   });
 
   it("region 1-5 content files are NOT dialogue formats (CLI skips them)", () => {
-    // region1-dialogue.json is beats/entries source material for the later
-    // Regions 2-5 Ink conversion — the validator must not silently accept
-    // it as dialogue, and the CLI must skip it explicitly instead of
-    // failing the gate on a file that is not dialogue yet. When a region
-    // file is converted to ink, this test is updated with it.
+    // region1-dialogue.json is beats/entries source material — the validator
+    // must not silently accept it as dialogue, and the CLI must skip it
+    // explicitly instead of failing the gate on a file that is not dialogue
+    // yet. Regions 2-5 were converted to compiled Ink stories in the
+    // regions2-5 PR (regionN-story.json, pinned in
+    // src/lib/inkStoryRegions25.test.ts); their regionN-dialogue.json beat
+    // specs stay content-only and are skipped by the CLI the same way.
     const result = validateDialogueJson(region1, "region1-dialogue.json");
     expect(result.format).toBe("unknown");
     expect(result.errors.length).toBe(1);
