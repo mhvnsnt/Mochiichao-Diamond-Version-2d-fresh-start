@@ -1281,9 +1281,12 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       // Region 1 step (i): exits honour their condition / hmNeeded
       // (doorGate.isExitOpen) — the Victory Route badges>=8 gate
       // and the Boot Bay Wave gate were unenforced metadata until
-      // now. A sealed exit answers with its reason, not opens;
+      // now. Regions 3-5 step: exits also honour their storyFlag —
+      // the inter-region links open only once the Ink story has set
+      // the flag (recorded in completedEvents as ink:<story>:<flag>).
+      // A sealed exit answers with its reason, not opens;
       // noclip still bypasses, as it bypasses doors.
-      if (!isExitOpen(exitFirst, badges, techniqueFlags)) {
+      if (!isExitOpen(exitFirst, badges, techniqueFlags, completedEvents)) {
         playCue('world.bump');
         setDialog({ lines: [exitSealedText(exitFirst, FULL_WORLD[exitFirst.to]?.name)] });
         setScreen("dialog");

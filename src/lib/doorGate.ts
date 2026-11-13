@@ -54,12 +54,41 @@ export function sealedDoorText(
 //     name is CLOSED.
 // Noclip (the cheat) bypasses exits in WorldEngine, as it bypasses
 // doors — this module is the gate, not the cheat.
-// ---------------------------------------------------------------------------
+//
+// Story flags — Regions 3-5 step, 2026-11-13.
+//
+// An exit may name a story flag (`storyFlag: "r3_storm_route_open"`):
+// the exit is traversable only once that flag is set. Flags are set
+// by Ink story progress and persist in the save as completedEvents
+// entries: WorldEngine.finishInkDialog records every variable a story
+// set to true as `ink:<storyId>:<flag>` (gameStore.completedEvents,
+// serialized with the save by SaveMenu). A bare flag name in
+// completedEvents counts too, so the gate reads the flag either way.
+// No new save format: the flag store is the completedEvents list
+// that already exists. Fail-closed: a named flag that is not set
+// keeps the exit sealed, exactly like an unrecognised condition or
+// an unheld technique.
+export function hasStoryFlag(
+  completedEvents: readonly string[] | null | undefined,
+  flag: string | null | undefined,
+): boolean {
+  if (!flag) return false;
+  const events = completedEvents ?? [];
+  return events.some((e) => e === flag || e.endsWith(`:${flag}`));
+}
+
+export type ExitGate = {
+  condition?: string | null;
+  hmNeeded?: string | null;
+  storyFlag?: string | null;
+  to?: string;
+};
 
 export function isExitOpen(
-  exit: { condition?: string | null; hmNeeded?: string | null; to?: string } | null | undefined,
+  exit: ExitGate | null | undefined,
   badges: readonly string[],
   techniqueFlags: Record<string, boolean>,
+  completedEvents: readonly string[] = [],
 ): boolean {
   if (!exit) return true;
   if (exit.condition && !isDoorOpen(exit.condition, badges)) return false;
@@ -67,12 +96,13 @@ export function isExitOpen(
     const tech = techniqueByName(exit.hmNeeded);
     if (!tech || !techniqueHeld(tech, techniqueFlags)) return false;
   }
+  if (exit.storyFlag && !hasStoryFlag(completedEvents, exit.storyFlag)) return false;
   return true;
 }
 
 // What the player hears when they try a sealed exit.
 export function exitSealedText(
-  exit: { condition?: string | null; hmNeeded?: string | null; to?: string } | null | undefined,
+  exit: ExitGate | null | undefined,
   destName?: string,
 ): string {
   const name = destName || exit?.to || "The way";
@@ -87,6 +117,9 @@ export function exitSealedText(
     if (tech) {
       return `${name} is sealed. It needs the ${exit.hmNeeded} technique.`;
     }
+  }
+  if (exit?.storyFlag) {
+    return `${name} is sealed. The way has not opened yet.`;
   }
   return `${name} is sealed.`;
 }

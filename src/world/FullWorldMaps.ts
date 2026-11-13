@@ -3267,7 +3267,7 @@ export const R2_FROST_PEAK: any = {
     { x:12, y:12, text:"FROST PEAK\\nThe First Champion waits at the top. He does not talk. He battles.\\nStorm route to Region 3: open. North to the Root Hamlet outpost (flag r3_storm_route_open)." },
   ],
   exits: [
-    { x:12, y:0, to:"r3_outpost_2f", enterAt:{x:6, y:11}, dir:"up" },
+    { x:12, y:0, to:"r3_outpost_2f", enterAt:{x:6, y:11}, dir:"up", storyFlag:"r3_storm_route_open" },
     { x:12, y:23, to:"r2_plateau", enterAt:{x:14, y:1}, dir:"down" },
   ],
   doors: [
@@ -4742,7 +4742,7 @@ export const R3_FRONTIER_ARENAS: any = {
   ],
   exits: [
     { x:14, y:29, to:"r3_plateau", enterAt:{x:14, y:1}, dir:"down" },
-    { x:14, y:0, to:"r4_twinleaf", enterAt:{x:14, y:29}, dir:"up" }
+    { x:14, y:0, to:"r4_twinleaf", enterAt:{x:14, y:29}, dir:"up", storyFlag:"r4_airship_route_open" }
   ],
   doors: [
 
@@ -6297,7 +6297,7 @@ export const R4_RIFT_DUNGEON: any = {
     { x:9, y:12, text:"RIFT DUNGEON\nDown there, the Mainframe shows its bones. Do not touch the bones. Just close the wound." }
   ],
   exits: [
-    { x:9, y:0, to:"r5_start_city", enterAt:{x:14, y:29}, dir:"up" }
+    { x:9, y:0, to:"r5_start_city", enterAt:{x:14, y:29}, dir:"up", storyFlag:"r5_signal_open" }
   ],
   doors: [
     { x:9, y:19, to:"r4_battle_zone", enterAt:{x:13, y:8}, label:"Battle Zone" }
