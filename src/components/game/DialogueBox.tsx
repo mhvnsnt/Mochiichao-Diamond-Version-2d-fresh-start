@@ -69,12 +69,15 @@ export function chunkDialogueLines(lines: string[]): string[] {
   return pages.length > 0 ? pages : ['...'];
 }
 
-export default function DialogueBox({ lines, speakerName, speakerSlot, choice, presentationMode = 'default', onComplete, onChoice, registerAdvance }: {
+export default function DialogueBox({ lines, speakerName, speakerSlot, choice, options, presentationMode = 'default', onComplete, onChoice, onOption, registerAdvance }: {
   lines: string[];
   speakerName?: string;
   speakerSlot?: HumanSlot | null;
   /** When set, YES/NO buttons appear on the last page instead of advancing. */
   choice?: boolean;
+  /** When set, a multi-choice list appears on the last page instead of advancing (Pokemon multichoice). Pass options OR choice, never both. */
+  options?: string[];
+  onOption?: (index: number) => void;
   /**
    * Presentation framing. 'default' (the default) = the existing look,
    * untouched. 'persona' = Tier 1 persona-style framing (letterbox
@@ -99,7 +102,8 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
   // partner!") was never shown in the v5 playtest. Resetting on
   // content (not array identity) avoids resetting on every render.
   const pagesKey = pages.join('\n');
-  useEffect(() => { setPageIdx(0); setShown(0); }, [pagesKey]);
+  const optionsKey = (options || []).join('\n');
+  useEffect(() => { setPageIdx(0); setShown(0); setChoiceIdx(0); }, [pagesKey, optionsKey]);
   const [shown, setShown] = useState(0);
   const [choiceIdx, setChoiceIdx] = useState(0);
   const choiceIdxRef = React.useRef(0);
@@ -174,11 +178,18 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
     onChoice?.(yes);
   }, [onChoice]);
 
+  // Multi-choice answers (step i, Ink): same confirm cue as YES.
+  const pickOption = React.useCallback((index: number) => {
+    playCue('ui.confirm');
+    onOption?.(index);
+  }, [onOption]);
+
   const advance = React.useCallback(() => {
     const st = stateRef.current;
     if (!st.typingDone) { setShown(page.length); return; }
     if (!st.isLast) { setPageIdx(i => i + 1); return; }
     if (choice) return; // must click YES / NO
+    if (options && options.length > 0) return; // must pick an option
     onComplete();
   }, [choice, onComplete, page.length]);
 
@@ -199,6 +210,22 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
       // cluster covering the YES/NO buttons; see WorldEngine).
       // Y/N now answer directly; Enter/Space are left alone for
       // choice dialogues so a focused YES/NO button can activate.
+      if (options && options.length > 0 && onOption) {
+        // Ink multichoice (step i): vertical option list on the last
+        // page. Arrow keys / W/S move the cursor, A/Enter/Space picks
+        // the highlighted option. No cancel key: an Ink choice must
+        // be answered, exactly like the decomps' multichoice.
+        if (stateRef.current.isLast && stateRef.current.typingDone) {
+          if (e.key === 'ArrowUp' || e.key === 'w') { e.preventDefault(); setChoiceIdx(i => (i - 1 + options.length) % options.length); return; }
+          if (e.key === 'ArrowDown' || e.key === 's') { e.preventDefault(); setChoiceIdx(i => (i + 1) % options.length); return; }
+          if (isConfirmKey(e, buttonMode)) { e.preventDefault(); pickOption(choiceIdxRef.current); return; }
+        }
+        if (!stateRef.current.isLast && isConfirmKey(e, buttonMode)) {
+          e.preventDefault();
+          advance();
+        }
+        return;
+      }
       if (choice && onChoice) {
         // M1 (2026-10-29): Pokemon-style YES/NO cursor on the last
         // page. Arrow keys / WASD move the cursor, A/Enter/Space
@@ -236,7 +263,7 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [advance, choice, onChoice, buttonMode]);
+  }, [advance, choice, onChoice, options, onOption, buttonMode]);
 
   // NOTE: data-menu-skin lives on this wrapper, not on StdWindow
   // itself (StdWindow does not forward data attributes): the CSS
@@ -314,13 +341,20 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
           {!isLast && typingDone && (
             <div className="text-teal-300 text-xs text-right mt-2 animate-pulse">▼</div>
           )}
-          {isLast && typingDone && !choice && (
+          {isLast && typingDone && !choice && !(options && options.length > 0) && (
             <div className="text-teal-300 text-xs text-right mt-2 animate-pulse">▼</div>
           )}
           {isLast && typingDone && choice && onChoice && (
             <div className="flex gap-3 mt-3 justify-end">
               <button onMouseEnter={() => setChoiceIdx(0)} onClick={(e) => { e.stopPropagation(); choose(true); }} className={`game-button px-6 py-2 font-bold min-h-[48px] ${choiceIdx === 0 ? 'ring-2 ring-yellow-300' : ''}`}>{choiceIdx === 0 ? '► ' : ''}YES</button>
               <button onMouseEnter={() => setChoiceIdx(1)} onClick={(e) => { e.stopPropagation(); choose(false); }} className={`game-button px-6 py-2 font-bold min-h-[48px] ${choiceIdx === 1 ? 'ring-2 ring-yellow-300' : ''}`}>{choiceIdx === 1 ? '► ' : ''}NO</button>
+            </div>
+          )}
+          {isLast && typingDone && options && options.length > 0 && onOption && (
+            <div className="flex flex-col gap-2 mt-3">
+              {options.map((opt, i) => (
+                <button key={i} onMouseEnter={() => setChoiceIdx(i)} onClick={(e) => { e.stopPropagation(); pickOption(i); }} className={`game-button px-4 py-2 font-bold min-h-[48px] text-left ${choiceIdx === i ? 'ring-2 ring-yellow-300' : ''}`}>{choiceIdx === i ? '► ' : ''}{opt}</button>
+              ))}
             </div>
           )}
         </div>
