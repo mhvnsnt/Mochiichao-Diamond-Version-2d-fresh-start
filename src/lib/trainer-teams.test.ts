@@ -122,6 +122,79 @@ describe('trainer-teams resolver', () => {
   });
 });
 
+describe('trainer-teams statsHeld lock (step f)', () => {
+  // R2-001..R2-004 are the Region 2 opening rows. Their species
+  // (147 Dorowani, 150 Gabu) carry PROVISIONAL stats in SPECIES_DB
+  // (Black 2 first-stage starter-pattern fills, total 308 each) — NOT
+  // Mars-approved numbers. The rows stay flagged statsHeld until Mars
+  // gives numbers, and the flags are what keep the provisional stats
+  // from being silently treated as canon: the "converts every row"
+  // test above passes for these rows only because the provisional
+  // stats exist, so this block locks the labelling itself.
+  const HELD_IDS = ['R2-001', 'R2-002', 'R2-003', 'R2-004'];
+
+  it('flags exactly the four Region 2 opening rows as statsHeld', () => {
+    const held = ALL_TRAINER_ROWS.filter((r) => r.statsHeld);
+    expect(held.map((r) => r.id).sort()).toEqual([...HELD_IDS].sort());
+  });
+
+  it('held rows use only 147/150 plus already-approved species', () => {
+    for (const row of ALL_TRAINER_ROWS) {
+      if (!row.statsHeld) continue;
+      for (const slot of row.team) {
+        expect(['147', '150', '016', '019', '041']).toContain(slot.speciesId);
+      }
+    }
+  });
+
+  it('no row anywhere uses species 148 (Gabu is 150)', () => {
+    for (const row of ALL_TRAINER_ROWS) {
+      for (const slot of row.team) {
+        expect(slot.speciesId).not.toBe('148');
+      }
+    }
+  });
+
+  it('provisional species appear ONLY in statsHeld rows', () => {
+    for (const row of ALL_TRAINER_ROWS) {
+      if (row.statsHeld) continue;
+      for (const slot of row.team) {
+        expect(slot.speciesId).not.toBe('147');
+        expect(slot.speciesId).not.toBe('150');
+      }
+    }
+  });
+
+  it('held rows resolve by display name for Region 2 map placement', () => {
+    expect(resolveTrainerRow('Ferry Walker Nia')?.id).toBe('R2-001');
+    expect(resolveTrainerRow('Ferry Walker Pim')?.id).toBe('R2-002');
+    expect(resolveTrainerRow('Route Trainer Oda')?.id).toBe('R2-003');
+    expect(resolveTrainerRow('Route Trainer Ren')?.id).toBe('R2-004');
+  });
+
+  it('147/150 exist in SPECIES_DB (held rows build) — numbers provisional', () => {
+    for (const id of ['147', '150']) {
+      const sp: any = (SPECIES_DB as any)[id];
+      expect(sp).toBeDefined();
+      expect(sp.baseStats).toBeDefined();
+      expect(sp.learnset.length).toBeGreaterThan(0);
+    }
+    expect((SPECIES_DB as any)['148']).toBeUndefined();
+  });
+
+  it('every row has sane levels (1-100), team size 1-6, reward > 0', () => {
+    for (const row of ALL_TRAINER_ROWS) {
+      expect(row.team.length).toBeGreaterThan(0);
+      expect(row.team.length).toBeLessThanOrEqual(6);
+      for (const slot of row.team) {
+        expect(slot.level).toBeGreaterThanOrEqual(1);
+        expect(slot.level).toBeLessThanOrEqual(100);
+      }
+      expect(row.reward).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe('trainer-teams map parity (wiring effect lock)', () => {
   type Battle = { name: string; team: [string, number][]; reward: number };
   function uniqueMapBattles(): Battle[] {
