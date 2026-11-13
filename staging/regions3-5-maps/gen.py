@@ -568,7 +568,7 @@ def plateau_npcs(n, entry_id):
     have region-specific lines — hardcoding R2's words here would put R2's
     lines into later regions (fixed 2026-11-13 while finishing gen.py)."""
     e = entry(n, entry_id)
-    att = dialogue_npc(n, e, "Plateau attendant", 14, 20, "🧑")
+    att = dialogue_npc(n, e, "Plateau Attendant", 14, 20, "🧑")
     elites = []
     for i, el in enumerate(e["elite"], start=1):
         elites.append({"id": f"elite_{i}", "x": 4 + i * 4, "y": 10, "sprite": "🥋",
@@ -1350,7 +1350,7 @@ def build_region5():
     # battle lines, owed with the battle itself.
     MAPS.append(site_map(n, "r5_mythar_final", "Mythar — True Final",
                          None, "r5_grand_tournament",
-                         [dialogue_npc(n, e17, "Plateau attendant", 12, 16, "🧑", nid="plateau_attendant_final"),
+                         [dialogue_npc(n, e17, "Plateau Attendant", 12, 16, "🧑", nid="plateau_attendant_final"),
                           dialogue_npc(n, e17, "Prof. Aeon", 8, 16, "🔬", nid="prof_aeon_mythar")],
                          "MYTHAR — TRUE FINAL\nFinal ascent. This is not a region champion. This is the champion of the whole Mainframe."))
 
