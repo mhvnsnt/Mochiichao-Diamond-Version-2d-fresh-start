@@ -47,5 +47,7 @@
   "doors": [{"x": 14, "y": 8, "to": "dojo_1", "enterAt": [7, 16], "label": "Champions Dojo — Core Gate"}, {"x": 24, "y": 6, "to": "mochiiplex_1", "enterAt": [7, 10], "label": "MochiiPlex"}],
   "npcs": [{"id": "dojo1_guard", "x": 14, "y": 9, "name": "Dojo Acolyte", "role": "npc", "dialog": ["Master Lin is in. Mind the floorboards — every part of this dojo has a place, and so will you, briefly.", "His custom: he sets the order, you find where you fit. The chalk marks by the gate are the last hundred who fit wrong. Kidding. Half of them are mine."], "dialogAfter": ["You fit. The Core Fragment sits heavy, doesn't it? Next road's the Forest — Aero Dojo, Wind Wing. Falk doesn't ask permission, so I am asking for him: be ready."]}, {"id": "town_lass", "x": 10, "y": 20, "name": "Town Girl", "role": "npc"}, {"id": "town_oldman", "x": 23, "y": 12, "name": "Old Man", "role": "npc"}],
   "signs": [{"x": 12, "y": 8, "text": "CHAMPIONS DOJO\nMaster Lin - The Unbreakable Core"}, {"x": 22, "y": 6, "text": "MOCHIIPLEX\nAll your Ranger needs in one spot!"}, {"x": 16, "y": 30, "text": "SILICON TOWN\nThe genesis of your journey."}],
+  "town": true,
+  "townServices": "mochiiplex_1",
   "noWild": true
 }
