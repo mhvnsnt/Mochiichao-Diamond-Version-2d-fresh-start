@@ -1,0 +1,51 @@
+name: ci-playwright
+# Playwright e2e gates for Mochiichao PRs (step j, 2026-11-13).
+# Runs the ACTIVE tests in tests/e2e/gates.spec.ts against a local
+# `vite preview` of the PR head — never against the live site (no
+# live site exists: Pages is not enabled on this repo, and the
+# Netlify site is paused for usage limits).
+# Kept separate from ci-budgets.yml on purpose: that workflow stays
+# green without a browser; this one owns the browser. Do NOT move
+# Playwright into ci-budgets.yml.
+# Skipped tests in gates.spec.ts still need a live playtest session
+# to un-skip (their selectors are not live-confirmed); CI runs only
+# the active ones, on desktop (1280x720) + phone (390x844) projects.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+concurrency:
+  group: ci-playwright-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    env:
+      # Same variable the spec and playwright.config.ts read: with it
+      # set, the config starts NO dev server and the spec targets
+      # the preview below instead of http://localhost:3000.
+      MOCHIICHAO_BASE_URL: http://localhost:4173/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install (lockfile)
+        run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Production build
+        run: npx vite build --base=./
+      - name: Serve preview + run gates
+        run: |
+          npx vite preview --port 4173 --strictPort > /tmp/vite-preview.log 2>&1 &
+          PREVIEW_PID=$!
+          trap 'kill $PREVIEW_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:4173/ > /dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          curl -fsS http://localhost:4173/ > /dev/null
+          npm run test:e2e:gates
