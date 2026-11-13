@@ -70,3 +70,44 @@ describe("town completeness gates", () => {
     expect(validateTown(baseMap())).toEqual([]);
   });
 });
+
+describe("return-exit gates", () => {
+  it("rejects an exit with no way back", () => {
+    const map = baseMap({ exits: { north: { to: "other", enterAt: [0, 0] } } });
+    const other = baseMap({ id: "other" });
+    const errors = validateTmjMap(map, { test_town: map, other });
+    expect(errors.some((e) => e.includes("no return exit/door"))).toBe(true);
+  });
+
+  it("accepts an exit whose target links back", () => {
+    const map = baseMap({ exits: { north: { to: "other", enterAt: [0, 0] } } });
+    const other = baseMap({ id: "other", exits: { south: { to: "test_town", enterAt: [0, 0] } } });
+    expect(validateTmjMap(map, { test_town: map, other })).toEqual([]);
+  });
+
+  it("exempts a oneWay exit from the return check", () => {
+    const map = baseMap({
+      exits: [{ x: 0, y: 0, to: "other", enterAt: [0, 0], oneWay: true }],
+    });
+    const other = baseMap({ id: "other" });
+    expect(validateTmjMap(map, { test_town: map, other })).toEqual([]);
+  });
+
+  it("rejects a townServices name that points nowhere", () => {
+    const map = baseMap({ townServices: "missing_services" });
+    const errors = validateTmjMap(map, { test_town: map });
+    expect(errors.some((e) => e.includes("townServices points to missing map"))).toBe(true);
+  });
+});
+
+describe("town services gates", () => {
+  it("lets a townServices map supply heal + shop", () => {
+    const town = baseMap({ npcs: [], town: true, townServices: "services" });
+    const services = baseMap({ id: "services" });
+    expect(validateTown(town, { services })).toEqual([]);
+    expect(validateTown(town)).toEqual([
+      "test_town: town has no heal NPC",
+      "test_town: town has no shop NPC",
+    ]);
+  });
+});
