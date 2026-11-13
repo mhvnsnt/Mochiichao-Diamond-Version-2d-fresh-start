@@ -259,9 +259,9 @@ describe('trainer-teams map parity (wiring effect lock)', () => {
     return [...seen.values()];
   }
 
-  it('wires 17 of 22 unique map trainer battles; 5 keep hand-built teams', () => {
+  it('wires 48 of 53 unique map trainer battles; 5 keep hand-built teams', () => {
     const battles = uniqueMapBattles();
-    expect(battles.length).toBe(22);
+    expect(battles.length).toBe(53);
     const matched: string[] = [];
     const unmatched: string[] = [];
     for (const b of battles) {
@@ -271,6 +271,7 @@ describe('trainer-teams map parity (wiring effect lock)', () => {
     }
     expect(matched.sort()).toEqual(
       [
+        // Region 1 (17, as before).
         'Acolyte Gale',
         'Acolyte Ken',
         'Acolyte Ren',
@@ -288,6 +289,38 @@ describe('trainer-teams map parity (wiring effect lock)', () => {
         'Miner Cleff',
         'Woods Walker Tess',
         'Youngster Jay',
+        // Region 2 (31, PR #423): 15 route/area + 16 dojo acolytes.
+        'Acolyte Bolt',
+        'Acolyte Ember',
+        'Acolyte Fist',
+        'Acolyte Flare',
+        'Acolyte Foam',
+        'Acolyte Kindling',
+        'Acolyte Leaf',
+        'Acolyte Legend',
+        'Acolyte Moss',
+        'Acolyte Myth',
+        'Acolyte Night',
+        'Acolyte Silk',
+        'Acolyte Spar',
+        'Acolyte Wave',
+        'Acolyte Web',
+        'Acolyte Wire',
+        'Ferry Walker Nia',
+        'Ferry Walker Pim',
+        'Forest Walker Faye',
+        'Lake Watcher Bryn',
+        'Radio Runner Dex',
+        'Radio Runner Vee',
+        'Route Trainer Oda',
+        'Route Trainer Ren',
+        'Shrine Keeper Lorn',
+        'Syndicate Operative Kest',
+        'Syndicate Operative Nyx',
+        'Veteran Iska',
+        'Veteran Miri',
+        'Veteran Ruel',
+        'Veteran Taro',
       ].sort(),
     );
     expect(unmatched.sort()).toEqual(
