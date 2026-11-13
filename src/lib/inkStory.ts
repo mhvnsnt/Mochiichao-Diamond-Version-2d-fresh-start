@@ -3,8 +3,11 @@
  *
  * Compiled Ink JSON (inkVersion + root, e.g.
  * src/lib/wiring/dialogue/region1-truck-start.json) is played through
- * inkjs (already a dependency). The validator's contract lives in
- * src/lib/wiring/validate-dialogue.ts: knots are the named containers
+ * inkjs (already a dependency). Regions 2-5 have the same shape:
+ * regionN-story.json, one story per region, one talk knot per dialogue
+ * entry plus an _after knot where the entry has post-battle/post-event
+ * lines (see docs/regions2-5-ink-dialogue-20261113.md). The validator's
+ * contract lives in src/lib/wiring/validate-dialogue.ts: knots are the
  * in root, `{"->": name}` diverts must resolve to a knot (or END),
  * `{"VAR=": name}` writes and `{"VAR?": name}` reads must be declared
  * in `global decl`. This driver plays exactly that format — it never
@@ -26,16 +29,26 @@
  */
 import { Story } from "inkjs";
 import truckStartJson from "./wiring/dialogue/region1-truck-start.json";
+import region2StoryJson from "./wiring/dialogue/region2-story.json";
+import region3StoryJson from "./wiring/dialogue/region3-story.json";
+import region4StoryJson from "./wiring/dialogue/region4-story.json";
+import region5StoryJson from "./wiring/dialogue/region5-story.json";
 
 /** Compiled Ink stories registered for live play, by story id. */
 export const INK_STORIES: Record<string, unknown> = {
   "region1-truck-start": truckStartJson,
+  "region2-story": region2StoryJson,
+  "region3-story": region3StoryJson,
+  "region4-story": region4StoryJson,
+  "region5-story": region5StoryJson,
 };
 
 export type InkLine = { speaker: string | null; text: string };
 export type InkChoice = { index: number; text: string };
 
-const SPEAKER_RE = /^([A-Za-z][A-Za-z .'-]*):\s+(.+)$/;
+// Speaker labels in Regions 2-5 include digits ("Elite 1", "Region 3
+// Researcher"), so the label class carries 0-9 as well as letters.
+const SPEAKER_RE = /^([A-Za-z][A-Za-z0-9 .'-]*):\s+(.+)$/;
 
 /** Split "Name: text" into speaker + text; bare lines are narration. */
 export function splitSpeaker(raw: string): InkLine {
@@ -215,7 +228,9 @@ export class InkSession {
     return undefined;
   }
 
-  /** Declared story variables (clock_set, codex_get, sprint_boots). */
+  /** Declared story variables (clock_set, codex_get, sprint_boots for the
+   *  truck start; r2_* / r3_* / r4_* / r5_* progression flags for the region
+   *  stories — badge steps, story beats, Hall entries, region links). */
   get variables(): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     for (const n of this.varNames) out[n] = this.getVariable(n);
