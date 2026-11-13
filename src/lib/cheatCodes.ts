@@ -164,7 +164,7 @@ export const CHEAT_CODES: CheatCodeDef[] = [
     code: 'SHINY-ON',
     kind: 'toggle',
     family: 'World & Debug',
-    description: 'Lustre display on.',
+    description: 'Lustre display on. (Emulator-style tool.)',
     apply: () => {
       useGameStore.getState().setCheatFlags({ shiny: true });
       return 'SHINY-ON: Lustre display on.';
@@ -174,7 +174,7 @@ export const CHEAT_CODES: CheatCodeDef[] = [
     code: 'SHINY-OFF',
     kind: 'toggle',
     family: 'World & Debug',
-    description: 'Lustre display off.',
+    description: 'Lustre display off. (Emulator-style tool.)',
     apply: () => {
       useGameStore.getState().setCheatFlags({ shiny: false });
       return 'SHINY-OFF: Lustre display off.';
@@ -184,7 +184,7 @@ export const CHEAT_CODES: CheatCodeDef[] = [
     code: 'NOCLIP',
     kind: 'toggle',
     family: 'World & Debug',
-    description: 'Toggle: walk through solid tiles (debug tool — can soft-lock a run; the save keeps the flag).',
+    description: 'Toggle: walk through solid tiles (emulator-style debug tool — can soft-lock a run; the save keeps the flag).',
     apply: () => {
       const next = !useGameStore.getState().noclip;
       useGameStore.getState().setCheatFlags({ noclip: next });
@@ -195,7 +195,7 @@ export const CHEAT_CODES: CheatCodeDef[] = [
     code: 'WARP-SECTOR0',
     kind: 'action',
     family: 'World & Debug',
-    description: 'Warp to Boot Harbor.',
+    description: 'Warp to Boot Harbor. (Emulator-style tool.)',
     apply: () => {
       useGameStore.getState().setMapState('sector0', { x: 15, y: 18 });
       return 'WARP-SECTOR0: warped to Boot Harbor.';
@@ -205,7 +205,7 @@ export const CHEAT_CODES: CheatCodeDef[] = [
     code: 'MONEY-1000',
     kind: 'grant',
     family: 'Money & Items',
-    description: '+1000 CR (legacy amount; wallet clamped at 999,999 as this code has always done).',
+    description: '+1000 CR (placeholder cheat amount; wallet clamped at 999,999 as this code has always done).',
     apply: () => {
       useGameStore.setState(s => ({ wallet: Math.min(WALLET_CAP_LEGACY, s.wallet + 1000) }));
       return 'MONEY-1000: +1000 CR.';
