@@ -4694,7 +4694,7 @@ export const R3_PLATEAU: any = {
     });
   })(),
   npcs: [
-    { id:"plateau_attendant", x:14, y:20, sprite:"🧑", name:"Plateau attendant", facing:"down", dialog:["Third ascent. The Hall has a third page for you, if you earn it."], inkStory:"region3-story", inkKnot:"r3_12_plateau" },
+    { id:"plateau_attendant", x:14, y:20, sprite:"🧑", name:"Plateau Attendant", facing:"down", dialog:["Third ascent. The Hall has a third page for you, if you earn it."], inkStory:"region3-story", inkKnot:"r3_12_plateau" },
     { id:"elite_1", x:8, y:10, sprite:"🥋", name:"Elite 1", facing:"down", dialog:["I guard the door. The sea taught me patience. Patience teaches back."], postBattleDialog:["Pass. The stairs are yours."] },
     { id:"elite_2", x:12, y:10, sprite:"🥋", name:"Elite 2", facing:"down", dialog:["I guard the stairs. The land taught me steadiness. Be steady."], postBattleDialog:["Steady. The hall is yours."] },
     { id:"elite_3", x:16, y:10, sprite:"🥋", name:"Elite 3", facing:"down", dialog:["I guard the hall. The hall remembers every region you have walked."], postBattleDialog:["It remembers you. The champion's door is next."] },
@@ -6215,7 +6215,7 @@ export const R4_PLATEAU: any = {
     });
   })(),
   npcs: [
-    { id:"plateau_attendant", x:14, y:20, sprite:"🧑", name:"Plateau attendant", facing:"down", dialog:["Fourth ascent. The Hall has a fourth page for you, if you earn it."], inkStory:"region4-story", inkKnot:"r4_15_plateau" },
+    { id:"plateau_attendant", x:14, y:20, sprite:"🧑", name:"Plateau Attendant", facing:"down", dialog:["Fourth ascent. The Hall has a fourth page for you, if you earn it."], inkStory:"region4-story", inkKnot:"r4_15_plateau" },
     { id:"elite_1", x:8, y:10, sprite:"🥋", name:"Elite 1", facing:"down", dialog:["I guard the door. The Rift taught me that doors are not always where you left them."], postBattleDialog:["Pass. The stairs are yours."] },
     { id:"elite_2", x:12, y:10, sprite:"🥋", name:"Elite 2", facing:"down", dialog:["I guard the stairs. The lakes taught me that still water is deep water."], postBattleDialog:["Deep. The hall is yours."] },
     { id:"elite_3", x:16, y:10, sprite:"🥋", name:"Elite 3", facing:"down", dialog:["I guard the hall. The hall remembers every region, and the Rift between them."], postBattleDialog:["It remembers you. The champion's door is next."] },
@@ -7662,7 +7662,7 @@ export const R5_PLATEAU: any = {
     });
   })(),
   npcs: [
-    { id:"plateau_attendant", x:14, y:20, sprite:"🧑", name:"Plateau attendant", facing:"down", dialog:["Fifth ascent. The Hall has a fifth page for you, if you earn it. After that, the Hall has a final page, and it is not yours yet."], inkStory:"region5-story", inkKnot:"r5_15_plateau" },
+    { id:"plateau_attendant", x:14, y:20, sprite:"🧑", name:"Plateau Attendant", facing:"down", dialog:["Fifth ascent. The Hall has a fifth page for you, if you earn it. After that, the Hall has a final page, and it is not yours yet."], inkStory:"region5-story", inkKnot:"r5_15_plateau" },
     { id:"elite_1", x:8, y:10, sprite:"🥋", name:"Elite 1", facing:"down", dialog:["I guard the door. The bond taught me that a door is not a wall, if you knock right."], postBattleDialog:["Pass. The stairs are yours."] },
     { id:"elite_2", x:12, y:10, sprite:"🥋", name:"Elite 2", facing:"down", dialog:["I guard the stairs. The frozen plot taught me that cold is not the same as closed."], postBattleDialog:["Open. The hall is yours."] },
     { id:"elite_3", x:16, y:10, sprite:"🥋", name:"Elite 3", facing:"down", dialog:["I guard the hall. The hall remembers every region, every bond, every battle."], postBattleDialog:["It remembers you. The champion's door is next."] },
@@ -7740,7 +7740,7 @@ export const R5_MYTHAR_FINAL: any = {
     });
   })(),
   npcs: [
-    { id:"plateau_attendant_final", x:12, y:16, sprite:"🧑", name:"Plateau attendant", facing:"down", dialog:["Final ascent. This is not a region champion. This is the champion of the whole Mainframe. Walk it like it is the last walk, because it is."], inkStory:"region5-story", inkKnot:"r5_17_mythar_final" },
+    { id:"plateau_attendant_final", x:12, y:16, sprite:"🧑", name:"Plateau Attendant", facing:"down", dialog:["Final ascent. This is not a region champion. This is the champion of the whole Mainframe. Walk it like it is the last walk, because it is."], inkStory:"region5-story", inkKnot:"r5_17_mythar_final" },
     { id:"prof_aeon_mythar", x:8, y:16, sprite:"🔬", name:"Prof. Aeon", facing:"down", dialog:["Five regions, five Halls, one trainer. The Mainframe remembers you now, the way it remembers Mythar. That is the true ending, and it is not an ending. It is an opening."], inkStory:"region5-story", inkKnot:"r5_17_mythar_final" }
   ],
   signs: [
