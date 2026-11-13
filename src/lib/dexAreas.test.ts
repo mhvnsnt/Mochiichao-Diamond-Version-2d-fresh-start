@@ -93,7 +93,17 @@ describe("worldAreasForSpecies against the real encounters.json", () => {
     ]);
   });
   it("a roster species with no worldArea row reads none", () => {
-    expect(worldAreasForSpecies("147")).toEqual([]);
+    // Aerobeak 020: in SPECIES_DB (R1-037 + R2-041 trainer teams) but
+    // in no worldArea row. 147 Dorowani used to be the example here;
+    // PR #423's Region 2 pools gave it r2-route-1-grass and
+    // r2-route-2-grass (locked below), so the no-area example moves.
+    expect(worldAreasForSpecies("020")).toEqual([]);
+  });
+  it("Dorowani 147 reads the two Region 2 opening pools (PR #423)", () => {
+    expect(worldAreasForSpecies("147")).toEqual([
+      { areaId: "r2-route-1-grass", mapId: "r2_route_1", method: "grass" },
+      { areaId: "r2-route-2-grass", mapId: "r2_route_2", method: "grass" },
+    ]);
   });
 });
 
@@ -106,7 +116,9 @@ describe("dexAreaLabel / dexAreaMessage", () => {
   it("the message joins areas, or says honestly when there are none", () => {
     expect(dexAreaMessage("004", "caught")).toContain("cave-of-echoes-cave (cave)");
     expect(dexAreaMessage("004", "caught")).toContain("sector0-placed (placed)");
-    expect(dexAreaMessage("147", "seen")).toBe("No recorded area yet.");
+    expect(dexAreaMessage("147", "seen")).toContain("r2-route-1-grass (grass)");
+    expect(dexAreaMessage("147", "seen")).toContain("r2-route-2-grass (grass)");
+    expect(dexAreaMessage("020", "seen")).toBe("No recorded area yet.");
     expect(dexAreaMessage("004", "undiscovered")).toBe("Undiscovered.");
   });
 });
