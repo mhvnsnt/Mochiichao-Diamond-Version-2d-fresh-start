@@ -28,18 +28,63 @@ describe("pathfinding", () => {
 });
 
 describe("tiled maps", () => {
+  // Minimal stand-ins for the maps sector0 links to: correct dims so
+  // sector0's enterAt coordinates land in bounds, and a return
+  // exit/door back to sector0 so the return-exit check passes.
+  // (The regen sector0 is 32x28 with array-form exits; the old
+  // copies-of-sector0 stubs cannot hold route_1's [13..17, 38].)
+  const stub = (
+    id: string,
+    width: number,
+    height: number,
+    back: Partial<TmjMap>,
+  ): TmjMap =>
+    ({
+      id,
+      name: id,
+      width,
+      height,
+      tiles: Array.from({ length: height }, () => Array(width).fill(0)),
+      exits: {},
+      npcs: [],
+      signs: [],
+      noWild: true,
+      ...back,
+    }) as TmjMap;
+  const maps: Record<string, TmjMap> = {
+    sector0: sector0 as unknown as TmjMap,
+    aeon_lab: stub("aeon_lab", 12, 14, {
+      doors: [{ x: 6, y: 12, to: "sector0", enterAt: [10, 3], label: "Boot Harbor" }],
+    }),
+    route_1: stub("route_1", 40, 40, {
+      exits: [
+        { x: 13, y: 38, to: "sector0", enterAt: [15, 18], dir: "down" },
+        { x: 14, y: 38, to: "sector0", enterAt: [15, 18], dir: "down" },
+        { x: 15, y: 38, to: "sector0", enterAt: [15, 18], dir: "down" },
+        { x: 16, y: 38, to: "sector0", enterAt: [15, 18], dir: "down" },
+        { x: 17, y: 38, to: "sector0", enterAt: [15, 18], dir: "down" },
+      ],
+    }),
+    boot_bay: stub("boot_bay", 32, 28, {
+      exits: [{ x: 15, y: 0, to: "sector0", enterAt: [15, 27], dir: "up" }],
+    }),
+    sector0_house_1f: stub("sector0_house_1f", 12, 12, {
+      doors: [{ x: 6, y: 10, to: "sector0", enterAt: [6, 7], label: "Boot Harbor" }],
+    }),
+    sector0_neighbor_house: stub("sector0_neighbor_house", 11, 10, {
+      doors: [{ x: 5, y: 8, to: "sector0", enterAt: [19, 4], label: "Boot Harbor" }],
+    }),
+    sector0_rival_house: stub("sector0_rival_house", 12, 12, {
+      doors: [{ x: 6, y: 10, to: "sector0", enterAt: [26, 7], label: "Boot Harbor" }],
+    }),
+  };
   it("sector0 validates as a town with heal + shop + sign", () => {
-    const maps: Record<string, TmjMap> = {
-      sector0: sector0 as unknown as TmjMap,
-      aeon_lab: { ...sector0, id: "aeon_lab" } as unknown as TmjMap,
-      route_1: { ...sector0, id: "route_1" } as unknown as TmjMap,
-    };
     expect(validateTmjMap(sector0 as unknown as TmjMap, maps)).toEqual([]);
     expect(validateTown(sector0 as unknown as TmjMap)).toEqual([]);
   });
   it("a missing exit target fails validation", () => {
     const bad = { ...sector0, exits: { nowhere: { to: "missing_map", enterAt: [0, 0] } } } as unknown as TmjMap;
-    expect(validateTmjMap(bad, {})).toHaveLength(1);
+    expect(validateTmjMap(bad, maps)).toHaveLength(1);
   });
 });
 
