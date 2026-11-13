@@ -57,7 +57,7 @@ export function sealedDoorText(
 // ---------------------------------------------------------------------------
 
 export function isExitOpen(
-  exit: { condition?: string | null; hmNeeded?: string | null } | null | undefined,
+  exit: { condition?: string | null; hmNeeded?: string | null; to?: string } | null | undefined,
   badges: readonly string[],
   techniqueFlags: Record<string, boolean>,
 ): boolean {
