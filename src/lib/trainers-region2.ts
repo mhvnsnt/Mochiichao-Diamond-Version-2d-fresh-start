@@ -5,8 +5,7 @@
 // Party moves are NOT in the spec and are NOT invented here; learnset wiring rides with PR #186 (HELD).
 // status: KEEP = already in FullWorldMaps.ts (world lane swaps the corrected team in; this file does NOT duplicate engine wiring),
 //   REPLACE = replaces a placeholder team, NEW = not yet in the game. [NAME GAP] names are preserved verbatim, never invented.
-// HELD in this region: R2-001, R2-002, R2-003, R2-004 use 147/148 at level only — stats HELD (Mars numbers owed), no placeholder stats.
-// R1-035 note: see that entry — spec 039 overridden to 040 per roster-wins reconciliation (Lin's Dreadtoise).
+// HELD in this region: R2-001, R2-002, R2-003, R2-004 use 147/150 — stats HELD (Mars numbers owed). SPECIES_DB now carries provisional Black 2 starter-pattern stats for 147/150 (total 308), so the rows build, but the numbers are NOT Mars-approved: the statsHeld flags stay until Mars gives numbers. Gabu is 150, not 148 (Mars's ruling, locked 2026-10-28).
 
 export interface TrainerPartySlot { speciesId: string; level: number; }
 
