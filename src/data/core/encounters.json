@@ -314,7 +314,309 @@
           "weight": 1
         }
       ]
-    }
+    },
+  {
+    "areaId": "r3-oldale-road-grass",
+    "mapId": "r3_oldale_road",
+    "method": "grass",
+    "rate": 0.15,
+    "slots": [
+      {
+        "speciesId": "013",
+        "minLevel": 60,
+        "maxLevel": 60,
+        "weight": 1
+      },
+      {
+        "speciesId": "038",
+        "minLevel": 60,
+        "maxLevel": 60,
+        "weight": 1
+      },
+      {
+        "speciesId": "019",
+        "minLevel": 61,
+        "maxLevel": 61,
+        "weight": 1
+      },
+      {
+        "speciesId": "022",
+        "minLevel": 61,
+        "maxLevel": 61,
+        "weight": 1
+      }
+    ]
+  },
+  {
+    "areaId": "r3-victory-route-grass",
+    "mapId": "r3_victory_route",
+    "method": "grass",
+    "rate": 0.22,
+    "slots": [
+      {
+        "speciesId": "021",
+        "minLevel": 74,
+        "maxLevel": 74,
+        "weight": 1
+      },
+      {
+        "speciesId": "046",
+        "minLevel": 74,
+        "maxLevel": 77,
+        "weight": 1
+      },
+      {
+        "speciesId": "006",
+        "minLevel": 75,
+        "maxLevel": 75,
+        "weight": 1
+      },
+      {
+        "speciesId": "003",
+        "minLevel": 75,
+        "maxLevel": 75,
+        "weight": 1
+      },
+      {
+        "speciesId": "012",
+        "minLevel": 76,
+        "maxLevel": 76,
+        "weight": 1
+      },
+      {
+        "speciesId": "028",
+        "minLevel": 76,
+        "maxLevel": 76,
+        "weight": 1
+      },
+      {
+        "speciesId": "009",
+        "minLevel": 77,
+        "maxLevel": 77,
+        "weight": 1
+      }
+    ]
+  },
+  {
+    "areaId": "r4-route-1-grass",
+    "mapId": "r4_route_1",
+    "method": "grass",
+    "rate": 0.15,
+    "slots": [
+      {
+        "speciesId": "041",
+        "minLevel": 78,
+        "maxLevel": 78,
+        "weight": 1
+      },
+      {
+        "speciesId": "019",
+        "minLevel": 78,
+        "maxLevel": 78,
+        "weight": 1
+      },
+      {
+        "speciesId": "013",
+        "minLevel": 79,
+        "maxLevel": 79,
+        "weight": 1
+      },
+      {
+        "speciesId": "022",
+        "minLevel": 79,
+        "maxLevel": 79,
+        "weight": 1
+      }
+    ]
+  },
+  {
+    "areaId": "r4-floaroma-grass",
+    "mapId": "r4_floaroma",
+    "method": "grass",
+    "rate": 0.15,
+    "slots": [
+      {
+        "speciesId": "038",
+        "minLevel": 80,
+        "maxLevel": 80,
+        "weight": 1
+      },
+      {
+        "speciesId": "041",
+        "minLevel": 80,
+        "maxLevel": 80,
+        "weight": 1
+      },
+      {
+        "speciesId": "042",
+        "minLevel": 81,
+        "maxLevel": 81,
+        "weight": 1
+      },
+      {
+        "speciesId": "035",
+        "minLevel": 81,
+        "maxLevel": 81,
+        "weight": 1
+      }
+    ]
+  },
+  {
+    "areaId": "r4-victory-route-grass",
+    "mapId": "r4_victory_route",
+    "method": "grass",
+    "rate": 0.22,
+    "slots": [
+      {
+        "speciesId": "006",
+        "minLevel": 88,
+        "maxLevel": 88,
+        "weight": 1
+      },
+      {
+        "speciesId": "015",
+        "minLevel": 88,
+        "maxLevel": 88,
+        "weight": 1
+      },
+      {
+        "speciesId": "021",
+        "minLevel": 89,
+        "maxLevel": 89,
+        "weight": 1
+      },
+      {
+        "speciesId": "028",
+        "minLevel": 89,
+        "maxLevel": 89,
+        "weight": 1
+      },
+      {
+        "speciesId": "003",
+        "minLevel": 90,
+        "maxLevel": 90,
+        "weight": 1
+      },
+      {
+        "speciesId": "046",
+        "minLevel": 90,
+        "maxLevel": 90,
+        "weight": 1
+      },
+      {
+        "speciesId": "012",
+        "minLevel": 91,
+        "maxLevel": 91,
+        "weight": 1
+      },
+      {
+        "speciesId": "009",
+        "minLevel": 91,
+        "maxLevel": 91,
+        "weight": 1
+      }
+    ]
+  },
+  {
+    "areaId": "r5-route-1-grass",
+    "mapId": "r5_route_1",
+    "method": "grass",
+    "rate": 0.15,
+    "slots": [
+      {
+        "speciesId": "013",
+        "minLevel": 88,
+        "maxLevel": 88,
+        "weight": 1
+      },
+      {
+        "speciesId": "038",
+        "minLevel": 88,
+        "maxLevel": 88,
+        "weight": 1
+      },
+      {
+        "speciesId": "019",
+        "minLevel": 89,
+        "maxLevel": 89,
+        "weight": 1
+      },
+      {
+        "speciesId": "022",
+        "minLevel": 89,
+        "maxLevel": 89,
+        "weight": 1
+      }
+    ]
+  },
+  {
+    "areaId": "r5-victory-route-grass",
+    "mapId": "r5_victory_route",
+    "method": "grass",
+    "rate": 0.22,
+    "slots": [
+      {
+        "speciesId": "006",
+        "minLevel": 96,
+        "maxLevel": 96,
+        "weight": 1
+      },
+      {
+        "speciesId": "015",
+        "minLevel": 96,
+        "maxLevel": 96,
+        "weight": 1
+      },
+      {
+        "speciesId": "021",
+        "minLevel": 97,
+        "maxLevel": 97,
+        "weight": 1
+      },
+      {
+        "speciesId": "028",
+        "minLevel": 97,
+        "maxLevel": 97,
+        "weight": 1
+      },
+      {
+        "speciesId": "012",
+        "minLevel": 97,
+        "maxLevel": 97,
+        "weight": 1
+      },
+      {
+        "speciesId": "046",
+        "minLevel": 97,
+        "maxLevel": 97,
+        "weight": 1
+      },
+      {
+        "speciesId": "009",
+        "minLevel": 98,
+        "maxLevel": 98,
+        "weight": 1
+      },
+      {
+        "speciesId": "003",
+        "minLevel": 98,
+        "maxLevel": 98,
+        "weight": 1
+      },
+      {
+        "speciesId": "002",
+        "minLevel": 98,
+        "maxLevel": 98,
+        "weight": 1
+      },
+      {
+        "speciesId": "043",
+        "minLevel": 98,
+        "maxLevel": 98,
+        "weight": 1
+      }
+    ]
+  }
   ],
   "_worldAreasNote": "Stub-kill S-6 (2026-10-29): the four live overworld tables MIGRATED VERBATIM from the inline zone arrays that used to sit in src/world/FullWorldMaps.ts (species and levels unchanged; fixed level -> minLevel=maxLevel; the old uniform pool pick -> equal weights; the zone rate carried on the table). sector0-placed carries the creature-mode roamer seeds that used to be hard-coded in CreatureModeView.initialWilds (species/levels verbatim; positions and temperaments stay authored in the view). src/lib/encounters.ts is the only reader; FullWorldMaps derives its per-map mirror from these tables at module load — one source, no dual truth."
 }
