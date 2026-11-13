@@ -10,6 +10,7 @@ import { STORAGE_RULES } from '../../lib/playableWiring';
 import { WALLPAPER_PRESETS, resolveWallpaper, PC_WALLPAPER_UPLOAD_SPEC } from '../../lib/wallpaperCatalogue';
 import { SLOTS_PER_BOX, uncappedBoxCount } from '../../lib/uncappedStorage';
 import { useMenuLayout } from '../../lib/menuLayoutLive';
+import { isYesKey, isNoKey } from '../../lib/yesNoKeys';
 
 /**
  * PC storage, v2 structure (pokemon_storage_system_menu.c, structure/
@@ -138,6 +139,21 @@ export default function PcView({ onBack }: { onBack: () => void }) {
     else { moveToPc(confirm.id); setMessage(`${confirm.name} deposited to PC storage.`); }
     setConfirm(null);
   };
+
+  // Audit-plan Y/N scope: PC deposit/withdraw/release confirm had
+  // NO keyboard answer at all — Y confirms, N cancels, via the
+  // shared yesNoKeys module, like Bag Toss and Shop buy/sell.
+  // Wording and behaviour are otherwise unchanged.
+  useEffect(() => {
+    if (!confirm) return;
+    const handler = (e: KeyboardEvent) => {
+      if (isYesKey(e)) doConfirm();
+      else if (isNoKey(e)) { playCue('ui.cancel'); setConfirm(null); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [confirm]);
 
   return (
     <div className="game-screen flex flex-col p-4 sm:p-6 overflow-hidden bg-[#0b1526]" data-menu-skin={skin?.id} data-menu-layout={pcMenuLayout.entryId} style={menuSkinVars(skin)}>
