@@ -8,8 +8,13 @@
  * Aggressive/Elite). Trainer names are as written in the source file
  * (dialogue rule: Muse-written, locked once written); any NAME GAP
  * marker in the source is preserved, not filled by guessing.
- * Species set is exactly the 49 in species.ts (001-046 + 147 + 148 + 331),
- * so every row is buildable now that 147/148 have stats (PR #287).
+ * Species set is exactly the 49 in species.ts (001-046 + 147 + 150 + 331).
+ * 147/150 carry provisional Black 2 starter-pattern stats (total 308 each)
+ * in species.ts, NOT Mars-approved numbers; the four rows using them
+ * (R2-001..R2-004) stay flagged statsHeld in the region files until Mars
+ * gives their numbers. (An earlier version of this comment cited PR #287
+ * for these stats; that PR touched only two garden files, so the citation
+ * was wrong and is removed rather than re-pointed.)
  */
 export type TrainerTeamMember = { speciesId: string; level: number };
 export type TrainerRow = {
