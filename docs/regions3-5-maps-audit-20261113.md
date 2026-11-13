@@ -93,7 +93,7 @@ non-battle NPCs there.
 ## 4. Trainers wired from rows (nothing invented)
 
 `trainers-region3.ts` has 46 rows, `trainers-region4.ts` 43 rows,
-`trainers-region5.ts` 47 rows (136 rows). This PR wires 76/136 = 56%
+`trainers-region5.ts` 47 rows (136 rows). This PR wires 77/136 = 57%
 as battle NPCs; the rest are dialogue-only slots (see §5).
 
 - Region 3, 27/46: R3-001 Hex lab battle (named "Hex"), R3-002/003
@@ -102,8 +102,8 @@ as battle NPCs; the rest are dialogue-only slots (see §5).
 - Region 4, 26/43: R4-001/002 (Sandgem Route), R4-003/004 (Floaroma
   Valley, wired on the town map), R4-005/006 (Celestic), R4-007..010
   (Victory Route), 16 dojo acolytes.
-- Region 5, 23/47: R5-001/002 (Start City Route), R5-005..009 (Victory
-  Route — five veterans, not four), 16 dojo acolytes.
+- Region 5, 24/47: R5-001/002 (Start City Route), R5-005..009 (Victory
+  Route — five veterans, not four), R5-047 Mythar (true final), 16 dojo acolytes.
 - Inline teams mirror the row (species + levels); the resolver swaps
   in the row team at battle time (`trainer-teams-resolver.ts`). Inline
   stats are the species' `SPECIES_DB` base stats, moves are
@@ -111,7 +111,8 @@ as battle NPCs; the rest are dialogue-only slots (see §5).
   NOT in the trainer file: each battle NPC carries one labelled
   placeholder line. Exceptions: the first Veteran on each victory route
   carries the entry's beats veteran lines (R3-11 / R4-14 / R5-14), and
-  the Hex lab battle carries the R3-01 hex pre/post lines.
+  the Hex lab battle carries the R3-01 hex pre/post lines, and the Mythar
+  true final carries the R5-17 champion pre/post lines.
 - Dojo themes + badge names come from the rows (R3: Core / Strike /
   Chrome / Flame / Beast / Aero / Mythic / Water; R4: Core / Flora /
   Umbral / Strike / Water / Chrome / Water-ice / Chrome; R5: Beast /
@@ -137,9 +138,14 @@ as battle NPCs; the rest are dialogue-only slots (see §5).
 - R5-039..044 Tournament rounds + R4-011..013 Battle Zone + R4-014
   Rift Warden: NAME GAP rows → dialogue-only NPCs with PLACEHOLDER
   lines, battles owed.
-- R5-047 Mythar: species 331 not in `SPECIES_DB` → no battle NPC;
-  the Mythar final map holds the attendant + Prof. Aeon only. The
-  R5-17 champion block is Mythar's battle lines, owed with the battle.
+- R5-047 Mythar: WIRED (this PR) — species 331 IS in `SPECIES_DB`
+  (species.ts key "331"); the Mythar final map now holds the attendant
+  + Prof. Aeon + the Grand Champion Mythar battle NPC (team
+  331/003/046/043/028/021 Lv100, reward 20000, ink knot
+  r5_17_mythar_final). NOTE: src/data/core/species.json lists Mythar
+  as id "047" (Mythic) — that file disagrees with species.ts ("331",
+  DRAGON) and the trainer rows; reconciling the two is a separate data
+  decision, NOT this PR.
 - R5-045/046 Tower Climbers (Bright / Umbral Tower, post-game): no
   tower maps exist — left unwired, owed.
 - R3-043..046 Frontier Brains: no Frontier Arena battle maps yet —
@@ -214,7 +220,7 @@ those stretches.
 
 - `tests/regions3-5-maps.test.ts` (new, added to `test:tests` in
   `package.json`): 15 tests — key resolution, reachability, gates,
-  towns, dead doors, dojo shape, 75 wired rows + Hex mirror, 7 pools,
+  towns, dead doors, dojo shape, 76 wired rows + Hex mirror, 7 pools,
   48 Ink knots, plateau fold, Grand Tournament, Mythar final. Local
   checks run before upload (no runnable checkout exists — same
   constraint as the R2 audit §11): Python pre-flight below. CI is the
@@ -233,8 +239,8 @@ those stretches.
 - `src/data/core/map-battle-bg.json` (modified): 126 new bindings.
 - `src/lib/musicPlacement.ts` (modified): 126 new placement rows.
 - `src/lib/battleBackground.test.ts` (modified): GOLDEN +126.
-- `src/lib/trainer-teams.test.ts` (modified): map parity 53 → 129
-  battles, 48 → 123 matched, 5 → 6 unmatched (second 'Hex').
+- `src/lib/trainer-teams.test.ts` (modified): map parity 53 → 130
+  battles, 48 → 124 matched, 5 → 6 unmatched (second 'Hex').
 - `src/lib/dexAreas.test.ts` (modified): 038 reads 4 areas.
 - `tests/region1-rescue.test.ts` (modified): FULL_WORLD 89 → 215.
 - `package.json` (modified): `test:tests` gains
