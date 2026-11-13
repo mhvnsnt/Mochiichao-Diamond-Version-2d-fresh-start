@@ -9,6 +9,7 @@ import { sellPrice } from '../../lib/playableWiring';
 import { shopBuyPrice } from '../../lib/shopPricing';
 import { applyMusic } from '../../lib/musicPlacement';
 import { recordFor, displayFor, isIdentified } from '../../lib/itemMeaning';
+import { isYesKey, isNoKey } from '../../lib/yesNoKeys';
 
 /**
  * Shop, v2 structure (shop.c, structure/rules only, no Pokemon code,
@@ -28,9 +29,9 @@ import { recordFor, displayFor, isIdentified } from '../../lib/itemMeaning';
  * stated in the buy screen itself, not only in this comment.
  */
 const SHOP_ITEMS = [
-  { id: 'luigi_cube', name: 'Luigi Cube', cost: 250, desc: 'A sketchy syndicate-brand capture device.' },
-  { id: 'mend_patch', name: 'Mend Patch', cost: 150, desc: 'Restores 50 HP.' },
-  { id: 'revive_core', name: 'Revive Core', cost: 500, desc: 'Reboots a fainted Mochiichao to 50% capacity.' },
+  { id: 'luigi_cube', name: 'Luigi Cube', cost: 250, desc: 'A sketchy syndicate-brand capture device. (Placeholder price — not Mars canon.)' },
+  { id: 'mend_patch', name: 'Mend Patch', cost: 150, desc: 'Restores 50 HP. (Placeholder price — not Mars canon.)' },
+  { id: 'revive_core', name: 'Revive Core', cost: 500, desc: 'Reboots a fainted Mochiichao to 50% capacity. (Placeholder price — not Mars canon.)' },
   { id: DATA_CARD_ID, name: 'Data Card', cost: DATA_CARD_COST, desc: 'Stores a captured creature\u2019s data. Swap it at the PC. (Placeholder price — not Mars canon.)' },
 ];
 
@@ -123,8 +124,8 @@ export default function ShopView({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     if (!confirm) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'y' || e.key === 'Y') doConfirm();
-      else if (e.key === 'n' || e.key === 'N') { playCue('ui.cancel'); setConfirm(null); }
+      if (isYesKey(e)) doConfirm();
+      else if (isNoKey(e)) { playCue('ui.cancel'); setConfirm(null); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);

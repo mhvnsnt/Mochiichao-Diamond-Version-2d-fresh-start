@@ -6,6 +6,7 @@ import { TEXT_SPEED_MS } from '../../lib/gameSettings';
 import { messageWindowStyle } from '../../lib/hudCustom';
 import type { MessageWindowStyle } from '../../lib/hudCustom';
 import { isConfirmKey } from '../../lib/buttonMode';
+import { isYesKey, isNoKey } from '../../lib/yesNoKeys';
 import { getDayNightMenuVariant, getWorldMenuVariant } from '../../lib/dayNightMenuVariants';
 import { useMenuSkin, menuSkinVars, menuSkinPanelShadow } from '../../lib/menuSkins';
 import type { DialoguePresentationMode } from '../../lib/personaDialogue';
@@ -209,8 +210,8 @@ export default function DialogueBox({ lines, speakerName, speakerSlot, choice, p
           if (isConfirmKey(e, buttonMode)) { e.preventDefault(); choose(choiceIdxRef.current === 0); return; }
           if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'x' || e.key === 'X') { e.preventDefault(); choose(false); return; }
         }
-        if (e.key === 'y' || e.key === 'Y') { choose(true); return; }
-        if (e.key === 'n' || e.key === 'N') { choose(false); return; }
+        if (isYesKey(e)) { choose(true); return; }
+        if (isNoKey(e)) { choose(false); return; }
         // Sequence build (2026-10-28): before this, the early return
         // below swallowed Enter/Space on EVERY page of a choice
         // dialogue, so a keyboard player could never read past page

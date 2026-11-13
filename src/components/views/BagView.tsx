@@ -6,6 +6,7 @@ import { ITEM_ICONS } from '../../lib/uiArt';
 import { MenuHelpLine } from '../game/MenuList';
 import { useMenuLayout } from '../../lib/menuLayoutLive';
 import { playCue } from '../../lib/soundCues';
+import { isYesKey, isNoKey } from '../../lib/yesNoKeys';
 
 /**
  * Bag, v5.2 heal wiring: Mend Patch now actually heals (see Use
@@ -122,7 +123,8 @@ export default function BagView({ onBack }: { onBack: () => void }) {
   // component in BagView with no key handler at all — so in the
   // v5.2 playtest pressing N did nothing and the prompt had to be
   // clicked away. Y confirms the toss, N cancels it; wording and
-  // behaviour are otherwise unchanged.
+  // behaviour are otherwise unchanged. Keys are read from the
+  // shared yesNoKeys module (audit-plan Y/N unification).
   const doTossYes = () => {
     if (!current) return;
     playCue('ui.confirm');
@@ -133,8 +135,8 @@ export default function BagView({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     if (!confirmToss) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'y' || e.key === 'Y') doTossYes();
-      else if (e.key === 'n' || e.key === 'N') { playCue('ui.cancel'); setConfirmToss(false); }
+      if (isYesKey(e)) doTossYes();
+      else if (isNoKey(e)) { playCue('ui.cancel'); setConfirmToss(false); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
