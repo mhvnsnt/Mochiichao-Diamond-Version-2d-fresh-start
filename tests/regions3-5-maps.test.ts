@@ -13,7 +13,7 @@
 // What this does NOT pin (owed, see docs/regions3-5-maps-audit-20261113.md):
 // dojo leader battles + badge awards (leaders are NAME GAP, dialogue-only;
 // R5-012 names Hex as Dojo 1 leader against R5-04's NAME GAP — flagged for
-// Mars), Elite / Champion / Mythar battles, Front Recruit battles
+// Mars), Elite / Champion battles, Front Recruit battles
 // (R5-003/004), Battle Zone / Tournament / Frontier Brain battles, wild
 // pools on the other routes, and the R5 tower climbers (no tower maps).
 import { describe, it, expect } from "vitest";
@@ -175,7 +175,7 @@ const ENTRY_KNOTS = [
   "r5_17_mythar_final",
 ];
 // Trainer rows wired as battle NPCs in this PR: 27 Region 3 + 26 Region 4
-// + 23 Region 5 = 76 NPCs, of which 75 resolve to rows. R3-001 (Hex, lab
+// + 24 Region 5 = 77 NPCs, of which 76 resolve to rows. R3-001 (Hex, lab
 // battle) is the exception: the NPC is named "Hex", which never resolves,
 // so its row is pinned separately below and NOT in this list.
 const WIRED_ROWS = [
@@ -254,6 +254,7 @@ const WIRED_ROWS = [
   "R5-029",
   "R5-031",
   "R5-032",
+  "R5-047",
 ];
 // Wild pools grounded in trainer-row species + levels (see the audit doc).
 const GROUNDED_POOLS: Record<string, { method: "grass" | "surf"; species: string[] }> = {
@@ -404,7 +405,7 @@ describe("regions3-5 maps — Regions 3-5 skeleton", () => {
     }
   });
 
-  it("75 wired battle NPCs match their trainer rows (species + levels + reward)", () => {
+  it("76 wired battle NPCs match their trainer rows (species + levels + reward)", () => {
     const rows: TrainerTeam[] = [
       ...(TRAINERS_REGION_3 as TrainerTeam[]),
       ...(TRAINERS_REGION_4 as TrainerTeam[]),
@@ -502,12 +503,25 @@ describe("regions3-5 maps — Regions 3-5 skeleton", () => {
     expect(hex.dialog[0]).toContain("I am here too.");
   });
 
-  it("Mythar final: attendant + Aeon only, no Mythar battle NPC", () => {
+  it("Mythar final: attendant + Aeon + Grand Champion Mythar battle (row R5-047)", () => {
     const npcs = allNpcs(M("r5_mythar_final"));
-    expect(npcs.length).toBe(2);
+    expect(npcs.length).toBe(3);
     expect(npcs.some((n) => n.name === "Plateau Attendant")).toBe(true);
     expect(npcs.some((n) => n.name === "Prof. Aeon")).toBe(true);
-    expect(npcs.filter((n) => n.battle).length).toBe(0);
+    const mythar = npcs.find((n) => n.name === "Grand Champion Mythar");
+    expect(mythar).toBeDefined();
+    expect(mythar!.battle).toBeDefined();
+    expect(mythar!.battle.team.map((m: any) => `${m.id}@${m.level}`)).toEqual([
+      "331@100",
+      "003@100",
+      "046@100",
+      "043@100",
+      "028@100",
+      "021@100",
+    ]);
+    expect(mythar!.battle.reward).toBe(20000);
+    expect(mythar!.inkKnot).toBe("r5_17_mythar_final");
+    expect(mythar!.dialog[0]).toContain("I am not a region champion");
     expect(npcs.some((n) => n.name === "Mythar")).toBe(false);
   });
 });
