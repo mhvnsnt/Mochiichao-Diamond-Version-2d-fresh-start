@@ -31,7 +31,7 @@ import BattleSceneBackdrop from "../components/game/BattleSceneBackdrop";
 import { resolveBattleScene, phaseFromLegacyPhase } from "../lib/battleBackground";
 import { getStyleProfile, battleEnemyTopPct, battlePlayerBottomPct } from "../lib/styleProfiles";
 import type { MoveAnimationProfile } from "../lib/moveAnimation";
-import { isDoorOpen, sealedDoorText } from "../lib/doorGate";
+import { isDoorOpen, sealedDoorText, isExitOpen, exitSealedText } from "../lib/doorGate";
 import { withMoodEvent, readMood } from "../lib/individual";
 import { selectFollowerReaction, followerTalkLine, followerHandoverLine } from "../lib/followerReaction";
 import { recognisePlace } from "../lib/place";
@@ -85,7 +85,7 @@ import encounterModesConfig from "../data/core/encounter-modes.json";
 import { eligibleEvents, resolveOutcome, arcAvailability, currentArcStage, completeArcStage, routineFor, phaseForHour, WITNESSED_EVENTS, STRANGER_ARCS } from "../lib/livingWorld";
 import type { DirectorContext, WitnessedEvent } from "../lib/livingWorld";
 import { tableFor, rollEncounterStep } from "../lib/encounters";
-import { evaluateTileGate, performedText } from "../lib/fieldTechniques";
+import { evaluateTileGate, performedText, techniqueByName } from "../lib/fieldTechniques";
 import { rollWildHeldItem, resolveBattleEndDrop, DROP_ITEM_NAMES } from "../lib/drops";
 import { greetingFor, isGreeter } from "../lib/greetings";
 import { RELIC_NPCS, APPRAISAL_TERMINAL_NPC_ID, appraisalTerminalLines, appraiseCarried, recordFor, canGrantUnique, encounterRateFactor, keepsakeBand } from "../lib/itemMeaning";
@@ -1039,9 +1039,11 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
 
   // v4 Mom-first dialogue: on the first world entry in Sector 0 with
   // no partner yet, Mom speaks first (one DialogueBox, portrait),
-  // pointing the player at the lab. It fires once (completedEvents
-  // 'v4_mom_intro'), never for a loaded save that already has a
-  // partner, and never again after the lab starter is chosen.
+  // pointing the player at Route 1.0, where Prof. Aeon is waiting
+  // with his bag. It fires once (completedEvents 'v4_mom_intro'),
+  // never for a loaded save that already has a partner, and never
+  // again after the Route 1.0 rescue pick. Step (i) re-pointed it
+  // from the lab to the route: the starter pick is out there now.
   const momIntroFired = React.useRef(false);
   useEffect(() => {
     if (momIntroFired.current) return;
@@ -1050,13 +1052,38 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     momIntroFired.current = true;
     setDialog({
       lines: [
-        "Welcome home! Prof. Aeon is waiting at the lab, just north of here.",
+        "Welcome home! Prof. Aeon is out on Route 1.0, just north of here.",
         "Go see him before you head out — the tall grass is no place without a partner.",
         "Your journey starts in Sector 0. I will be right here when you need me.",
       ],
       isEvent: true,
       eventId: 'v4_mom_intro',
       npc: { id: "mom", name: "Mom" },
+    });
+    setScreen("dialog");
+  }, [screen, currentMap, hasStarter, completedEvents]);
+
+  // Region 1 step (i): Route 1.0 rescue intro — on the first world
+  // entry onto Route 1.0 with no partner yet, Prof. Aeon speaks
+  // first (one DialogueBox, portrait), pointing the player at his
+  // bag. Same pattern as the v4 Mom intro above: fires once
+  // (completedEvents 'route_rescue_intro'), never for a loaded save
+  // that already has a partner. The lines are the ink route_rescue
+  // knot (region1-truck-start.ink), verbatim.
+  const rescueIntroFired = React.useRef(false);
+  useEffect(() => {
+    if (rescueIntroFired.current) return;
+    if (screen !== "overworld" || currentMap !== 'route_1' || hasStarter) return;
+    if (completedEvents.includes('route_rescue_intro')) return;
+    rescueIntroFired.current = true;
+    setDialog({
+      lines: [
+        "Prof. Aeon: Help! This wild creature has me cornered!",
+        "Prof. Aeon: Quick — take one from my bag and drive it off!",
+      ],
+      isEvent: true,
+      eventId: 'route_rescue_intro',
+      npc: { id: "prof_aeon", name: "Prof. Aeon" },
     });
     setScreen("dialog");
   }, [screen, currentMap, hasStarter, completedEvents]);
@@ -1213,7 +1240,11 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       canCatch: false,
       reward: rowMembers && trainerRow ? trainerRow.reward : (npc.battle.reward || 100),
       isDojo: !!npc.isDojoBoss,
-      badge: npc.battle.badge
+      badge: npc.battle.badge,
+      // Region 1 step (i): the battle state carries the dojo
+      // leader's hmReward so the win path can grant the technique
+      // (Lin -> Mighty Push). NPCs without one carry undefined.
+      hmReward: npc.battle.hmReward
     });
     // Soundtrack lane: battle entry cries, both sides — the trainer's
     // lead creature on send-out, the player's on theirs.
@@ -1247,6 +1278,17 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     // and door tiles bypass the solid check.
     const exitFirst = (mapData as any).exits?.find((e: any) => e.x === nx && e.y === ny);
     if (exitFirst && !noclip) {
+      // Region 1 step (i): exits honour their condition / hmNeeded
+      // (doorGate.isExitOpen) — the Victory Route badges>=8 gate
+      // and the Boot Bay Wave gate were unenforced metadata until
+      // now. A sealed exit answers with its reason, not opens;
+      // noclip still bypasses, as it bypasses doors.
+      if (!isExitOpen(exitFirst, badges, techniqueFlags)) {
+        playCue('world.bump');
+        setDialog({ lines: [exitSealedText(exitFirst, FULL_WORLD[exitFirst.to]?.name)] });
+        setScreen("dialog");
+        return;
+      }
       playCue('world.exit');
       setIsTransitioning(true);
       setTimeout(() => {
@@ -2014,7 +2056,7 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
       // without a party: show a plain, dismissible prompt instead.
       const hasLivingParty = playerTeam.some((m: any) => (m.currentHp ?? m.hp) > 0);
       if (npcHere.battle && !defeatedTrainers.includes(npcHere.id) && !hasLivingParty) {
-        setDialog({ lines: [...lines, "You need a partner before you can battle. Go see Prof. Aeon at the lab, just north of here."], npc: npcHere });
+        setDialog({ lines: [...lines, "You need a partner before you can battle. Go see Prof. Aeon out on Route 1.0, just north of here."], npc: npcHere });
       } else if (npcHere.battle && !defeatedTrainers.includes(npcHere.id)) {
         setDialog({ lines: [...lines, "...Let's battle!"], npc: npcHere, afterBattle: true });
       } else {
@@ -2198,6 +2240,29 @@ const finishDialog = () => {
       useGameStore.getState().appendKeepsakeFact({ itemId: 'sprint_boots', kind: 'received' });
       notify("Received the Sprint Boots! Hold B to run.", "#ffd700");
     }
+    // Region 1 step (i): technique grants on first talk — the
+    // Preserve Keeper teaches Wave (Wave-Ride) and the Neon ferry
+    // captain teaches Slice (Data-Cut). Same pattern as Mom's
+    // Sprint Boots above: a completed non-event conversation
+    // grants the technique flag the tile gates read; later talks
+    // are plain conversation. The keeper/captain dialog lines
+    // themselves are untouched (pinned by the attribution test).
+    if (dialog.npc?.id === 'harbor_preserve_keeper' && !dialog.isEvent) {
+      const tech = techniqueByName("Wave");
+      if (tech && !useGameStore.getState().techniqueFlags[tech.flag]) {
+        useGameStore.getState().setTechniqueFlag(tech.flag, true);
+        playCue('item.get');
+        notify("Learned the Wave technique! Water is a road now.", "#ffd700");
+      }
+    }
+    if (dialog.npc?.id === 'neon_ferry_captain' && !dialog.isEvent) {
+      const tech = techniqueByName("Slice");
+      if (tech && !useGameStore.getState().techniqueFlags[tech.flag]) {
+        useGameStore.getState().setTechniqueFlag(tech.flag, true);
+        playCue('item.get');
+        notify("Learned the Slice technique! Vines and lies, cut.", "#ffd700");
+      }
+    }
     // Item meaning S-IM1: a placed unique enters the bag once,
     // through this one channel; the find is written as a completed
     // event so the world object goes quiet afterwards. One-of-one
@@ -2243,6 +2308,23 @@ const finishDialog = () => {
     }
     if (dialog.isEvent && dialog.eventId) {
       setCompletedEvents(ce => [...ce, dialog.eventId]);
+    }
+    // Region 1 step (i): the Route 1.0 rescue gift — closing
+    // Aeon's gift dialogue chains the wild-creature battle (the
+    // gift dialog carries eventId 'route_rescue_gift' and the
+    // battle npc below; the npc slot itself stays Prof. Aeon for
+    // the portrait). The wild Sproutle team is a placeholder per
+    // Break 4 — trainerBattleMon rebuilds it from SPECIES_DB, so
+    // these are the fallback numbers, not canon stats. A loss
+    // blacks out and the flow continues (mirrors Hex); the wild
+    // creature does not re-trigger.
+    if (dialog.eventId === 'route_rescue_gift') {
+      const started = triggerTrainerBattle({ id: 'route_rescue_battle', name: 'Wild Sproutle', battle: { team: [{ id: "038", name: "Sproutle", hp: 45, maxHp: 45, atk: 60, def: 55, spd: 50, moves: ["Web Blast", "Tackle"], type: "Grass", level: 5 }], reward: 0, badge: null } });
+      if (!started) {
+        setScreen("overworld");
+        setDialog(null);
+      }
+      return;
     }
     if (dialog.afterBattle && dialog.npc) {
       // Belt-and-braces for the pre-starter soft-lock: if no battle
@@ -2302,8 +2384,20 @@ const finishDialog = () => {
       // Inventory note: the wallet starts with 10 Luigi Cubes and
       // initializeStarter adds 5, so the player now holds 15 — the
       // "gifted you 5" wording is the +5 gift, not a total of 5.
+      // Step (i): a pick from Aeon's bag on Route 1.0 (npc id
+      // aeon_bag_*) carries the same gift lines, but the dialog
+      // also carries eventId 'route_rescue_gift' so finishDialog
+      // chains the wild-creature battle after it closes. A lab
+      // pick can no longer happen (lab balls are display-only),
+      // but the plain branch stays for any other pick_starter_
+      // choice that reaches here.
       playCue('item.get');
-      setDialog({ lines: ["You chose your partner! A white flash envelopes you...", "Prof. Aeon: A fine choice!", "I've also gifted you 5 Luigi Cubes. You can use them to catch wild Mochiichao in the tall grass!", "Good luck on your journey!"], isEvent: false, npc: { id: "prof_aeon", name: "Prof. Aeon" } });
+      const giftLines = ["You chose your partner! A white flash envelopes you...", "Prof. Aeon: A fine choice!", "I've also gifted you 5 Luigi Cubes. You can use them to catch wild Mochiichao in the tall grass!", "Good luck on your journey!"];
+      if (dialog.npc?.id?.startsWith("aeon_bag_")) {
+        setDialog({ lines: giftLines, isEvent: true, eventId: 'route_rescue_gift', npc: { id: "prof_aeon", name: "Prof. Aeon" } });
+      } else {
+        setDialog({ lines: giftLines, isEvent: false, npc: { id: "prof_aeon", name: "Prof. Aeon" } });
+      }
       setScreen("dialog");
     } else {
       setScreen("overworld");
@@ -2322,7 +2416,7 @@ const finishDialog = () => {
     lines: [
       "Prof. Aeon: Well done! That was your first battle, and your partner did you proud.",
       "Here is your MochiDex — it records every Mochiichao you meet and catch.",
-      "Now, your goal: visit the dojos across the Mainframe Region, beat Champion Mythar, and stop the Hackers and the Syndicate.",
+      "Now, your goal: visit the dojos across the Mainframe Region, beat Champion Hex, and stop the Hackers and the Syndicate.",
       "Route 1.0 is open. Your first town is Silicon Town — head north when you are ready.",
     ],
     isEvent: true,
@@ -2480,6 +2574,20 @@ const finishDialog = () => {
         playVictoryJingle('trainer');
         newLog.push(`${bs.trainerName} was defeated!`);
         if (bs.isDojo) { setBadges(b => [...b, bs.badge]); playCue('ritual.badge'); newLog.push(`You received the ${bs.badge}!`); }
+        // Region 1 step (i): a dojo victory grants the leader's
+        // hmReward technique (Lin -> Mighty Push) — the gap this
+        // PR closes: hmReward was carried in the map but never
+        // consumed. The flag is the fieldTechniques tech.*
+        // namespace; the log line is the grant's only fanfare,
+        // same surface as the badge line above. Guarded by !held
+        // so a re-fought dojo never double-grants.
+        if (bs.hmReward) {
+          const tech = techniqueByName(bs.hmReward);
+          if (tech && !useGameStore.getState().techniqueFlags[tech.flag]) {
+            useGameStore.getState().setTechniqueFlag(tech.flag, true);
+            newLog.push(`You learned the ${bs.hmReward} technique!`);
+          }
+        }
         if (!moneyShown) setCredits(c => c + bs.reward);
         setDefeatedTrainers(dt => [...dt, bs.npcId]);
         setBattleState({ ...bs, trainerTeam: newTeam, log: newLog, phase: "over" });
@@ -2489,7 +2597,7 @@ const finishDialog = () => {
           setBattleState(null);
           // v4 step 7: after the Hex first battle (win), Aeon
           // states the goal in dialogue, in order — dojos,
-          // Champion Mythar, Hackers/Syndicate — not in a menu
+          // Champion Hex, Hackers/Syndicate — not in a menu
           // header. The MochiDex + 5 Luigi Cubes were already
           // given at the starter beat (see handleChoice); this
           // dialogue names the goal, it does not re-gift.
@@ -2500,6 +2608,24 @@ const finishDialog = () => {
           if (bs.npcId === 'hex_battle_event' && !completedEvents.includes('v4_hex_goal')) {
             // v5: same goal dialogue as the loss path (hexGoalDialog).
             setDialog(hexGoalDialog());
+            setScreen("dialog");
+          } else if (bs.npcId === 'route_rescue_battle' && !completedEvents.includes('route_rescue_thanks')) {
+            // Region 1 step (i): the rescue win — Aeon's thanks
+            // (ink lab-knot lines, "Route Topaz" re-worded to
+            // "Route 1.0": Topaz vs Greenfield Path naming is
+            // Mars-to-confirm). One-time event; a loss reaches
+            // the overworld instead (blackout branch), and the
+            // wild creature does not re-trigger.
+            setDialog({
+              lines: [
+                "Phew. Thank you. That bag is yours to keep, and so is the creature inside it.",
+                "This is your Mochiioteca. It records every Mochiichao you meet.",
+                "Now go — Route 1.0 is waiting, and Silicon Town is just past it.",
+              ],
+              isEvent: true,
+              eventId: 'route_rescue_thanks',
+              npc: { id: "prof_aeon", name: "Prof. Aeon" },
+            });
             setScreen("dialog");
           } else {
             setScreen("overworld");
@@ -3701,17 +3827,17 @@ const finishDialog = () => {
         }
       />
 
-      {/* v4 goal line: the missing "where do I start". The route
-          gate itself already exists (block_route_1 events, noStarter
-          condition, and tall-grass encounters already require a
-          starter) — v4 makes it discoverable instead of inventing a
-          second gate. */}
+      {/* v4 goal line: the missing "where do I start". Step (i):
+          the route gate is now the Route 1.0 rescue (Aeon + his
+          bag on route_1) — the old block_route_1 step-back events
+          are gone — and tall-grass encounters already require a
+          starter. The HUD points at the route, not the lab. */}
       <WorldHud
         mapName={mapData?.name || currentMap}
         timeLabel={`${String(gameHour).padStart(2, "0")}:00 ${phase}`}
         goalLabel={
           !hasStarter
-            ? "Goal: Visit Prof. Aeon's Lab (walk into the north building)"
+            ? "Goal: Head north to Route 1.0 — Prof. Aeon is out there with his bag"
             : !defeatedTrainers.includes('hex_battle_event') && currentMap === 'aeon_lab'
               ? `Goal: Battle ${rivalName} at the lab exit, then head to Route 1.0`
               : currentMap === 'sector0'

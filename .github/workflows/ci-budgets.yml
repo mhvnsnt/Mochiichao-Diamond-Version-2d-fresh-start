@@ -38,7 +38,7 @@ jobs:
       # CLI filters are substrings), and `vitest run tests` would also pick
       # up the Playwright e2e spec, which must never run under Vitest.
       - name: New unit-test scaffolding (tests/*.test.ts only, not e2e specs)
-        run: npx vitest run tests/ci-budgets.test.ts tests/type-chart.test.ts tests/opponent-direction.test.ts tests/tiled-map-gates.test.ts tests/dialogue-structure.test.ts tests/dialogue-exit-flag.test.ts tests/wiring.test.ts
+        run: npx vitest run tests/ci-budgets.test.ts tests/type-chart.test.ts tests/opponent-direction.test.ts tests/tiled-map-gates.test.ts tests/dialogue-structure.test.ts tests/dialogue-exit-flag.test.ts tests/wiring.test.ts tests/exitGate.test.ts tests/region1-rescue.test.ts
       - name: Tiled map validation (validate:maps)
         run: npm run validate:maps
       - name: Dialogue validation (validate:dialogue)

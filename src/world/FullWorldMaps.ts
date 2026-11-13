@@ -30,9 +30,11 @@ export const SECTOR_0: any = {
     // exit at (13-17, 0) was unreachable no matter how the player
     // walked — that, not a missing exit, is why Route 1.0 was never
     // reached in the v4 playtest. The x=15 column is now PATH from
-    // the y=5 path row up to the y=0 exit row. The block_route_1
-    // events at y=1 still gate it: with no starter the player is
-    // stepped back with the "go see Prof. Aeon first" message.
+    // the y=5 path row up to the y=0 exit row. Step (i): the
+    // block_route_1 step-back events at y=1 are gone — the Route 1.0
+    // rescue (Prof. Aeon + his bag, on route_1) is the starter
+    // source now, so the gate corridor stays open and the player
+    // meets Aeon on the route instead of being stepped back here.
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,4,4,4,4,4,4,1,3,1,1,4,4,4,4,4,4,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,4,4,4,4,4,4,1,3,1,1,4,4,4,4,4,4,1,1,1,1,1,1,1,1],
@@ -121,7 +123,7 @@ export const SECTOR_0: any = {
     { x:2, y:11, text:"BOOT HARBOR\nProf. Aeon's Lab is north — walk into the door." },
     { x:11, y:11, text:"TALL GRASS\nWild Mochiichao live here — bring a partner first!" },
     { x:19, y:11, text:"BOOT HARBOR\nThe lab is north of here. Route 1.0 is north past the lab." },
-    { x:15, y:5, text:"ROUTE 1.0 GATE\nNorth to Route 1.0 and Silicon Town.\nNo partner yet? Go to Prof. Aeon's Lab first." },
+    { x:15, y:5, text:"ROUTE 1.0 GATE\nNorth to Route 1.0 and Silicon Town.\nNo partner yet? Prof. Aeon is out on Route 1.0 — go help him!" },
   ],
   exits: [
     ...buildEdgeExits(13, 17, 0, "route_1", 38, "up"),
@@ -138,11 +140,6 @@ export const SECTOR_0: any = {
     { x:26, y:7, to:"sector0_rival_house", enterAt:{x:6, y:10}, label:"Hex's House" }
   ],
   events: [
-    { id: "block_route_1", x:13, y:1, dialog:["Wait! It's dangerous to go into the tall grass without a partner!","Go see Prof. Aeon at his lab first!"], condition: "noStarter" },
-    { id: "block_route_1", x:14, y:1, dialog:["Wait! It's dangerous to go into the tall grass without a partner!","Go see Prof. Aeon at his lab first!"], condition: "noStarter" },
-    { id: "block_route_1", x:15, y:1, dialog:["Wait! It's dangerous to go into the tall grass without a partner!","Go see Prof. Aeon at his lab first!"], condition: "noStarter" },
-    { id: "block_route_1", x:16, y:1, dialog:["Wait! It's dangerous to go into the tall grass without a partner!","Go see Prof. Aeon at his lab first!"], condition: "noStarter" },
-    { id: "block_route_1", x:17, y:1, dialog:["Wait! It's dangerous to go into the tall grass without a partner!","Go see Prof. Aeon at his lab first!"], condition: "noStarter" },
     // Living-world witnessed scenes (director: src/lib/livingWorld.ts).
     // Stock step-on presentations of bh_snatch_at_bay_steps and
     // bh_duel_in_the_plaza: the scene (and, for the duel, the battle
@@ -172,7 +169,11 @@ export const AEON_LAB: any = {
     });
   })(),
   npcs: [
-    { id:"prof_aeon", x:6, y:4, sprite:"🔬", name:"Prof. Aeon", facing:"down", movement:"wander", wanderRadius:1, dialog:["Welcome! I'm glad you could make it.","These five Mochiichao are ready for a partner.","Go ahead, pick one!","This is the Mochiioteca. It records every Mochiichao you meet. Keep it safe.","And these are Capture Cubes. Throw one at a wild Mochiichao, and if it stays, it travels with you. That is the whole job, really."] },
+    // Step (i): the "pick one" lines are gone — the starter pick
+    // happens out on Route 1.0 now (the rescue, Aeon's bag), so the
+    // lab Aeon no longer offers a partner here. The Mochiioteca /
+    // Capture Cubes lines stay: they are the lab talk, unchanged.
+    { id:"prof_aeon", x:6, y:4, sprite:"🔬", name:"Prof. Aeon", facing:"down", movement:"wander", wanderRadius:1, dialog:["Welcome! I'm glad you could make it.","This is the Mochiioteca. It records every Mochiichao you meet. Keep it safe.","And these are Capture Cubes. Throw one at a wild Mochiichao, and if it stays, it travels with you. That is the whole job, really."] },
     { id:"asst_mochiko", x:9, y:4, sprite:"👩‍🔬", name:"Assistant Mochiko", facing:"down", movement:"wander", wanderRadius:1, dialog:["I'm Professor Aeon's assistant, Mochiko!","He's been waiting for you to choose your first partner."] },
     // v4: in-lab Hex is dialogue-only. The FIRST battle is the
     // lab-exit event (hex_battle_event, dynamic team, rival name),
@@ -180,11 +181,15 @@ export const AEON_LAB: any = {
     // (lab NPC + exit event + Boot Harbor rival) and the lab NPC's
     // fixed Razorgater contradicted the player's pick.
     { id:"hex_lab_battle", x:4, y:8, sprite:"😤", name:"Hex", facing:"right", dialog:["I already have my starter. I will be waiting at the door when you leave — do not keep me waiting."] },
-    { id:"starter_mochii", creatureId:"001", x:2, y:6, sprite:"🔵", name:"Mochii Ball", facing:"down", dialog:["Mochii! (A bouncy water-type)","Are you sure you want to choose Mochii?", ""], isChoice: true, eventId: "pick_starter_001" },
-    { id:"starter_razorgater", creatureId:"004", x:4, y:6, sprite:"🐊", name:"Razorgater Ball", facing:"down", dialog:["Razorgater! (A strong, metallic crocodile)","Are you sure you want to choose Razorgater?", ""], isChoice: true, eventId: "pick_starter_004" },
-    { id:"starter_tyrage", creatureId:"007", x:6, y:6, sprite:"🪨", name:"Tyrage Ball", facing:"down", dialog:["Tyrage! (An earthy dinosaur)","Are you sure you want to choose Tyrage?", ""], isChoice: true, eventId: "pick_starter_007" },
-    { id:"starter_kittember", creatureId:"010", x:8, y:6, sprite:"😼", name:"Kittember Ball", facing:"down", dialog:["Kittember! (A fast and fiery feline)","Are you sure you want to choose Kittember?", ""], isChoice: true, eventId: "pick_starter_010" },
-    { id:"starter_sproutle", creatureId:"038", x:10, y:6, sprite:"🐢", name:"Sproutle Ball", facing:"down", dialog:["Sproutle! (A grassy plant turtle)","Are you sure you want to choose Sproutle?", ""], isChoice: true, eventId: "pick_starter_038" },
+    // Step (i): the five lab balls are display-only now — the
+    // rescue on Route 1.0 is the only starter source (master
+    // Template T), so no isChoice / pick_starter_XXX here. Each ball
+    // keeps its label line and points the player at Aeon's bag.
+    { id:"starter_mochii", creatureId:"001", x:2, y:6, sprite:"🔵", name:"Mochii Ball", facing:"down", dialog:["Mochii! (A bouncy water-type)","The bag is out on Route 1.0 with Prof. Aeon — pick your partner there."] },
+    { id:"starter_razorgater", creatureId:"004", x:4, y:6, sprite:"🐊", name:"Razorgater Ball", facing:"down", dialog:["Razorgater! (A strong, metallic crocodile)","The bag is out on Route 1.0 with Prof. Aeon — pick your partner there."] },
+    { id:"starter_tyrage", creatureId:"007", x:6, y:6, sprite:"🪨", name:"Tyrage Ball", facing:"down", dialog:["Tyrage! (An earthy dinosaur)","The bag is out on Route 1.0 with Prof. Aeon — pick your partner there."] },
+    { id:"starter_kittember", creatureId:"010", x:8, y:6, sprite:"😼", name:"Kittember Ball", facing:"down", dialog:["Kittember! (A fast and fiery feline)","The bag is out on Route 1.0 with Prof. Aeon — pick your partner there."] },
+    { id:"starter_sproutle", creatureId:"038", x:10, y:6, sprite:"🐢", name:"Sproutle Ball", facing:"down", dialog:["Sproutle! (A grassy plant turtle)","The bag is out on Route 1.0 with Prof. Aeon — pick your partner there."] },
     { id:"dorowani_display", x:3, y:10, sprite:"", creatureId:"147", name:"Dorowani", facing:"down", dialog:["Dorowani! A Gen 2 starter.","Dorowani arrives later in the journey."] },
     { id:"gabu_display", x:9, y:10, sprite:"", creatureId:"148", name:"Gabu", facing:"down", dialog:["Gabu! A Gen 2 starter.","Gabu arrives later in the journey."] },
     // Item meaning S-IM1: the appraisal service's first seat. Its
@@ -238,6 +243,20 @@ export const ROUTE_1: any = {
     { id:"trainer_lass", x:19, y:20, sprite:"👧", name:"Lass Amy", facing:"left", dialog:["My Mochiichao is the cutest!", "It's super bouncy! Watch out!"], postBattleDialog: ["Aww, my cute Mochii...", "You're really strong!"], battle:{ team:[{id:"001",name:"Mochii",hp:38,maxHp:38,atk:35,def:35,spd:45,moves:["Foam Burst","Tackle"],type:"Water", level:4}], reward:100, badge:null } },
     { id:"trainer_hiker", x:14, y:30, sprite:"⛏️", name:"Hiker Dan", facing:"up", dialog:["This path is rough, but my partner is tough!", "Tyrage, show them your earth-shattering power!"], postBattleDialog: ["We crumbled like rocks...", "I'll carve a new path to victory next time."], battle:{ team:[{id:"007",name:"Tyrage",hp:45,maxHp:45,atk:40,def:40,spd:35,moves:["Punch","Tackle"],type:"Earth", level:5}], reward:180, badge:null } },
     { id:"trainer_bugcatcher", x:4, y:6, sprite:"🐛", name:"Bug Catcher Rick", facing:"right", dialog:["I use the tall grass to find bug Mochiichao!"], postBattleDialog: ["I should've caught stronger bugs!"], battle:{ team:[{id:"016",name:"Squirmite",hp:30,maxHp:30,atk:35,def:35,spd:50,moves:["Web Blast","Tackle"],type:"Bug", level:3}], reward:80, badge:null } },
+    // Region 1 step (i): the Route 1.0 rescue — Prof. Aeon is
+    // cornered here by a wild creature, his bag beside him. The
+    // five bag NPCs reuse the lab balls' pick_starter_XXX choices
+    // (same dialog lines); the lab balls are display-only now, so
+    // the rescue is the only starter source (master Template T).
+    // Aeon stands at (10,35) facing down the south path; the bag
+    // sits on the grass west of the path column (x=13-15). The
+    // intro lines are the ink route_rescue knot, verbatim.
+    { id:"prof_aeon_route1", x:10, y:35, sprite:"🔬", name:"Prof. Aeon", facing:"down", dialog:["Help! This wild creature has me cornered!","Quick — take one from my bag and drive it off!"] },
+    { id:"aeon_bag_mochii", creatureId:"001", x:7, y:35, sprite:"🔵", name:"Mochii Ball", facing:"down", dialog:["Mochii! (A bouncy water-type)","Are you sure you want to choose Mochii?", ""], isChoice: true, eventId: "pick_starter_001" },
+    { id:"aeon_bag_razorgater", creatureId:"004", x:8, y:35, sprite:"🐊", name:"Razorgater Ball", facing:"down", dialog:["Razorgater! (A strong, metallic crocodile)","Are you sure you want to choose Razorgater?", ""], isChoice: true, eventId: "pick_starter_004" },
+    { id:"aeon_bag_tyrage", creatureId:"007", x:9, y:35, sprite:"🪨", name:"Tyrage Ball", facing:"down", dialog:["Tyrage! (An earthy dinosaur)","Are you sure you want to choose Tyrage?", ""], isChoice: true, eventId: "pick_starter_007" },
+    { id:"aeon_bag_kittember", creatureId:"010", x:11, y:35, sprite:"😼", name:"Kittember Ball", facing:"down", dialog:["Kittember! (A fast and fiery feline)","Are you sure you want to choose Kittember?", ""], isChoice: true, eventId: "pick_starter_010" },
+    { id:"aeon_bag_sproutle", creatureId:"038", x:12, y:35, sprite:"🐢", name:"Sproutle Ball", facing:"down", dialog:["Sproutle! (A grassy plant turtle)","Are you sure you want to choose Sproutle?", ""], isChoice: true, eventId: "pick_starter_038" },
     // BW2 lane — visible roamers v1 (spec §6): species from this
     // map's own encounter pool, living in its tall-grass patches on
     // the existing NPC wander step. They are seen, they wander, they
@@ -353,11 +372,11 @@ export const BINARY_FIELDS: any = {
   exits: [
     ...buildEdgeExits(13, 17, 34, "route_1", 1, "down"),
     ...buildVertExits(0, 15, 25, "binary_woods", 30, "left"),
-    // Victory Route gate: badges>=8 is metadata here, following the
-    // mauveville_arena 'ciphers>=10' precedent. WorldEngine enforces
-    // no exit condition except hasStarter/noStarter events, so the
-    // 8-badge enforcement is OWED by an engine-lane change and is
-    // NOT claimed as live in this PR.
+    // Victory Route gate: badges>=8, enforced in WorldEngine.move
+    // via doorGate.isExitOpen (step i) — this used to be unenforced
+    // metadata, the OWED engine-lane change this comment called for.
+    // The mauveville_arena 'ciphers>=10' door stays unenforceable
+    // (ciphers exist nowhere in the store/engine) — pre-existing.
     { x:14, y:0, to:"victory_route", enterAt:{x:14, y:39}, dir:"up", condition:"badges>=8" },
   ],
   doors: [
@@ -581,7 +600,12 @@ export const NEON_CITY: any = {
   })(),
   npcs: [
     { id:"neon_astrologer", x:14, y:30, sprite:"🔮", name:"Data Astrologer", facing:"down", movement:"wander", wanderRadius:1, dialog:["The stars are aligning in the Mainframe.", "I have sensed legendary beings, built from raw data, myth, and stars!"] },
-    { id:"neon_shaman", x:24, y:20, sprite:"📿", name:"Cyber Shaman", facing:"left", movement:"wander", wanderRadius:1, dialog:["Mythar, the first legend... he slumbers deep in the digital cosmos.", "But numerology and myths say more celestial Mochiichao will awaken soon."] }
+    { id:"neon_shaman", x:24, y:20, sprite:"📿", name:"Cyber Shaman", facing:"left", movement:"wander", wanderRadius:1, dialog:["Mythar, the first legend... he slumbers deep in the digital cosmos.", "But numerology and myths say more celestial Mochiichao will awaken soon."] },
+    // Region 1 step (i): the Neon ferry captain (Beat 5 spec
+    // lines, region1-dialogue.json, verbatim). First talk teaches
+    // Slice (Data-Cut) — the ferry-cell battle itself is owed (no
+    // ferry map yet), so the grant is the talk, not the cell clear.
+    { id:"neon_ferry_captain", x:20, y:30, sprite:"⚓", name:"Ferry Captain", facing:"down", dialog:["The ferry runs on data, not diesel. Help me clear the Hacker cell on the ferry, and I will teach you Data-Cut. It cuts vines, and it cuts lies, if you use it right."] }
   ],
   exits: [
     ...buildVertExits(0, 15, 25, "scrap_junkyard", 32, "left"),
@@ -797,7 +821,7 @@ export const DOJO_2: any = {
     });
   })(),
   npcs: [
-    { id:"master_falk", x:5, y:2, sprite:"🥋", name:"Master Falk", dialog:["Hey, hey, welcome up here. I'm Master Falk, and I'm high as a kite today, so you better keep up.","You made it to my Dojo? Good. I live free like a bird up here, no cage, no chain, just wind.","The winds favor the swift! So show me you're swift, or get blown right back down."], postBattleDialog:["Ha! Okay, okay, you clipped my wings. I'm high as a kite, but you flew higher.","Free like a bird, and today that bird is you. Take the wind with you.","Here's your Wind Fragment. Hold it tight, or the wind will take it.","Next Dojo's down the road, not up in the clouds. Don't get too comfortable on the ground, though. Stay free, stay fast."], battle:{ team:[{id:"019",name:"Zephling",hp:40,maxHp:40,atk:55,def:35,spd:60,moves:["Tackle","Swift Movement"],type:"Aero",level:18},{id:"020",name:"Aerobeak",hp:60,maxHp:60,atk:75,def:55,spd:80,moves:["Tackle","Swift Movement"],type:"Aero",level:19},{id:"021",name:"Stormtalon",hp:80,maxHp:80,atk:105,def:75,spd:110,moves:["Tackle","Swift Movement"],type:"Aero",level:20}], reward:1500, badge:"Wind Fragment", hmReward:"Slice" }, isDojoBoss: true },
+    { id:"master_falk", x:5, y:2, sprite:"🥋", name:"Master Falk", dialog:["Hey, hey, welcome up here. I'm Master Falk, and I'm high as a kite today, so you better keep up.","You made it to my Dojo? Good. I live free like a bird up here, no cage, no chain, just wind.","The winds favor the swift! So show me you're swift, or get blown right back down."], postBattleDialog:["Ha! Okay, okay, you clipped my wings. I'm high as a kite, but you flew higher.","Free like a bird, and today that bird is you. Take the wind with you.","Here's your Wind Fragment. Hold it tight, or the wind will take it.","Next Dojo's down the road, not up in the clouds. Don't get too comfortable on the ground, though. Stay free, stay fast."], battle:{ team:[{id:"019",name:"Zephling",hp:40,maxHp:40,atk:55,def:35,spd:60,moves:["Tackle","Swift Movement"],type:"Aero",level:18},{id:"020",name:"Aerobeak",hp:60,maxHp:60,atk:75,def:55,spd:80,moves:["Tackle","Swift Movement"],type:"Aero",level:19},{id:"021",name:"Stormtalon",hp:80,maxHp:80,atk:105,def:75,spd:110,moves:["Tackle","Swift Movement"],type:"Aero",level:20}], reward:1500, badge:"Wind Fragment" }, isDojoBoss: true },
     { id:"dojo_acolyte_gale", x:3, y:6, sprite:"🥋", name:"Acolyte Gale", facing:"down", dialog:["The wind tests everyone who climbs."], battle:{ team:[{id:"019",name:"Zephling",hp:40,maxHp:40,atk:55,def:35,spd:60,moves:["Tackle","Swift Movement"],type:"Aero",level:17}], reward:500, badge:null } },
     { id:"dojo_acolyte_skye", x:7, y:6, sprite:"🥋", name:"Acolyte Skye", facing:"down", dialog:["Master Falk's wind shows no mercy."], battle:{ team:[{id:"019",name:"Zephling",hp:40,maxHp:40,atk:55,def:35,spd:60,moves:["Tackle","Swift Movement"],type:"Aero",level:18},{id:"020",name:"Aerobeak",hp:60,maxHp:60,atk:75,def:55,spd:80,moves:["Tackle","Swift Movement"],type:"Aero",level:18}], reward:600, badge:null } },
   ],
