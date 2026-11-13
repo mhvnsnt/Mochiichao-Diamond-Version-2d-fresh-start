@@ -66,8 +66,8 @@ export default function GardenView({ onBack }: { onBack: () => void }) {
   const [note, setNote] = useState<string | null>(null);
   const [place, setPlace] = useState<string | null>(null);
   // Bonding / Memory Quests (monster-tamer spec step 4): quest givers
-  // are existing Mochiichao NPCs. Completing one raises bond +10 and
-  // one Garden stat +5 on the selected creature's Garden record.
+  // are existing Mochiichao NPCs. Rewards are placeholders (Bond +0 /
+  // Garden stat +0) until Mars sets canon numbers — NO SOURCE audit.
   // Befriending does NOT replace capture — capture stays Luigi Cubes
   // + Ring Capture, and Garden records here are still the local
   // Garden records here are shared store records, saved with the game (pass 3).
@@ -246,7 +246,7 @@ export default function GardenView({ onBack }: { onBack: () => void }) {
                 <div key={q.id} className="game-panel p-3 flex justify-between items-center gap-3">
                   <div>
                     <div className="font-bold text-white text-sm">{q.title} <span className="text-slate-400 font-normal">— {q.giver}</span></div>
-                    <div className="text-xs text-slate-400 mt-1">{q.text} Reward: Bond +{q.bondReward}, {q.gardenStat} +{q.gardenReward}.</div>
+                    <div className="text-xs text-slate-400 mt-1">{q.text} Reward (placeholder — not Mars canon): Bond +{q.bondReward}, {q.gardenStat} +{q.gardenReward}.</div>
                   </div>
                   <button
                     disabled={!current || !!completedQuests[q.id]}
