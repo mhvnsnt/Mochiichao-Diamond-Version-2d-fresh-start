@@ -155,7 +155,7 @@ export const SPECIES_DB: Record<string, SpeciesData> = {
 //   no engine code and 0 Gen 1 creatures.)
 //   Collapses: Aero+Wind->FLYING, Bug+Silk->BUG (a species with both collapses to one type). Beast->NORMAL keeps Beast distinct from Strike.
 //   catchRate 45, baseExpYield 100, growthRate "Medium Slow", learnset BASIC_MOVES are neutral defaults, NOT canon.
-//   description is a placeholder sentence, NOT lore. HELD OUT: 147 Dorowani, 150 Gabu — Mars numbers, locked 2026-10-28 (Gabu moved up from 148 by his ruling that day). NOT added here.
+//   description is a placeholder sentence, NOT lore. 147 Dorowani / 150 Gabu: added below after this block landed (Gabu moved up from 148 by Mars's ruling, locked 2026-10-28). Their stats are provisional Black 2 first-stage starter-pattern fills (total 308 each), NOT Mars-approved numbers — Mars's numbers are still owed, and the four trainer rows using them (R2-001..R2-004) stay flagged statsHeld. Do not treat these numbers as canon.
   "011": {
     id: "011",
     name: "Pyropaw",
