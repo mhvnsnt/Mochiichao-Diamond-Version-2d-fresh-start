@@ -29,6 +29,10 @@
  *    or a known event-stitch name; anything else is reported
  *  - no dead ends: a stitch with neither exit:true nor choices is an error
  *  - no empty lines / choices / missing speakers
+ *  - written-but-never-read flags are WARNINGS (not errors): a flag set by
+ *    a stitch but never read by a choice condition cannot gate re-entry
+ *    inside the dialogue — it is consumed by game/progression code, and
+ *    the reader must be recorded, not invented here.
  * Superseded knots (file metadata) are WARNINGS, not errors: the old
  * knot is retained for history and its replacement is the live one.
  * Dialogue content itself is never "fixed" here — a locked line is
@@ -338,6 +342,21 @@ function validateHandShaped(
     }
   }
 
+  // Written-but-never-read: a flag set by a stitch but never read by a
+  // choice condition cannot gate any re-entry — nothing in the dialogue
+  // branches on it, so its one-time lines can repeat unnoticed. These
+  // flags are consumed by game/progression code outside dialogue
+  // conditions (e.g. dojo_N_defeated gates the next beat), so this is a
+  // WARNING, not an error: the reader must be recorded, not invented.
+  for (const f of written) {
+    if (!read.has(f)) {
+      warn(
+        "$",
+        `flag "${f}" is set by a stitch but never read by a choice condition`,
+      );
+    }
+  }
+
   // Reachability: every stitch must be a `main` nav stitch, a choice
   // target, or a known event stitch triggered by battle/field code.
   // (Event stitches are NOT choice targets by design — the battle
@@ -376,6 +395,8 @@ function validateCompiledInk(
   const stats = emptyStats();
   const err = (where: string, message: string) =>
     errors.push({ level: "error", file, where, message });
+  const warn = (where: string, message: string) =>
+    warnings.push({ level: "warning", file, where, message });
 
   const root = doc["root"];
   if (!Array.isArray(root)) {
@@ -437,6 +458,19 @@ function validateCompiledInk(
   for (const r of new Set(varReads)) {
     if (!writtenSet.has(r)) {
       err("$", `ink variable "${r}" is read but never declared/written`);
+    }
+  }
+  // Written-but-never-read: a variable set in the story but never read
+  // by an ink condition cannot gate any re-entry inside the story — its
+  // one-time lines can repeat unnoticed unless the game flow branches
+  // on it. That game-side reader is outside this file, so this is a
+  // WARNING, not an error: the reader must be recorded, not invented.
+  for (const w of writtenSet) {
+    if (!new Set(varReads).has(w)) {
+      warn(
+        "$",
+        `ink variable "${w}" is written but never read inside this story`,
+      );
     }
   }
   for (const k of knotNames) {
