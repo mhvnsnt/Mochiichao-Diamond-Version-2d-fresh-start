@@ -20,6 +20,8 @@ import {
   worldStatusTickLine,
 } from "./worldBattleCore";
 import { commitNextLevel, commitRecipientExp } from "./battlePayoff";
+import { createMochii } from "./engine";
+import { MOVES_DB } from "./moves";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -511,5 +513,151 @@ describe("worldQueueEvolution + worldNextChainEvolution (S6 step 8: mid-battle e
     const starts = engine.split("triggerWildBattle").length - 1;
     expect(starts).toBeGreaterThan(0);
     expect(engine).toContain("pendingEvolutionsRef.current = [];");
+  });
+});
+
+describe("live wild encounter (v5.2 acceptance: wild Mochii damage 3-6)", () => {
+  // Real inputs, not synthetic flats: the player is a createMochii
+  // instance (Lv5 Sproutle, the starter) and the wild foe is the flat
+  // shape triggerWildBattle builds from createMochii("001", 5)
+  // (Lv5 Mochii). Live path: worldBattleHit -> calculateDamage.
+  // Hand-computed per battle-math's step order (base -> +2 -> crit
+  // -> STAB -> type -> roll), neutral multipliers (the Draco-gated
+  // chart is held, never silently filled):
+  // - Lv5 Sproutle: hp 21, atk 12, def 12 (base 55/68/64, IV 15).
+  // - Wild Lv5 Mochii flat: hp 20, atk 10, def 10 (base 45/49/49).
+  // - Player TACKLE / QUICK_ATTACK bp 40, no STAB, neutral:
+  //   base 5 -> roll 92% = 4, roll 85% = 4, roll 100% = 5.
+  // - Wild TACKLE vs Sproutle def 12: base 4 -> roll 92% = 3,
+  //   roll 85% = 3, roll 100% = 4.
+  // - Lv6 Sproutle VINE_LASH bp 45, STAB, atk 14: base 5 -> +2 = 7
+  //   -> STAB 10 -> roll 92% = 9 (above the neutral 3-6 band, as a
+  //   STAB hit should be; the band is the neutral-hit acceptance).
+  //   NOTE: an earlier draft said 8 for this hit — that is the Lv5
+  //   atk-12 value; VINE_LASH is learned at 6, so Lv6 atk 14 gives 9.
+  // RNG: with forceCrit: false, worldBattleHit consumes accuracy,
+  // then damage only — calculateDamage uses
+  // `opts.forceCrit ?? rollCrit(...)`, so an explicit false
+  // short-circuits the crit roll (no rng consumed). Constant 0.5 ->
+  // roll 92; constant 0.99 -> roll 85 (accuracy roll 100 still
+  // hits at acc 100); sequence [0.5, 0.0] -> roll 100. (An earlier
+  // draft used [0.5, 0.5, 0.0] for roll 100, assuming a crit roll
+  // in between — the local run showed that gives roll 92, because
+  // forceCrit: false skips the crit roll and the damage roll reads
+  // the second 0.5. Corrected here, run-verified.)
+  const ROLL_85 = () => 0.99;
+  const seqRng = (seq: number[]) => {
+    let i = 0;
+    return () => seq[i++] ?? 0.5;
+  };
+
+  // The player battle copy, as triggerWildBattle builds it: the full
+  // createMochii instance plus the host's name / currentHp / hp.
+  const playerBuilt = createMochii("038", 5)!;
+  const PLAYER_SPROUTLE = {
+    ...playerBuilt,
+    name: "Sproutle",
+    currentHp: playerBuilt.hp,
+    hp: playerBuilt.hp,
+  };
+  // The wild foe, exactly as triggerWildBattle builds it: a flat
+  // shape from createMochii("001", 5) — atk/def from stats, spd =
+  // stats.spe, moves as MOVES_DB display names. heldItem is null
+  // today (zero-row species drop table, per the host comment).
+  const wildBuilt = createMochii("001", 5)!;
+  const WILD_MOCHII_FLAT = {
+    id: "wild_test",
+    speciesId: "001",
+    heldItem: null,
+    name: "Mochii",
+    level: 5,
+    hp: wildBuilt.hp,
+    maxHp: wildBuilt.maxHp,
+    currentHp: wildBuilt.hp,
+    atk: wildBuilt.stats.atk,
+    def: wildBuilt.stats.def,
+    spd: wildBuilt.stats.spe,
+    moves: wildBuilt.moves.map((mid: string) => (MOVES_DB as any)[mid]?.name || mid),
+    type: "WATER",
+  };
+  // Lv6 Sproutle, the first level with VINE_LASH in its learnset.
+  const sproutle6 = createMochii("038", 6)!;
+  const PLAYER_SPROUTLE_6 = {
+    ...sproutle6,
+    name: "Sproutle",
+    currentHp: sproutle6.hp,
+    hp: sproutle6.hp,
+  };
+
+  const TACKLE = { power: 40, type: "Normal", moveId: "TACKLE" };
+  const QUICK_ATTACK = { power: 40, type: "Normal", moveId: "QUICK_ATTACK" };
+  const VINE_LASH = { power: 45, type: "Grass", moveId: "VINE_LASH" };
+
+  it("player is a real Lv5 Sproutle: hp 21, atk 12, def 12, moves TACKLE + QUICK_ATTACK", () => {
+    expect(playerBuilt.stats).toMatchObject({ atk: 12, def: 12 });
+    expect(playerBuilt.hp).toBe(21);
+    expect(playerBuilt.maxHp).toBe(21);
+    expect(playerBuilt.moves).toEqual(["TACKLE", "QUICK_ATTACK"]);
+  });
+  it("wild foe is the triggerWildBattle flat: hp 20, atk 10, def 10, spd = spe", () => {
+    expect(wildBuilt.stats).toMatchObject({ atk: 10, def: 10, spe: 10 });
+    expect(WILD_MOCHII_FLAT).toMatchObject({ hp: 20, maxHp: 20, atk: 10, def: 10, spd: 10 });
+    expect(WILD_MOCHII_FLAT.moves).toEqual(["Tackle", "Swift Movement"]);
+  });
+  it("player TACKLE roll 92 -> 4, inside the 3-6 acceptance band", () => {
+    const r = worldBattleHit(PLAYER_SPROUTLE, WILD_MOCHII_FLAT, TACKLE,
+      { rng: ROLL_92, forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.totalDamage).toBe(4);
+    expect(r.results[0].rollPercent).toBe(92);
+    expect(r.totalDamage).toBeGreaterThanOrEqual(3);
+    expect(r.totalDamage).toBeLessThanOrEqual(6);
+  });
+  it("player TACKLE roll 85 -> 4", () => {
+    const r = worldBattleHit(PLAYER_SPROUTLE, WILD_MOCHII_FLAT, TACKLE,
+      { rng: ROLL_85, forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.totalDamage).toBe(4);
+    expect(r.results[0].rollPercent).toBe(85);
+  });
+  it("player TACKLE roll 100 (sequence rng) -> 5", () => {
+    const r = worldBattleHit(PLAYER_SPROUTLE, WILD_MOCHII_FLAT, TACKLE,
+      { rng: seqRng([0.5, 0.0]), forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.totalDamage).toBe(5);
+    expect(r.results[0].rollPercent).toBe(100);
+  });
+  it("player QUICK_ATTACK roll 92 -> 4 (same bp; priority 1, so it acts)", () => {
+    expect((MOVES_DB as any).QUICK_ATTACK.pri).toBe(1);
+    const r = worldBattleHit(PLAYER_SPROUTLE, WILD_MOCHII_FLAT, QUICK_ATTACK,
+      { rng: ROLL_92, forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.totalDamage).toBe(4);
+  });
+  it("wild TACKLE vs player: roll 92 -> 3, roll 85 -> 3, roll 100 -> 4", () => {
+    const r92 = worldBattleHit(WILD_MOCHII_FLAT, PLAYER_SPROUTLE, TACKLE,
+      { rng: ROLL_92, forceCrit: false });
+    expect(r92.hit).toBe(true);
+    expect(r92.totalDamage).toBe(3);
+    const r85 = worldBattleHit(WILD_MOCHII_FLAT, PLAYER_SPROUTLE, TACKLE,
+      { rng: ROLL_85, forceCrit: false });
+    expect(r85.totalDamage).toBe(3);
+    const r100 = worldBattleHit(WILD_MOCHII_FLAT, PLAYER_SPROUTLE, TACKLE,
+      { rng: seqRng([0.5, 0.0]), forceCrit: false });
+    expect(r100.totalDamage).toBe(4);
+    for (const r of [r92, r85, r100]) {
+      expect(r.totalDamage).toBeGreaterThanOrEqual(3);
+      expect(r.totalDamage).toBeLessThanOrEqual(6);
+    }
+  });
+  it("Lv6 Sproutle VINE_LASH (STAB, neutral type) roll 92 -> 9, acts, above the neutral band", () => {
+    expect(sproutle6.stats.atk).toBe(14);
+    expect(sproutle6.moves).toContain("VINE_LASH");
+    const r = worldBattleHit(PLAYER_SPROUTLE_6, WILD_MOCHII_FLAT, VINE_LASH,
+      { rng: ROLL_92, forceCrit: false });
+    expect(r.hit).toBe(true);
+    expect(r.results[0].isStab).toBe(true);
+    expect(r.totalDamage).toBe(9);
+    expect(r.totalDamage).toBeGreaterThanOrEqual(3);
   });
 });
