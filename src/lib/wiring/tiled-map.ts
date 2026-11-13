@@ -6,7 +6,7 @@
  * properties for gate flag / tech / badge. The validator is the
  * 100% gate: a map that fails it cannot be wired.
  */
-export type TmjExit = { to: string; enterAt: [number, number]; gate?: string };
+export type TmjExit = { to: string; enterAt: [number, number]; gate?: string; oneWay?: boolean };
 /**
  * Array-form exit: one entry per exit tile, as derived from
  * FullWorldMaps.ts (edge exits are generated per tile there, e.g.
@@ -21,6 +21,9 @@ export type TmjExitTile = {
   dir?: string;
   gate?: string;
   hmNeeded?: string;
+  /** One-way edge exit: no return exit/door is required (e.g. the
+   *  moving-truck door — you step off the truck and cannot go back). */
+  oneWay?: boolean;
 };
 /** Door warp: a door tile that leads to another map (label + optional
  *  condition preserved from FullWorldMaps.ts, e.g. the Neon City ->
@@ -32,6 +35,8 @@ export type TmjDoor = {
   enterAt: [number, number];
   label?: string;
   condition?: string;
+  /** One-way door warp: no return exit/door is required. */
+  oneWay?: boolean;
 };
 export type TmjMap = {
   id: string;
@@ -50,6 +55,12 @@ export type TmjMap = {
   weather?: string;
   interior?: boolean;
   doors?: TmjDoor[];
+  /** Town marker: a town is only a town if it has heal + shop + sign
+   *  (see validateTown). A town may name a services map instead of
+   *  carrying its own heal/shop NPCs — e.g. Binary Fields names
+   *  mochiiplex_1, which holds the healer and the shop. */
+  town?: boolean;
+  townServices?: string;
 };
 
 export function validateTmjMap(map: TmjMap, allMaps: Record<string, TmjMap>): string[] {
@@ -108,16 +119,59 @@ export function validateTmjMap(map: TmjMap, allMaps: Record<string, TmjMap>): st
     }
     checkTarget("door", `(${door.x},${door.y})`, door.to, door.enterAt);
   }
+  if (map.townServices && !allMaps[map.townServices]) {
+    errors.push(`${map.id}: townServices points to missing map ${map.townServices}`);
+  }
+  // Return-exit check: every exit/door must have a way back, or the
+  // player can be stranded. A link whose target map is missing is
+  // already an error above and is skipped here so it is reported once.
+  // oneWay links (the moving-truck door) are exempt by design.
+  const links: { kind: string; label: string; to: string; oneWay?: boolean }[] = [];
+  if (Array.isArray(map.exits)) {
+    for (const exit of map.exits) {
+      links.push({ kind: "exit", label: `(${exit.x},${exit.y})`, to: exit.to, oneWay: exit.oneWay });
+    }
+  } else {
+    for (const [key, exit] of Object.entries(map.exits)) {
+      links.push({ kind: "exit", label: key, to: exit.to, oneWay: exit.oneWay });
+    }
+  }
+  for (const door of map.doors ?? []) {
+    links.push({ kind: "door", label: `(${door.x},${door.y})`, to: door.to, oneWay: door.oneWay });
+  }
+  for (const link of links) {
+    if (link.oneWay) continue;
+    const target = allMaps[link.to];
+    if (!target) continue;
+    const back = (t: TmjMap): boolean => {
+      const tExits = Array.isArray(t.exits)
+        ? t.exits.map((e) => e.to)
+        : Object.values(t.exits).map((e) => e.to);
+      const tDoors = (t.doors ?? []).map((d) => d.to);
+      return [...tExits, ...tDoors].includes(map.id);
+    };
+    if (!back(target)) {
+      errors.push(`${map.id}: ${link.kind} ${link.label} to ${link.to} has no return exit/door back to ${map.id}`);
+    }
+  }
   if (!map.wildPool && !map.noWild) errors.push(`${map.id}: no wildPool and no noWild note`);
   return errors;
 }
 
 /** A town is only a town if it has heal + shop + sign. Returns the
- *  missing pieces, so a town that is only a map is never counted. */
-export function validateTown(map: TmjMap): string[] {
+ *  missing pieces, so a town that is only a map is never counted.
+ *  Heal/shop may live on the town's townServices map instead of the
+ *  town itself (Binary Fields -> mochiiplex_1); signs must be on the
+ *  town map. allMaps defaults to {} so single-map callers keep the
+ *  old behaviour: a town with no services map must carry both NPCs. */
+export function validateTown(map: TmjMap, allMaps: Record<string, TmjMap> = {}): string[] {
   const errors: string[] = [];
-  if (!map.npcs.some((n) => n.role === "heal")) errors.push(`${map.id}: town has no heal NPC`);
-  if (!map.npcs.some((n) => n.role === "shop")) errors.push(`${map.id}: town has no shop NPC`);
+  const services = map.townServices ? allMaps[map.townServices] : undefined;
+  const hasRole = (role: string) =>
+    map.npcs.some((n) => n.role === role) ||
+    (services?.npcs.some((n) => n.role === role) ?? false);
+  if (!hasRole("heal")) errors.push(`${map.id}: town has no heal NPC`);
+  if (!hasRole("shop")) errors.push(`${map.id}: town has no shop NPC`);
   if (map.signs.length === 0) errors.push(`${map.id}: town has no sign`);
   return errors;
 }
