@@ -122,13 +122,13 @@ describe("region1-truck-start, full story (followDiverts)", () => {
     expect(s.done).toBe(true);
     expect(seen).toContain("There you are! The truck beat us here.");
     expect(seen).toContain(
-      "Prof. Aeon: Help! This wild creature has me cornered!",
+      "Help! This wild creature has me cornered!",
     );
     expect(seen).toContain(
-      "Prof. Aeon: This is your Mochiioteca. It records every Mochiichao you meet.",
+      "This is your Mochiioteca. It records every Mochiichao you meet.",
     );
     expect(seen).toContain(
-      "Mom: Off already? Here — Sprint Boots. They'll get you there twice as fast.",
+      "Off already? Here — Sprint Boots. They'll get you there twice as fast.",
     );
     expect(s.variables.clock_set).toBe(true);
     expect(s.variables.codex_get).toBe(true);
