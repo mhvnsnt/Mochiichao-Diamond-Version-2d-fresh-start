@@ -195,6 +195,49 @@ describe('trainer-teams statsHeld lock (step f)', () => {
   });
 });
 
+describe('trainer-teams stale-NEW re-mark lock (2026-11-13 audit)', () => {
+  // Five Region 1 rows were marked NEW when written, but their NPCs were
+  // placed in FullWorldMaps.ts afterwards, so the status was stale — the
+  // resolver header (2026-10-27) invited the data lane to re-mark them
+  // KEEP. This locks the re-mark AND the teams/rewards, so a future edit
+  // cannot silently change a live map battle's team while re-marking.
+  const REMARKED: [string, [string, number][], number][] = [
+    ['R1-005', [['016', 10], ['017', 11]], 220],
+    ['R1-006', [['038', 11], ['041', 11]], 280],
+    ['R1-010', [['035', 15], ['007', 16]], 340],
+    ['R1-011', [['013', 16], ['036', 17]], 380],
+    ['R1-037', [['019', 18], ['020', 18]], 600],
+  ];
+
+  it('marks exactly the five map-placed rows KEEP with unchanged teams/rewards', () => {
+    const byId = new Map(ALL_TRAINER_ROWS.map((r) => [r.id, r]));
+    for (const [id, team, reward] of REMARKED) {
+      const row = byId.get(id);
+      expect(row).toBeDefined();
+      expect(row!.status).toBe('KEEP');
+      expect(row!.team.map((s) => [s.speciesId, s.level])).toEqual(team);
+      expect(row!.reward).toBe(reward);
+    }
+    // No other Region 1 row changed status in this re-mark: KEEP is now
+    // 15 of 76 (10 original + these 5), REPLACE stays 1 (R1-038).
+    const r1 = ALL_TRAINER_ROWS.filter((r) => r.id.startsWith('R1-'));
+    expect(r1.filter((r) => r.status === 'KEEP').length).toBe(15);
+    expect(r1.filter((r) => r.status === 'REPLACE').map((r) => r.id)).toEqual(['R1-038']);
+  });
+
+  it('the five re-marked rows still resolve from their live map battles', () => {
+    for (const name of [
+      'Bug Catcher Mira',
+      'Woods Walker Tess',
+      'Miner Cleff',
+      'Cave Runner Pike',
+      'Acolyte Skye',
+    ]) {
+      expect(resolveTrainerRow(name)).not.toBeNull();
+    }
+  });
+});
+
 describe('trainer-teams map parity (wiring effect lock)', () => {
   type Battle = { name: string; team: [string, number][]; reward: number };
   function uniqueMapBattles(): Battle[] {
