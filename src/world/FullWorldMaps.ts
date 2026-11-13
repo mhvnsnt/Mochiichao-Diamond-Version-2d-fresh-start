@@ -829,7 +829,11 @@ export const SECTOR0_TRUCK: any = {
     // which is the ink's next beat (house_2f_clock, now a real
     // event in sector0_house_2f). Dialog only — the heal-Mom is the
     // town/house Mom, as in the ink.
-    { id:"mom_truck", x:6, y:4, sprite:"", name:"Mom", facing:"down", dialog:["There you are! The truck beat us here.", "Our new house is just up the road. Go on in and set the clock upstairs — movers hate waiting."] },
+    // Step (i, 2026-11-13): inkStory/inkKnot — the talk plays the
+    // mom_truck knot live via InkDialogueBox (knot-scoped: it stops
+    // at the house_1f divert). dialog[] stays as the fallback if the
+    // story cannot load.
+    { id:"mom_truck", x:6, y:4, sprite:"", name:"Mom", facing:"down", dialog:["There you are! The truck beat us here.", "Our new house is just up the road. Go on in and set the clock upstairs — movers hate waiting."], inkStory:"region1-truck-start", inkKnot:"mom_truck" },
     { id:"mover_1", x:3, y:5, sprite:"📦", name:"Mover", facing:"down", dialog:["Careful with that one — it is the clock. A new home needs a correct time."] },
     { id:"mover_2", x:8, y:5, sprite:"📦", name:"Mover", facing:"down", dialog:["Last box out, then we are done. Your room is upstairs."] },
   ],

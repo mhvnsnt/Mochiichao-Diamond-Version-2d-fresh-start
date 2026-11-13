@@ -14,6 +14,8 @@ import { SPECIES_DB } from '../lib/species';
 import { MOVES_DB } from '../lib/moves';
 import { createMochii, evolveInstance } from '../lib/engine';
 import DialogueBox from "../components/game/DialogueBox";
+import InkDialogueBox from "../components/game/InkDialogueBox";
+import { createInkSession, type InkSession } from "../lib/inkStory";
 import { isConfirmKey } from "../lib/buttonMode";
 import { slotForNpc } from "../lib/humanSheets";
 import { personaPresentationForNpc } from "../lib/personaDialogue";
@@ -609,6 +611,11 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
     if (fn) fn();
   };
   const [dialog, setDialog] = useState<any>(null);
+  // Live Ink dialogue (step i): an NPC with inkStory/inkKnot plays a
+  // compiled Ink story through InkDialogueBox instead of plain lines.
+  // dialog stays null while an Ink story is up; finishInkDialog owns
+  // the close + flag recording.
+  const [inkDialog, setInkDialog] = useState<{ session: InkSession; npc: any; storyId: string } | null>(null);
   // v4: DialogueBox owns typing/page state internally. WorldEngine
   // only keeps this ref so the on-screen A button can advance the
   // box (keyboard Enter/Space is handled inside DialogueBox).
@@ -2037,7 +2044,18 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           const g = greetingFor(npcHere, deriveMorale(st.deedLedger).band.id);
           lines = [g.line, ...lines];
         }
-        setDialog({ lines, npc: npcHere, eventId: npcHere.eventId, isChoice: npcHere.isChoice });
+        // Live Ink dialogue (step i): an NPC with inkStory plays one
+        // knot of a compiled Ink story. The session is created here so
+        // a bad story id / knot falls back to the NPC's plain dialog
+        // lines instead of opening an empty box.
+        const inkSession = (npcHere as any).inkStory
+          ? createInkSession((npcHere as any).inkStory, (npcHere as any).inkKnot)
+          : null;
+        if (inkSession) {
+          setInkDialog({ session: inkSession, npc: npcHere, storyId: (npcHere as any).inkStory });
+        } else {
+          setDialog({ lines, npc: npcHere, eventId: npcHere.eventId, isChoice: npcHere.isChoice });
+        }
       }
       setScreen("dialog");
       return;
@@ -2126,7 +2144,23 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
   // the box reports the last page completed (or a choice is made via
   // handleChoice). Choice dialogues never reach here — DialogueBox
   // shows YES/NO instead of advancing.
-  const finishDialog = () => {
+    // Live Ink dialogue close (step i): record every flag the story
+  // set to true as a completed event (ink:<story>:<flag>) so the
+  // save / event system can see the beat, then return to the
+  // overworld exactly like a plain dialogue close.
+  const finishInkDialog = (variables: Record<string, unknown>) => {
+    if (!inkDialog) return;
+    const setFlags = Object.entries(variables)
+      .filter(([, v]) => v === true)
+      .map(([k]) => `ink:${inkDialog.storyId}:${k}`);
+    if (setFlags.length > 0) {
+      setCompletedEvents((ce) => [...ce, ...setFlags.filter((f) => !ce.includes(f))]);
+    }
+    setInkDialog(null);
+    setScreen("overworld");
+  };
+
+const finishDialog = () => {
     if (!dialog) return;
     // Stub-kill S-2: a witnessed event's scene, once read, offers
     // its choices — direct outcomes as buttons, plus the intervene
@@ -3750,6 +3784,14 @@ export default function WorldEngine({ setView, setBattleEnemy }: { setView?: any
           choice={!!dialog.isChoice}
           onComplete={finishDialog}
           onChoice={handleChoice}
+          registerAdvance={(fn) => { dialogAdvanceRef.current = fn; }}
+        />
+      )}
+      {screen === "dialog" && inkDialog && (
+        <InkDialogueBox
+          session={inkDialog.session}
+          npc={inkDialog.npc}
+          onComplete={finishInkDialog}
           registerAdvance={(fn) => { dialogAdvanceRef.current = fn; }}
         />
       )}
