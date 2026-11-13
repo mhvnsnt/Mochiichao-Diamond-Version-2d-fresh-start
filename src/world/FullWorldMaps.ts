@@ -1774,17 +1774,1503 @@ export const REGION2_ARRIVAL: any = {
     });
   })(),
   npcs: [
-    // Stub only (region1-wiring.md §3 #35): Region 2's own wiring spec
-    // builds its maps. No onward exit is added here on purpose.
+    // Region 2 maps are wired now (regions2-5-maps PR, 2026-11-13): the
+    // north edge leads to Dawnfield, the first Region 2 town.
     { id:"arrival_ferry", x:14, y:20, sprite:"⚓", name:"Ferry Captain", facing:"down", dialog:["Dawnfield. End of the ferry, start of the chapter."] },
   ],
   signs: [
-    { x:14, y:14, text:"REGION 2 ARRIVAL\\nStub only. Region 2 maps are built by the Region 2 wiring pass." },
+    { x:14, y:14, text:"REGION 2 ARRIVAL\\nNorth to Dawnfield. The ferry docks here." },
   ],
   exits: [
+    { x:14, y:0, to:"r2_dawnfield", enterAt:{x:14, y:28}, dir:"up" },
     { x:14, y:29, to:"data_isle_7", enterAt:{x:12, y:1}, dir:"down" }
   ],
   doors: [],
+  events: [],
+  encounters: []
+};
+
+// Region 2 — Twin / Return (2026-11-13, regions2-5-maps PR).
+// Skeleton only: every dialogue mapKey in region2-dialogue.json now has a
+// map (32 direct + 6 folded into r2_plateau), routes between towns, gates
+// named, wild pools only where trainer rows ground them. Trainer teams
+// and lines come from trainers-region2.ts / region2-dialogue.json —
+// nothing is invented here. Town names that are verbatim Pokemon town
+// names in the merged dialogue are NOT repeated as display names: those
+// towns carry a labelled GAP FOR MARS placeholder and the dialogue entry
+// id, so Mars can rename them in one pass (see docs audit).
+export const R2_DAWNFIELD: any = {
+  name: "Dawnfield — Region 2 Arrival",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x===13&&y===7) return TILE.DOOR;
+      if (x===14&&y===7) return TILE.DOOR;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"ferry_captain", x:14, y:20, sprite:"⚓", name:"Ferry Captain", facing:"down", dialog:["Dawnfield. End of the ferry, start of the chapter.","Aeon sent word ahead. Your team is on the list, but the list opens badge by badge. Earn them.","The MochiiPlex here is small, but the heal is free, same as home. Rest before you walk."], inkStory:"region2-story", inkKnot:"r2_01_dawnfield" },
+    { id:"dawnfield_researcher", x:10, y:20, sprite:"🧑‍🔬", name:"Dawnfield Researcher", facing:"down", dialog:["Aeon handed you to me by radio, so I will say it plain: this region remembers trainers.","Walk the opening road first. Do not skip to the tower. The tower notices skippers."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"DAWNFIELD\\nFirst stop after the ferry. MochiiPlex heal is free.\\nNorth: the opening road to Cherryport." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_route_1", enterAt:{x:14, y:39}, dir:"up" },
+    { x:14, y:29, to:"region2_arrival", enterAt:{x:14, y:28}, dir:"down" },
+  ],
+  doors: [
+    { x:13, y:7, to:"r2_mochiiplex_dawnfield", enterAt:{x:7, y:10}, label:"Dawnfield MochiiPlex" },
+    { x:14, y:7, to:"r2_mochiiplex_dawnfield", enterAt:{x:8, y:10}, label:"Dawnfield MochiiPlex" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_MOCHIIPLEX_DAWNFIELD: any = {
+  name: "Dawnfield MochiiPlex",
+  music: "route1_theme",
+  weather: "clear",
+  interior: true,
+  width: 15, height: 12,
+  playerStart: { x:7, y:10 },
+  tiles: (() => {
+    return buildMap(15, 12, (x, y) => {
+      if ((x===7||x===8)&&y===11) return TILE.DOOR;
+      if (x===0||x===14||y===0||y===11) return TILE.WALL;
+      if ((x===5||x===6)&&y===1) return TILE.HEAL_MACHINE;
+      if ((x===11||x===12)&&y===1) return TILE.TERMINAL;
+      if (y===1) return TILE.BUILDING;
+      if (y===2&&x>=2&&x<=12) return TILE.COUNTER;
+      if ((x===2||x===3||x===11||x===12)&&y===9) return TILE.BENCH;
+      if ((x===1||x===13)&&y===10) return TILE.PLANT;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"healer_1", x:7, y:3, sprite:"👩‍⚕️", name:"Center Nurse", facing:"down", isHeal: true, dialog:["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."] },
+    { id:"shop_1", x:3, y:3, sprite:"🛒", name:"Clerk", facing:"down", isShop: true, dialog:["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."] },
+    { id:"plex_waiting_trainer", x:11, y:7, sprite:"🧢", name:"Waiting Trainer", facing:"left", dialog:["PLACEHOLDER — waiting-trainer line GAP FOR MARS (no beats line for this NPC)."] },
+  ],
+  signs: [
+    { x:4, y:2, text:"MOCHII CENTER\\nHealing is free — it is always free. Cubes and patches at the west end of the counter." },
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:11, to:"r2_dawnfield", enterAt:{x:13, y:8}, label:"Exit" },
+    { x:8, y:11, to:"r2_dawnfield", enterAt:{x:14, y:8}, label:"Exit" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ROUTE_1: any = {
+  name: "Route R2-1 — Dawnfield Road",
+  music: "route1_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:14, y:39 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16) return TILE.PATH;
+      if (y>=18&&y<=20) return TILE.PATH;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"r2_001_nia", x:10, y:15, sprite:"🚶", name:"Ferry Walker Nia", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-001; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-001)."], battle:{ team:[{id:"147",name:"Dorowani",hp:55,maxHp:55,atk:55,def:45,spd:45,moves:["Tackle","Swift Movement"],type:"Water",level:10}], reward:200, badge:null } },
+    { id:"r2_002_pim", x:18, y:25, sprite:"🚶", name:"Ferry Walker Pim", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-002; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-002)."], battle:{ team:[{id:"150",name:"Gabu",hp:65,maxHp:65,atk:63,def:45,spd:45,moves:["Tackle","Swift Movement"],type:"Normal",level:10},{id:"016",name:"Squirmite",hp:30,maxHp:30,atk:35,def:30,spd:50,moves:["Tackle","Swift Movement"],type:"Bug",level:11}], reward:220, badge:null } },
+  ],
+  signs: [
+    { x:14, y:10, text:"ROUTE R2-1 — DAWNFIELD ROAD\\nNorth to Cherryport. South to Dawnfield." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_cherryport", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:39, to:"r2_dawnfield", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_CHERRYPORT: any = {
+  name: "Cherryport — Opening Road",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"cherryport_road_keeper", x:14, y:20, sprite:"🚶", name:"Cherryport Road Keeper", facing:"down", dialog:["This is the opening road. First wilds, first trainers, nothing fancy — and that is the point.","If your team feels thin, catch here. The grass is kind to new arrivals."], inkStory:"region2-story", inkKnot:"r2_02_cherryport" },
+    { id:"cherryport_fisher", x:10, y:20, sprite:"🎣", name:"Cherryport Fisher", facing:"down", dialog:["The water here is shallow. Wave-Ride is not needed yet. Walk the bank and watch the data.","A trainer who rushes past Cherryport misses the whole region. I have seen it happen."] },
+    { id:"healer_cherryport", x:7, y:10, sprite:"👩‍⚕️", name:"Center Nurse", facing:"down", isHeal: true, dialog:["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."] },
+    { id:"shop_cherryport", x:22, y:10, sprite:"🛒", name:"Clerk", facing:"down", isShop: true, dialog:["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"CHERRYPORT\\nOpening road town. First wilds, first trainers.\\nNorth: the road to the Dojo 1 town (R2-03). South: Dawnfield." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_route_2", enterAt:{x:14, y:39}, dir:"up" },
+    { x:14, y:29, to:"r2_route_1", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ROUTE_2: any = {
+  name: "Route R2-2 — Cherryport Road",
+  music: "route1_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:14, y:39 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16) return TILE.PATH;
+      if (y>=18&&y<=20) return TILE.PATH;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"r2_003_oda", x:10, y:15, sprite:"🧢", name:"Route Trainer Oda", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-003; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-003)."], battle:{ team:[{id:"041",name:"Pixilite",hp:40,maxHp:40,atk:30,def:30,spd:70,moves:["Tackle","Swift Movement"],type:"Grass",level:12},{id:"147",name:"Dorowani",hp:55,maxHp:55,atk:55,def:45,spd:45,moves:["Tackle","Swift Movement"],type:"Water",level:12}], reward:260, badge:null } },
+    { id:"r2_004_ren", x:18, y:25, sprite:"🧢", name:"Route Trainer Ren", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-004; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-004)."], battle:{ team:[{id:"019",name:"Zephling",hp:40,maxHp:40,atk:55,def:35,spd:60,moves:["Tackle","Swift Movement"],type:"Flying",level:13},{id:"150",name:"Gabu",hp:65,maxHp:65,atk:63,def:45,spd:45,moves:["Tackle","Swift Movement"],type:"Normal",level:13}], reward:280, badge:null } },
+  ],
+  signs: [
+    { x:14, y:10, text:"ROUTE R2-2 — CHERRYPORT ROAD\\nNorth to the Dojo 1 town (R2-03). South to Cherryport." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_violet", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:39, to:"r2_cherryport", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_VIOLET: any = {
+  name: "R2 Dojo 1 Town — name GAP FOR MARS",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x===13&&y===7) return TILE.DOOR;
+      if (x===14&&y===7) return TILE.DOOR;
+      if (x===4&&y===7) return TILE.DOOR;
+      if (x===5&&y===7) return TILE.DOOR;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"violet_town_elder", x:14, y:20, sprite:"🧓", name:"Town Elder", facing:"down", dialog:["The dojo is older. Respect both and the badge will not feel heavy."] },
+    { id:"healer_violet", x:7, y:10, sprite:"👩‍⚕️", name:"Center Nurse", facing:"down", isHeal: true, dialog:["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."] },
+    { id:"shop_violet", x:22, y:10, sprite:"🛒", name:"Clerk", facing:"down", isShop: true, dialog:["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"R2-03 — DOJO 1 TOWN\\nName GAP FOR MARS (see region2-dialogue.json R2-03).\\nDojo 1 (Flora) is here. Tower puzzle: west door." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_route_3", enterAt:{x:14, y:39}, dir:"up" },
+    { x:14, y:29, to:"r2_route_2", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+    { x:13, y:7, to:"r2_dojo_1", enterAt:{x:7, y:16}, label:"Dojo 1 — Flora Gate" },
+    { x:14, y:7, to:"r2_dojo_1", enterAt:{x:7, y:16}, label:"Dojo 1 — Flora Gate" },
+    { x:4, y:7, to:"r2_tower", enterAt:{x:9, y:18}, label:"Tower" },
+    { x:5, y:7, to:"r2_tower", enterAt:{x:9, y:18}, label:"Tower" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_TOWER: any = {
+  name: "Tower — Dojo 1 Puzzle",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 20, height: 20,
+  playerStart: { x:9, y:18 },
+  tiles: (() => {
+    return buildMap(20, 20, (x, y) => {
+      if (x===9&&y===19) return TILE.DOOR;
+      if (x===0||x===19||y===0||y===19) return TILE.WALL;
+      if (x===9||x===10) return TILE.PATH;
+      if (y===10) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"tower_guide", x:9, y:10, sprite:"🗼", name:"Tower Guide", facing:"down", dialog:["The tower is a puzzle, not a wall. Each floor teaches you one thing. Do not climb angry.","The first beast was seen here. Seen, not caught. Remember the difference."], inkStory:"region2-story", inkKnot:"r2_03_violet" },
+  ],
+  signs: [
+    { x:9, y:12, text:"TOWER\\nA puzzle, not a wall. Each floor teaches one thing.\\nUpper floors owed — no floor maps yet (flag r2_tower_puzzle)." },
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:9, y:19, to:"r2_violet", enterAt:{x:4, y:8}, label:"Dojo 1 Town" },
+  ],
+  events: [],
+  encounters: []
+};
+
+// Dojo 1 — Flora Gate — Dojo theme Flora, badge Flora Fragment (trainer row R2-018). Leader is NAME GAP:
+// present and dialogued, battle + badge award owed by the trainer
+// wiring batch — not silently invented here (DOJO_3 precedent).
+export const R2_DOJO_1: any = {
+  name: "Dojo 1 — Flora Gate",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"r2_016_leaf", x:3, y:10, sprite:"🥋", name:"Acolyte Leaf", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-016; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-016)."], battle:{ team:[{id:"038",name:"Sproutle",hp:55,maxHp:55,atk:68,def:64,spd:31,moves:["Tackle","Swift Movement"],type:"Grass",level:14}], reward:400, badge:null } },
+    { id:"r2_017_moss", x:11, y:10, sprite:"🥋", name:"Acolyte Moss", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-017; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-017)."], battle:{ team:[{id:"041",name:"Pixilite",hp:40,maxHp:40,atk:30,def:30,spd:70,moves:["Tackle","Swift Movement"],type:"Grass",level:15},{id:"038",name:"Sproutle",hp:55,maxHp:55,atk:68,def:64,spd:31,moves:["Tackle","Swift Movement"],type:"Grass",level:15}], reward:450, badge:null } },
+    { id:"dojo_leader", x:7, y:2, sprite:"🥋", name:"Dojo Leader", facing:"down", dialog:["A tower stands because every stone knows its place. Show me you know yours."], inkStory:"region2-story", inkKnot:"r2_03_violet", postBattleDialog:["You know it. Take the first badge of this region. Your old team opens one slot wider now."] },
+  ],
+  signs: [
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_violet", enterAt:{x:13, y:8}, label:"Dojo 1 — Flora Gate" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ROUTE_3: any = {
+  name: "Route R2-3",
+  music: "route1_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:14, y:39 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16) return TILE.PATH;
+      if (y>=18&&y<=20) return TILE.PATH;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+  ],
+  signs: [
+    { x:14, y:10, text:"ROUTE R2-3\\nNorth to the Dojo 2 town (R2-04). South to the Dojo 1 town (R2-03)." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_azalea", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:39, to:"r2_violet", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_AZALEA: any = {
+  name: "R2 Dojo 2 Town — name GAP FOR MARS",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x===13&&y===7) return TILE.DOOR;
+      if (x===14&&y===7) return TILE.DOOR;
+      if (x===4&&y===7) return TILE.DOOR;
+      if (x===5&&y===7) return TILE.DOOR;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"healer_azalea", x:7, y:10, sprite:"👩‍⚕️", name:"Center Nurse", facing:"down", isHeal: true, dialog:["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."] },
+    { id:"shop_azalea", x:22, y:10, sprite:"🛒", name:"Clerk", facing:"down", isShop: true, dialog:["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"R2-04 — DOJO 2 TOWN\\nName GAP FOR MARS (see region2-dialogue.json R2-04).\\nDojo 2 (Bug) is here. The well is west." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_route_4", enterAt:{x:14, y:39}, dir:"up" },
+    { x:14, y:29, to:"r2_route_3", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+    { x:13, y:7, to:"r2_dojo_2", enterAt:{x:7, y:16}, label:"Dojo 2 — Bug Gate" },
+    { x:14, y:7, to:"r2_dojo_2", enterAt:{x:7, y:16}, label:"Dojo 2 — Bug Gate" },
+    { x:4, y:7, to:"r2_well", enterAt:{x:7, y:16}, label:"Well" },
+    { x:5, y:7, to:"r2_well", enterAt:{x:7, y:16}, label:"Well" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_WELL: any = {
+  name: "Well — Spring Rescue",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"well_keeper", x:7, y:8, sprite:"🪣", name:"Well Keeper", facing:"down", dialog:["The well is not dry. It is drained. Someone is taking the spring, one bucket at a time.","Go down. Bring the spring back. The town will remember who did it."], inkStory:"region2-story", inkKnot:"r2_04_azalea" },
+    { id:"syndicate_well", x:7, y:4, sprite:"🕶️", name:"Syndicate Operative", facing:"down", dialog:["The spring flows where we say it flows. You are not on the list.","Fine. Battle me, then. The list does not change, but you can try."] },
+  ],
+  signs: [
+    { x:7, y:12, text:"THE WELL\\nThe spring is drained, not dry. Someone is taking it." },
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_azalea", enterAt:{x:4, y:8}, label:"Dojo 2 Town" },
+  ],
+  events: [],
+  encounters: []
+};
+
+// Dojo 2 — Bug Gate — Dojo theme Bug, badge Bug Fragment (trainer row R2-021). Leader is NAME GAP:
+// present and dialogued, battle + badge award owed by the trainer
+// wiring batch — not silently invented here (DOJO_3 precedent).
+export const R2_DOJO_2: any = {
+  name: "Dojo 2 — Bug Gate",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"r2_019_web", x:3, y:10, sprite:"🥋", name:"Acolyte Web", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-019; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-019)."], battle:{ team:[{id:"016",name:"Squirmite",hp:30,maxHp:30,atk:35,def:30,spd:50,moves:["Tackle","Swift Movement"],type:"Bug",level:18}], reward:500, badge:null } },
+    { id:"r2_020_silk", x:11, y:10, sprite:"🥋", name:"Acolyte Silk", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-020; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-020)."], battle:{ team:[{id:"017",name:"Cocoonode",hp:50,maxHp:50,atk:20,def:55,spd:30,moves:["Tackle","Swift Movement"],type:"Bug",level:19},{id:"016",name:"Squirmite",hp:30,maxHp:30,atk:35,def:30,spd:50,moves:["Tackle","Swift Movement"],type:"Bug",level:19}], reward:550, badge:null } },
+    { id:"dojo_leader", x:7, y:2, sprite:"🥋", name:"Dojo Leader", facing:"down", dialog:["You brought the spring back. Now bring a steady team. I test steadiness, not speed."], inkStory:"region2-story", inkKnot:"r2_04_azalea", postBattleDialog:["Steady. Take the second badge. Your old team opens another slot."] },
+  ],
+  signs: [
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_azalea", enterAt:{x:13, y:8}, label:"Dojo 2 — Bug Gate" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ROUTE_4: any = {
+  name: "Route R2-4",
+  music: "route1_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:14, y:39 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16) return TILE.PATH;
+      if (y>=18&&y<=20) return TILE.PATH;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+  ],
+  signs: [
+    { x:14, y:10, text:"ROUTE R2-4\\nNorth to the forest (R2-05). South to the Dojo 2 town (R2-04)." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_ilex_forest", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:39, to:"r2_azalea", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ILEX_FOREST: any = {
+  name: "Forest — Shrine Maze",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if ((x===13||x===14)&&y===7) return TILE.DOOR;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      if ((x+y)%5===0) return TILE.FLOWER;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"forest_wanderer", x:10, y:20, sprite:"🌲", name:"Forest Wanderer", facing:"down", dialog:["I got lost here three times. The fourth time, I stopped rushing, and the path found me.","Cut nothing here unless the path asks you to. Data-Cut is a tool, not a shortcut."] },
+    { id:"r2_005_faye", x:8, y:18, sprite:"🌲", name:"Forest Walker Faye", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-005; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-005)."], battle:{ team:[{id:"017",name:"Cocoonode",hp:50,maxHp:50,atk:20,def:55,spd:30,moves:["Tackle","Swift Movement"],type:"Bug",level:20},{id:"041",name:"Pixilite",hp:40,maxHp:40,atk:30,def:30,spd:70,moves:["Tackle","Swift Movement"],type:"Grass",level:20}], reward:480, badge:null } },
+    { id:"r2_006_lorn", x:22, y:18, sprite:"🧎", name:"Shrine Keeper Lorn", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-006; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-006)."], battle:{ team:[{id:"042",name:"Wispkin",hp:40,maxHp:40,atk:30,def:30,spd:70,moves:["Tackle","Swift Movement"],type:"Dark",level:21},{id:"018",name:"Mothrix",hp:60,maxHp:60,atk:45,def:50,spd:100,moves:["Tackle","Swift Movement"],type:"Bug",level:21}], reward:500, badge:null } },
+  ],
+  signs: [
+    { x:14, y:14, text:"FOREST\\nA maze on purpose. The shrine is in the middle.\\nNorth: the road to the Dojo 3 city (R2-06). Shrine: north door." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_route_5", enterAt:{x:14, y:39}, dir:"up" },
+    { x:14, y:29, to:"r2_route_4", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+    { x:13, y:7, to:"r2_shrine", enterAt:{x:7, y:14}, label:"Shrine" },
+    { x:14, y:7, to:"r2_shrine", enterAt:{x:7, y:14}, label:"Shrine" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_SHRINE: any = {
+  name: "Shrine — Forest Middle",
+  music: "fields_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 16,
+  playerStart: { x:7, y:14 },
+  tiles: (() => {
+    return buildMap(16, 16, (x, y) => {
+      if (x===7&&y===15) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===15) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"forest_shrine_keeper", x:7, y:6, sprite:"⛩️", name:"Forest Shrine Keeper", facing:"down", dialog:["The forest is a maze on purpose. The shrine is in the middle, and the middle is quiet.","The second beast was seen at the shrine. It did not stay. Beasts do not stay for crowds."], inkStory:"region2-story", inkKnot:"r2_05_ilex_forest" },
+  ],
+  signs: [
+    { x:7, y:10, text:"SHRINE\\nQuiet, in the middle of the maze. The second beast was seen here." },
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:15, to:"r2_ilex_forest", enterAt:{x:14, y:8}, label:"Forest" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ROUTE_5: any = {
+  name: "Route R2-5",
+  music: "route1_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:14, y:39 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16) return TILE.PATH;
+      if (y>=18&&y<=20) return TILE.PATH;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+  ],
+  signs: [
+    { x:14, y:10, text:"ROUTE R2-5\\nNorth to the Dojo 3 city (R2-06). South to the forest (R2-05)." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_goldenrod", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:39, to:"r2_ilex_forest", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_GOLDENROD: any = {
+  name: "R2 Dojo 3 City — name GAP FOR MARS",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x===13&&y===7) return TILE.DOOR;
+      if (x===14&&y===7) return TILE.DOOR;
+      if (x===4&&y===7) return TILE.DOOR;
+      if (x===5&&y===7) return TILE.DOOR;
+      if (x===22&&y===7) return TILE.DOOR;
+      if (x===23&&y===7) return TILE.DOOR;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"market_clerk", x:10, y:20, sprite:"🛍️", name:"Market Clerk", facing:"down", dialog:["Big city, big market. The Garden branch here sells what Silicon Town cannot stock yet.","Do not buy everything. Buy what your team actually needs for the next road."] },
+    { id:"healer_goldenrod", x:7, y:10, sprite:"👩‍⚕️", name:"Center Nurse", facing:"down", isHeal: true, dialog:["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."] },
+    { id:"shop_goldenrod", x:22, y:10, sprite:"🛒", name:"Clerk", facing:"down", isShop: true, dialog:["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"R2-06 — DOJO 3 CITY\\nName GAP FOR MARS (see region2-dialogue.json R2-06).\\nDojo 3 (Chrome) is here. Radio Tower: west. Garden branch: east." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_route_6", enterAt:{x:14, y:39}, dir:"up" },
+    { x:14, y:29, to:"r2_route_5", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+    { x:13, y:7, to:"r2_dojo_3", enterAt:{x:7, y:16}, label:"Dojo 3 — Chrome Gate" },
+    { x:14, y:7, to:"r2_dojo_3", enterAt:{x:7, y:16}, label:"Dojo 3 — Chrome Gate" },
+    { x:4, y:7, to:"r2_radio_tower", enterAt:{x:7, y:16}, label:"Radio Tower" },
+    { x:5, y:7, to:"r2_radio_tower", enterAt:{x:7, y:16}, label:"Radio Tower" },
+    { x:22, y:7, to:"r2_garden_branch", enterAt:{x:7, y:14}, label:"Garden Branch" },
+    { x:23, y:7, to:"r2_garden_branch", enterAt:{x:7, y:14}, label:"Garden Branch" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_RADIO_TOWER: any = {
+  name: "Radio Tower",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"radio_tower_clerk", x:7, y:8, sprite:"📻", name:"Radio Tower Clerk", facing:"down", dialog:["The tower talks to the whole region. Right now it is talking too much, and listening too little.","Come back after the tower story. It will make sense then, and not before."], inkStory:"region2-story", inkKnot:"r2_06_goldenrod" },
+    { id:"r2_007_dex", x:3, y:12, sprite:"📻", name:"Radio Runner Dex", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-007; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-007)."], battle:{ team:[{id:"032",name:"Gearkid",hp:40,maxHp:40,atk:55,def:70,spd:30,moves:["Tackle","Swift Movement"],type:"Chrome",level:28},{id:"026",name:"Inklet",hp:40,maxHp:40,atk:40,def:40,spd:50,moves:["Tackle","Swift Movement"],type:"Water",level:28}], reward:700, badge:null } },
+    { id:"r2_008_vee", x:11, y:12, sprite:"📻", name:"Radio Runner Vee", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-008; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-008)."], battle:{ team:[{id:"033",name:"Mechapion",hp:60,maxHp:60,atk:75,def:95,spd:50,moves:["Tackle","Swift Movement"],type:"Chrome",level:29},{id:"019",name:"Zephling",hp:40,maxHp:40,atk:55,def:35,spd:60,moves:["Tackle","Swift Movement"],type:"Flying",level:29}], reward:720, badge:null } },
+    { id:"syndicate_tower", x:7, y:4, sprite:"🕶️", name:"Syndicate Operative", facing:"down", dialog:["The tower is ours on paper. Paper is stronger than you think."] },
+  ],
+  signs: [
+    { x:7, y:12, text:"RADIO TOWER\\nIt talks to the whole region. Right now it talks too much." },
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_goldenrod", enterAt:{x:4, y:8}, label:"Dojo 3 City" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_GARDEN_BRANCH: any = {
+  name: "Garden Branch",
+  music: "fields_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 16,
+  playerStart: { x:7, y:14 },
+  tiles: (() => {
+    return buildMap(16, 16, (x, y) => {
+      if (x===7&&y===15) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===15) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"garden_clerk", x:7, y:6, sprite:"🌱", name:"Garden Clerk", facing:"down", dialog:["PLACEHOLDER — Garden branch line GAP FOR MARS (stock list owed; see master §11.5)."] },
+  ],
+  signs: [
+    { x:7, y:10, text:"GARDEN BRANCH\\nSells what Silicon Town cannot stock yet. Stock list GAP FOR MARS." },
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:15, to:"r2_goldenrod", enterAt:{x:22, y:8}, label:"Dojo 3 City" },
+  ],
+  events: [],
+  encounters: []
+};
+
+// Dojo 3 — Chrome Gate — Dojo theme Chrome, badge Chrome Fragment (trainer row R2-024). Leader is NAME GAP:
+// present and dialogued, battle + badge award owed by the trainer
+// wiring batch — not silently invented here (DOJO_3 precedent).
+export const R2_DOJO_3: any = {
+  name: "Dojo 3 — Chrome Gate",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"r2_022_wire", x:3, y:10, sprite:"🥋", name:"Acolyte Wire", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-022; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-022)."], battle:{ team:[{id:"032",name:"Gearkid",hp:40,maxHp:40,atk:55,def:70,spd:30,moves:["Tackle","Swift Movement"],type:"Chrome",level:25}], reward:650, badge:null } },
+    { id:"r2_023_bolt", x:11, y:10, sprite:"🥋", name:"Acolyte Bolt", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-023; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-023)."], battle:{ team:[{id:"033",name:"Mechapion",hp:60,maxHp:60,atk:75,def:95,spd:50,moves:["Tackle","Swift Movement"],type:"Chrome",level:26},{id:"004",name:"Razorgater",hp:50,maxHp:50,atk:65,def:64,spd:43,moves:["Tackle","Swift Movement"],type:"Water",level:26}], reward:700, badge:null } },
+    { id:"dojo_leader", x:7, y:2, sprite:"🥋", name:"Dojo Leader", facing:"down", dialog:["A big city dojo is not a big dojo. It is a dojo that has to be exact, because everyone is watching."], inkStory:"region2-story", inkKnot:"r2_06_goldenrod", postBattleDialog:["Exact. Take the third badge. Your old team opens another slot."] },
+  ],
+  signs: [
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_goldenrod", enterAt:{x:13, y:8}, label:"Dojo 3 — Chrome Gate" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ROUTE_6: any = {
+  name: "Route R2-6",
+  music: "route1_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:14, y:39 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16) return TILE.PATH;
+      if (y>=18&&y<=20) return TILE.PATH;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+  ],
+  signs: [
+    { x:14, y:10, text:"ROUTE R2-6\\nNorth to the Dojo 4 town (R2-07). South to the Dojo 3 city (R2-06)." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_ecruteak", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:39, to:"r2_goldenrod", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ECRUTEAK: any = {
+  name: "R2 Dojo 4 Town — name GAP FOR MARS",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x===13&&y===7) return TILE.DOOR;
+      if (x===14&&y===7) return TILE.DOOR;
+      if (x===4&&y===7) return TILE.DOOR;
+      if (x===5&&y===7) return TILE.DOOR;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"ecruteak_elder", x:14, y:20, sprite:"🧓", name:"Town Elder", facing:"down", dialog:["This city remembers fire. It also remembers the trainers who walked out of the fire calm."] },
+    { id:"healer_ecruteak", x:7, y:10, sprite:"👩‍⚕️", name:"Center Nurse", facing:"down", isHeal: true, dialog:["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."] },
+    { id:"shop_ecruteak", x:22, y:10, sprite:"🛒", name:"Clerk", facing:"down", isShop: true, dialog:["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"R2-07 — DOJO 4 TOWN\\nName GAP FOR MARS (see region2-dialogue.json R2-07).\\nDojo 4 (Umbral) is here. Burned Tower: west door." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_route_7", enterAt:{x:14, y:39}, dir:"up" },
+    { x:14, y:29, to:"r2_route_6", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+    { x:13, y:7, to:"r2_dojo_4", enterAt:{x:7, y:16}, label:"Dojo 4 — Umbral Gate" },
+    { x:14, y:7, to:"r2_dojo_4", enterAt:{x:7, y:16}, label:"Dojo 4 — Umbral Gate" },
+    { x:4, y:7, to:"r2_burned_tower", enterAt:{x:9, y:18}, label:"Burned Tower" },
+    { x:5, y:7, to:"r2_burned_tower", enterAt:{x:9, y:18}, label:"Burned Tower" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_BURNED_TOWER: any = {
+  name: "Burned Tower",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 20, height: 20,
+  playerStart: { x:9, y:18 },
+  tiles: (() => {
+    return buildMap(20, 20, (x, y) => {
+      if (x===9&&y===19) return TILE.DOOR;
+      if (x===0||x===19||y===0||y===19) return TILE.WALL;
+      if (x===9||x===10) return TILE.PATH;
+      if (y===10) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"burned_tower_keeper", x:9, y:10, sprite:"🔥", name:"Burned Tower Keeper", facing:"down", dialog:["The tower burned, and the beasts woke in the smoke. They are not yours to catch yet.","They are yours to follow. Follow, do not chase. Chasing scares a beast into the next region."], inkStory:"region2-story", inkKnot:"r2_07_ecruteak" },
+  ],
+  signs: [
+    { x:9, y:12, text:"BURNED TOWER\\nIt burned, and the beasts woke in the smoke.\\nBeasts: follow, do not chase (flag r2_beasts_wake)." },
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:9, y:19, to:"r2_ecruteak", enterAt:{x:4, y:8}, label:"Dojo 4 Town" },
+  ],
+  events: [],
+  encounters: []
+};
+
+// Dojo 4 — Umbral Gate — Dojo theme Umbral, badge Umbral Fragment (trainer row R2-027). Leader is NAME GAP:
+// present and dialogued, battle + badge award owed by the trainer
+// wiring batch — not silently invented here (DOJO_3 precedent).
+export const R2_DOJO_4: any = {
+  name: "Dojo 4 — Umbral Gate",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"r2_025_ember", x:3, y:10, sprite:"🥋", name:"Acolyte Ember", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-025; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-025)."], battle:{ team:[{id:"042",name:"Wispkin",hp:40,maxHp:40,atk:30,def:30,spd:70,moves:["Tackle","Swift Movement"],type:"Dark",level:31}], reward:800, badge:null } },
+    { id:"r2_026_night", x:11, y:10, sprite:"🥋", name:"Acolyte Night", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-026; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-026)."], battle:{ team:[{id:"043",name:"Duskfiend",hp:60,maxHp:60,atk:60,def:60,spd:100,moves:["Tackle","Swift Movement"],type:"Dark",level:32},{id:"026",name:"Inklet",hp:40,maxHp:40,atk:40,def:40,spd:50,moves:["Tackle","Swift Movement"],type:"Water",level:32}], reward:850, badge:null } },
+    { id:"dojo_leader", x:7, y:2, sprite:"🥋", name:"Dojo Leader", facing:"down", dialog:["Fire teaches, if you let it. Show me what the tower taught you."], inkStory:"region2-story", inkKnot:"r2_07_ecruteak", postBattleDialog:["You learned. Take the fourth badge. Your old team opens another slot."] },
+  ],
+  signs: [
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_ecruteak", enterAt:{x:13, y:8}, label:"Dojo 4 — Umbral Gate" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ROUTE_7: any = {
+  name: "Route R2-7",
+  music: "route1_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:14, y:39 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16) return TILE.PATH;
+      if (y>=18&&y<=20) return TILE.PATH;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+  ],
+  signs: [
+    { x:14, y:10, text:"ROUTE R2-7\\nNorth to the Dojo 5 town (R2-08). South to the Dojo 4 town (R2-07)." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_olivine", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:39, to:"r2_ecruteak", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_OLIVINE: any = {
+  name: "R2 Dojo 5 Town — name GAP FOR MARS",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x===13&&y===7) return TILE.DOOR;
+      if (x===14&&y===7) return TILE.DOOR;
+      if (x===4&&y===7) return TILE.DOOR;
+      if (x===5&&y===7) return TILE.DOOR;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"olivine_harbour_keeper", x:14, y:20, sprite:"⚓", name:"Harbour Keeper", facing:"down", dialog:["Wave-Ride works here, same as Region 1. Water is a road, if you respect it. Do not surf angry."] },
+    { id:"healer_olivine", x:7, y:10, sprite:"👩‍⚕️", name:"Center Nurse", facing:"down", isHeal: true, dialog:["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."] },
+    { id:"shop_olivine", x:22, y:10, sprite:"🛒", name:"Clerk", facing:"down", isShop: true, dialog:["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"R2-08 — DOJO 5 TOWN\\nName GAP FOR MARS (see region2-dialogue.json R2-08).\\nDojo 5 (Water) is here. Lighthouse: west. Sea road east needs Wave-Ride." },
+  ],
+  exits: [
+    { x:14, y:29, to:"r2_route_7", enterAt:{x:14, y:1}, dir:"down" },
+    { x:29, y:15, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+    { x:29, y:16, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+    { x:29, y:17, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+    { x:29, y:18, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+    { x:29, y:19, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+    { x:29, y:20, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+    { x:29, y:21, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+    { x:29, y:22, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+    { x:29, y:23, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+    { x:29, y:24, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+    { x:29, y:25, to:"r2_sea_road", enterAt:{x:1, y:20}, dir:"right", hmNeeded:"Wave" },
+  ],
+  doors: [
+    { x:13, y:7, to:"r2_dojo_5", enterAt:{x:7, y:16}, label:"Dojo 5 — Water Gate" },
+    { x:14, y:7, to:"r2_dojo_5", enterAt:{x:7, y:16}, label:"Dojo 5 — Water Gate" },
+    { x:4, y:7, to:"r2_lighthouse", enterAt:{x:7, y:16}, label:"Lighthouse" },
+    { x:5, y:7, to:"r2_lighthouse", enterAt:{x:7, y:16}, label:"Lighthouse" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_LIGHTHOUSE: any = {
+  name: "Lighthouse",
+  music: "fields_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"lighthouse_keeper", x:7, y:8, sprite:"🔦", name:"Lighthouse Keeper", facing:"down", dialog:["The light is not for ships. It is for trainers who have forgotten where the shore is.","Keep the light, and I will keep the sea road open for you. That is the deal, and it is fair."], inkStory:"region2-story", inkKnot:"r2_08_olivine" },
+  ],
+  signs: [
+    { x:7, y:12, text:"LIGHTHOUSE\\nThe light is not for ships. It is for trainers who forgot where the shore is." },
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_olivine", enterAt:{x:4, y:8}, label:"Dojo 5 Town" },
+  ],
+  events: [],
+  encounters: []
+};
+
+// Dojo 5 — Water Gate — Dojo theme Water, badge Water Fragment (trainer row R2-030). Leader is NAME GAP:
+// present and dialogued, battle + badge award owed by the trainer
+// wiring batch — not silently invented here (DOJO_3 precedent).
+export const R2_DOJO_5: any = {
+  name: "Dojo 5 — Water Gate",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"r2_028_foam", x:3, y:10, sprite:"🥋", name:"Acolyte Foam", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-028; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-028)."], battle:{ team:[{id:"022",name:"Finblade",hp:45,maxHp:45,atk:70,def:50,spd:70,moves:["Tackle","Swift Movement"],type:"Chrome",level:37}], reward:950, badge:null } },
+    { id:"r2_029_wave", x:11, y:10, sprite:"🥋", name:"Acolyte Wave", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-029; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-029)."], battle:{ team:[{id:"023",name:"Megalochrome",hp:70,maxHp:70,atk:115,def:80,spd:100,moves:["Tackle","Swift Movement"],type:"Chrome",level:38},{id:"001",name:"Mochii",hp:45,maxHp:45,atk:49,def:49,spd:45,moves:["Tackle","Swift Movement"],type:"Water",level:38}], reward:1000, badge:null } },
+    { id:"dojo_leader", x:7, y:2, sprite:"🥋", name:"Dojo Leader", facing:"down", dialog:["A lighthouse keeper's dojo is a dojo of patience. Wait for the right move, then take it."], inkStory:"region2-story", inkKnot:"r2_08_olivine", postBattleDialog:["Patient. Take the fifth badge. Your old team opens another slot."] },
+  ],
+  signs: [
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_olivine", enterAt:{x:13, y:8}, label:"Dojo 5 — Water Gate" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_SEA_ROAD: any = {
+  name: "Sea Road — Wave Crossing",
+  music: "water_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:1, y:20 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if ((x===0||x===27)&&y!==20) return TILE.WALL;
+      if (y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16&&y>=18&&y<=22) return TILE.DOCK;
+      return TILE.WATER;
+    });
+  })(),
+  npcs: [
+  ],
+  signs: [
+    { x:14, y:20, text:"SEA ROAD\\nWave-Ride crossing. West: the Dojo 5 town (R2-08). East: the Dojo 6 town (R2-09)." },
+  ],
+  exits: [
+    { x:0, y:20, to:"r2_olivine", enterAt:{x:28, y:20}, dir:"left" },
+    { x:27, y:20, to:"r2_cianwood", enterAt:{x:1, y:20}, dir:"right" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_CIANWOOD: any = {
+  name: "R2 Dojo 6 Town — name GAP FOR MARS",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x===13&&y===7) return TILE.DOOR;
+      if (x===14&&y===7) return TILE.DOOR;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"medicine_keeper", x:14, y:20, sprite:"💊", name:"Medicine Keeper", facing:"down", dialog:["The medicine is not magic. It is care, measured out, one dose at a time. Bring it to the island dojo, and bring it whole.","The water crossing is short. The lesson is long. Do not mix them up."], inkStory:"region2-story", inkKnot:"r2_09_cianwood" },
+    { id:"healer_cianwood", x:7, y:10, sprite:"👩‍⚕️", name:"Center Nurse", facing:"down", isHeal: true, dialog:["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."] },
+    { id:"shop_cianwood", x:22, y:10, sprite:"🛒", name:"Clerk", facing:"down", isShop: true, dialog:["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"R2-09 — DOJO 6 TOWN\\nName GAP FOR MARS (see region2-dialogue.json R2-09).\\nDojo 6 (Strike) is here. Medicine keeper: ask about the island dojo." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_route_8", enterAt:{x:14, y:39}, dir:"up" },
+    { x:0, y:15, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+    { x:0, y:16, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+    { x:0, y:17, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+    { x:0, y:18, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+    { x:0, y:19, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+    { x:0, y:20, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+    { x:0, y:21, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+    { x:0, y:22, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+    { x:0, y:23, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+    { x:0, y:24, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+    { x:0, y:25, to:"r2_sea_road", enterAt:{x:26, y:20}, dir:"left", hmNeeded:"Wave" },
+  ],
+  doors: [
+    { x:13, y:7, to:"r2_dojo_6", enterAt:{x:7, y:16}, label:"Dojo 6 — Strike Gate" },
+    { x:14, y:7, to:"r2_dojo_6", enterAt:{x:7, y:16}, label:"Dojo 6 — Strike Gate" },
+  ],
+  events: [],
+  encounters: []
+};
+
+// Dojo 6 — Strike Gate — Dojo theme Strike, badge Strike Fragment (trainer row R2-033). Leader is NAME GAP:
+// present and dialogued, battle + badge award owed by the trainer
+// wiring batch — not silently invented here (DOJO_3 precedent).
+export const R2_DOJO_6: any = {
+  name: "Dojo 6 — Strike Gate",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"r2_031_fist", x:3, y:10, sprite:"🥋", name:"Acolyte Fist", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-031; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-031)."], battle:{ team:[{id:"029",name:"Punchkid",hp:50,maxHp:50,atk:70,def:50,spd:60,moves:["Tackle","Swift Movement"],type:"Rock",level:41}], reward:1050, badge:null } },
+    { id:"r2_032_spar", x:11, y:10, sprite:"🥋", name:"Acolyte Spar", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-032; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-032)."], battle:{ team:[{id:"030",name:"Strikechamp",hp:70,maxHp:70,atk:110,def:70,spd:80,moves:["Tackle","Swift Movement"],type:"Rock",level:42},{id:"029",name:"Punchkid",hp:50,maxHp:50,atk:70,def:50,spd:60,moves:["Tackle","Swift Movement"],type:"Rock",level:42}], reward:1100, badge:null } },
+    { id:"dojo_leader", x:7, y:2, sprite:"🥋", name:"Dojo Leader", facing:"down", dialog:["You crossed water to get here. Now cross the gap between a good team and a cared-for team."], inkStory:"region2-story", inkKnot:"r2_09_cianwood", postBattleDialog:["Cared for. Take the sixth badge. Your old team opens another slot."] },
+  ],
+  signs: [
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_cianwood", enterAt:{x:13, y:8}, label:"Dojo 6 — Strike Gate" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ROUTE_8: any = {
+  name: "Route R2-8",
+  music: "route1_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:14, y:39 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16) return TILE.PATH;
+      if (y>=18&&y<=20) return TILE.PATH;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+  ],
+  signs: [
+    { x:14, y:10, text:"ROUTE R2-8\\nNorth to the Dojo 7 town (R2-10). South to the Dojo 6 town (R2-09)." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_mahogany", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:39, to:"r2_cianwood", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_MAHOGANY: any = {
+  name: "R2 Dojo 7 Town — name GAP FOR MARS",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x===13&&y===7) return TILE.DOOR;
+      if (x===14&&y===7) return TILE.DOOR;
+      if (x===4&&y===7) return TILE.DOOR;
+      if (x===5&&y===7) return TILE.DOOR;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"healer_mahogany", x:7, y:10, sprite:"👩‍⚕️", name:"Center Nurse", facing:"down", isHeal: true, dialog:["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."] },
+    { id:"shop_mahogany", x:22, y:10, sprite:"🛒", name:"Clerk", facing:"down", isShop: true, dialog:["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"R2-10 — DOJO 7 TOWN\\nName GAP FOR MARS (see region2-dialogue.json R2-10).\\nDojo 7 (Flame) is here. Lake: north. Hideout: west, under the town." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_lake", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:29, to:"r2_route_8", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+    { x:13, y:7, to:"r2_dojo_7", enterAt:{x:7, y:16}, label:"Dojo 7 — Flame Gate" },
+    { x:14, y:7, to:"r2_dojo_7", enterAt:{x:7, y:16}, label:"Dojo 7 — Flame Gate" },
+    { x:4, y:7, to:"r2_hideout", enterAt:{x:9, y:18}, label:"Hideout" },
+    { x:5, y:7, to:"r2_hideout", enterAt:{x:9, y:18}, label:"Hideout" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_LAKE: any = {
+  name: "Lake — R2-10 Waters",
+  music: "water_theme",
+  weather: "clear",
+  width: 28, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(28, 30, (x, y) => {
+      if (x===0||x===27||y===0||y===29) return TILE.WALL;
+      if (y>=26) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.WATER;
+    });
+  })(),
+  npcs: [
+    { id:"lake_watcher", x:14, y:27, sprite:"🎣", name:"Lake Watcher", facing:"down", dialog:["The lake is angry. Something red is in it, and it is not red by nature. Someone made it red.","The hideout is under the town. Raid it, and the lake calms. Do not raid it angry — raid it steady."], inkStory:"region2-story", inkKnot:"r2_10_mahogany" },
+    { id:"r2_009_bryn", x:10, y:27, sprite:"🎣", name:"Lake Watcher Bryn", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-009; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-009)."], battle:{ team:[{id:"028",name:"Krakenox",hp:85,maxHp:85,atk:85,def:85,spd:90,moves:["Tackle","Swift Movement"],type:"Water",level:44},{id:"024",name:"Floatcalf",hp:80,maxHp:80,atk:40,def:45,spd:40,moves:["Tackle","Swift Movement"],type:"Water",level:44}], reward:1100, badge:null } },
+  ],
+  signs: [
+    { x:18, y:27, text:"THE LAKE\\nSomething red is in it, and it is not red by nature." },
+  ],
+  exits: [
+    { x:14, y:29, to:"r2_mahogany", enterAt:{x:14, y:1}, dir:"down" },
+    { x:14, y:0, to:"r2_route_9", enterAt:{x:14, y:39}, dir:"up" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_HIDEOUT: any = {
+  name: "Hideout — Under the Town",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 20, height: 20,
+  playerStart: { x:9, y:18 },
+  tiles: (() => {
+    return buildMap(20, 20, (x, y) => {
+      if (x===9&&y===19) return TILE.DOOR;
+      if (x===0||x===19||y===0||y===19) return TILE.WALL;
+      if (x===9||x===10) return TILE.PATH;
+      if (y===10) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"r2_010_kest", x:6, y:10, sprite:"🕶️", name:"Syndicate Operative Kest", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-010; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-010)."], battle:{ team:[{id:"027",name:"Toxitacle",hp:60,maxHp:60,atk:60,def:60,spd:70,moves:["Tackle","Swift Movement"],type:"Water",level:45},{id:"008",name:"Duneclaw",hp:60,maxHp:60,atk:75,def:55,spd:65,moves:["Tackle","Swift Movement"],type:"Earth",level:45}], reward:1150, badge:null } },
+    { id:"r2_011_nyx", x:13, y:10, sprite:"🕶️", name:"Syndicate Operative Nyx", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-011; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-011)."], battle:{ team:[{id:"043",name:"Duskfiend",hp:60,maxHp:60,atk:60,def:60,spd:100,moves:["Tackle","Swift Movement"],type:"Dark",level:46},{id:"006",name:"Reaperdile",hp:85,maxHp:85,atk:105,def:100,spd:78,moves:["Tackle","Swift Movement"],type:"Chrome",level:46}], reward:1200, badge:null } },
+    { id:"syndicate_hideout_leader", x:9, y:4, sprite:"🕶️", name:"Syndicate Hideout Leader", facing:"down", dialog:["The lake is a battery. We charge it, we use it. You are not part of the circuit."] },
+  ],
+  signs: [
+    { x:9, y:12, text:"HIDEOUT\\nThe lake is a battery. We charge it, we use it." },
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:9, y:19, to:"r2_mahogany", enterAt:{x:4, y:8}, label:"Dojo 7 Town" },
+  ],
+  events: [],
+  encounters: []
+};
+
+// Dojo 7 — Flame Gate — Dojo theme Flame, badge Flame Fragment (trainer row R2-036). Leader is NAME GAP:
+// present and dialogued, battle + badge award owed by the trainer
+// wiring batch — not silently invented here (DOJO_3 precedent).
+export const R2_DOJO_7: any = {
+  name: "Dojo 7 — Flame Gate",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"r2_034_kindling", x:3, y:10, sprite:"🥋", name:"Acolyte Kindling", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-034; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-034)."], battle:{ team:[{id:"011",name:"Pyropaw",hp:60,maxHp:60,atk:65,def:55,spd:90,moves:["Tackle","Swift Movement"],type:"Flame",level:46}], reward:1150, badge:null } },
+    { id:"r2_035_flare", x:11, y:10, sprite:"🥋", name:"Acolyte Flare", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-035; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-035)."], battle:{ team:[{id:"044",name:"Ashemit",hp:40,maxHp:40,atk:50,def:40,spd:60,moves:["Tackle","Swift Movement"],type:"Flame",level:47},{id:"011",name:"Pyropaw",hp:60,maxHp:60,atk:65,def:55,spd:90,moves:["Tackle","Swift Movement"],type:"Flame",level:47}], reward:1200, badge:null } },
+    { id:"dojo_leader", x:7, y:2, sprite:"🥋", name:"Dojo Leader", facing:"down", dialog:["You calmed a lake. Now calm a dojo. Same skill, smaller water."], inkStory:"region2-story", inkKnot:"r2_10_mahogany", postBattleDialog:["Calm. Take the seventh badge. Your old team opens another slot."] },
+  ],
+  signs: [
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_mahogany", enterAt:{x:13, y:8}, label:"Dojo 7 — Flame Gate" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_ROUTE_9: any = {
+  name: "Route R2-9",
+  music: "route1_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:14, y:39 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16) return TILE.PATH;
+      if (y>=18&&y<=20) return TILE.PATH;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+  ],
+  signs: [
+    { x:14, y:10, text:"ROUTE R2-9\\nNorth to the Dojo 8 town (R2-11). South to the lake (R2-10)." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_blackthorn", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:39, to:"r2_lake", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_BLACKTHORN: any = {
+  name: "R2 Dojo 8 Town — name GAP FOR MARS",
+  music: "fields_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x===13&&y===7) return TILE.DOOR;
+      if (x===14&&y===7) return TILE.DOOR;
+      if (x===4&&y===7) return TILE.DOOR;
+      if (x===5&&y===7) return TILE.DOOR;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"healer_blackthorn", x:7, y:10, sprite:"👩‍⚕️", name:"Center Nurse", facing:"down", isHeal: true, dialog:["Welcome to the MochiiPlex. Your team is tired? Rest here. It is free, and it is always free."] },
+    { id:"shop_blackthorn", x:22, y:10, sprite:"🛒", name:"Clerk", facing:"down", isShop: true, dialog:["Capture Cubes, Mend Patches, and a few Data Cards. Come back when you have more CR — the good stock comes with the badges."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"R2-11 — DOJO 8 TOWN\\nName GAP FOR MARS (see region2-dialogue.json R2-11).\\nDojo 8 (Mythic) is here. The den: west." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_victory_route", enterAt:{x:14, y:39}, dir:"up", condition:"badges>=16" },
+    { x:14, y:29, to:"r2_route_9", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+    { x:13, y:7, to:"r2_dojo_8", enterAt:{x:7, y:16}, label:"Dojo 8 — Mythic Gate" },
+    { x:14, y:7, to:"r2_dojo_8", enterAt:{x:7, y:16}, label:"Dojo 8 — Mythic Gate" },
+    { x:4, y:7, to:"r2_den", enterAt:{x:9, y:18}, label:"Den" },
+    { x:5, y:7, to:"r2_den", enterAt:{x:9, y:18}, label:"Den" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_DEN: any = {
+  name: "Den — Dragon Trial",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 20, height: 20,
+  playerStart: { x:9, y:18 },
+  tiles: (() => {
+    return buildMap(20, 20, (x, y) => {
+      if (x===9&&y===19) return TILE.DOOR;
+      if (x===0||x===19||y===0||y===19) return TILE.WALL;
+      if (x===9||x===10) return TILE.PATH;
+      if (y===10) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"den_elder", x:9, y:10, sprite:"🐉", name:"Den Elder", facing:"down", dialog:["The den is a trial, not a test. A test asks what you know. A trial asks who you are.","Walk the den. If you come out, the badge is already yours. The battle just confirms it."], inkStory:"region2-story", inkKnot:"r2_11_blackthorn" },
+  ],
+  signs: [
+    { x:9, y:12, text:"THE DEN\\nA trial, not a test. Walk it. If you come out, the badge is already yours." },
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:9, y:19, to:"r2_blackthorn", enterAt:{x:4, y:8}, label:"Dojo 8 Town" },
+  ],
+  events: [],
+  encounters: []
+};
+
+// Dojo 8 — Mythic Gate — Dojo theme Mythic, badge Mythic Fragment (trainer row R2-039). Leader is NAME GAP:
+// present and dialogued, battle + badge award owed by the trainer
+// wiring batch — not silently invented here (DOJO_3 precedent).
+export const R2_DOJO_8: any = {
+  name: "Dojo 8 — Mythic Gate",
+  music: "dojo_theme",
+  weather: "clear",
+  interior: true,
+  width: 16, height: 18,
+  playerStart: { x:7, y:16 },
+  tiles: (() => {
+    return buildMap(16, 18, (x, y) => {
+      if (x===7&&y===17) return TILE.DOOR;
+      if (x===0||x===15||y===0||y===17) return TILE.WALL;
+      return TILE.PATH;
+    });
+  })(),
+  npcs: [
+    { id:"r2_037_myth", x:3, y:10, sprite:"🥋", name:"Acolyte Myth", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-037; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-037)."], battle:{ team:[{id:"002",name:"Tiidebiite",hp:59,maxHp:59,atk:63,def:80,spd:58,moves:["Tackle","Swift Movement"],type:"Water",level:52}], reward:1250, badge:null } },
+    { id:"r2_038_legend", x:11, y:10, sprite:"🥋", name:"Acolyte Legend", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-038; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-038)."], battle:{ team:[{id:"044",name:"Ashemit",hp:40,maxHp:40,atk:50,def:40,spd:60,moves:["Tackle","Swift Movement"],type:"Flame",level:53},{id:"002",name:"Tiidebiite",hp:59,maxHp:59,atk:63,def:80,spd:58,moves:["Tackle","Swift Movement"],type:"Water",level:53}], reward:1300, badge:null } },
+    { id:"dojo_leader", x:7, y:2, sprite:"🥋", name:"Dojo Leader", facing:"down", dialog:["You walked the den. Now stand in it. Show me the trainer the den saw."], inkStory:"region2-story", inkKnot:"r2_11_blackthorn", postBattleDialog:["The den saw you. Take the eighth badge. Your old team is fully open now."] },
+  ],
+  signs: [
+  ],
+  exits: [
+  ],
+  doors: [
+    { x:7, y:17, to:"r2_blackthorn", enterAt:{x:13, y:8}, label:"Dojo 8 — Mythic Gate" },
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_VICTORY_ROUTE: any = {
+  name: "Victory Route — Region 2 Gauntlet",
+  music: "route1_theme",
+  weather: "clear",
+  width: 28, height: 40,
+  playerStart: { x:14, y:39 },
+  tiles: (() => {
+    return buildMap(28, 40, (x, y) => {
+      if (x===0||x===27||y===0||y===39) return TILE.WALL;
+      if (x>=12&&x<=16) return TILE.PATH;
+      if (y>=18&&y<=20) return TILE.PATH;
+      return TILE.TALL_GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"victory_gate_keeper", x:14, y:20, sprite:"🏔️", name:"Victory Gate Keeper", facing:"down", dialog:["Eight badges. That is the gate, and it is the only gate. Walk it. Do not run it — run it and you will miss the trainers who teach you."], inkStory:"region2-story", inkKnot:"r2_12_victory_route" },
+    { id:"r2_012_taro", x:10, y:15, sprite:"🎖️", name:"Veteran Taro", facing:"down", dialog:["I have walked this route in Region 1 and here. The route remembers. Show me you do too."], postBattleDialog:["You remember. Good. The Plateau is next, and it remembers more."], battle:{ team:[{id:"009",name:"Oblivirex",hp:80,maxHp:80,atk:100,def:80,spd:85,moves:["Tackle","Swift Movement"],type:"Earth",level:56},{id:"015",name:"Quakehound",hp:85,maxHp:85,atk:110,def:95,spd:90,moves:["Tackle","Swift Movement"],type:"Earth",level:56}], reward:1400, badge:null } },
+    { id:"r2_013_iska", x:18, y:15, sprite:"🎖️", name:"Veteran Iska", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-013; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-013)."], battle:{ team:[{id:"021",name:"Stormtalon",hp:80,maxHp:80,atk:105,def:75,spd:110,moves:["Tackle","Swift Movement"],type:"Flying",level:57},{id:"046",name:"Yogiferno",hp:80,maxHp:80,atk:90,def:70,spd:110,moves:["Tackle","Swift Movement"],type:"Flame",level:57}], reward:1450, badge:null } },
+    { id:"r2_014_ruel", x:10, y:25, sprite:"🎖️", name:"Veteran Ruel", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-014; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-014)."], battle:{ team:[{id:"003",name:"AquariiOS",hp:79,maxHp:79,atk:83,def:100,spd:78,moves:["Tackle","Swift Movement"],type:"Water",level:58},{id:"034",name:"Gorokappa",hp:80,maxHp:80,atk:105,def:125,spd:70,moves:["Tackle","Swift Movement"],type:"Chrome",level:58}], reward:1500, badge:null } },
+    { id:"r2_015_miri", x:18, y:25, sprite:"🎖️", name:"Veteran Miri", facing:"down", dialog:["PLACEHOLDER — battle line GAP FOR MARS (trainer row R2-015; Mars fills the line)."], postBattleDialog:["PLACEHOLDER — post-battle line GAP FOR MARS (trainer row R2-015)."], battle:{ team:[{id:"012",name:"Manticlaw",hp:75,maxHp:75,atk:90,def:70,spd:110,moves:["Tackle","Swift Movement"],type:"Flame",level:59},{id:"028",name:"Krakenox",hp:85,maxHp:85,atk:85,def:85,spd:90,moves:["Tackle","Swift Movement"],type:"Water",level:59}], reward:1550, badge:null } },
+  ],
+  signs: [
+    { x:14, y:10, text:"VICTORY ROUTE\\nNorth to the Plateau, second ascent. South to the Dojo 8 town (R2-11)." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_plateau", enterAt:{x:14, y:29}, dir:"up" },
+    { x:14, y:39, to:"r2_blackthorn", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_PLATEAU: any = {
+  name: "Mainframe Plateau — Second Ascent",
+  music: "route1_theme",
+  weather: "clear",
+  width: 30, height: 30,
+  playerStart: { x:14, y:29 },
+  tiles: (() => {
+    return buildMap(30, 30, (x, y) => {
+      if (x===0||x===29||y===0||y===29) return TILE.WALL;
+      if (x>=2&&x<=6&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=10&&x<=16&&y>=2&&y<=6) return TILE.BUILDING;
+      if (x>=20&&x<=26&&y>=2&&y<=6) return TILE.BUILDING;
+      if (y===15) return TILE.PATH;
+      if (x===14) return TILE.PATH;
+      return TILE.GRASS;
+    });
+  })(),
+  npcs: [
+    { id:"plateau_attendant", x:14, y:20, sprite:"🧑", name:"Plateau Attendant", facing:"down", dialog:["Second ascent. Same Plateau, different trainer. The Hall has a second page for you, if you earn it."], inkStory:"region2-story", inkKnot:"r2_13_plateau" },
+    { id:"elite_1", x:8, y:10, sprite:"🥋", name:"Elite 1", facing:"down", dialog:["I guard the door. Pass me, and you are no longer a visitor."], postBattleDialog:["Pass. The stairs are yours."] },
+    { id:"elite_2", x:12, y:10, sprite:"🥋", name:"Elite 2", facing:"down", dialog:["I guard the stairs. Climb, if you can."], postBattleDialog:["Climb. The hall is yours."] },
+    { id:"elite_3", x:16, y:10, sprite:"🥋", name:"Elite 3", facing:"down", dialog:["I guard the hall. The hall remembers everyone who stood here."], postBattleDialog:["It will remember you. The champion's door is next."] },
+    { id:"elite_4", x:20, y:10, sprite:"🥋", name:"Elite 4", facing:"down", dialog:["I guard the champion's door. Knock twice, and mean it."], postBattleDialog:["Knock. Mean it. Go."] },
+    { id:"champion", x:14, y:4, sprite:"👑", name:"Champion", facing:"down", dialog:["You have beaten a region that remembers you. Now beat the trainer it remembers most."], postBattleDialog:["You have. The Hall remembers you twice now. Go back and finish what you started in Region 1 — it is waiting, stronger."] },
+  ],
+  signs: [
+    { x:14, y:14, text:"HALL OF RECORDS\\nSecond entry is set on Champion defeat. Flag r2_hall_second_entry — owed: no Champion battle yet." },
+  ],
+  exits: [
+    { x:14, y:0, to:"r2_frost_peak", enterAt:{x:12, y:22}, dir:"up" },
+    { x:14, y:29, to:"r2_victory_route", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
+  events: [],
+  encounters: []
+};
+
+export const R2_FROST_PEAK: any = {
+  name: "Frost Peak — First Champion",
+  music: "fields_theme",
+  weather: "clear",
+  width: 24, height: 24,
+  playerStart: { x:12, y:22 },
+  tiles: (() => {
+    return buildMap(24, 24, (x, y) => {
+      if (x===0||x===23||y===0||y===23) return TILE.WALL;
+      if (y===12) return TILE.PATH;
+      if (x===12) return TILE.PATH;
+      return TILE.ICE;
+    });
+  })(),
+  npcs: [
+    { id:"frost_peak_guide", x:12, y:16, sprite:"🏔️", name:"Frost Peak Guide", facing:"down", dialog:["The top is snow and silence. The First Champion waits there. He does not talk. He battles."], inkStory:"region2-story", inkKnot:"r2_14_frost_peak" },
+    { id:"prof_aeon_radio", x:8, y:16, sprite:"📻", name:"Prof. Aeon", facing:"down", dialog:["You beat the First Champion. The expedition signal is clean. Take the storm route. Region 3 is on the other side of it."] },
+    { id:"first_champion", x:12, y:4, sprite:"👑", name:"First Champion", facing:"down", dialog:["…"], postBattleDialog:["The sea route is open. Storm-locked, but open. Region 3 is waiting."] },
+  ],
+  signs: [
+    { x:12, y:12, text:"FROST PEAK\\nThe First Champion waits at the top. He does not talk. He battles.\\nStorm route to Region 3: owed by the Region 3 pass (flag r3_storm_route_open)." },
+  ],
+  exits: [
+    { x:12, y:23, to:"r2_plateau", enterAt:{x:14, y:1}, dir:"down" },
+  ],
+  doors: [
+  ],
   events: [],
   encounters: []
 };
@@ -1835,7 +3321,50 @@ export const FULL_WORLD: Record<string, any> = {
   data_isle_5: DATA_ISLE_5,
   data_isle_6: DATA_ISLE_6,
   data_isle_7: DATA_ISLE_7,
-  region2_arrival: REGION2_ARRIVAL
+  region2_arrival: REGION2_ARRIVAL,
+  r2_dawnfield: R2_DAWNFIELD,
+  r2_mochiiplex_dawnfield: R2_MOCHIIPLEX_DAWNFIELD,
+  r2_route_1: R2_ROUTE_1,
+  r2_cherryport: R2_CHERRYPORT,
+  r2_route_2: R2_ROUTE_2,
+  r2_violet: R2_VIOLET,
+  r2_tower: R2_TOWER,
+  r2_dojo_1: R2_DOJO_1,
+  r2_route_3: R2_ROUTE_3,
+  r2_azalea: R2_AZALEA,
+  r2_well: R2_WELL,
+  r2_dojo_2: R2_DOJO_2,
+  r2_route_4: R2_ROUTE_4,
+  r2_ilex_forest: R2_ILEX_FOREST,
+  r2_shrine: R2_SHRINE,
+  r2_route_5: R2_ROUTE_5,
+  r2_goldenrod: R2_GOLDENROD,
+  r2_radio_tower: R2_RADIO_TOWER,
+  r2_garden_branch: R2_GARDEN_BRANCH,
+  r2_dojo_3: R2_DOJO_3,
+  r2_route_6: R2_ROUTE_6,
+  r2_ecruteak: R2_ECRUTEAK,
+  r2_burned_tower: R2_BURNED_TOWER,
+  r2_dojo_4: R2_DOJO_4,
+  r2_route_7: R2_ROUTE_7,
+  r2_olivine: R2_OLIVINE,
+  r2_lighthouse: R2_LIGHTHOUSE,
+  r2_dojo_5: R2_DOJO_5,
+  r2_sea_road: R2_SEA_ROAD,
+  r2_cianwood: R2_CIANWOOD,
+  r2_dojo_6: R2_DOJO_6,
+  r2_route_8: R2_ROUTE_8,
+  r2_mahogany: R2_MAHOGANY,
+  r2_lake: R2_LAKE,
+  r2_hideout: R2_HIDEOUT,
+  r2_dojo_7: R2_DOJO_7,
+  r2_route_9: R2_ROUTE_9,
+  r2_blackthorn: R2_BLACKTHORN,
+  r2_den: R2_DEN,
+  r2_dojo_8: R2_DOJO_8,
+  r2_victory_route: R2_VICTORY_ROUTE,
+  r2_plateau: R2_PLATEAU,
+  r2_frost_peak: R2_FROST_PEAK
 };
 
 // Encounter mirror (stub-kill S-6, 2026-10-29): the core tables in
