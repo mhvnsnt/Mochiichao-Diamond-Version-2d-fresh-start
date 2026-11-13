@@ -18,9 +18,10 @@ jobs:
     # tsc --noEmit OOMs at Node's default ~2 GB heap on this repo
     # (tsconfig includes src + tests + tools with resolveJsonModule;
     # PRs #407/#408/#409 all died with "JavaScript heap out of memory",
-    # exit 134, 0 TS errors). Give every Node step 4 GB of heap.
+    # exit 134, 0 TS errors). 4 GB still OOM'd on PR #410's own run
+    # (job 131600191842), so give every Node step 6 GB of heap.
     env:
-      NODE_OPTIONS: --max-old-space-size=4096
+      NODE_OPTIONS: --max-old-space-size=6144
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
