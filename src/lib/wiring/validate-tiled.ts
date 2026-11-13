@@ -17,22 +17,22 @@
  *   - keys: every exit/door target id must be a map in this set.
  *   - exits: array form (x,y in this map, enterAt in the target map)
  *     or the legacy Record form (enterAt in the target map, gate flag
- *     name if present); hmNeeded, when present, must be a string.
+ *     name if present); hmNeeded, when present, must be a string;
+ *     oneWay, when present, must be a boolean.
  *   - doors: x,y in this map, enterAt in the target map.
  *   - positions: playerStart, every npc and every sign inside the map.
  *   - wild: exactly one of wildPool (non-empty) or noWild=true.
+ *   - return-exit: every exit/door must have a return exit/door from
+ *     its target map back to this map, unless it is oneWay (the
+ *     moving-truck door is the only oneWay link: you step off the
+ *     truck and cannot go back). A link to a missing map is already
+ *     an error and is not double-reported here.
+ *   - town: town, when present, must be a boolean; townServices, when
+ *     present, must name a map in this set. A town (town === true)
+ *     must have a sign on the map and heal + shop, either on the map
+ *     or on its townServices map (Binary Fields -> mochiiplex_1).
  * Warnings (do not fail the run): a map no exit/door points at
- * (e.g. a start-only map), a map with no exit and no door, and an
- * enterAt that lands outside sector0.json only. sector0.json is a
- * pre-existing simplified sample (20x20) left untouched by this
- * change, while FullWorldMaps.ts sector0 is 32x28 — so new maps
- * derived from FullWorldMaps.ts legitimately enter sector0 at
- * coordinates the sample cannot hold (boot_bay -> [15,27],
- * sector0_rival_house door -> [26,9]). Those two are warnings
- * until sector0.json is regenerated from FullWorldMaps.ts; a
- * missing target map is a hard error for every map, sector0
- * included, and enterAt bounds into every other map are hard
- * errors too.
+ * (e.g. a start-only map) and a map with no exit and no door.
  *
  * Run: npx tsx src/lib/wiring/validate-tiled.ts
  * Exit 0 = every map passes. This file imports no game code, so it
@@ -100,6 +100,26 @@ for (const file of files) {
 
 // Second pass: every cross-map check needs the full key set first.
 const targeted = new Set<string>();
+
+// Every exit/door link a map carries, in either exits form.
+const linksOf = (d: Record<string, unknown>): { kind: string; to: string; oneWay: unknown }[] => {
+  const out: { kind: string; to: string; oneWay: unknown }[] = [];
+  if (Array.isArray(d.exits)) {
+    for (const e of d.exits as Record<string, unknown>[]) {
+      out.push({ kind: "exit", to: String(e.to), oneWay: e.oneWay });
+    }
+  } else if (d.exits !== undefined && typeof d.exits === "object") {
+    for (const e of Object.values(d.exits as Record<string, Record<string, unknown>>)) {
+      out.push({ kind: "exit", to: String(e.to), oneWay: e.oneWay });
+    }
+  }
+  if (Array.isArray(d.doors)) {
+    for (const dr of d.doors as Record<string, unknown>[]) {
+      out.push({ kind: "door", to: String(dr.to), oneWay: dr.oneWay });
+    }
+  }
+  return out;
+};
 for (const [id, data] of parsed) {
   const info = maps.get(id) as MapInfo;
   const { width, height } = info;
@@ -175,13 +195,7 @@ for (const [id, data] of parsed) {
     if (!isPair(enterAt)) {
       errors.push(`${tag}: ${kind} ${label} enterAt ${JSON.stringify(enterAt)} is not an [x,y] pair`);
     } else if (!inBounds(enterAt[0], enterAt[1], target.width, target.height)) {
-      // Legacy-sample exception, documented in the header: sector0.json
-      // is 20x20 while FullWorldMaps.ts sector0 is 32x28.
-      if (to === "sector0") {
-        warnings.push(`${tag}: ${kind} ${label} enterAt ${JSON.stringify(enterAt)} outside sector0 sample (20x20); valid in FullWorldMaps sector0 (32x28) — sector0.json regeneration owed`);
-      } else {
-        errors.push(`${tag}: ${kind} ${label} enterAt ${JSON.stringify(enterAt)} outside ${to} (${target.width}x${target.height})`);
-      }
+      errors.push(`${tag}: ${kind} ${label} enterAt ${JSON.stringify(enterAt)} outside ${to} (${target.width}x${target.height})`);
     }
   };
   // Exits: array form (new maps, one entry per exit tile) or the
@@ -195,6 +209,9 @@ for (const [id, data] of parsed) {
       if (e.hmNeeded !== undefined && typeof e.hmNeeded !== "string") {
         errors.push(`${tag}: exit ${i} hmNeeded must be a string`);
       }
+      if (e.oneWay !== undefined && typeof e.oneWay !== "boolean") {
+        errors.push(`${tag}: exit ${i} oneWay must be a boolean`);
+      }
       if (e.gate !== undefined && (typeof e.gate !== "string" || !/^[a-z0-9_]+$/.test(e.gate))) {
         errors.push(`${tag}: exit ${i} gate ${String(e.gate)} is not a flag name`);
       }
@@ -204,6 +221,9 @@ for (const [id, data] of parsed) {
     for (const [key, exit] of Object.entries(data.exits as Record<string, Record<string, unknown>>)) {
       if (exit.gate !== undefined && (typeof exit.gate !== "string" || !/^[a-z0-9_]+$/.test(exit.gate))) {
         errors.push(`${tag}: exit ${key} gate ${String(exit.gate)} is not a flag name`);
+      }
+      if (exit.oneWay !== undefined && typeof exit.oneWay !== "boolean") {
+        errors.push(`${tag}: exit ${key} oneWay must be a boolean`);
       }
       checkTarget("exit", key, exit.to, exit.enterAt);
     }
@@ -217,10 +237,49 @@ for (const [id, data] of parsed) {
         errors.push(`${tag}: door ${i} at (${String(d.x)},${String(d.y)}) outside ${width}x${height}`);
       }
       if (d.label !== undefined && typeof d.label !== "string") errors.push(`${tag}: door ${i} label must be a string`);
+      if (d.oneWay !== undefined && typeof d.oneWay !== "boolean") errors.push(`${tag}: door ${i} oneWay must be a boolean`);
       checkTarget("door", String(i), d.to, d.enterAt);
     });
   } else if (data.doors !== undefined) {
     errors.push(`${tag}: doors must be an array`);
+  }
+  // Town marker + enforcement: a town map (town === true) must have a
+  // sign on the map and heal + shop, either on the map or on its
+  // townServices map (Binary Fields -> mochiiplex_1). townServices
+  // must name a map in this set.
+  if (data.town !== undefined && typeof data.town !== "boolean") {
+    errors.push(`${tag}: town must be a boolean`);
+  }
+  if (data.townServices !== undefined) {
+    if (typeof data.townServices !== "string" || !data.townServices) {
+      errors.push(`${tag}: townServices must be a non-empty string`);
+    } else if (!maps.has(data.townServices)) {
+      errors.push(`${tag}: townServices points to missing map ${data.townServices}`);
+    }
+  }
+  if (data.town === true) {
+    const services =
+      typeof data.townServices === "string" ? parsed.get(data.townServices) : undefined;
+    const hasRole = (role: string) =>
+      (Array.isArray(data.npcs) &&
+        (data.npcs as Record<string, unknown>[]).some((n) => n.role === role)) ||
+      (services !== undefined &&
+        Array.isArray(services.npcs) &&
+        (services.npcs as Record<string, unknown>[]).some((n) => n.role === role));
+    if (!hasRole("heal")) errors.push(`${tag}: town has no heal NPC`);
+    if (!hasRole("shop")) errors.push(`${tag}: town has no shop NPC`);
+    if (!Array.isArray(data.signs) || data.signs.length === 0) errors.push(`${tag}: town has no sign`);
+  }
+  // Return-exit check: every exit/door needs a way back from the
+  // target map, unless it is oneWay (the moving-truck door). A link
+  // to a missing map is already an error above and is skipped here so
+  // it is reported once.
+  for (const link of linksOf(data)) {
+    if (link.oneWay === true) continue;
+    const target = parsed.get(link.to);
+    if (!target) continue;
+    const back = linksOf(target).some((l) => l.to === tag);
+    if (!back) errors.push(`${tag}: ${link.kind} to ${link.to} has no return exit/door back to ${tag}`);
   }
   const hasPool = Array.isArray(data.wildPool) && data.wildPool.length > 0;
   const noWild = data.noWild === true;
