@@ -259,9 +259,9 @@ describe('trainer-teams map parity (wiring effect lock)', () => {
     return [...seen.values()];
   }
 
-  it('wires 123 of 129 unique map trainer battles; 6 keep hand-built teams', () => {
+  it('wires 124 of 130 unique map trainer battles; 6 keep hand-built teams', () => {
     const battles = uniqueMapBattles();
-    expect(battles.length).toBe(129);
+    expect(battles.length).toBe(130);
     const matched: string[] = [];
     const unmatched: string[] = [];
     for (const b of battles) {
@@ -321,7 +321,7 @@ describe('trainer-teams map parity (wiring effect lock)', () => {
         'Veteran Miri',
         'Veteran Ruel',
         'Veteran Taro',
-        // Regions 3-5 (75, this PR): 26 Region 3 + 26 Region 4 + 23 Region 5.
+        // Regions 3-5 (76, this PR): 26 Region 3 + 26 Region 4 + 24 Region 5.
         'Acolyte Ash',
         'Acolyte Bloom',
         'Acolyte Boulder',
@@ -374,6 +374,7 @@ describe('trainer-teams map parity (wiring effect lock)', () => {
         'Arena Runner Pax',
         'Cave Painter Rune',
         'Flower Walker Petal',
+        'Grand Champion Mythar',
         'Land Faction Terra',
         'Lore Keeper Ora',
         'Rift Watcher Crag',

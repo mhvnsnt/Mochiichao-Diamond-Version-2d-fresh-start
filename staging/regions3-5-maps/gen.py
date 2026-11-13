@@ -152,7 +152,7 @@ def battle_npc(n, row, x, y, sprite="🧢"):
     """Wired battle NPC from a trainer row. Name = class + name (R2 convention),
     except Hex (R3-001) whose display name is the row label 'lab-exit battle' —
     the NPC is named 'Hex', inline team mirrors the row exactly."""
-    name = "Hex" if row["id"] == "R3-001" else f'{row["trainerClass"]} {row["name"]}'
+    name = "Hex" if row["id"] == "R3-001" else (f'{row["trainerClass"]} {row["name"]}' if row["name"] else row["trainerClass"])
     slug_name = "hex" if row["id"] == "R3-001" else slug(row["name"] or row["trainerClass"])
     nid = f'{row["id"].lower().replace("-", "_")}_{slug_name}'
     return {"id": nid, "x": x, "y": y, "sprite": sprite, "name": name,
@@ -1345,13 +1345,21 @@ def build_region5():
           "dialog": e16["hex"]["pre"], "post": e16["hex"]["post"],
           "ink": ("region5-story", entry_knot(n, "R5-16"))}] + challengers,
         "GRAND TOURNAMENT\nEvery champion, every region, one bracket. Win it, and you face Mythar."))
-    # Mythar final: attendant + Aeon only. R5-047 Mythar (species 331, not in
-    # SPECIES_DB) gets NO battle NPC; the R5-17 champion block is Mythar's
-    # battle lines, owed with the battle itself.
+    # Mythar final: attendant + Aeon + Grand Champion Mythar (R5-047).
+    # Species 331 IS in SPECIES_DB (species.ts key "331"); the R5-17
+    # champion block is Mythar's battle lines, wired with the battle.
+    # NOTE: src/data/core/species.json lists Mythar as id "047" (Mythic) —
+    # that file disagrees with species.ts ("331", DRAGON) and the trainer
+    # rows; reconciling the two is a separate data decision, NOT this PR.
+    mythar_npc = battle_npc(n, T["R5-047"], 12, 4, sprite="✨")
+    mythar_npc["dialog"] = e17["champion"]["pre"]
+    mythar_npc["post"] = e17["champion"]["post"]
+    mythar_npc["ink"] = ("region5-story", entry_knot(n, "R5-17"))
     MAPS.append(site_map(n, "r5_mythar_final", "Mythar — True Final",
                          None, "r5_grand_tournament",
                          [dialogue_npc(n, e17, "Plateau Attendant", 12, 16, "🧑", nid="plateau_attendant_final"),
-                          dialogue_npc(n, e17, "Prof. Aeon", 8, 16, "🔬", nid="prof_aeon_mythar")],
+                          dialogue_npc(n, e17, "Prof. Aeon", 8, 16, "🔬", nid="prof_aeon_mythar"),
+                          mythar_npc],
                          "MYTHAR — TRUE FINAL\nFinal ascent. This is not a region champion. This is the champion of the whole Mainframe."))
 
 # ================================================================= EMISSION
@@ -1745,11 +1753,11 @@ def emit_regions_test(matched, unmatched):
                          if "battle" in npc})
     # The Hex lab battle (R3-001) is wired but never resolves (see the
     # trainer-teams parity test); the row-matching check below covers the
-    # other 75, and Hex is pinned separately.
-    assert len(wired_rows) == 76, f"expected 76 wired rows, got {len(wired_rows)}"
+    # other 76, and Hex is pinned separately.
+    assert len(wired_rows) == 77, f"expected 77 wired rows, got {len(wired_rows)}"
     assert "R3-001" in wired_rows
     wired_match_rows = [r for r in wired_rows if r != "R3-001"]
-    assert len(wired_match_rows) == 75
+    assert len(wired_match_rows) == 76
     pools_by_map = {map_id: {"method": method, "species": sorted({s["speciesId"] for s in slots})}
                     for area, map_id, method, rate, slots in POOLS}
     test = """// Regions 3-5 maps — Regions 3-5 skeleton tests (2026-11-13).
@@ -1767,7 +1775,7 @@ def emit_regions_test(matched, unmatched):
 // What this does NOT pin (owed, see docs/regions3-5-maps-audit-20261113.md):
 // dojo leader battles + badge awards (leaders are NAME GAP, dialogue-only;
 // R5-012 names Hex as Dojo 1 leader against R5-04's NAME GAP — flagged for
-// Mars), Elite / Champion / Mythar battles, Front Recruit battles
+// Mars), Elite / Champion battles, Front Recruit battles
 // (R5-003/004), Battle Zone / Tournament / Frontier Brain battles, wild
 // pools on the other routes, and the R5 tower climbers (no tower maps).
 import { describe, it, expect } from "vitest";
@@ -1824,7 +1832,7 @@ const ENTRY_KNOTS = [
 @@ENTRY_KNOTS@@
 ];
 // Trainer rows wired as battle NPCs in this PR: 27 Region 3 + 26 Region 4
-// + 23 Region 5 = 76 NPCs, of which 75 resolve to rows. R3-001 (Hex, lab
+// + 24 Region 5 = 77 NPCs, of which 76 resolve to rows. R3-001 (Hex, lab
 // battle) is the exception: the NPC is named "Hex", which never resolves,
 // so its row is pinned separately below and NOT in this list.
 const WIRED_ROWS = [
@@ -1973,7 +1981,7 @@ describe("regions3-5 maps — Regions 3-5 skeleton", () => {
     }
   });
 
-  it("75 wired battle NPCs match their trainer rows (species + levels + reward)", () => {
+  it("76 wired battle NPCs match their trainer rows (species + levels + reward)", () => {
     const rows: TrainerTeam[] = [
       ...(TRAINERS_REGION_3 as TrainerTeam[]),
       ...(TRAINERS_REGION_4 as TrainerTeam[]),
@@ -2071,12 +2079,25 @@ describe("regions3-5 maps — Regions 3-5 skeleton", () => {
     expect(hex.dialog[0]).toContain("I am here too.");
   });
 
-  it("Mythar final: attendant + Aeon only, no Mythar battle NPC", () => {
+  it("Mythar final: attendant + Aeon + Grand Champion Mythar battle (row R5-047)", () => {
     const npcs = allNpcs(M("r5_mythar_final"));
-    expect(npcs.length).toBe(2);
+    expect(npcs.length).toBe(3);
     expect(npcs.some((n) => n.name === "Plateau Attendant")).toBe(true);
     expect(npcs.some((n) => n.name === "Prof. Aeon")).toBe(true);
-    expect(npcs.filter((n) => n.battle).length).toBe(0);
+    const mythar = npcs.find((n) => n.name === "Grand Champion Mythar");
+    expect(mythar).toBeDefined();
+    expect(mythar!.battle).toBeDefined();
+    expect(mythar!.battle.team.map((m: any) => `${m.id}@${m.level}`)).toEqual([
+      "331@100",
+      "003@100",
+      "046@100",
+      "043@100",
+      "028@100",
+      "021@100",
+    ]);
+    expect(mythar!.battle.reward).toBe(20000);
+    expect(mythar!.inkKnot).toBe("r5_17_mythar_final");
+    expect(mythar!.dialog[0]).toContain("I am not a region champion");
     expect(npcs.some((n) => n.name === "Mythar")).toBe(false);
   });
 });
@@ -2198,7 +2219,7 @@ non-battle NPCs there.
 ## 4. Trainers wired from rows (nothing invented)
 
 `trainers-region3.ts` has 46 rows, `trainers-region4.ts` 43 rows,
-`trainers-region5.ts` 47 rows (136 rows). This PR wires 76/136 = 56%
+`trainers-region5.ts` 47 rows (136 rows). This PR wires 77/136 = 57%
 as battle NPCs; the rest are dialogue-only slots (see §5).
 
 - Region 3, 27/46: R3-001 Hex lab battle (named "Hex"), R3-002/003
@@ -2207,8 +2228,8 @@ as battle NPCs; the rest are dialogue-only slots (see §5).
 - Region 4, 26/43: R4-001/002 (Sandgem Route), R4-003/004 (Floaroma
   Valley, wired on the town map), R4-005/006 (Celestic), R4-007..010
   (Victory Route), 16 dojo acolytes.
-- Region 5, 23/47: R5-001/002 (Start City Route), R5-005..009 (Victory
-  Route — five veterans, not four), 16 dojo acolytes.
+- Region 5, 24/47: R5-001/002 (Start City Route), R5-005..009 (Victory
+  Route — five veterans, not four), R5-047 Mythar (true final), 16 dojo acolytes.
 - Inline teams mirror the row (species + levels); the resolver swaps
   in the row team at battle time (`trainer-teams-resolver.ts`). Inline
   stats are the species' `SPECIES_DB` base stats, moves are
@@ -2216,7 +2237,8 @@ as battle NPCs; the rest are dialogue-only slots (see §5).
   NOT in the trainer file: each battle NPC carries one labelled
   placeholder line. Exceptions: the first Veteran on each victory route
   carries the entry's beats veteran lines (R3-11 / R4-14 / R5-14), and
-  the Hex lab battle carries the R3-01 hex pre/post lines.
+  the Hex lab battle carries the R3-01 hex pre/post lines, and the Mythar
+  true final carries the R5-17 champion pre/post lines.
 - Dojo themes + badge names come from the rows (R3: Core / Strike /
   Chrome / Flame / Beast / Aero / Mythic / Water; R4: Core / Flora /
   Umbral / Strike / Water / Chrome / Water-ice / Chrome; R5: Beast /
@@ -2242,9 +2264,14 @@ as battle NPCs; the rest are dialogue-only slots (see §5).
 - R5-039..044 Tournament rounds + R4-011..013 Battle Zone + R4-014
   Rift Warden: NAME GAP rows → dialogue-only NPCs with PLACEHOLDER
   lines, battles owed.
-- R5-047 Mythar: species 331 not in `SPECIES_DB` → no battle NPC;
-  the Mythar final map holds the attendant + Prof. Aeon only. The
-  R5-17 champion block is Mythar's battle lines, owed with the battle.
+- R5-047 Mythar: WIRED (this PR) — species 331 IS in `SPECIES_DB`
+  (species.ts key "331"); the Mythar final map now holds the attendant
+  + Prof. Aeon + the Grand Champion Mythar battle NPC (team
+  331/003/046/043/028/021 Lv100, reward 20000, ink knot
+  r5_17_mythar_final). NOTE: src/data/core/species.json lists Mythar
+  as id "047" (Mythic) — that file disagrees with species.ts ("331",
+  DRAGON) and the trainer rows; reconciling the two is a separate data
+  decision, NOT this PR.
 - R5-045/046 Tower Climbers (Bright / Umbral Tower, post-game): no
   tower maps exist — left unwired, owed.
 - R3-043..046 Frontier Brains: no Frontier Arena battle maps yet —
@@ -2319,7 +2346,7 @@ those stretches.
 
 - `tests/regions3-5-maps.test.ts` (new, added to `test:tests` in
   `package.json`): 15 tests — key resolution, reachability, gates,
-  towns, dead doors, dojo shape, 75 wired rows + Hex mirror, 7 pools,
+  towns, dead doors, dojo shape, 76 wired rows + Hex mirror, 7 pools,
   48 Ink knots, plateau fold, Grand Tournament, Mythar final. Local
   checks run before upload (no runnable checkout exists — same
   constraint as the R2 audit §11): Python pre-flight below. CI is the
@@ -2338,8 +2365,8 @@ those stretches.
 - `src/data/core/map-battle-bg.json` (modified): 126 new bindings.
 - `src/lib/musicPlacement.ts` (modified): 126 new placement rows.
 - `src/lib/battleBackground.test.ts` (modified): GOLDEN +126.
-- `src/lib/trainer-teams.test.ts` (modified): map parity 53 → 129
-  battles, 48 → 123 matched, 5 → 6 unmatched (second 'Hex').
+- `src/lib/trainer-teams.test.ts` (modified): map parity 53 → 130
+  battles, 48 → 124 matched, 5 → 6 unmatched (second 'Hex').
 - `src/lib/dexAreas.test.ts` (modified): 038 reads 4 areas.
 - `tests/region1-rescue.test.ts` (modified): FULL_WORLD 89 → 215.
 - `package.json` (modified): `test:tests` gains
@@ -2402,8 +2429,8 @@ def preflight(existing_src):
             nb += 1
             for sid, _lvl in npc["battle"]["team"]:
                 assert sid in SPECIES, f"{m['key']} {npc['id']}: species {sid} not in SPECIES_DB"
-    assert nb == 76, f"expected 76 wired battle NPCs, got {nb}"
-    ok("76 wired battle NPCs; all battle species in SPECIES_DB (49)")
+    assert nb == 77, f"expected 77 wired battle NPCs, got {nb}"
+    ok("77 wired battle NPCs; all battle species in SPECIES_DB (49)")
     # 4. ink knots resolve
     refs = set()
     for m in MAPS:
@@ -2433,8 +2460,8 @@ def preflight(existing_src):
     ok("112 dialogue mapKeys resolve (94 direct + 18 folded into plateaus)")
     # 6. trainer-teams parity simulation
     battles, matched, unmatched = simulate_parity(existing_src)
-    assert len(battles) == 129, f"expected 129 unique battles, got {len(battles)}"
-    assert len(matched) == 123, f"expected 123 matched, got {len(matched)}"
+    assert len(battles) == 130, f"expected 130 unique battles, got {len(battles)}"
+    assert len(matched) == 124, f"expected 124 matched, got {len(matched)}"
     assert len(unmatched) == 6, f"expected 6 unmatched, got {len(unmatched)}"
     assert sorted(unmatched) == sorted(["Champion — MYTHAR", "Hex", "Hex",
                                         "Junk Warlord Krix", "Luigi", "Luigi Castagnoli"]), \
@@ -2445,7 +2472,7 @@ def preflight(existing_src):
     ex_matched = [b["name"] for b in ex_battles
                   if resolve_row(b["name"], b["team"], b["reward"])]
     assert len(ex_matched) == 48, f"expected 48 existing matched, got {len(ex_matched)}"
-    ok("trainer-teams parity: 129 battles, 123 matched, 6 unmatched (Hex x2)")
+    ok("trainer-teams parity: 130 battles, 124 matched, 6 unmatched (Hex x2)")
     # 7. FULL_WORLD count
     assert len(existing_keys) + 126 == 215
     ok("FULL_WORLD 89 -> 215")
