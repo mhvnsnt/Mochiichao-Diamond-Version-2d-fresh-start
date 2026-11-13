@@ -87,9 +87,12 @@ describe("worldAreasForSpecies against the real encounters.json", () => {
       { areaId: "sector0-placed", mapId: "sector0", method: "placed" },
     ]);
   });
-  it("Sproutle 038 reads route-1-grass only", () => {
+  it("Sproutle 038 reads route-1-grass plus the Regions 3-5 opening pools", () => {
     expect(worldAreasForSpecies("038")).toEqual([
       { areaId: "route-1-grass", mapId: "route_1", method: "grass" },
+      { areaId: "r3-oldale-road-grass", mapId: "r3_oldale_road", method: "grass" },
+      { areaId: "r4-floaroma-grass", mapId: "r4_floaroma", method: "grass" },
+      { areaId: "r5-route-1-grass", mapId: "r5_route_1", method: "grass" },
     ]);
   });
   it("a roster species with no worldArea row reads none", () => {

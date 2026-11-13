@@ -43,11 +43,12 @@ function specLines(entryId: string, speaker: string): string[] {
 }
 
 describe('region 1 rescue: Region 1 maps intact, no leftover gate', () => {
-  // PR #423 added the 43 Region 2 maps (46 -> 89). The count below is
-  // the new total; the Region 1 keys themselves are pinned by the
-  // tests below (sector0 events/signs, Aeon, bags, gates).
-  it('FULL_WORLD has 46 Region 1 keys + 43 Region 2 keys (89)', () => {
-    expect(Object.keys(FULL_WORLD).length).toBe(89);
+  // PR #423 added the 43 Region 2 maps (46 -> 89); this PR adds the
+  // 126 Regions 3-5 maps (89 -> 215). The count below is the new total;
+  // the Region 1 keys themselves are pinned by the tests below (sector0
+  // events/signs, Aeon, bags, gates).
+  it('FULL_WORLD has 46 Region 1 keys + 43 Region 2 keys + 126 Regions 3-5 keys (215)', () => {
+    expect(Object.keys(FULL_WORLD).length).toBe(215);
   });
 
   it('sector0 has no block_route_1 step-back events left', () => {
